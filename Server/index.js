@@ -31,7 +31,7 @@ server.listen(process.env.serverPort, (err) => {
   if (err) {
     console.log(err);
   } else {
-    console.log("connected at 2020 ");
+    console.log(`connected at ${process.env.serverPort}`);
   }
 });
 server.use(cors()); // if you want to use every domain

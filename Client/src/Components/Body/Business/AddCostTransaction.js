@@ -2,7 +2,9 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
 import "./AddCostTransaction.css";
+import $ from "jquery";
 function AddCostTransaction() {
+  const [showCostForm, setshowCostForm] = useState(false);
   const [Formdata, setFormdata] = useState({});
   const [costList, setcostList] = useState([]);
   let businessName = localStorage.getItem("businessName");
@@ -11,6 +13,13 @@ function AddCostTransaction() {
       businessName,
     });
     let costData = response.data.data;
+    console.log("costData", costData);
+    if (costData.length == 0) {
+      alert("No cost list data.");
+      $(".costTransactionForm").hide();
+    } else {
+      setshowCostForm(true);
+    }
     setcostList(costData);
     // setFormdata({ ...Formdata, costData });
   };
@@ -39,11 +48,13 @@ function AddCostTransaction() {
     });
   };
   useEffect(() => {
-    let costDate = document.getElementById("costDate").value;
-    console.log(" costDate is ", costDate);
-    if (costDate == "") {
-      costDate = currentDates();
-      document.getElementById("costDate").value = costDate;
+    if (showCostForm) {
+      let costDate = $("#costDate").value;
+      console.log(" costDate is ", costDate);
+      if (costDate == "") {
+        costDate = currentDates();
+        $("#costDate").val(costDate);
+      }
     }
     // businessName = localStorage.getItem("businessName");
     // setFormdata({
@@ -62,40 +73,42 @@ function AddCostTransaction() {
   }, [costList]);
   return (
     <div>
-      {console.log(Formdata)}
-      <form onSubmit={handleFormSubmit} className="costTransactionForm">
-        <div className="dateDiv">
-          <div>Date</div>
-          <input
-            name="costDate"
-            onChange={collectCotForm}
-            type="Date"
-            id="costDate"
-          />
-        </div>
-        {costList?.map((items) => {
-          return (
-            <div className="" key={items.costsId}>
-              <div className="label"> {items.costName} </div>
-              <input
-                type="number"
-                placeholder="Cost Amount"
-                name={items.costName.replaceAll(/\s/g, "")}
-                onChange={collectCotForm}
-                className="formInputToTransaction"
-              />
-              <textarea
-                onChange={collectCotForm}
-                placeholder="Cost Description"
-                className="formInputToTransaction"
-                name={"Description_" + items.costName.replaceAll(/\s/g, "")}
-                type="text"
-              ></textarea>
-            </div>
-          );
-        })}
-        <button type="submit">Submit</button>
-      </form>
+      {console.log(Object.keys(Formdata).length)}
+      {showCostForm && (
+        <form onSubmit={handleFormSubmit} className="costTransactionForm">
+          <div className="dateDiv">
+            <div>Date</div>
+            <input
+              name="costDate"
+              onChange={collectCotForm}
+              type="Date"
+              id="costDate"
+            />
+          </div>
+          {costList?.map((items) => {
+            return (
+              <div className="" key={items.costsId}>
+                <div className="label"> {items.costName} </div>
+                <input
+                  type="number"
+                  placeholder="Cost Amount"
+                  name={items.costName.replaceAll(/\s/g, "")}
+                  onChange={collectCotForm}
+                  className="formInputToTransaction"
+                />
+                <textarea
+                  onChange={collectCotForm}
+                  placeholder="Cost Description"
+                  className="formInputToTransaction"
+                  name={"Description_" + items.costName.replaceAll(/\s/g, "")}
+                  type="text"
+                ></textarea>
+              </div>
+            );
+          })}
+          <button type="submit">Submit</button>
+        </form>
+      )}
     </div>
   );
 }
