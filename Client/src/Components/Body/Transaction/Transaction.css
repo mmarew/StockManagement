@@ -1,0 +1,36 @@
+tr input {
+  width: 60px;
+  border: none;
+  padding: 6px 4px;
+}
+tr input:focus {
+  border-color: blue;
+  outline: none;
+  border: 2px solid blue;
+}
+td {
+  background-color: white;
+}
+td button {
+  background-color: green;
+  color: white;
+  border: none;
+  padding: 10px;
+  display: none;
+}
+.active {
+  display: block;
+}
+.searchView{
+  background-color: blue;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 10px;
+  margin: auto;
+  margin-bottom: 10px;
+  display: block;
+  border-color: blue;
+}
+table{
+  width:fit-content;
+}

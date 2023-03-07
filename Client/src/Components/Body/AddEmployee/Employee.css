@@ -1,0 +1,61 @@
+input {
+  padding: 5px 10px;
+}
+.EmployeeButton {
+  background-color: white;
+  margin-top: 20px;
+  padding: 10px;
+}
+.EmployeeButton button {
+  background-color: green;
+  color: white;
+  padding: 10px;
+  border: none;
+  margin: 0 5px;
+  border-radius: 10px;
+}
+.employeeList {
+  background-color: white;
+  margin: 10px auto;
+  padding: 10px;
+  border-radius: 10px;
+  width: 300px;
+}
+.employeeList div {
+  padding: 5px;
+}
+.employeeList button {
+  background-color: Red;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.searchedEmloyee {
+  background-color: white;
+  width: 300px;
+  margin: 10px auto;
+  padding: 10px;
+  border-radius: 10px;
+}
+.searchedEmloyee div {
+  margin: 10px 0;
+}
+.searchedEmloyee button {
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+}
+.nameLabel{
+  padding: 10px;
+}
+.employeeSearchForm{
+  background-color: white;
+  padding: 10px;
+  width: 300px;
+  margin: 10px auto;
+  border-radius: 10px;
+}

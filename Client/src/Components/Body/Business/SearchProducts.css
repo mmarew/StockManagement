@@ -1,0 +1,46 @@
+#searchProduct {
+  display: flex;
+  width: fit-content;
+  margin: 10px auto;
+  background-color: #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+  flex-direction: column;
+}
+#searchProduct input,
+select {
+  padding: 5px;
+  margin-left: 10px;
+  margin: 5px;
+}
+.searchBtn {
+  background-color: blue;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+table,
+th,
+td {
+  border: 1px solid;
+}
+.updateProducts {
+  width: fit-content;
+  background-color: green;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  display: none;
+}
+.trProductName td input {
+  width: 100px;
+}
+table {
+  display: none;
+}
+.searchInputs {
+  flex-direction: column;
+  display: none;
+}

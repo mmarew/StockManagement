@@ -1,0 +1,13 @@
+.addTransaction {
+  display: flex;
+  justify-content: center;
+  background-color: white;
+}
+.addTransaction button {
+  background-color: green;
+  color: white;
+  padding: 7px;
+  margin: 5px;
+  border: 0px;
+  border-radius: 10px;
+}

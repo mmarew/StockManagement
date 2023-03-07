@@ -1,0 +1,49 @@
+.registerViewSearch {
+  position: fixed;
+  width: 100%;
+  background-color: blue;
+  display: flex;
+  justify-content: center;
+}
+.registerViewSearch .openBusinessTab {
+  color: white;
+  border: 0px;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.openBusinessTab:hover {
+  background-color: rgb(172, 172, 223);
+}
+#registerProductsForm {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  background-color: white;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+}
+#registerProductsForm input {
+  padding: 5px;
+  margin: 10px auto;
+}
+#dateId {
+  margin: 10px auto;
+  display: block;
+}
+.activeLink {
+  background-color: black;
+}
+table {
+  width: fit-content;
+  margin: auto;
+}
+body{
+  text-align: center;
+}
+.welcomeInfo{
+  padding: 10px;
+}
+/* word wrap, formatter(prettier then tic tic), preview (untick work bench) */

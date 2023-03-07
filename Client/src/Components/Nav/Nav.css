@@ -1,0 +1,9 @@
+.navLinks {
+  background-color: black;
+  display: flex;
+}
+.navLinks .Lists {
+  color: white;
+  text-decoration: none;
+  padding: 10px;
+}

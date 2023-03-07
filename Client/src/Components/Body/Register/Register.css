@@ -1,0 +1,21 @@
+.userRegistrationForm {
+  background-color: white;
+  padding: 20px 10px;
+  margin: 20px auto;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+}
+.userRegistrationForm input {
+  margin: 10px auto;
+  width: 250px;
+  padding: 5px;
+}
+[name="submitButton"] {
+  background-color: blue;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}

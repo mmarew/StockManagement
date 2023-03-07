@@ -1,0 +1,37 @@
+.registerViewSearch {
+  position: fixed;
+  width: 100%;
+  background-color: blue;
+  display: flex;
+  justify-content: center;
+}
+.registerViewSearch .openBusinessTab {
+  background-color: blue;
+  color: white;
+  border: 0px;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-decoration: none;
+}
+#registerProductsForm {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  background-color: white;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+}
+#registerProductsForm input {
+  padding: 5px;
+  margin: 10px auto;
+}
+#dateId {
+  margin: 10px auto;
+  display: block;
+}
+.createdBusiness {
+  background-color: white;
+  padding: 20px;
+}

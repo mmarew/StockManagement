@@ -1,0 +1,16 @@
+.navOFEmployerBusiness {
+  background-color: blue;
+  margin-bottom: 10px;
+}
+.navOFEmployerBusiness * button {
+  padding: 10px;
+  width: fit-content;
+
+  background-color: transparent;
+  border: none;
+  color: white;
+  text-decoration: none;
+}
+.navOFEmployerBusiness *:hover {
+  text-decoration: underline;
+}

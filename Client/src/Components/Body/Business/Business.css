@@ -1,0 +1,63 @@
+.createdBusinessWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.Business {
+  margin-top: 10px;
+  /* border: 1px solid; */
+  padding: 10px 20px;
+  margin: 10px;
+  background-color: white;
+  border-radius: 10px;
+}
+.BusinessWrapper {
+  padding: 10px;
+}
+.createBusiness {
+  display: block;
+  margin: auto;
+  color: white;
+  background-color: green;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+}
+.businessName {
+  padding: 10px;
+}
+.businessButton {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+}
+.businessButton button {
+  background-color: blue;
+  color: white;
+  padding: 10px;
+  border: none;
+  margin: 0 5px;
+  border-radius: 10px;
+}
+.update-wrapper {
+  display: none;
+  flex-direction: column;
+  margin-top: 20px;
+}
+.update-wrapper div {
+  text-align: center;
+  margin-top: 20px;
+}
+.update-wrapper input {
+  max-width: 300px;
+  padding: 7px;
+}
+.update-wrapper div button {
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 10px;
+  border: 10px;
+  margin: 0 5px;
+  border-radius: 10px;
+}

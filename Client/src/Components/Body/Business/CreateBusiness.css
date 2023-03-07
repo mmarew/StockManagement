@@ -1,0 +1,17 @@
+.createBusinessForm {
+  background-color: white;
+  width: fit-content;
+  padding: 20px;
+  margin: auto;
+}
+.createBusinessForm button {
+  background-color: blue;
+  color: white;
+  padding: 10px;
+  margin: 10px auto;
+  border: none;
+  border-radius: 10px;
+}
+#cancelButton {
+  background-color: rgb(114, 114, 8);
+}

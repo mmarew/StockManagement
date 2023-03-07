@@ -1,0 +1,33 @@
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  margin: 20px auto;
+  background-color: white;
+  padding: 20px;
+  box-shadow: 2px 2px rgb(220, 244, 245);
+  border-radius: 10px;
+  justify-content: flex-end;
+}
+.btnLogin {
+  width: fit-content;
+  margin: auto;
+  padding: 5px 20px;
+  border: none;
+  background-color: blue;
+  color: white;
+  border-radius: 10px;
+  font-size: 20px;
+}
+.loginForm input {
+  padding: 10px;
+  margin: 10px auto;
+}
+body {
+  background-color: rgb(245, 245, 245);
+}
+.loginForm div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
