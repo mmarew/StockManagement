@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import "./Business.css";
 import axios from "axios";
+// import dotenv from "dotenv";
+// dotenv.config();
 import $ from "jquery";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import CreateBusiness from "./CreateBusiness";
 import { useNavigate } from "react-router-dom";
+let serverAddress = `http://localhost:2020`; //process.env.serverAddress;
+// dotenv.config();
 function Business() {
   const [BusinessLists, setBusinessLists] = useState(
     <h4>Your business lists</h4>
@@ -33,7 +37,7 @@ function Business() {
               businessname = $("#" + businessId).val();
             console.log(businessname, targetBusinessId);
             let updateRes = await axios.post(
-              `http://localhost:2020/updateBusinessName`,
+              `${serverAddress}/updateBusinessName`,
               {
                 businessname,
                 targetBusinessId,
@@ -88,7 +92,7 @@ function Business() {
     setnewBusiness("allow");
   };
   let getBusiness = async () => {
-    let results = await axios.post("http://localhost:2020/getBusiness", {
+    let results = await axios.post(`${serverAddress}/getBusiness`, {
       token,
     });
     console.log(results.data);
