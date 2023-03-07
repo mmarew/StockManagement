@@ -123,3 +123,8 @@ function App() {
   );
 }
 export default App;
+//
+// git commit -m "first commit"
+// git branch -M main
+// git remote add origin https://github.com/mmarew/StockManagement.git
+// git push -u origin main
