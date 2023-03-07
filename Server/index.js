@@ -2,6 +2,8 @@ import cors from "cors";
 import express from "express";
 import bcrypt from "bcryptjs";
 import Auth from "./Auth.js";
+import * as dotenv from "dotenv"; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+dotenv.config();
 import createBasicTables from "./Database.js";
 let date = new Date();
 let fullTime =
@@ -25,7 +27,7 @@ import Database, {
   connection,
   createBusiness,
 } from "./Database.js";
-server.listen(2020, (err) => {
+server.listen(process.env.serverPort, (err) => {
   if (err) {
     console.log(err);
   } else {
