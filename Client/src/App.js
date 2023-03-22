@@ -14,6 +14,9 @@ import AddItems from "./Components/Body/Business/AddItems";
 import Employee from "./Components/Body/AddEmployee/Employee";
 import OpenEmployeersBusiness from "./Components/Body/Business/OpenEmployeersBusiness";
 import RegisterEmployersProducts from "./Components/Body/Business/RegisterEmployersProducts";
+import Help from "./Components/Hepl/Help";
+import AddSingleSales from "./Components/Body/Business/AddSingleSales";
+import AddTotalSales from "./Components/Body/Business/AddTotalSales";
 function App() {
   return (
     <div className="App">
@@ -27,6 +30,16 @@ function App() {
             <Route path="view" element={<SearchProducts />} />
             <Route path="Search" element={<Transaction />} />
           </Route>
+
+          <Route
+            path="/help"
+            element={
+              <>
+                <Nav />
+                <Help />
+              </>
+            }
+          />
           <Route
             path="/Transaction"
             element={
@@ -105,7 +118,14 @@ function App() {
             <Route
               path="/OpenBusiness/addTransaction"
               element={<AddTransaction />}
-            />
+            >
+              <Route
+                path="singleSalestransaction"
+                element={<AddSingleSales />}
+              />
+              <Route path="totalSalestransaction" element={<AddTotalSales />} />
+            </Route>
+            {/* singleSalestransaction */}
           </Route>
         </Routes>
         {/* <Routes>

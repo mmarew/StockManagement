@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
-import "./AddSales.css";
+import "./AddTotalSales.css";
 import $ from "jquery";
-function AddSales({ Time }) {
+function AddTotalSales({ Time }) {
   console.log("Time is " + Time);
   let ProductId = [];
   const [ProductsList, setProductsList] = useState();
@@ -124,4 +124,4 @@ function AddSales({ Time }) {
     </div>
   );
 }
-export default AddSales;
+export default AddTotalSales;

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import AddCostTransaction from "./AddCostTransaction";
-import AddSales from "./AddSales";
+import AddSalesTranaction from "./AddSalesTranaction";
 import "./addTransaction.css";
 function AddTransaction({ Time }) {
   const [Transaction, setTransaction] = useState("");
   let setTargatedRegistration = (e) => {
-    if (e.target.name == "Sales") setTransaction(<AddSales />);
+    if (e.target.name == "Sales") setTransaction(<AddSalesTranaction />);
     if (e.target.name == "Cost") setTransaction(<AddCostTransaction />);
   };
 

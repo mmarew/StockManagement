@@ -40,6 +40,9 @@ export default function Nav() {
       <Link className="Lists" to="/Profiles">
         Profiles
       </Link>
+      <Link className="Lists" to="/help">
+        Help
+      </Link>
     </div>
   );
 }

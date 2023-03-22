@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Business.css";
 import axios from "axios";
-// import dotenv from "dotenv";
-// dotenv.config();
 import $ from "jquery";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css

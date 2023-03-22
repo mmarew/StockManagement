@@ -6,18 +6,30 @@ import * as dotenv from "dotenv"; // see https://github.com/motdotla/dotenv#how-
 dotenv.config();
 import createBasicTables from "./Database.js";
 let date = new Date();
-let fullTime =
-  date.getFullYear() +
-  "/" +
-  (date.getMonth() + 1) +
-  "/" +
-  date.getDate() +
-  " " +
-  date.getHours() +
-  ":" +
-  date.getMinutes() +
-  ":" +
-  date.getSeconds();
+let fullTime,
+  year = date.getFullYear(),
+  month = date.getMonth() + 1,
+  day = date.getDate(),
+  hour = date.getHours(),
+  minuite = date.getMinutes(),
+  second = date.getSeconds();
+
+if (month < 10) {
+  month = "0" + month;
+}
+if (day < 10) {
+  day = "0" + day;
+}
+if (hour < 10) {
+  hour = "0" + hour;
+}
+if (minuite < 10) {
+  minuite = "0" + minuite;
+}
+if (second < 10) {
+  second = "0" + second;
+}
+fullTime = year + "-" + month + "-" + day + "" + hour + ":" + minuite;
 console.log("fullTime is " + fullTime);
 let server = express();
 createBasicTables();
@@ -728,6 +740,55 @@ server.post("/registerEmployeersProducts", (req, res) => {
     salesQty = TranactionProducts[sales_],
     wrickageQty = TranactionProducts[Wrickage_];
   console.log(purchaseQty, salesQty, wrickageQty);
-  let insert = `insert into `;
+  res.json({ data: req.body });
+});
+server.post("/getsingleProducts", (req, res) => {
+  let businessName = req.body.businessName,
+    productName = req.body.searchInput;
+  let selectProduct = `select * from ${businessName}_products where productName like '%${productName}%'`;
+  connection.query(selectProduct, (error, results) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("results");
+      console.log(results);
+      res.json({ data: results });
+    }
+  });
+});
+server.post("/registerSinglesalesTransaction", (req, res) => {
+  res.json({ data: req.body });
+  // Description: "78";
+  // brokenQty: "90";
+  // businessId: "1";
+  // purchaseQty: "900";
+  // salesQty: "700";
+  let Description = req.body.Description,
+    brokenQty = req.body.brokenQty,
+    businessId = req.body.businessId,
+    purchaseQty = req.body.purchaseQty,
+    salesQty = req.body.salesQty,
+    ProductId = req.body.ProductId;
+  let createTable = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int, salesQty int,businessId int, ProductId int,brokenQty int, Description varchar(2000), primary key(dailySalesId) )`;
+  connection.query(createTable, (error, results) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(results.data);
+    }
+    // res.json({ data: results });
+  });
+
+  let Insert = `insert into dailyTransaction(purchaseQty,salesQty,businessId,ProductId,brokenQty,Description)value('${purchaseQty}','${salesQty}','${businessId}','${ProductId}','${brokenQty}','${Description}')`;
+  connection.query(Insert, (error, results) => {
+    if (error) {
+      console.log(error);
+    }
+    if (results) {
+      console.log(results);
+    }
+  });
+});
+server.post("/getDailyTransaction", (req, res) => {
   res.json({ data: req.body });
 });

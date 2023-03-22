@@ -1,10 +1,10 @@
 import React from "react";
 import AddCostTransaction from "./AddCostTransaction";
-import AddSales from "./AddSales";
+import AddTotalSales from "./AddTotalSales";
 function RegisterEmployersProducts() {
   return (
     <>
-      <AddSales />
+      <AddTotalSales />
       <br /> <br />
       <h3>Cost Transaction</h3>
       <br />
