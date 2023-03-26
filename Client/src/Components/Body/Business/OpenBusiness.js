@@ -25,6 +25,7 @@ function OpenBusiness() {
       navigate("/");
     }
     if (e.target.name == "addTransaction") {
+      $(".salesOrCosts").show();
       setBody(<AddTransaction />);
     } else if (e.target.name == "addItem") {
       // setBody(<AddProducts />);
@@ -37,6 +38,9 @@ function OpenBusiness() {
       setBody(<Employee />);
     }
   };
+  window.addEventListener("locationchange", function () {
+    console.log("location changed!");
+  });
 
   return (
     <div>

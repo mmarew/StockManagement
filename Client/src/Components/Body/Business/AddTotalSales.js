@@ -6,6 +6,7 @@ import $ from "jquery";
 function AddTotalSales({ Time }) {
   console.log("Time is " + Time);
   let ProductId = [];
+
   const [ProductsList, setProductsList] = useState();
   const [CollectedProducts, setCollectedProducts] = useState({});
   const [selectedTime, setselectedTime] = useState();
@@ -32,11 +33,14 @@ function AddTotalSales({ Time }) {
       "http://localhost:2020/getRegisteredProducts",
       { token, BusinessId, businessName }
     );
+    console.log("@getRegisteredProducts Response.data.data");
+    console.log(Response.data.data);
     setProductsList(Response.data.data);
   };
   let sendFormDataToServer = async (e) => {
     e.preventDefault();
     console.log(CollectedProducts);
+    // return;
     let response = await axios.post(
       "http://localhost:2020/registerTransaction",
       CollectedProducts
@@ -67,21 +71,20 @@ function AddTotalSales({ Time }) {
     getRegisteredProducts();
     console.log(CollectedProducts);
   }, []);
-
   return (
-    <div>
+    <div className="addTotalSalesWrapper">
       {console.log(CollectedProducts)}
-      <input
-        onChange={(e) => {
-          console.log(e.target.value);
-          setselectedTime(e.target.value);
-        }}
-        type="date"
-        name=""
-        id="dateId"
-      />
       {console.log(ProductsList)}
       <form id="formOnAddTransaction" action="" onSubmit={sendFormDataToServer}>
+        <input
+          onChange={(e) => {
+            console.log(e.target.value);
+            setselectedTime(e.target.value);
+          }}
+          type="date"
+          name=""
+          id="dateId"
+        />
         {ProductsList?.map((item) => {
           return (
             <div key={item.ProductId}>

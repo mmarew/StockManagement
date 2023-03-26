@@ -17,6 +17,8 @@ import RegisterEmployersProducts from "./Components/Body/Business/RegisterEmploy
 import Help from "./Components/Hepl/Help";
 import AddSingleSales from "./Components/Body/Business/AddSingleSales";
 import AddTotalSales from "./Components/Body/Business/AddTotalSales";
+import AddCostTransaction from "./Components/Body/Business/AddCostTransaction";
+import AddSalesTransaction from "./Components/Body/Business/AddSalesTransaction";
 function App() {
   return (
     <div className="App">
@@ -119,6 +121,18 @@ function App() {
               path="/OpenBusiness/addTransaction"
               element={<AddTransaction />}
             >
+              <Route
+                path="AddSalesTranaction"
+                element={<AddSalesTransaction />}
+              >
+                <Route path="addSingleSales" element={<AddSingleSales />} />{" "}
+                <Route path="addTotalSales" element={<AddTotalSales />} />
+              </Route>
+              <Route
+                path="AddCostTransaction"
+                element={<AddCostTransaction />}
+              ></Route>
+
               <Route
                 path="singleSalestransaction"
                 element={<AddSingleSales />}

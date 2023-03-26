@@ -757,38 +757,48 @@ server.post("/getsingleProducts", (req, res) => {
   });
 });
 server.post("/registerSinglesalesTransaction", (req, res) => {
-  res.json({ data: req.body });
-  // Description: "78";
-  // brokenQty: "90";
-  // businessId: "1";
-  // purchaseQty: "900";
-  // salesQty: "700";
   let Description = req.body.Description,
     brokenQty = req.body.brokenQty,
     businessId = req.body.businessId,
     purchaseQty = req.body.purchaseQty,
     salesQty = req.body.salesQty,
-    ProductId = req.body.ProductId;
-  let createTable = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int, salesQty int,businessId int, ProductId int,brokenQty int, Description varchar(2000), primary key(dailySalesId) )`;
+    ProductId = req.body.ProductId,
+    currentDate = req.body.currentDate;
+  let createTable = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int, salesQty int,businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date, primary key(dailySalesId) )`;
   connection.query(createTable, (error, results) => {
     if (error) {
       console.log(error);
     } else {
       console.log(results.data);
     }
-    // res.json({ data: results });
   });
-
-  let Insert = `insert into dailyTransaction(purchaseQty,salesQty,businessId,ProductId,brokenQty,Description)value('${purchaseQty}','${salesQty}','${businessId}','${ProductId}','${brokenQty}','${Description}')`;
+  let Insert = `insert into dailyTransaction(purchaseQty,salesQty,businessId,ProductId,brokenQty,Description,registrationDate)value('${purchaseQty}','${salesQty}','${businessId}','${ProductId}','${brokenQty}','${Description}','${currentDate}')`;
   connection.query(Insert, (error, results) => {
     if (error) {
       console.log(error);
     }
     if (results) {
-      console.log(results);
+      res.json({ data: "successfullyRegistered" });
     }
   });
 });
 server.post("/getDailyTransaction", (req, res) => {
-  res.json({ data: req.body });
+  // res.json({ data: req.body });
+  let productId = req.body.productId,
+    businessId = req.body.businessId,
+    currentDates = req.body.currentDates,
+    businessName = req.body.businessName,
+    getTransaction = `select * from dailyTransaction,${businessName}_products where businessId='${businessId}' and dailyTransaction.ProductId='${productId}' and registrationDate='${currentDates}' and (${businessName}_products.ProductId=dailyTransaction.ProductId)`;
+  if (productId == "getAllTransaction") {
+    getTransaction = `select * from dailyTransaction,${businessName}_products where businessId='${businessId}' and registrationDate='${currentDates}' and (${businessName}_products.ProductId=dailyTransaction.ProductId)`;
+  }
+  // res.json({ data: productId });
+  // return;
+  connection.query(getTransaction, (err, result) => {
+    if (err) console.log(err);
+    if (result) {
+      console.log(result);
+      res.json({ data: result });
+    }
+  });
 });

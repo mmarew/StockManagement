@@ -3,6 +3,8 @@ import "./Nav.css";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 export default function Nav() {
+  let url = window.location.url;
+  console.log(url);
   let navigate = useNavigate();
   let VerifyLogin = async () => {
     let savedStore = localStorage.getItem("storeToken");

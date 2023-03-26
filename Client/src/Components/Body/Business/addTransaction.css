@@ -11,3 +11,6 @@
   border: 0px;
   border-radius: 10px;
 }
+.activeClass {
+  background-color: blue !important;
+}
