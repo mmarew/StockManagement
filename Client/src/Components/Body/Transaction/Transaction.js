@@ -159,10 +159,12 @@ export default function Transaction() {
   }, [FetchedDatas]);
   return (
     <div>
-      <input type="date" name="" id="dateIdTransaction" />
-      <button className="searchView" onClick={ViewTransactions}>
-        View Transactions
-      </button>
+      <div className="searchInputAndBtn">
+        <input type="date" name="" id="dateIdTransaction" />
+        <button className="searchView" onClick={ViewTransactions}>
+          View
+        </button>
+      </div>
       <table border="1" id="TransactionTable">
         <tr>
           <th>Product name</th>
