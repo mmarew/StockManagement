@@ -1,5 +1,3 @@
-import React from "react";
-import $ from "jquery";
 function currentDates() {
   let date = new Date();
   let year = date.getFullYear(),
