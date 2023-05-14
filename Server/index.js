@@ -1,10 +1,21 @@
-import cors from "cors";
-import express from "express";
-import bcrypt from "bcryptjs";
-import Auth from "./Auth.js";
-import * as dotenv from "dotenv"; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+let cors = require("cors");
+let express = require("express");
+let bcrypt = require("bcryptjs");
+let Auth = require("./Auth.js").Auth;
+let dotenv = require("dotenv"); // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-let
 dotenv.config();
-import createBasicTables from "./Database.js";
+let path = "/";
+
+let server = express();
+server.use(cors());
+server.use(express.json());
+server.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+
+let createBasicTables = require("./Database.js");
 let date = new Date();
 let fullTime,
   year = date.getFullYear(),
@@ -31,39 +42,32 @@ if (second < 10) {
 }
 fullTime = year + "-" + month + "-" + day + "" + hour + ":" + minuite;
 console.log("fullTime is " + fullTime);
-let server = express();
-createBasicTables();
-import jwt from "jsonwebtoken";
-import Database, {
-  insertIntoUserTable,
-  connection,
-  createBusiness,
-} from "./Database.js";
+createBasicTables.createBasicTables();
+let jwt = require("jsonwebtoken");
+let Database,
+  {
+    insertIntoUserTable,
+    connection,
+    createBusiness,
+  } = require("./Database.js");
 server.listen(process.env.serverPort, (err) => {
   if (err) {
     console.log(err);
   } else {
-    console.log(`connected at ${process.env.serverPort}`);
+    // console.log(`connected at ${process.env.serverPort}`);
   }
 });
-server.use(cors()); // if you want to use every domain
-const corsOption = {
-  origin: ["http://localhost:3000"],
-};
-server.use(cors(corsOption));
-server.use(express.json());
-server.use(
-  express.urlencoded({
-    extended: true,
-  })
-);
-server.get("/", (req, res) => {
-  console.log(req.body);
-  //    console.log(res);
-  res.end("it is server");
+server.post(path, (req, res) => {
+  res.end(
+    "<h1><center>This is server is running well in post methodes.</center></h1>"
+  );
 });
-server.post("/getBusiness", (req, res) => {
-  // console.log(req.body.token);
+server.get(path, (req, res) => {
+  res.end(
+    "<h1><center>This is server is running well in get methodes.</center></h1>"
+  );
+});
+server.post(path + "getBusiness/", (req, res) => {
   let Tokens = req.body.token;
   if (Tokens == "" || Tokens == undefined) {
     return res.json({ data: "You haven't loged in before." });
@@ -77,8 +81,8 @@ server.post("/getBusiness", (req, res) => {
     if (err) {
       console.log(err);
     } else {
-      console.log("getBusiness");
-      console.log(result);
+      // console.log("getBusiness");
+      // console.log(result);
       myBusiness = result;
     }
     let getEmployeerBusiness = `select * from employeeTable , business where userIdInEmployee='${userID}' 
@@ -87,27 +91,21 @@ server.post("/getBusiness", (req, res) => {
       if (err) console.log(err);
       if (result) {
         employeerBusiness = results;
-        console.log("employeerBusiness = " + employeerBusiness);
-        console.log("userID " + userID);
       }
-      console.log(
-        "myBusiness, employeerBusiness " + myBusiness,
-        employeerBusiness
-      );
-
       res.json({ myBusiness, employeerBusiness });
     });
   });
 });
-server.post("/verifyLogin", (req, res) => {
+server.post(path + "verifyLogin/", (req, res) => {
   let decoded = jwt.verify(req.body.token, "shhhhh");
   let userID = decoded.userID;
+  // console.log("verifyLogin userID", userID);
   let select = `select * from userstable where userId='${userID}'`;
   connection.query(select, (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(result);
+      // console.log(result);
       if (result.length > 0) {
         return res.json({ data: "alreadyConnected" });
       } else {
@@ -117,18 +115,18 @@ server.post("/verifyLogin", (req, res) => {
   });
   // res.json({ data: "connection" });
 });
-server.post("/Login", (req, res) => {
-  console.log(req.body);
+server.post(path + "Login/", (req, res) => {
+  // console.log(req.body);
   let select = `select * from userstable where phoneNumber='${req.body.phoneNumber}' limit 1`;
   connection.query(select, (err, result) => {
     if (result.length == 0) {
       return res.json({ data: "data not found" });
     } else {
-      console.log(result[0].password);
+      // console.log(result[0].password);
     }
     let savedPassword = result[0].password;
     const isMatch = bcrypt.compareSync(req.body.Password, savedPassword);
-    console.log(isMatch);
+    // console.log(isMatch);
 
     let token = jwt.sign({ userID: result[0].userId }, "shhhhh");
 
@@ -140,7 +138,7 @@ server.post("/Login", (req, res) => {
   });
   // res.json({ data: "connected" });
 });
-server.post("/RegisterUsers", async (req, res) => {
+server.post(path + "RegisterUsers/", async (req, res) => {
   let registerPhone = req.body.registerPhone,
     registerPassword = req.body.registerPassword,
     fullName = req.body.fullName;
@@ -150,9 +148,10 @@ server.post("/RegisterUsers", async (req, res) => {
     registerPassword,
     res
   );
-  console.log("results is " + results);
+  // console.log("results is " + results);
 });
-server.post("/addProducts", async (req, res) => {
+server.post(path + "addProducts/", async (req, res) => {
+  // console.log("Auth is ", Auth);
   let rowData = req.body,
     productName = rowData.productName,
     productPrice = rowData.productUnitPrice,
@@ -166,23 +165,31 @@ server.post("/addProducts", async (req, res) => {
       console.log(err);
     } else {
       businessName = result[0].BusinessName;
-      console.log("result[0]");
-      console.log(result);
+      // console.log("result[0]");
+      // console.log(result);
 
-      console.log(result[0].ownerId);
+      // console.log(result[0].ownerId);
       if (result[0].ownerId !== userId) {
         res.json({ data: "notAllowedFroYou" });
         return;
       }
       let selectProduct = `select productName from ${businessName}_products where productName='${productName}'`;
       connection.query(selectProduct, (err, result) => {
-        if (err) return console.log(err);
+        if (err) {
+          console.log(err);
+          if (err.sqlState == `42S02`) {
+            console.log("please recreate tables again");
+
+            createBusiness(businessName, userId, fullTime, res, "recreate");
+          }
+          return;
+        }
         if (result.length == 0) {
           let Insert = `insert into ${businessName}_products(productsUnitCost,productsUnitPrice,productName)values('${productCost}','${productPrice}','${productName}')`;
           connection.query(Insert, (err, result) => {
             if (err) console.log(err);
             if (result) {
-              console.log(result);
+              // console.log(result);
               res.json({ data: "productIsAdded" });
             }
           });
@@ -193,16 +200,16 @@ server.post("/addProducts", async (req, res) => {
     }
   });
 });
-server.post("/createBusiness", (req, res) => {
+server.post(path + "createBusiness/", (req, res) => {
   let businessName = req.body.businessName;
   let decoded = jwt.verify(req.body.token, "shhhhh");
   let userID = decoded.userID;
   let response = createBusiness(businessName, userID, fullTime, res);
-  console.log(response);
+  // console.log(response);
   // res.json({ data: response });
 });
-server.post("/getRegisteredProducts", async (req, res) => {
-  console.log(req.body.BusinessId, req.body.token, req.body.businessName);
+server.post(path + "getRegisteredProducts/", async (req, res) => {
+  // console.log(req.body.BusinessId, req.body.token, req.body.businessName);
   let select = `select * from ${req.body.businessName}_products`;
   connection.query(select, (err, result) => {
     if (err) console.log(err);
@@ -212,26 +219,26 @@ server.post("/getRegisteredProducts", async (req, res) => {
   // let userId = await Auth(req.body.token);
   // res.end("getRegisteredProducts lllllllllll");
 });
-server.post("/registerTransaction", async (req, res) => {
+server.post(path + "registerTransaction/", async (req, res) => {
   let rowData = req.body,
     ProductsList = rowData.ProductsList,
     businessName = rowData.businessName;
   // check if it was registered before on this date
   let selectToCheck = `select * from  ${businessName}_transaction where registeredTime like '%${req.body.dates}%'`;
-  console.log(
-    "businessName " + businessName,
-    " req.body.dates = " + req.body.dates
-  );
+  // console.log( "businessName " + businessName, " req.body.dates = " + req.body.dates  );
   connection.query(selectToCheck, async (err, results) => {
-    if (err) console.log(err);
-    console.log("First check it out ");
-    console.log(results);
-    // return;
+    if (err) {
+      console.log(err);
+    }
     if (results.length > 0) {
-      console.log("greater than it ");
+      //
+      // console.log("First check it out ");
+      // console.log(results);
+      // return;
+      // console.log("greater than it ");
       return res.json({ data: "This is already registered" });
     } else {
-      console.log("results = " + results);
+      // console.log("results = " + results);
       let values = "";
       for (let i = 0; i < ProductsList.length; i++) {
         let productID = ProductsList[i].ProductId,
@@ -240,13 +247,9 @@ server.post("/registerTransaction", async (req, res) => {
           salesQuantity = "salesQuantity" + productID,
           purchaseQty = "purchaseQty" + productID,
           wrickageQty = "wrickageQty" + productID;
-        console.log(
-          rowData[salesQuantity],
-          rowData[purchaseQty],
-          rowData[wrickageQty]
-        );
+        // console.log(rowData[salesQuantity],rowData[purchaseQty], rowData[wrickageQty]        );
         // let prevDay = await getPreviousDay(new Date(req.body.dates));
-        // console.log("prevDay = " + prevDay);
+        //// console.log("prevDay = " + prevDay);
         let Inventory = 0;
 
         let prevInventory = `select * from ${businessName}_transaction where productIDTransaction='${productID}' and registeredTime<'${req.body.dates}' order by registeredTime desc limit 1 `;
@@ -255,7 +258,7 @@ server.post("/registerTransaction", async (req, res) => {
             console.log(err);
           } else {
             if (results.length == 0) {
-              console.log("no data found");
+              // console.log("no data found");
             } else {
               Inventory = results[0].Inventory;
             }
@@ -265,7 +268,7 @@ server.post("/registerTransaction", async (req, res) => {
               parseInt(Inventory) -
               parseInt(rowData[wrickageQty]);
 
-            console.log(Inventory);
+            // console.log(Inventory);
 
             if (i > 0) {
               values += ",";
@@ -279,7 +282,7 @@ server.post("/registerTransaction", async (req, res) => {
               connection.query(insert, (err, result) => {
                 if (err) console.log(err);
                 else {
-                  console.log(result);
+                  // console.log(result);
                   updateNextDateInventory(
                     `${businessName}_transaction`,
                     productID,
@@ -287,7 +290,9 @@ server.post("/registerTransaction", async (req, res) => {
                     Inventory
                   );
 
-                  return res.json({ data: "data is registered successfully" });
+                  return res.json({
+                    data: "data is registered successfully",
+                  });
                 }
               });
           }
@@ -296,8 +301,8 @@ server.post("/registerTransaction", async (req, res) => {
     }
   });
 });
-server.post("/ViewTransactions", (req, res) => {
-  console.log(req.body);
+server.post(path + "ViewTransactions/", (req, res) => {
+  // console.log(req.body);
   let businessName = req.body.businessName,
     time = req.body.time;
   let select = `select * from ${businessName}_transaction,${businessName}_products where ${businessName}_products.productId=${businessName}_transaction.productIDTransaction and registeredTime like '%${time}%'`;
@@ -308,7 +313,7 @@ server.post("/ViewTransactions", (req, res) => {
       console.log(err);
       return res.json({ data: "data is full of err " });
     } else {
-      console.log(result);
+      // console.log(result);
       salesTransaction = result;
       // res.json({ data: result });
 
@@ -318,7 +323,7 @@ server.post("/ViewTransactions", (req, res) => {
         if (err) {
           console.log(err);
         } else {
-          console.log(results);
+          // console.log(results);
           expenseTransaction = results;
           res.json({ expenseTransaction, salesTransaction });
         }
@@ -326,8 +331,8 @@ server.post("/ViewTransactions", (req, res) => {
     }
   });
 });
-server.post("/updateTransactions", async (req, res) => {
-  console.log(req.body);
+server.post(path + "updateTransactions/", async (req, res) => {
+  // console.log(req.body);
   let currentInventory = "",
     prevInventory = "";
   let previous = getPreviousDay(new Date(req.body.date));
@@ -343,9 +348,9 @@ server.post("/updateTransactions", async (req, res) => {
       console.log(err);
       return err;
     } else {
-      console.log("issssssssssssss");
-      console.log(result);
-      console.log(result.length);
+      // console.log("issssssssssssss");
+      // console.log(result);
+      // console.log(result.length);
       if (result.length > 0) {
         currentInventory = parseInt(req.body.inventory) + prevInventory;
       } else if (result.length == 0) {
@@ -367,7 +372,7 @@ server.post("/updateTransactions", async (req, res) => {
           console.log(result);
         }
       });
-      console.log("currentInventory " + currentInventory);
+      // console.log("currentInventory " + currentInventory);
       return result;
     }
   });
@@ -385,12 +390,12 @@ async function getPreviousDay(date) {
     (previousFormat.getMonth() + 1) +
     "-" +
     previousFormat.getDate();
-  console.log("previousDay = " + previousDay);
+  // console.log("previousDay = " + previousDay);
 
   return previousDay;
 }
-server.post("/searchProducts", (req, res) => {
-  console.log(req.body.InputValue);
+server.post(path + "searchProducts/", (req, res) => {
+  // console.log(req.body.InputValue);
   // {
   //   businessName: 'marew_masresha_abate',
   //   toDate: '2023-02-21',
@@ -404,12 +409,7 @@ server.post("/searchProducts", (req, res) => {
     toDate = req.body.InputValue.toDate,
     fromDate = req.body.InputValue.fromDate,
     selectSearches = req.body.InputValue.selectSearches;
-  console.log(
-    businessName,
-    toDate,
-    fromDate,
-    " = selectSearches = " + selectSearches
-  );
+  // console.log( businessName,toDate, fromDate, " = selectSearches = " + selectSearches  );
   if (selectSearches == "PRODUCTS") {
     let selectProducts = `select * from ${businessName}_products`;
     connection.query(selectProducts, (err, productResults) => {
@@ -421,9 +421,11 @@ server.post("/searchProducts", (req, res) => {
   } else if (selectSearches == "TRANSACTION") {
     let select = `select * from ${businessName}_transaction , ${businessName}_products where productIDTransaction=ProductId and productName like '%${productName}%' and registeredTime between '${fromDate}' and '${toDate}'`;
     connection.query(select, (err, result) => {
-      if (err) console.log(err);
+      if (err) {
+        console.log(err);
+      }
       if (result) {
-        console.log(result);
+        // console.log(result);
         res.json({ data: result, products: "no result" });
       }
     });
@@ -432,8 +434,8 @@ server.post("/searchProducts", (req, res) => {
   }
 });
 
-server.post("/updateProducts", (req, res) => {
-  console.log(req.body);
+server.post(path + "updateProducts/", (req, res) => {
+  // console.log(req.body);
   let productPrice = req.body.productPrice,
     productName = req.body.productName,
     productCost = req.body.productCost,
@@ -446,12 +448,12 @@ server.post("/updateProducts", (req, res) => {
   });
   res.json({ data: "updated well" });
 });
-server.post("/AddCostItems", (req, res) => {
+server.post(path + "AddCostItems/", (req, res) => {
   insertIntoCosts(`${req.body.businessName}_Costs`, req.body, res);
-  console.log(req.body);
+  // console.log(req.body);
 });
-server.post("/getCostLists", (req, res) => {
-  console.log(req.body);
+server.post(path + "getCostLists/", (req, res) => {
+  // console.log(req.body);
   let select = `select * from ${req.body.businessName}_costs`;
   connection.query(select, (err, results) => {
     if (err) {
@@ -464,13 +466,13 @@ server.post("/getCostLists", (req, res) => {
       res.json({
         data: results,
       });
-      console.log(results);
+      // console.log(results);
     }
-    // console.log(businessName);
+    //// console.log(businessName);
   });
 });
-server.post(`/registerCostTransaction`, (req, res) => {
-  console.log(req.body.businessName);
+server.post(`/registerCostTransaction/`, (req, res) => {
+  // console.log(req.body.businessName);
 
   let costData = req.body.costData,
     date = req.body.costDate,
@@ -479,32 +481,29 @@ server.post(`/registerCostTransaction`, (req, res) => {
   connection.query(Check, (err, result) => {
     if (err) console.log(err);
     if (result) {
-      console.log("costDatecostDatecostDatecostDatecostDate");
-      console.log(result);
-      console.log("date is " + date);
+      // console.log("costDatecostDatecostDatecostDatecostDate");
+      // console.log(result);
+      // console.log("date is " + date);
       if (result.length > 0) {
         return res.json({ data: "registered before" });
       } else {
         let i = 0;
         for (; i < costData.length; i++) {
           //  costsId: 1, costName: '9990', unitCost: 890
-          console.log(costData[i]);
+          // console.log(costData[i]);
           let costsId = costData[i].costsId,
             costName = costData[i].costName,
             Description = "Description_" + costName;
-          console.log("Description is " + Description);
+          // console.log("Description is " + Description);
           let costAmount = rowData[costName],
             costDescription = rowData[Description];
-          console.log(
-            "costAmount = " + costAmount,
-            " costDescription=" + costDescription
-          );
+          // console.log( "costAmount = " + costAmount, " costDescription=" + costDescription );
           let insert = `insert into ${req.body.businessName}_expenses (costId,costAmount,costDescription,costRegisteredDate) values('${costsId}','${costAmount}','${costDescription}','${date}')`;
           connection.query(insert, (err, result2) => {
             if (err) console.log(err);
             else if (result2) {
               // res.json({ data: "Inserted properly" });
-              console.log(result2);
+              // console.log(result2);
             }
           });
         }
@@ -513,8 +512,8 @@ server.post(`/registerCostTransaction`, (req, res) => {
     }
   });
 });
-server.post("/updateBusiness", (req, res) => {
-  console.log(req.body);
+server.post(path + "updateBusiness/", (req, res) => {
+  // console.log(req.body);
   // costDescription_: 'ii',
   // costAmount_: '8909',
   // ids: 26,
@@ -525,10 +524,11 @@ server.post("/updateBusiness", (req, res) => {
   let update = `update ${businessName} set costAmount='${costAmount_}',costDescription='${costDescription_}' where expenseId='${req.body.ids}'`;
   connection.query(update, (err, result) => {
     if (err) console.log(update);
-    if (result) console.log(result);
-    res.json({
-      data: "updated well",
-    });
+    if (result)
+      // console.log(result);
+      res.json({
+        data: "updated well",
+      });
   });
 });
 let updateNextDateInventory = (
@@ -537,12 +537,7 @@ let updateNextDateInventory = (
   date,
   previousInventory
 ) => {
-  console.log(
-    `businessName, productId, date, previousInventory = ` + businessName,
-    productId,
-    date,
-    previousInventory
-  );
+  // console.log(`businessName, productId, date, previousInventory = ` + businessName,  productId, date,    previousInventory  );
 
   let select = `select * from ${businessName} where productIDTransaction='${productId}' and registeredTime>'${date}' order by registeredTime asc`;
   connection.query(select, (err, results) => {
@@ -550,9 +545,9 @@ let updateNextDateInventory = (
       console.log(err);
     }
     if (results.length > 0) {
-      console.log("it is ok");
+      // console.log("it is ok");
       // use for loop
-      console.log(results);
+      // console.log(results);
 
       for (let i = 0; i < results.length; i++) {
         let salesqty = results[i].salesQty,
@@ -560,18 +555,18 @@ let updateNextDateInventory = (
           inventory = 0,
           wrickages = results[i].wrickages;
         inventory = purchaseQty + previousInventory - salesqty - wrickages;
-        console.log(" inventory is @ " + i + " " + inventory);
+        // console.log(" inventory is @ " + i + " " + inventory);
         // return;
         let update = `update ${businessName} set inventory='${inventory}' where transactionId=${results[i].transactionId}`;
         previousInventory = inventory;
         connection.query(update, (err, results1) => {
-          console.log("results1 is " + results1.length);
-          console.log(results1);
+          // console.log("results1 is " + results1.length);
+          // console.log(results1);
           if (err) {
             console.log(err);
           }
           if (results1) {
-            console.log("updated " + results1);
+            // console.log("updated " + results1);
           } else {
           }
         });
@@ -582,8 +577,8 @@ let updateNextDateInventory = (
   });
 };
 function insertIntoCosts(businessName, data, res) {
-  console.log("businessName " + businessName);
-  console.log("datas=", data);
+  // console.log("businessName " + businessName);
+  // console.log("datas=", data);
   //  costName varchar(3000),unitCost
   let check = `select * from ${businessName} where costName='${data.Costname}' `;
   connection.query(check, (err, result1) => {
@@ -595,24 +590,24 @@ function insertIntoCosts(businessName, data, res) {
       connection.query(insert, (err, result) => {
         if (err) console.log(err);
         if (result) {
-          console.log(result);
+          // console.log(result);
           return res.json({ data: "Registered successfully" });
         }
       });
     }
   });
 }
-server.post("/updateBusinessName", (req, res) => {
-  console.log(req.body);
+server.post(path + "updateBusinessName/", (req, res) => {
+  // console.log(req.body);
   let businessName = req.body.businessname,
     targetBusinessId = req.body.targetBusinessId;
-  console.log("businessName", businessName);
+  // console.log("businessName", businessName);
   let oldBusinessName = "";
   let getOldtableName = `select * from business where businessId='${targetBusinessId}'`;
   connection.query(getOldtableName, (err, results) => {
     if (err) console.log(err);
     if (results) {
-      console.log(results);
+      // console.log(results);
       oldBusinessName = results[0].businessName;
     }
     // RENAME Cars To Car_2021_Details ;
@@ -645,38 +640,39 @@ server.post("/updateBusinessName", (req, res) => {
   connection.query(update, (err, result) => {
     if (err) console.log(err);
     if (result) {
-      console.log(result);
+      // console.log(result);
     }
   });
   res.json({ data: "update is successfull" });
 });
-server.post("/searchEmployee", (req, res) => {
+server.post(path + "searchEmployee/", (req, res) => {
   let employeeNameToBeSearched = req.body.employeeNameToBeSearched;
   let select = `select userId,employeeName,phoneNumber from userstable where  phoneNumber like '%${employeeNameToBeSearched}%' or employeeName like '%${employeeNameToBeSearched}%'`;
   connection.query(select, (err, result) => {
     if (err) console.log(err);
     if (result) {
       res.json({ data: result });
-      console.log("search employeee ");
-      console.log(result);
+      // console.log("search employeee ");
+      // console.log(result);
     }
   });
-  console.log(req.body);
+  // console.log(req.body);
   // connection.query(select);
 });
-server.post("/addEmployee", (req, res) => {
+server.post(path + "addEmployee/", (req, res) => {
   let rowData = req.body,
     name = rowData.name,
     phone = rowData.phone,
     businessId = rowData.businessId,
     userId = rowData.userId;
-  console.log("rowData is ");
-  console.log(rowData);
+  // console.log("rowData is ");
+  // console.log(rowData);
 
   let check = `select * from employeeTable,business where userIdInEmployee=${userId} and BusinessID=${businessId} and BusinessIDEmployee=BusinessID`;
   connection.query(check, (err, response) => {
     if (err) console.log(err);
     if (response) {
+      //
       if (response.length > 0) {
         res.json({ data: "data is already registered bofore" });
       } else {
@@ -684,32 +680,33 @@ server.post("/addEmployee", (req, res) => {
         connection.query(insert, (err, result) => {
           if (err) console.log(err);
           if (result) {
+            //
             res.json({ data: "data is inserted correctly." });
-            console.log(result);
+            // console.log(result);
           }
         });
       }
     }
-    console.log(response);
+    // console.log(response);
   });
   return;
 });
-server.post("/getBusinessEmployee", (req, res) => {
-  console.log(req.body);
-  console.log("req.body.businessId " + req.body.businessId);
+server.post(path + "getBusinessEmployee/", (req, res) => {
+  // console.log(req.body);
+  // console.log("req.body.businessId " + req.body.businessId);
   let select = `select * from employeetable,userstable where userId=userIdInEmployee and BusinessID='${req.body.businessId}'`;
   connection.query(select, (Error, response) => {
     if (Error) {
-      console.log(Error);
+      // console.log(Error);
     }
     if (response) {
-      console.log(response);
+      // console.log(response);
       res.json({ data: response });
     }
   });
 });
-server.post("/removeEmployees", (req, res) => {
-  console.log(req.body);
+server.post(path + "removeEmployees/", (req, res) => {
+  // console.log(req.body);
   let deleteEmployee = `delete from employeetable where employeeId='${req.body.employeeId}'`;
   connection.query(deleteEmployee, (err, results) => {
     if (err) {
@@ -717,46 +714,41 @@ server.post("/removeEmployees", (req, res) => {
       return;
     }
     res.json({ Status: "deleted", EmployeeId: req.body.employeeId });
-    console.log(results);
+    // console.log(results);
   });
 });
-server.post("/registerEmployeersProducts", (req, res) => {
+server.post(path + "registerEmployeersProducts/", (req, res) => {
   let TranactionProducts = req.body.tranactionProducts,
     EmployeersProduct = req.body.EmployeersProduct;
-  console.log(
-    "TranactionProducts = ",
-    TranactionProducts,
-    "EmployeersProduct = ",
-    EmployeersProduct
-  );
+  // console.log("TranactionProducts = ", TranactionProducts,    "EmployeersProduct = ",  EmployeersProduct );
   let ProductId = EmployeersProduct[0].ProductId;
   //  { purchase_1: '456', sales_1: '400', Wrickage_1: '6' }
   let purchase_ = "purchase_" + ProductId,
     sales_ = "sales_" + ProductId,
     Wrickage_ = "Wrickage_" + ProductId;
-  console.log("EmployeersProduct[0]", EmployeersProduct[0]);
-  console.log();
+  // console.log("EmployeersProduct[0]", EmployeersProduct[0]);
+  // console.log();
   let purchaseQty = TranactionProducts[purchase_],
     salesQty = TranactionProducts[sales_],
     wrickageQty = TranactionProducts[Wrickage_];
-  console.log(purchaseQty, salesQty, wrickageQty);
+  // console.log(purchaseQty, salesQty, wrickageQty);
   res.json({ data: req.body });
 });
-server.post("/getsingleProducts", (req, res) => {
+server.post(path + "getsingleProducts/", (req, res) => {
   let businessName = req.body.businessName,
     productName = req.body.searchInput;
   let selectProduct = `select * from ${businessName}_products where productName like '%${productName}%'`;
   connection.query(selectProduct, (error, results) => {
     if (error) {
-      console.log(error);
+      // console.log(error);
     } else {
-      console.log("results");
-      console.log(results);
+      // console.log("results");
+      // console.log(results);
       res.json({ data: results });
     }
   });
 });
-server.post("/registerSinglesalesTransaction", (req, res) => {
+server.post(path + "registerSinglesalesTransaction/", (req, res) => {
   let Description = req.body.Description,
     brokenQty = req.body.brokenQty,
     businessId = req.body.businessId,
@@ -767,22 +759,22 @@ server.post("/registerSinglesalesTransaction", (req, res) => {
   let createTable = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int, salesQty int,businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date, primary key(dailySalesId) )`;
   connection.query(createTable, (error, results) => {
     if (error) {
-      console.log(error);
+      // console.log(error);
     } else {
-      console.log(results.data);
+      // console.log(results.data);
     }
   });
   let Insert = `insert into dailyTransaction(purchaseQty,salesQty,businessId,ProductId,brokenQty,Description,registrationDate)value('${purchaseQty}','${salesQty}','${businessId}','${ProductId}','${brokenQty}','${Description}','${currentDate}')`;
   connection.query(Insert, (error, results) => {
     if (error) {
-      console.log(error);
+      // console.log(error);
     }
     if (results) {
       res.json({ data: "successfullyRegistered" });
     }
   });
 });
-server.post("/getDailyTransaction", (req, res) => {
+server.post(path + "getDailyTransaction/", (req, res) => {
   // res.json({ data: req.body });
   let productId = req.body.productId,
     businessId = req.body.businessId,
@@ -797,7 +789,7 @@ server.post("/getDailyTransaction", (req, res) => {
   connection.query(getTransaction, (err, result) => {
     if (err) console.log(err);
     if (result) {
-      console.log(result);
+      // console.log(result);
       res.json({ data: result });
     }
   });
