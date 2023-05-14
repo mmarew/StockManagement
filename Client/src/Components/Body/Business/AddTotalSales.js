@@ -6,7 +6,7 @@ import $ from "jquery";
 function AddTotalSales({ Time }) {
   console.log("Time is " + Time);
   let ProductId = [];
-
+  let serverAddress = localStorage.getItem("targetUrl");
   const [ProductsList, setProductsList] = useState();
   const [CollectedProducts, setCollectedProducts] = useState({});
   const [selectedTime, setselectedTime] = useState();
@@ -29,10 +29,11 @@ function AddTotalSales({ Time }) {
     });
   };
   let getRegisteredProducts = async () => {
-    let Response = await axios.post(
-      "http://localhost:2020/getRegisteredProducts",
-      { token, BusinessId, businessName }
-    );
+    let Response = await axios.post(serverAddress + "getRegisteredProducts/", {
+      token,
+      BusinessId,
+      businessName,
+    });
     console.log("@getRegisteredProducts Response.data.data");
     console.log(Response.data.data);
     setProductsList(Response.data.data);
@@ -41,8 +42,9 @@ function AddTotalSales({ Time }) {
     e.preventDefault();
     console.log(CollectedProducts);
     // return;
+
     let response = await axios.post(
-      "http://localhost:2020/registerTransaction",
+      serverAddress + "registerTransaction/",
       CollectedProducts
     );
 

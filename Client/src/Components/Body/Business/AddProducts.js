@@ -2,6 +2,7 @@ import axios from "axios";
 import "./AddProducts.css";
 import React, { useState } from "react";
 const AddProducts = () => {
+  let serverAddress = localStorage.getItem("targetUrl");
   let token = localStorage.getItem("storeToken");
   let businessId = localStorage.getItem("businessId");
   const [FormData, setFormData] = useState({});
@@ -16,24 +17,26 @@ const AddProducts = () => {
   };
   let registerProducts = async (e) => {
     e.preventDefault();
-    let response = await axios.post(
-      "http://localhost:2020/addProducts",
-      FormData
-    );
+    let response = await axios.post(serverAddress + "addProducts/", FormData);
     let data = response.data.data;
+    console.log("response", response);
     let registerProducts = document.getElementsByClassName("registerProducts");
-    for (let i = 0; i < registerProducts.length; i++) {
-      registerProducts[i].value = "";
-    }
+
     if (data == "productIsAlreadyAddedBefore") {
       alert("Already registered");
     } else if (data == "productIsAdded") {
       alert("you have added products successfully");
+    } else if (data == "created well") {
+      alert("Your product is not registered. please try again.");
+      return;
+    }
+    for (let i = 0; i < registerProducts.length; i++) {
+      registerProducts[i].value = "";
     }
   };
   return (
     <div>
-      <h1 className="registrationFormToproducts">Forms To Register Products</h1>
+      <h4 className="registrationFormToproducts">Forms To Register Products</h4>
 
       <form id="registerProductsForm" onSubmit={registerProducts} method="post">
         <input

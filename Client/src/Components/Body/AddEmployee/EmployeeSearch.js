@@ -1,13 +1,14 @@
 import axios from "axios";
 import React, { useState } from "react";
 const EmployeeSearch = () => {
+  let serverAddress = localStorage.getItem("targetUrl");
   const [InputValue, setInputValue] = useState();
   const [searchedEmployee, setsearchedEmployee] = useState([]);
   let addEmployeeDatas = async (name, phone, userId) => {
     console.log(name, phone, userId);
 
     let businessId = localStorage.getItem("businessId");
-    let response = await axios.post(`http://localhost:2020/addEmployee`, {
+    let response = await axios.post(serverAddress + `addEmployee/`, {
       name,
       businessId,
       phone,
@@ -33,7 +34,7 @@ const EmployeeSearch = () => {
     e.preventDefault();
     console.log("searchEmployees");
     let response = await axios.post(
-      "http://localhost:2020/searchEmployee",
+      serverAddress + "searchEmployee",
       InputValue
     );
     console.log("@searchEmployee response = ", response.data.data);

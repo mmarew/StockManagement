@@ -1,14 +1,18 @@
 import React, { useState } from "react";
 import "./Login.css";
 import axios from "axios";
+import $ from "jquery";
+import { CircularProgress } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 function Login() {
+  let serverAddress = localStorage.getItem("targetUrl");
   let Navigate = useNavigate();
   const [loginForm, setloginForm] = useState({});
   let submitForm = async (e) => {
     e.preventDefault();
+    $("#CircularProgress").show();
     console.log("submitForm");
-    let response = await axios.post("http://localhost:2020/Login", loginForm);
+    let response = await axios.post(serverAddress + "Login/", loginForm);
     console.log("response = ");
     console.log(response.data.data);
     if (response.data.data == "loginSuccessFull") {
@@ -25,6 +29,7 @@ function Login() {
     } else if (response.data.data == "password mismatch") {
       alert("password mismatch");
     }
+    $("#CircularProgress").hide();
   };
   let handleFormData = (e) => {
     let values = e.target.value;
@@ -35,6 +40,7 @@ function Login() {
     <div className="">
       {console.log(loginForm)}
       <form className="loginForm" onSubmit={submitForm} action="">
+        <CircularProgress id="CircularProgress" />
         <input
           required
           name="phoneNumber"

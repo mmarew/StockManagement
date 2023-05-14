@@ -1,7 +1,8 @@
 import axios from "axios";
 import React, { useState } from "react";
 import "./CreateBusiness.css";
-function CreateBusiness() {
+function CreateBusiness({ getBusiness, setnewBusiness }) {
+  let serverAddress = localStorage.getItem("targetUrl");
   const [businessData, setbusinessData] = useState({});
   let handleCreateForm = (e) => {
     e.preventDefault();
@@ -27,13 +28,15 @@ function CreateBusiness() {
       }
     }
     let response = await axios.post(
-      "http://localhost:2020/createBusiness",
+      serverAddress + "createBusiness/",
       businessData
     );
     console.log(response.data);
     let data = response.data.data;
     if (data == "created well") {
+      setnewBusiness("");
       alert("Your business is created well. Thankyou.");
+      getBusiness();
     }
     if (data == "alreadyRegistered") {
       alert("Error. Because this business name is already registered before.");
@@ -41,6 +44,9 @@ function CreateBusiness() {
   };
   let cancelBusinessCreation = () => {
     console.log("cancelBusinessCreation");
+    console.log("setnewBusiness", setnewBusiness);
+    // newBusiness = "";
+    setnewBusiness("");
   };
   return (
     <div>

@@ -4,12 +4,13 @@ import currentDates from "../Date/currentDate";
 import "./AddCostTransaction.css";
 import $ from "jquery";
 function AddCostTransaction() {
+  let serverAddress = localStorage.getItem("targetUrl");
   const [showCostForm, setshowCostForm] = useState(false);
   const [Formdata, setFormdata] = useState({});
   const [costList, setcostList] = useState([]);
   let businessName = localStorage.getItem("businessName");
   let getListOfCosts = async () => {
-    let response = await axios.post("http://localhost:2020/getCostLists", {
+    let response = await axios.post(serverAddress + "getCostLists/", {
       businessName,
     });
     let costData = response.data.data;
@@ -26,7 +27,7 @@ function AddCostTransaction() {
   let handleFormSubmit = async (e) => {
     e.preventDefault();
     let response = await axios.post(
-      `http://localhost:2020/registerCostTransaction`,
+      serverAddress + `registerCostTransaction/`,
       Formdata
     );
     console.log("response ", response.data.data);

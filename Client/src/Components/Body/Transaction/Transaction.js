@@ -4,6 +4,7 @@ import $ from "jquery";
 import "./Transaction.css";
 import currentDates from "../Date/currentDate";
 export default function Transaction() {
+  let serverAddress = localStorage.getItem("targetUrl");
   const [salesAmount, setSalesAmount] = useState(0);
   const [FetchedDatas, setFetchedDatas] = useState([]);
   const [TotalExpenses, setTotalExpenses] = useState();
@@ -25,7 +26,7 @@ export default function Transaction() {
     }
     console.log(ob);
     let updates = await axios
-      .post("http://localhost:2020/updateTransactions", ob)
+      .post(serverAddress + "updateTransactions/", ob)
       .then((data) => {
         $("#" + id).hide();
         console.log(data);
@@ -38,15 +39,12 @@ export default function Transaction() {
     let costDescription_ = $("#costDescription_" + ids).val(),
       costAmount_ = $("#costAmount_" + ids).val();
     console.log(costDescription_, costAmount_);
-    let updateResponse = await axios.post(
-      "http://localhost:2020/updateBusiness",
-      {
-        costDescription_,
-        costAmount_,
-        ids,
-        businessName,
-      }
-    );
+    let updateResponse = await axios.post(serverAddress + "updateBusiness/", {
+      costDescription_,
+      costAmount_,
+      ids,
+      businessName,
+    });
     console.log(updateResponse);
     console.log("updateResponse " + updateResponse.data.data);
     if (updateResponse.data.data == "updated well") {
@@ -80,10 +78,7 @@ export default function Transaction() {
     }
     ob.businessName = businessName;
     console.log(ob);
-    let response = await axios.post(
-      "http://localhost:2020/ViewTransactions",
-      ob
-    );
+    let response = await axios.post(serverAddress + "ViewTransactions/", ob);
     let arrayData = response.data.salesTransaction;
     let expenses = response.data.expenseTransaction;
     let exp = expenses?.reduce((a, c) => {
@@ -98,7 +93,10 @@ export default function Transaction() {
     if (arrayData?.length == 0) {
       setFetchedDatas([]);
       $("#TransactionTable").hide();
-      alert("No transaction data on this day");
+      $("#noTransaction").remove();
+      $("#ExpensesLists").after(
+        "<h5 id='noTransaction'>No transaction data on this day</h5>"
+      );
       return;
     } else {
       $("#TransactionTable").show();
@@ -125,7 +123,6 @@ export default function Transaction() {
   };
   useEffect(() => {
     console.log(ExpenseTransaction);
-
     ExpenseTransaction?.map((items) => {
       let costAmount_ = "costAmount_" + items.expenseId,
         costDescription_ = "costDescription_" + items.expenseId;
@@ -137,14 +134,11 @@ export default function Transaction() {
     ViewTransactions();
   }, []);
   useEffect(() => {
-    // $("input").removeAttr("value");
     FetchedDatas?.map((Items) => {
       let id = "unitPrice_" + Items.transactionId;
       $("#" + id).val(Items.unitPrice);
       let salesQty_ = "salesQty_" + Items.transactionId;
       $("#" + salesQty_).val(Items.salesQty);
-      // let idofSales = "totalSales_" + Items.transactionId;
-      // $("#" + idofSales).val(Items.salesQty * Items.unitPrice);
       let unitCost_ = "unitCost_" + Items.transactionId;
       $("#" + unitCost_).val(Items.unitCost);
       let purchaseQty_ = "purchaseQty_" + Items.transactionId;
@@ -272,7 +266,7 @@ export default function Transaction() {
         {" Sales Amount- Purchase Amount " + salesAmount}
       </table>
       <div>
-        <h1>expenses list</h1>
+        <h4 id="ExpensesLists">Expenses list</h4>
         <table className="tableExpenses">
           <tr>
             <th>Name</th>

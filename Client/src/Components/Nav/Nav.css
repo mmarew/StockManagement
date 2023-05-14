@@ -1,9 +1,21 @@
 .navLinks {
   background-color: black;
   display: flex;
+  justify-content: center;
 }
 .navLinks .Lists {
   color: white;
   text-decoration: none;
   padding: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.Lists:hover {
+  background: green;
+}
+.Lists {
+  margin: 0 2px;
+}
+.active {
+  background-color: blue;
 }

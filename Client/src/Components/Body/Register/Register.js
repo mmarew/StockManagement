@@ -1,28 +1,33 @@
 import axios from "axios";
 import React, { useState } from "react";
 import "./Register.css";
+import $ from "jquery";
+import { CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-// it is sign up
+let serverUrl = localStorage.getItem("targetUrl");
 function Register() {
   const navigate = useNavigate();
   const [RegisterForm, setRegisterForm] = useState({});
   let handleRegistrationChange = (e) => {
     e.preventDefault();
-    // console.log(e.target);
     let value = e.target.value,
       names = e.target.name;
     setRegisterForm({ ...RegisterForm, [names]: value });
   };
   let handleRegistrationSubmit = async (e) => {
     e.preventDefault();
-    let response = await axios.post(
-      "http://localhost:2020/RegisterUsers",
-      RegisterForm
-    );
-    console.log();
+    $("#CircularProgress").show();
+    let response = await axios.post(serverUrl + "RegisterUsers/", RegisterForm);
+
     let data = response.data.data;
-    alert(response.data.data);
-    navigate("/");
+    console.log("response is ", response);
+    if (response.data.data == "This phone number is registered before.")
+      alert(response.data.data);
+    else if (response.data.data == "Data is inserted well.") {
+      alert("You are registered as user in stock management system. Thankyou");
+      navigate("/");
+    } else navigate("/");
+    $("#CircularProgress").hide();
   };
   return (
     <form
@@ -30,6 +35,7 @@ function Register() {
       onSubmit={handleRegistrationSubmit}
       action=""
     >
+      <CircularProgress id="CircularProgress" />
       <input
         required
         name="fullName"

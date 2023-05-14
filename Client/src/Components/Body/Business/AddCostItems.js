@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
 import "./AddCostItems.css";
 function AddCostItems() {
+  let serverAddress = localStorage.getItem("targetUrl");
   const [data, setdata] = useState({});
   let collectInputInformation = (e) => {
     console.log(e.target.value);
@@ -23,7 +24,7 @@ function AddCostItems() {
   }, []);
   let submitCosts = async (e) => {
     e.preventDefault();
-    let response = await axios.post("http://localhost:2020/AddCostItems", data);
+    let response = await axios.post(serverAddress + "AddCostItems/", data);
     console.log(response.data.data);
     if (response.data.data == "Registered successfully") {
       alert("Registered successfully");

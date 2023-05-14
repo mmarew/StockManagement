@@ -6,8 +6,7 @@ import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import CreateBusiness from "./CreateBusiness";
 import { useNavigate } from "react-router-dom";
-let serverAddress = `http://localhost:2020`; //process.env.serverAddress;
-// dotenv.config();
+let serverAddress = localStorage.getItem("targetUrl");
 function Business() {
   const [BusinessLists, setBusinessLists] = useState(
     <h4>Your business lists</h4>
@@ -35,7 +34,7 @@ function Business() {
               businessname = $("#" + businessId).val();
             console.log(businessname, targetBusinessId);
             let updateRes = await axios.post(
-              `${serverAddress}/updateBusinessName`,
+              `${serverAddress}updateBusinessName/`,
               {
                 businessname,
                 targetBusinessId,
@@ -45,6 +44,9 @@ function Business() {
             let data = updateRes.data.data;
             if (data == "update is successfull") {
               alert(data);
+              $("#businessWrapper_" + targetBusinessId).hide();
+              $("#openEditWrapper" + targetBusinessId).show();
+
               localStorage.setItem("businessname", businessname);
               createdBusiness?.map((items) => {
                 console.log(items);
@@ -78,8 +80,8 @@ function Business() {
   let editThisBusiness = (businessId, businessName) => {
     console.log(businessId);
     console.log("BusinessName", businessName);
-    $(".businessButton").show();
-    $(".update-wrapper").hide();
+    // $(".businessButton").show();
+    // $(".update-wrapper").hide();
     $("#businessWrapper_" + businessId).show();
     $("#openEditWrapper" + businessId).hide();
     $("#businessName_" + businessId).val(businessName);
@@ -90,7 +92,7 @@ function Business() {
     setnewBusiness("allow");
   };
   let getBusiness = async () => {
-    let results = await axios.post(`${serverAddress}/getBusiness`, {
+    let results = await axios.post(`${serverAddress}getBusiness/`, {
       token,
     });
     console.log(results.data);
@@ -136,96 +138,114 @@ function Business() {
           Create Business
         </button>
         <br />
-        {newBusiness == "allow" && <CreateBusiness />}
-        {BusinessLists}
-        <div className="createdBusinessWrapper">
-          {createdBusiness?.map((datas) => {
-            console.log(datas);
-            return (
-              <div
-                key={datas.BusinessID}
-                className="createdBusiness"
-                id={"createdBusiness_" + datas.BusinessID}
-              >
-                <div className="Business">
-                  <h2 className="businessName">{datas.BusinessName}</h2>
-                  <div
-                    className="businessButton"
-                    id={"openEditWrapper" + datas.BusinessID}
-                  >
-                    <button
-                      onClick={() =>
-                        openThisBusiness(datas.BusinessID, datas.BusinessName)
-                      }
-                    >
-                      open
-                    </button>
-                    <button
-                      onClick={() =>
-                        editThisBusiness(datas.BusinessID, datas.BusinessName)
-                      }
-                    >
-                      Edit
-                    </button>
-                  </div>
-                  <div
-                    id={"businessWrapper_" + datas.BusinessID}
-                    className="update-wrapper"
-                  >
-                    <input
-                      id={"businessName_" + datas.BusinessID}
-                      placeholder="Business name"
-                      type="text"
-                    />
-                    <div
-                      className="updateCancelWrapper"
-                      id={"updateCancelWrapper_" + datas.BusinessID}
-                    >
-                      <button
-                        onClick={() => updateBusinesssName(datas.BusinessID)}
-                      >
-                        Update
-                      </button>
-                      <button
-                        onClick={() => cancelBusinessUpdate(datas.BusinessID)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-          {
-            <>
-              {console.log("employeerBusiness")}
-              {console.log(employeerBusiness)}
-              {employeerBusiness?.map((items) => {
-                console.log(items);
+        {newBusiness == "allow" ? (
+          <CreateBusiness
+            getBusiness={getBusiness}
+            setnewBusiness={setnewBusiness}
+          />
+        ) : (
+          <div>
+            {BusinessLists}
+            <div className="createdBusinessWrapper">
+              {createdBusiness?.map((datas) => {
+                console.log(datas);
                 return (
-                  <div key={items.employeeId} className="Business">
-                    <h1>{items.BusinessName}</h1>
-                    <div className="businessButton">
-                      <button
-                        onClick={() => {
-                          openEmployeerBusiness(
-                            items.BusinessID,
-                            items.ownerId,
-                            items.BusinessName
-                          );
-                        }}
-                        className=""
+                  <div
+                    key={datas.BusinessID}
+                    className="createdBusiness"
+                    id={"createdBusiness_" + datas.BusinessID}
+                  >
+                    <div className="Business">
+                      <h2 className="businessName">{datas.BusinessName}</h2>
+                      <div
+                        className="businessButton"
+                        id={"openEditWrapper" + datas.BusinessID}
                       >
-                        OPEN
-                      </button>
+                        <button
+                          onClick={() =>
+                            openThisBusiness(
+                              datas.BusinessID,
+                              datas.BusinessName
+                            )
+                          }
+                        >
+                          open
+                        </button>
+                        <button
+                          onClick={() =>
+                            editThisBusiness(
+                              datas.BusinessID,
+                              datas.BusinessName
+                            )
+                          }
+                        >
+                          Edit
+                        </button>
+                      </div>
+                      <div
+                        id={"businessWrapper_" + datas.BusinessID}
+                        className="update-wrapper"
+                      >
+                        <input
+                          id={"businessName_" + datas.BusinessID}
+                          placeholder="Business name"
+                          type="text"
+                        />
+                        <div
+                          className="updateCancelWrapper"
+                          id={"updateCancelWrapper_" + datas.BusinessID}
+                        >
+                          <button
+                            onClick={() =>
+                              updateBusinesssName(datas.BusinessID)
+                            }
+                          >
+                            Update
+                          </button>
+                          <button
+                            onClick={() =>
+                              cancelBusinessUpdate(datas.BusinessID)
+                            }
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
               })}
-            </>
-          }
-        </div>
+              {
+                <>
+                  {console.log("employeerBusiness")}
+                  {console.log(employeerBusiness)}
+                  {employeerBusiness?.map((items) => {
+                    console.log(items);
+                    return (
+                      <div key={items.employeeId} className="Business">
+                        <h1>{items.BusinessName}</h1>
+                        <div className="businessButton">
+                          <button
+                            onClick={() => {
+                              openEmployeerBusiness(
+                                items.BusinessID,
+                                items.ownerId,
+                                items.BusinessName
+                              );
+                            }}
+                            className=""
+                          >
+                            OPEN
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              }
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -2,7 +2,9 @@ import React, { useEffect } from "react";
 import "./Nav.css";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import $ from "jquery";
 export default function Nav() {
+  let serverAddress = localStorage.getItem("targetUrl");
   let url = window.location.url;
   console.log(url);
   let navigate = useNavigate();
@@ -13,7 +15,7 @@ export default function Nav() {
       navigate("/login");
       return;
     }
-    let response = await axios.post("http://localhost:2020/verifyLogin", {
+    let response = await axios.post(serverAddress + "verifyLogin/", {
       token: savedStore,
     });
     console.log("response == ", response.data);
@@ -26,10 +28,14 @@ export default function Nav() {
   useEffect(() => {
     VerifyLogin();
   }, []);
-
+  let hundleNavigationBar = (e) => {
+    console.log(e.target);
+    $(".Lists").removeClass("active");
+    $(e.target).addClass("active");
+  };
   return (
     <div className="navLinks">
-      <Link className="Lists" to="/Business">
+      <Link onClick={hundleNavigationBar} className="Lists" to="/Business">
         Business
       </Link>
       {/* <Link className="Lists" to="/Transaction">
@@ -39,10 +45,10 @@ export default function Nav() {
       </Link> <Link className="Lists" to="/Reports">
         Reports
       </Link> */}
-      <Link className="Lists" to="/Profiles">
+      <Link onClick={hundleNavigationBar} className="Lists" to="/Profiles">
         Profiles
       </Link>
-      <Link className="Lists" to="/help">
+      <Link onClick={hundleNavigationBar} className="Lists" to="/help">
         Help
       </Link>
     </div>

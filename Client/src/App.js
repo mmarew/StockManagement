@@ -46,7 +46,6 @@ function App() {
             path="/Transaction"
             element={
               <>
-                <Nav />
                 <Transaction />
               </>
             }
@@ -55,7 +54,6 @@ function App() {
             path="/Employee"
             element={
               <>
-                <Nav />
                 <Employee />
               </>
             }
@@ -91,6 +89,7 @@ function App() {
             path="/login"
             element={
               <>
+                <Nav />
                 <Login />
               </>
             }
@@ -99,6 +98,7 @@ function App() {
             path="/register"
             element={
               <>
+                <Nav />
                 <Register />
               </>
             }
@@ -125,7 +125,7 @@ function App() {
                 path="AddSalesTranaction"
                 element={<AddSalesTransaction />}
               >
-                <Route path="addSingleSales" element={<AddSingleSales />} />{" "}
+                <Route path="addSingleSales" element={<AddSingleSales />} />
                 <Route path="addTotalSales" element={<AddTotalSales />} />
               </Route>
               <Route
@@ -139,7 +139,6 @@ function App() {
               />
               <Route path="totalSalestransaction" element={<AddTotalSales />} />
             </Route>
-            {/* singleSalestransaction */}
           </Route>
         </Routes>
         {/* <Routes>

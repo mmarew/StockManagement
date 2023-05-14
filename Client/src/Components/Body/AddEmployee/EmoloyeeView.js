@@ -2,10 +2,11 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import $ from "jquery";
 function EmployeeView() {
+  let serverAddress = localStorage.getItem("targetUrl");
   const [EmployeesList, setEmployeesList] = useState();
   let RemoveThisEmployee = async (employeeId) => {
     console.log("first" + employeeId);
-    let response = await axios.post("http://localhost:2020/removeEmployees", {
+    let response = await axios.post(serverAddress + "removeEmployees/", {
       employeeId,
     });
     console.log("items is ");
@@ -18,12 +19,9 @@ function EmployeeView() {
   let getBusinessEmployee = async () => {
     let businessId = localStorage.getItem("businessId");
     console.log("businessId is " + businessId);
-    let response = await axios.post(
-      "http://localhost:2020/getBusinessEmployee",
-      {
-        businessId,
-      }
-    );
+    let response = await axios.post(serverAddress + "getBusinessEmployee/", {
+      businessId,
+    });
     setEmployeesList(response.data.data);
   };
   useEffect(() => {
@@ -41,7 +39,6 @@ function EmployeeView() {
           </>
         )}
 
-       
         {EmployeesList?.map((items) => {
           console.log(items);
           return (

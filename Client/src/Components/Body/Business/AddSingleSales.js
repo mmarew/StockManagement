@@ -147,6 +147,7 @@ function AddSingleSales() {
   };
   let RegiterCollectedDailyTransaction = async (e) => {
     e.preventDefault();
+    let serverAddress = localStorage.getItem("targetUrl");
     let businessName = localStorage.getItem("businessName"),
       BusinessId = localStorage.getItem("businessId");
     console.log("allDailySales");
@@ -163,7 +164,7 @@ function AddSingleSales() {
     console.log("productsInfo =");
     console.log(productsInfo);
     let Response = await axios.post(
-      "http://localhost:2020/registerTransaction",
+      serverAddress + "registerTransaction/",
       productsInfo
     );
     console.log("Response", Response.data.data);

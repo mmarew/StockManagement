@@ -29,8 +29,9 @@ function SearchProducts() {
     ob.productCost = $("#" + productCost_).val();
     ob.id = id;
     ob.businessName = businessName;
+    let serverAddress = localStorage.getItem("targetUrl");
     let response = axios
-      .post("http://localhost:2020/updateProducts", ob)
+      .post(serverAddress + "updateProducts/", ob)
       .then((datas) => {
         $("." + btnId).hide();
         if ((datas.data.data = "updated well")) {
@@ -39,10 +40,10 @@ function SearchProducts() {
       });
   };
   let businessName = localStorage.getItem("businessName");
-
+  let serverAddress = localStorage.getItem("targetUrl");
   let submitSearch = async (e) => {
     e.preventDefault();
-    let response = await axios.post("http://localhost:2020/searchProducts", {
+    let response = await axios.post(serverAddress + "searchProducts/", {
       InputValue,
     });
     $("table").hide();
@@ -75,7 +76,6 @@ function SearchProducts() {
     //
     $("table").hide();
     if (searchTarget == "PRODUCTS") {
-     
       console.log("searchedProducts.length " + searchedProducts.length);
       if (searchedProducts.length > 0) {
         console.log("show products");
