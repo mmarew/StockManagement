@@ -13,14 +13,14 @@ function Login() {
     $("#CircularProgress").show();
     console.log("submitForm");
     let response = await axios.post(serverAddress + "Login/", loginForm);
-    console.log("response = ");
+    console.log("response = ", response);
     console.log(response.data.data);
     if (response.data.data == "loginSuccessFull") {
       console.log(response.data.token);
       let token = response.data.token;
       localStorage.setItem("storeToken", token);
       let getToken = localStorage.getItem("storeToken");
-      console.log("getToken");
+      console.log("getToken", getToken);
       Navigate("/Business");
     } else if (response.data.data == "data not found") {
       alert(

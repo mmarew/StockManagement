@@ -1,7 +1,14 @@
 let mysql = require("mysql");
 let bcript = require("bcryptjs");
-
+/*
+server side connection
 var connection = mysql.createConnection({
+  host: "localhost",
+  user: "masetawoshacom_stock",
+  password: "DBcp123$%^",
+  database: "masetawoshacom_store",
+});*/
+let connection = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",

@@ -5,7 +5,6 @@ let Auth = require("./Auth.js").Auth;
 let dotenv = require("dotenv"); // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-let
 dotenv.config();
 let path = "/";
-
 let server = express();
 server.use(cors());
 server.use(express.json());
@@ -14,7 +13,6 @@ server.use(
     extended: true,
   })
 );
-
 let createBasicTables = require("./Database.js");
 let date = new Date();
 let fullTime,
@@ -74,7 +72,7 @@ server.post(path + "getBusiness/", (req, res) => {
   }
   let decoded = jwt.verify(req.body.token, "shhhhh");
   let userID = decoded.userID;
-  let getBusiness = `select * from business where ownerId='${userID}'`;
+  let getBusiness = `select * from Business where ownerId='${userID}'`;
   let myBusiness = "",
     employeerBusiness = "";
   connection.query(getBusiness, (err, result) => {
@@ -85,8 +83,8 @@ server.post(path + "getBusiness/", (req, res) => {
       // console.log(result);
       myBusiness = result;
     }
-    let getEmployeerBusiness = `select * from employeeTable , business where userIdInEmployee='${userID}' 
-    and business.BusinessID=employeetable.BusinessIDEmployee`;
+    let getEmployeerBusiness = `select * from employeeTable , Business where userIdInEmployee='${userID}' 
+    and Business.BusinessID=employeetable.BusinessIDEmployee`;
     connection.query(getEmployeerBusiness, (err, results) => {
       if (err) console.log(err);
       if (result) {
@@ -96,14 +94,19 @@ server.post(path + "getBusiness/", (req, res) => {
     });
   });
 });
-server.post(path + "verifyLogin/", (req, res) => {
+server.post(path + "verifyLogin/", async (req, res) => {
   let decoded = jwt.verify(req.body.token, "shhhhh");
+
   let userID = decoded.userID;
   // console.log("verifyLogin userID", userID);
-  let select = `select * from userstable where userId='${userID}'`;
+
+  let select = `select * from usersTable where userId='${userID}'`;
+  res.json({ decoded, select });
+  return;
   connection.query(select, (err, result) => {
     if (err) {
       console.log(err);
+      return res.json({ err, data: "error in the database connection" });
     } else {
       // console.log(result);
       if (result.length > 0) {
@@ -159,7 +162,7 @@ server.post(path + "addProducts/", async (req, res) => {
     businessId = rowData.businessId,
     userId = await Auth(rowData.token),
     businessName = "";
-  let select = `select * from  business where businessId=${businessId}`;
+  let select = `select * from  Business where businessId=${businessId}`;
   connection.query(select, (err, result) => {
     if (err) {
       console.log(err);
@@ -343,7 +346,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
   // );
   let select = `select * from ${req.body.businessName}_transaction where registeredTime like '%${previous}%' and  transactionId='${req.body.transactionId}'`;
   let update = "";
-  let xx = await connection.query(select, async (err, result) => {
+  let xx = connection.query(select, async (err, result) => {
     if (err) {
       console.log(err);
       return err;
@@ -380,7 +383,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
   res.json({ data: req.body });
 });
 async function getPreviousDay(date) {
-  const previous = await new Date(date.getTime());
+  const previous = new Date(date.getTime());
   previous.setDate(date.getDate() - 1);
   let previousFormat = new Date(previous),
     previousDay = "";
@@ -603,7 +606,7 @@ server.post(path + "updateBusinessName/", (req, res) => {
     targetBusinessId = req.body.targetBusinessId;
   // console.log("businessName", businessName);
   let oldBusinessName = "";
-  let getOldtableName = `select * from business where businessId='${targetBusinessId}'`;
+  let getOldtableName = `select * from Business where businessId='${targetBusinessId}'`;
   connection.query(getOldtableName, (err, results) => {
     if (err) console.log(err);
     if (results) {
@@ -635,7 +638,7 @@ server.post(path + "updateBusinessName/", (req, res) => {
     });
   });
 
-  let update = `update business set businessName='${businessName}' where businessId='${targetBusinessId}'`;
+  let update = `update Business set businessName='${businessName}' where businessId='${targetBusinessId}'`;
   // { businessname: 'waterBusiness', targetBusinessId: 37 }
   connection.query(update, (err, result) => {
     if (err) console.log(err);
@@ -668,7 +671,7 @@ server.post(path + "addEmployee/", (req, res) => {
   // console.log("rowData is ");
   // console.log(rowData);
 
-  let check = `select * from employeeTable,business where userIdInEmployee=${userId} and BusinessID=${businessId} and BusinessIDEmployee=BusinessID`;
+  let check = `select * from employeeTable,Business where userIdInEmployee=${userId} and BusinessID=${businessId} and BusinessIDEmployee=BusinessID`;
   connection.query(check, (err, response) => {
     if (err) console.log(err);
     if (response) {

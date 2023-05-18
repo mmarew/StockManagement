@@ -9,14 +9,14 @@ export default function Nav() {
   console.log(url);
   let navigate = useNavigate();
   let VerifyLogin = async () => {
-    let savedStore = localStorage.getItem("storeToken");
-    console.log("savedStore ===== " + savedStore);
-    if (savedStore == null || savedStore == "") {
+    let savedToken = localStorage.getItem("storeToken");
+    console.log("savedStore ===== " + savedToken);
+    if (savedToken == null || savedToken == "") {
       navigate("/login");
       return;
     }
     let response = await axios.post(serverAddress + "verifyLogin/", {
-      token: savedStore,
+      token: savedToken,
     });
     console.log("response == ", response.data);
     if (response.data.data == "alreadyConnected") {
