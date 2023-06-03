@@ -1,5 +1,6 @@
 import axios from "axios";
 import "./AddProducts.css";
+import $ from "jquery";
 import React, { useState } from "react";
 const AddProducts = () => {
   let serverAddress = localStorage.getItem("targetUrl");
@@ -17,6 +18,7 @@ const AddProducts = () => {
   };
   let registerProducts = async (e) => {
     e.preventDefault();
+    $(".LinearProgress").show();
     let response = await axios.post(serverAddress + "addProducts/", FormData);
     let data = response.data.data;
     console.log("response", response);
@@ -33,6 +35,7 @@ const AddProducts = () => {
     for (let i = 0; i < registerProducts.length; i++) {
       registerProducts[i].value = "";
     }
+    $(".LinearProgress").hide();
   };
   return (
     <div>

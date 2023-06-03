@@ -42,10 +42,35 @@ function SearchProducts() {
   let businessName = localStorage.getItem("businessName");
   let serverAddress = localStorage.getItem("targetUrl");
   let submitSearch = async (e) => {
+    console.log("InputValue", InputValue.productName);
     e.preventDefault();
+    if (InputValue.selectSearches == "TRANSACTION") {
+      if (InputValue.productName == "" || InputValue.productName == undefined) {
+        alert("please type product name first");
+        // $("input").prop("required", true);
+        // toDate: '', fromDate:
+        $("#searchInputs").css({ backgroundColor: "red" });
+        return;
+      }
+      if (InputValue.toDate == "" || InputValue.fromDate == "") {
+        alert("date is mandatory");
+        $("#fromDate").css({ backgroundColor: "red" });
+        $("#toDate").css({ backgroundColor: "red" });
+        return;
+      }
+    }
+    if (InputValue.selectSearches == "") {
+      if (InputValue.toDate == "" || InputValue.fromDate == "") {
+        alert("date is mandatory");
+        $("#fromDate").css({ backgroundColor: "red" });
+        $("#toDate").css({ backgroundColor: "red" });
+        return;
+      }
+    }
     let response = await axios.post(serverAddress + "searchProducts/", {
       InputValue,
     });
+    console.log("response", response);
     $("table").hide();
     if (response.data.data == "Bad request.") {
       alert("Bad request");
@@ -53,19 +78,25 @@ function SearchProducts() {
     }
     console.log("response.data ");
     console.log(response.data);
-
+    console.log("searchTarget", searchTarget);
     if (searchTarget == "PRODUCTS") {
       $("#savedProduct").show();
       setSearchedProducts(response.data.products);
-    } else if (searchTarget == "TRANSACTION") {
+    } else {
       $("#productTransaction").show();
       setSearchedDatas(response.data.data);
+      if (searchTarget == "ALLTRANSACTION") {
+        $("#searchInputs").hide();
+      } else {
+        // alert("wrong selecttions");
+      }
     }
   };
   let getInputValues = (e) => {
     let value = e.target.value,
       name = e.target.name;
-    console.log(value);
+    console.log(e.target.id);
+    $("#" + e.target.id).css({ backgroundColor: "" });
     businessName = localStorage.getItem("businessName");
     setInputValue({ ...InputValue, [name]: value, businessName });
   };
@@ -90,6 +121,7 @@ function SearchProducts() {
     } else {
     }
   }, [searchTarget]);
+
   useEffect(() => {
     businessName = localStorage.getItem("businessName");
     let fromDate = $("#fromDate").val(),
@@ -104,22 +136,109 @@ function SearchProducts() {
     });
     handleChangeInSelect();
   }, []);
-  useEffect(() => {
-    SearchedDatas?.map((items) => {
+
+  let showEachValues = () => {
+    $(".tableRows").remove();
+    $("#productTransaction").show("");
+    console.log("SearchedDatas", SearchedDatas);
+    if (SearchedDatas.length == 0) {
+      // alert("no data found");
+      return;
+    }
+    let showEachItems = $("#showEachItems").is(":checked");
+    console.log("showEachItems", showEachItems);
+    let Data = SearchedDatas;
+    Data.sort((a, b) =>
+      a.productName > b.productName ? 1 : b.productName > a.productName ? -1 : 0
+    );
+    let appendCounter = 0;
+    Data?.map((items) => {
+      let purchaseQty = 0,
+        salesQty = 0,
+        Inventory = 0,
+        wrickages = 0,
+        description = " , ";
+
+      if (!showEachItems) {
+        // loop is used to collect same datas(same ProductId),
+        for (let i = 0; i < Data.length; i++) {
+          if (items.ProductId == Data[i].ProductId) {
+            Inventory = Inventory + Data[i].Inventory;
+            wrickages = wrickages + Data[i].wrickages;
+            purchaseQty = purchaseQty + Data[i].purchaseQty;
+            salesQty = salesQty + Data[i].salesQty;
+            description = description + " " + Data[i].description;
+          }
+        }
+      } else {
+        purchaseQty = items.purchaseQty;
+        wrickages = items.wrickages;
+        salesQty = items.salesQty;
+        Inventory = items.Inventory;
+      }
+
       console.log(items.transactionId);
       let id = items.transactionId;
-      $("#purchaseQty_" + id).val(items.purchaseQty);
-      $("#wrickages_" + id).val(items.wrickages);
-      $("#totalPurchase_" + id).val(items.Inventory);
+      let trId = "trId_" + items.transactionId;
+      if (!showEachItems) {
+        trId = "trId_" + items.ProductId;
+      }
+      $("#" + trId).remove();
+      let tr = `<tr id='${trId}' class='tableRows'> 
+              <td>
+                <input id='productName_${items.transactionId}' type="text" />
+              </td>
+              <td>${items.registeredTime.split("T")[0]}</td>
+              <td>
+                <input id='unitPrice_${items.transactionId}' type="text" />
+              </td>
+
+              <td>
+                <input id='salesQty_${items.transactionId}' type="text" />
+              </td>
+              <td>
+                <input id='totalSales_${items.transactionId}' type="text" />
+              </td>
+              <td>
+                <input id='unitCost_${items.transactionId}' type="text" />
+              </td>
+              <td>
+                <input id='purchaseQty_${items.transactionId}' type="text" />
+              </td>
+
+              <td>
+                <input
+                  id='totalPurchase_${items.transactionId}'
+                  type="text"
+                />
+              </td>
+              <td>
+                <input id='wrickages_${items.transactionId}' type="text" />
+              </td>
+              <td>
+                <input id='Inventory_${items.transactionId}' type="text" />
+              </td>
+              <td>
+                <input id='Description_${items.transactionId}' type="text" />
+              </td>
+            </tr>`;
+      $("#productTransaction").append(tr);
+      $("#purchaseQty_" + id).val(purchaseQty);
+      $("#wrickages_" + id).val(wrickages);
+      $("#totalPurchase_" + id).val(purchaseQty * items.unitCost);
       $("#unitCost_" + id).val(items.unitCost);
-      $("#totalSales_" + id).val(items.unitPrice * items.salesQty);
-      $("#salesQty_" + id).val(items.salesQty);
+      $("#totalSales_" + id).val(items.unitPrice * salesQty);
+      $("#salesQty_" + id).val(salesQty);
       $("#unitPrice_" + id).val(items.unitPrice);
       $("#productName_" + id).val(items.productName);
-      $("#Inventory_" + id).val(items.Inventory);
+      $("#Inventory_" + id).val(Inventory);
       $("#Description_" + id).val(items.description);
     });
+  };
+  useEffect(() => {
+    showEachValues();
   }, [SearchedDatas]);
+  /////////////////////////////
   useEffect(() => {
     searchedProducts?.map((items) => {
       $("#productName_" + items.ProductId).val(items.productName);
@@ -146,11 +265,16 @@ function SearchProducts() {
 
     if (value == "PRODUCTS") {
       $(".searchInputs").hide();
-    } else {
+    } else if (value == "ALLTRANSACTION") {
+      $("#searchInputs").hide();
+      $(".searchInputs").css("display", "flex");
+    } else if (value == "TRANSACTION") {
       $(".searchInputs").show();
-
+      $("#searchInputs").show();
       $(".searchInputs").css("display", "flex");
       // display: flex;
+    } else {
+      alert("unkown choise 2020");
     }
   };
   return (
@@ -158,7 +282,8 @@ function SearchProducts() {
       {console.log(InputValue)}
       <form onSubmit={submitSearch} id="searchProduct">
         <select onChange={handleChangeInSelect} name="" id="selectSearches">
-          <option value="TRANSACTION">TRANSACTION</option>
+          <option value="TRANSACTION">SINGLE TRANSACTION</option>
+          <option value="ALLTRANSACTION">ALL TRANSACTION</option>
           <option value="PRODUCTS">PRODUCTS</option>
         </select>
         <div className="searchInputs">
@@ -186,6 +311,10 @@ function SearchProducts() {
         </div>
         <input className="searchBtn" type="submit" value={"Search"} />
       </form>
+      <div>
+        Show Each transaction{" "}
+        <input id="showEachItems" onChange={showEachValues} type="checkbox" />
+      </div>
       <table id="productTransaction">
         <tr>
           <th>Product name</th>
@@ -200,7 +329,7 @@ function SearchProducts() {
           <th>Inventory</th>
           <th>Description</th>
         </tr>
-        {SearchedDatas?.map((items) => {
+        {/* {SearchedDatas?.map((items) => {
           return (
             <tr>
               {console.log(items.transactionId)}
@@ -242,7 +371,7 @@ function SearchProducts() {
               </td>
             </tr>
           );
-        })}
+        })} */}
       </table>
       <table id="savedProduct">
         <tr>

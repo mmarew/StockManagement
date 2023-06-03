@@ -6,6 +6,8 @@ import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import CreateBusiness from "./CreateBusiness";
 import { useNavigate } from "react-router-dom";
+import { LinearProgress } from "@mui/material";
+import DeleteBusiness from "./DeleteBusiness";
 let serverAddress = localStorage.getItem("targetUrl");
 function Business() {
   const [BusinessLists, setBusinessLists] = useState(
@@ -33,6 +35,7 @@ function Business() {
             let businessId = "businessName_" + targetBusinessId,
               businessname = $("#" + businessId).val();
             console.log(businessname, targetBusinessId);
+            $("#LinearProgress").show();
             let updateRes = await axios.post(
               `${serverAddress}updateBusinessName/`,
               {
@@ -40,12 +43,18 @@ function Business() {
                 targetBusinessId,
               }
             );
-            console.log(updateRes.data.data);
+            $("#LinearProgress1").hide();
+            console.log(updateRes.data);
             let data = updateRes.data.data;
-            if (data == "update is successfull") {
+            if (data == "reservedByOtherBusiness") {
+              alert(
+                "This name is reserved by another company. So please try to use another name to remove naming conflicts. Thankyou"
+              );
+            } else if (data == "update is successfull") {
               alert(data);
               $("#businessWrapper_" + targetBusinessId).hide();
               $("#openEditWrapper" + targetBusinessId).show();
+              $("#businessNameH2_" + targetBusinessId).text(businessname);
 
               localStorage.setItem("businessname", businessname);
               createdBusiness?.map((items) => {
@@ -92,25 +101,32 @@ function Business() {
     setnewBusiness("allow");
   };
   let getBusiness = async () => {
+    $("#LinearProgress").show();
     let results = await axios.post(`${serverAddress}getBusiness/`, {
       token,
     });
+    $("#LinearProgress1").hide();
     console.log(results.data);
-    if (results.data.myBusiness == "" && results.data.employeerBusiness == "") {
+    if (
+      results.data.myBusiness?.length == 0 &&
+      results.data.employeerBusiness?.length == 0
+    ) {
       setBusinessLists(
-        <h1>
+        <h3>
           You havn't created business or no business is allowed to administered
           by you
-        </h1>
+        </h3>
       );
       return;
     }
     if (results.data.myBusiness == "") {
     } else {
+      setBusinessLists("");
       setcreatedBusiness(results.data.myBusiness);
     }
     if (results.data.employeerBusiness == "") {
     } else {
+      setBusinessLists("");
       setemployeerBusiness(results.data.employeerBusiness);
     }
     // setbusinessName()
@@ -129,11 +145,13 @@ function Business() {
   useEffect(() => {
     getBusiness();
   }, []);
+
   return (
     <>
       {console.log("employeerBusiness is = " + employeerBusiness)}
 
       <div className="BusinessWrapper">
+        <LinearProgress id="LinearProgress1" />
         <button onClick={AddBusiness} className="createBusiness">
           Create Business
         </button>
@@ -155,8 +173,16 @@ function Business() {
                     className="createdBusiness"
                     id={"createdBusiness_" + datas.BusinessID}
                   >
-                    <div className="Business">
-                      <h2 className="businessName">{datas.BusinessName}</h2>
+                    <div
+                      className="Business"
+                      id={"eachBusiness_" + datas.BusinessID}
+                    >
+                      <h2
+                        id={"businessNameH2_" + datas.BusinessID}
+                        className="businessName"
+                      >
+                        {datas.BusinessName}
+                      </h2>
                       <div
                         className="businessButton"
                         id={"openEditWrapper" + datas.BusinessID}
@@ -180,6 +206,19 @@ function Business() {
                           }
                         >
                           Edit
+                        </button>
+                        <button
+                          id=""
+                          onClick={() =>
+                            DeleteBusiness(
+                              datas.BusinessID,
+                              datas.BusinessName,
+                              getBusiness,
+                              setBusinessLists
+                            )
+                          }
+                        >
+                          Delete
                         </button>
                       </div>
                       <div

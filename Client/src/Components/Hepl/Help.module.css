@@ -1,0 +1,19 @@
+.helpContainer {
+  margin: 10px;
+}
+.helpUL {
+  text-align: left;
+  width: fit-content;
+  margin: auto;
+}
+.helpUL li {
+  cursor: pointer;
+}
+.backButton {
+  background-color: green;
+  border: none;
+  padding: 10px;
+  margin: 10px;
+  color: white;
+  border-radius: 10px;
+}

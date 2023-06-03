@@ -61,3 +61,6 @@
   margin: 0 5px;
   border-radius: 10px;
 }
+#LinearProgress {
+  display: block;
+}

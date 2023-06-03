@@ -1,0 +1,3 @@
+ftp of stock.masetawosha.com pass=~ShqnL3!DweD
+userName=reactclient
+directory=stock.masetawosha.com/

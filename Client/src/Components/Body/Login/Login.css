@@ -31,6 +31,14 @@ body {
   flex-direction: column;
   justify-content: space-around;
 }
-#CircularProgress {
+#LinearProgress {
   display: none;
+}
+.help {
+  cursor: pointer;
+  margin-top: 10px;
+}
+.signupRegister {
+  text-decoration: none;
+  margin-top: 10px;
 }

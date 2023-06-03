@@ -49,13 +49,16 @@ input {
   padding: 10px;
   border-radius: 10px;
 }
-.nameLabel{
+.nameLabel {
   padding: 10px;
 }
-.employeeSearchForm{
+.employeeSearchForm {
   background-color: white;
   padding: 10px;
   width: 300px;
   margin: 10px auto;
   border-radius: 10px;
+}
+.EmployeeToBusiness {
+  background-color: rgb(160, 160, 2) !important;
 }

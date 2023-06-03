@@ -22,3 +22,7 @@
 #LinearProgress2 {
   display: none;
 }
+.changeOrNotPasswors {
+  cursor: pointer;
+  color: blue;
+}

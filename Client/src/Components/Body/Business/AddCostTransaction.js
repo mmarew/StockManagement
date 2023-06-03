@@ -10,22 +10,26 @@ function AddCostTransaction() {
   const [costList, setcostList] = useState([]);
   let businessName = localStorage.getItem("businessName");
   let getListOfCosts = async () => {
+    $(".LinearProgress").show();
     let response = await axios.post(serverAddress + "getCostLists/", {
       businessName,
     });
     let costData = response.data.data;
     console.log("costData", costData);
     if (costData.length == 0) {
-      alert("No cost list data.");
-      $(".costTransactionForm").hide();
+      // alert("No cost list data.");
+      // $(".costTransactionForm").hide();
     } else {
       setshowCostForm(true);
     }
     setcostList(costData);
     // setFormdata({ ...Formdata, costData });
+    $(".LinearProgress").hide();
   };
   let handleFormSubmit = async (e) => {
     e.preventDefault();
+    console.log("Formdata", Formdata);
+    $(".LinearProgress").show();
     let response = await axios.post(
       serverAddress + `registerCostTransaction/`,
       Formdata
@@ -37,6 +41,7 @@ function AddCostTransaction() {
     } else if (data == "Inserted properly") {
       alert("Inserted properly");
     }
+    $(".LinearProgress").hide();
   };
   let collectCotForm = (e) => {
     console.log(e.target);
@@ -75,11 +80,12 @@ function AddCostTransaction() {
   return (
     <div>
       {console.log(Object.keys(Formdata).length)}
-      {showCostForm && (
+      {showCostForm ? (
         <form onSubmit={handleFormSubmit} className="costTransactionForm">
           <div className="dateDiv">
             <div>Date</div>
             <input
+              required
               name="costDate"
               onChange={collectCotForm}
               type="Date"
@@ -91,6 +97,7 @@ function AddCostTransaction() {
               <div className="" key={items.costsId}>
                 <div className="label"> {items.costName} </div>
                 <input
+                  required
                   type="number"
                   placeholder="Cost Amount"
                   name={items.costName.replaceAll(/\s/g, "")}
@@ -98,6 +105,7 @@ function AddCostTransaction() {
                   className="formInputToTransaction"
                 />
                 <textarea
+                  required
                   onChange={collectCotForm}
                   placeholder="Cost Description"
                   className="formInputToTransaction"
@@ -109,6 +117,11 @@ function AddCostTransaction() {
           })}
           <button type="submit">Submit</button>
         </form>
+      ) : (
+        <h4>
+          you haven't registered cost list data before. Please register cost
+          items by click on items then costs
+        </h4>
       )}
     </div>
   );

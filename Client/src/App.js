@@ -37,7 +37,7 @@ function App() {
             path="/help"
             element={
               <>
-                <Nav />
+                {/* <Nav /> */}
                 <Help />
               </>
             }
@@ -89,7 +89,6 @@ function App() {
             path="/login"
             element={
               <>
-                <Nav />
                 <Login />
               </>
             }
@@ -98,7 +97,6 @@ function App() {
             path="/register"
             element={
               <>
-                <Nav />
                 <Register />
               </>
             }

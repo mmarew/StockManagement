@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import "./AddSingleSales.css";
 import currentDates from "../Date/currentDate";
 function AddSingleSales() {
+  let serverAddress = localStorage.getItem("targetUrl");
   const [productDetailes, setproductDetailes] = useState([]);
   const [inputValues, setInputValues] = useState({});
   const [formInputValues, setformInputValues] = useState([]);
@@ -13,7 +14,7 @@ function AddSingleSales() {
     e.preventDefault();
     // clear all detailes
     setproductDetailes([]);
-    let responce = await axios.post("http://localhost:2020/getsingleProducts", {
+    let responce = await axios.post(serverAddress + "getsingleProducts", {
       ...inputValues,
       ...{ BusinessId: localStorage.getItem("businessId") },
       ...{ businessName: localStorage.getItem("businessName") },
@@ -38,7 +39,7 @@ function AddSingleSales() {
   let registerSinglesalesTransaction = async (e) => {
     e.preventDefault();
     let responce = await axios.post(
-      "http://localhost:2020/registerSinglesalesTransaction",
+      serverAddress + "registerSinglesalesTransaction",
       {
         ...formInputValues,
         businessId: localStorage.getItem("businessId"),

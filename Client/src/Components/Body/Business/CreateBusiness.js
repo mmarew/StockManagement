@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import "./CreateBusiness.css";
+import $ from "jquery";
 function CreateBusiness({ getBusiness, setnewBusiness }) {
   let serverAddress = localStorage.getItem("targetUrl");
   const [businessData, setbusinessData] = useState({});
@@ -27,6 +28,10 @@ function CreateBusiness({ getBusiness, setnewBusiness }) {
         return;
       }
     }
+    {
+      console.log("businessData is = ", businessData);
+    }
+    $(".LinearProgress").show();
     let response = await axios.post(
       serverAddress + "createBusiness/",
       businessData
@@ -34,9 +39,27 @@ function CreateBusiness({ getBusiness, setnewBusiness }) {
     console.log(response.data);
     let data = response.data.data;
     if (data == "created well") {
-      setnewBusiness("");
-      alert("Your business is created well. Thankyou.");
-      getBusiness();
+      /*
+ tableCollections: {
+ registerBusinessName: "regesteredBefore"
+_Costs: 0
+_Transaction: 0
+_expenses: 0
+_products: 0 }  */
+      let registerBusinessName =
+        response.data.tableCollections.registerBusinessName;
+      console.log(response.data.tableCollections.registerBusinessName);
+      // console.log(response.data);
+      // return;
+      if (registerBusinessName == "regesteredBefore") {
+        alert(
+          "This business name is reserved before. so please change its name. Thank You"
+        );
+      } else {
+        setnewBusiness("");
+        alert("Your business is created well. Thankyou.");
+        getBusiness();
+      }
     }
     if (data == "alreadyRegistered") {
       alert("Error. Because this business name is already registered before.");
@@ -47,6 +70,7 @@ function CreateBusiness({ getBusiness, setnewBusiness }) {
     console.log("setnewBusiness", setnewBusiness);
     // newBusiness = "";
     setnewBusiness("");
+    $(".LinearProgress").hide();
   };
   return (
     <div>

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Login.css";
 import axios from "axios";
 import $ from "jquery";
-import { CircularProgress } from "@mui/material";
+import { LinearProgress } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 function Login() {
   let serverAddress = localStorage.getItem("targetUrl");
@@ -10,17 +10,12 @@ function Login() {
   const [loginForm, setloginForm] = useState({});
   let submitForm = async (e) => {
     e.preventDefault();
-    $("#CircularProgress").show();
-    console.log("submitForm");
+    $("#LinearProgress").show();
     let response = await axios.post(serverAddress + "Login/", loginForm);
-    console.log("response = ", response);
-    console.log(response.data.data);
     if (response.data.data == "loginSuccessFull") {
-      console.log(response.data.token);
       let token = response.data.token;
       localStorage.setItem("storeToken", token);
       let getToken = localStorage.getItem("storeToken");
-      console.log("getToken", getToken);
       Navigate("/Business");
     } else if (response.data.data == "data not found") {
       alert(
@@ -29,18 +24,22 @@ function Login() {
     } else if (response.data.data == "password mismatch") {
       alert("password mismatch");
     }
-    $("#CircularProgress").hide();
+    $("#LinearProgress").hide();
   };
   let handleFormData = (e) => {
     let values = e.target.value;
     let names = e.target.name;
     setloginForm({ ...loginForm, [names]: values });
   };
+  useEffect(() => {
+    console.log("verify login");
+  }, []);
+
   return (
     <div className="">
       {console.log(loginForm)}
       <form className="loginForm" onSubmit={submitForm} action="">
-        <CircularProgress id="CircularProgress" />
+        <LinearProgress id="LinearProgress" />
         <input
           required
           name="phoneNumber"
@@ -52,15 +51,23 @@ function Login() {
           required
           name="Password"
           onChange={handleFormData}
-          type="text"
+          type="password"
           placeholder="Password"
         />
         <button className="btnLogin" type="submit">
           Login
         </button>
-        <Link className="" to="/register">
+        <Link className="signupRegister" to="/register">
           Register / Sign Up?
         </Link>
+        <a
+          className="help"
+          onClick={() => {
+            Navigate("/help");
+          }}
+        >
+          Help
+        </a>
       </form>
     </div>
   );

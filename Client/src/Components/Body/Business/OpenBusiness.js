@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Transaction from "../Transaction/Transaction";
 import AddTransaction from "./addTransaction.js";
 import $ from "jquery";
@@ -8,9 +8,14 @@ import SearchProducts from "./SearchProducts";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import AddItems from "./AddItems";
 import Employee from "../AddEmployee/Employee";
+import { LinearProgress } from "@mui/material";
+import { InitialContext } from "../UserContext/UserContext";
+
 function OpenBusiness() {
+  const savedContext = useContext(InitialContext);
+  const [ownersName, setownersName] = savedContext;
   const [ActiveBody, setBody] = useState();
-  const [selectedTime, setselectedTime] = useState("");
+  // const [selectedTime, setselectedTime] = useState("");
   useEffect(() => {
     $("#dateId").val(currentDate());
   }, []);
@@ -41,11 +46,14 @@ function OpenBusiness() {
   window.addEventListener("locationchange", function () {
     console.log("location changed!");
   });
+  useEffect(() => {
+    $(".LinearProgress").hide();
+  }, []);
 
   return (
     <div>
       <h2 className="welcomeInfo">
-        Welcome to {localStorage.getItem("businessName")}
+        Dear {savedContext}, Welcome to {localStorage.getItem("businessName")}
       </h2>
       <div className="registerViewSearch">
         <Link
@@ -116,7 +124,9 @@ function OpenBusiness() {
           id="dateId"
         /> */}
       </div>
-      {/* {ActiveBody} */}
+
+      <LinearProgress id="LinearProgress" className="LinearProgress" />
+
       <Outlet />
     </div>
   );

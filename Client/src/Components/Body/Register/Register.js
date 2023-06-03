@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import "./Register.css";
 import $ from "jquery";
-import { CircularProgress } from "@mui/material";
+import { LinearProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 let serverUrl = localStorage.getItem("targetUrl");
 function Register() {
@@ -16,7 +16,7 @@ function Register() {
   };
   let handleRegistrationSubmit = async (e) => {
     e.preventDefault();
-    $("#CircularProgress").show();
+    $("#LinearProgress2").show();
     let response = await axios.post(serverUrl + "RegisterUsers/", RegisterForm);
 
     let data = response.data.data;
@@ -27,7 +27,7 @@ function Register() {
       alert("You are registered as user in stock management system. Thankyou");
       navigate("/");
     } else navigate("/");
-    $("#CircularProgress").hide();
+    $("#LinearProgress2").hide();
   };
   return (
     <form
@@ -35,7 +35,7 @@ function Register() {
       onSubmit={handleRegistrationSubmit}
       action=""
     >
-      <CircularProgress id="CircularProgress" />
+      <LinearProgress id="LinearProgress2" />
       <input
         required
         name="fullName"

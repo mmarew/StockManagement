@@ -42,6 +42,7 @@ function AddTotalSales({ Time }) {
     e.preventDefault();
     console.log(CollectedProducts);
     // return;
+    $(".LinearProgress").show();
 
     let response = await axios.post(
       serverAddress + "registerTransaction/",
@@ -61,6 +62,7 @@ function AddTotalSales({ Time }) {
         byClass[i].value = "";
       }
     }
+    $(".LinearProgress").hide();
   };
   useEffect(() => {
     setCollectedProducts({ ...CollectedProducts, dates: selectedTime });
@@ -76,56 +78,64 @@ function AddTotalSales({ Time }) {
   return (
     <div className="addTotalSalesWrapper">
       {console.log(CollectedProducts)}
-      {console.log(ProductsList)}
-      <form id="formOnAddTransaction" action="" onSubmit={sendFormDataToServer}>
-        <input
-          onChange={(e) => {
-            console.log(e.target.value);
-            setselectedTime(e.target.value);
-          }}
-          type="date"
-          name=""
-          id="dateId"
-        />
-        {ProductsList?.map((item) => {
-          return (
-            <div key={item.ProductId}>
-              <br />
-              <div className="productName-transaction">
-                {" "}
-                <h4>{item.productName}</h4>
+      {console.log("ProductsList", ProductsList)}
+      {ProductsList?.length > 0 ? (
+        <form
+          id="formOnAddTransaction"
+          action=""
+          onSubmit={sendFormDataToServer}
+        >
+          <input
+            onChange={(e) => {
+              console.log(e.target.value);
+              setselectedTime(e.target.value);
+            }}
+            type="date"
+            name=""
+            id="dateId"
+          />
+          {ProductsList?.map((item) => {
+            return (
+              <div key={item.ProductId}>
+                <br />
+                <div className="productName-transaction">
+                  {" "}
+                  <h4>{item.productName}</h4>
+                </div>
+
+                <input
+                  target={item.ProductId}
+                  onChange={collectFormData}
+                  className={"productInput"}
+                  type="text"
+                  name={"purchaseQty" + item.ProductId}
+                  placeholder="Purchase quantity"
+                />
+
+                <input
+                  onChange={collectFormData}
+                  className={"productInput"}
+                  type="text"
+                  name={"salesQuantity" + item.ProductId}
+                  placeholder="Sales quantity"
+                />
+                <input
+                  onChange={collectFormData}
+                  className={"productInput"}
+                  type="text"
+                  name={"wrickageQty" + item.ProductId}
+                  placeholder="Broken quantity"
+                />
               </div>
-
-              <input
-                target={item.ProductId}
-                onChange={collectFormData}
-                className={"productInput"}
-                type="text"
-                name={"purchaseQty" + item.ProductId}
-                placeholder="Purchase quantity"
-              />
-
-              <input
-                onChange={collectFormData}
-                className={"productInput"}
-                type="text"
-                name={"salesQuantity" + item.ProductId}
-                placeholder="Sales quantity"
-              />
-              <input
-                onChange={collectFormData}
-                className={"productInput"}
-                type="text"
-                name={"wrickageQty" + item.ProductId}
-                placeholder="Broken quantity"
-              />
-            </div>
-          );
-        })}
-        <button type="submit" className="RegisterSales">
-          Register
-        </button>
-      </form>
+            );
+          })}
+          <button type="submit" className="RegisterSales">
+            Register
+          </button>
+        </form>
+      ) : (
+        "You haven't registered products yet. please click item then click sales then register items first "
+      )}
     </div>
   );
 }

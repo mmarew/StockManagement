@@ -69,3 +69,7 @@ body {
 .dropdown-content {
   color: black;
 }
+.LinearProgress {
+  margin: 5px 0;
+  display: none;
+}
