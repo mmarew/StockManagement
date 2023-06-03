@@ -2,7 +2,8 @@ let cors = require("cors");
 let express = require("express");
 let bcrypt = require("bcryptjs");
 let Auth = require("./Auth.js").Auth;
-let dotenv = require("dotenv"); // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-let
+let dotenv = require("dotenv");
+// see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-let
 dotenv.config();
 let path = "/";
 let server = express();
@@ -13,6 +14,7 @@ server.use(
     extended: true,
   })
 );
+
 let createBasicTables = require("./Database.js");
 let date = new Date();
 let fullTime,
@@ -39,18 +41,19 @@ if (second < 10) {
   second = "0" + second;
 }
 fullTime = year + "-" + month + "-" + day + "" + hour + ":" + minuite;
-console.log("fullTime is " + fullTime);
+// console.log("fullTime is " + fullTime);
 createBasicTables.createBasicTables();
 let jwt = require("jsonwebtoken");
 let Database,
   {
+    deleteBusiness,
     insertIntoUserTable,
     connection,
     createBusiness,
   } = require("./Database.js");
 server.listen(process.env.serverPort, (err) => {
   if (err) {
-    console.log(err);
+    return res.json({ err });
   } else {
     // console.log(`connected at ${process.env.serverPort}`);
   }
@@ -77,16 +80,15 @@ server.post(path + "getBusiness/", (req, res) => {
     employeerBusiness = "";
   connection.query(getBusiness, (err, result) => {
     if (err) {
-      console.log(err);
+      return res.json({ err });
     } else {
       // console.log("getBusiness");
       // console.log(result);
       myBusiness = result;
     }
-    let getEmployeerBusiness = `select * from employeeTable , Business where userIdInEmployee='${userID}' 
-    and Business.BusinessID=employeetable.BusinessIDEmployee`;
+    let getEmployeerBusiness = `select * from employeeTable , Business where userIdInEmployee='${userID}'and Business.BusinessID=employeeTable.BusinessIDEmployee`;
     connection.query(getEmployeerBusiness, (err, results) => {
-      if (err) console.log(err);
+      if (err) return res.json({ err });
       if (result) {
         employeerBusiness = results;
       }
@@ -95,32 +97,31 @@ server.post(path + "getBusiness/", (req, res) => {
   });
 });
 server.post(path + "verifyLogin/", async (req, res) => {
-  let decoded = jwt.verify(req.body.token, "shhhhh");
-
-  let userID = decoded.userID;
-  // console.log("verifyLogin userID", userID);
-
-  let select = `select * from usersTable where userId='${userID}'`;
-  res.json({ decoded, select });
-  return;
-  connection.query(select, (err, result) => {
+  let token = req.body.token;
+  jwt.verify(token, "shhhhh", function (err, decoded) {
     if (err) {
-      console.log(err);
-      return res.json({ err, data: "error in the database connection" });
-    } else {
-      // console.log(result);
-      if (result.length > 0) {
-        return res.json({ data: "alreadyConnected" });
-      } else {
-        return res.json({ data: "dataNotFound" });
-      }
+      return res.json({ data: err });
     }
+    let userID = decoded.userID;
+    let select = `select * from usersTable where userId='${userID}'`;
+    connection.query(select, (err, result) => {
+      if (err) {
+        return res.json({ err, data: "error in the database connection" });
+      } else {
+        if (result.length > 0) {
+          return res.json({ data: "alreadyConnected", decoded, result });
+        } else {
+          return res.json({ data: "dataNotFound", decoded });
+        }
+      }
+    });
   });
+
   // res.json({ data: "connection" });
 });
 server.post(path + "Login/", (req, res) => {
   // console.log(req.body);
-  let select = `select * from userstable where phoneNumber='${req.body.phoneNumber}' limit 1`;
+  let select = `select * from usersTable where phoneNumber='${req.body.phoneNumber}' limit 1`;
   connection.query(select, (err, result) => {
     if (result.length == 0) {
       return res.json({ data: "data not found" });
@@ -165,7 +166,7 @@ server.post(path + "addProducts/", async (req, res) => {
   let select = `select * from  Business where businessId=${businessId}`;
   connection.query(select, (err, result) => {
     if (err) {
-      console.log(err);
+      return res.json({ err });
     } else {
       businessName = result[0].BusinessName;
       // console.log("result[0]");
@@ -179,10 +180,9 @@ server.post(path + "addProducts/", async (req, res) => {
       let selectProduct = `select productName from ${businessName}_products where productName='${productName}'`;
       connection.query(selectProduct, (err, result) => {
         if (err) {
-          console.log(err);
+          return res.json({ err });
           if (err.sqlState == `42S02`) {
             console.log("please recreate tables again");
-
             createBusiness(businessName, userId, fullTime, res, "recreate");
           }
           return;
@@ -190,7 +190,7 @@ server.post(path + "addProducts/", async (req, res) => {
         if (result.length == 0) {
           let Insert = `insert into ${businessName}_products(productsUnitCost,productsUnitPrice,productName)values('${productCost}','${productPrice}','${productName}')`;
           connection.query(Insert, (err, result) => {
-            if (err) console.log(err);
+            if (err) return res.json({ err });
             if (result) {
               // console.log(result);
               res.json({ data: "productIsAdded" });
@@ -208,14 +208,12 @@ server.post(path + "createBusiness/", (req, res) => {
   let decoded = jwt.verify(req.body.token, "shhhhh");
   let userID = decoded.userID;
   let response = createBusiness(businessName, userID, fullTime, res);
-  // console.log(response);
-  // res.json({ data: response });
 });
 server.post(path + "getRegisteredProducts/", async (req, res) => {
   // console.log(req.body.BusinessId, req.body.token, req.body.businessName);
   let select = `select * from ${req.body.businessName}_products`;
   connection.query(select, (err, result) => {
-    if (err) console.log(err);
+    if (err) return res.json({ err });
     if (result) console.log(result);
     res.json({ data: result });
   });
@@ -231,7 +229,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
   // console.log( "businessName " + businessName, " req.body.dates = " + req.body.dates  );
   connection.query(selectToCheck, async (err, results) => {
     if (err) {
-      console.log(err);
+      return res.json({ err });
     }
     if (results.length > 0) {
       //
@@ -258,7 +256,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
         let prevInventory = `select * from ${businessName}_transaction where productIDTransaction='${productID}' and registeredTime<'${req.body.dates}' order by registeredTime desc limit 1 `;
         connection.query(prevInventory, (err, results) => {
           if (err) {
-            console.log(err);
+            return res.json({ err });
           } else {
             if (results.length == 0) {
               // console.log("no data found");
@@ -283,7 +281,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
               values;
             if (i == ProductsList.length - 1)
               connection.query(insert, (err, result) => {
-                if (err) console.log(err);
+                if (err) return res.json({ err });
                 else {
                   // console.log(result);
                   updateNextDateInventory(
@@ -313,7 +311,6 @@ server.post(path + "ViewTransactions/", (req, res) => {
     expenseTransaction = "";
   connection.query(select, (err, result) => {
     if (err) {
-      console.log(err);
       return res.json({ data: "data is full of err " });
     } else {
       // console.log(result);
@@ -324,7 +321,7 @@ server.post(path + "ViewTransactions/", (req, res) => {
   ${businessName}_expenses.costId=${businessName}_costs.costsId and costRegisteredDate='${time}'`;
       connection.query(selectCost, (err, results) => {
         if (err) {
-          console.log(err);
+          return res.json({ err });
         } else {
           // console.log(results);
           expenseTransaction = results;
@@ -348,7 +345,6 @@ server.post(path + "updateTransactions/", async (req, res) => {
   let update = "";
   let xx = connection.query(select, async (err, result) => {
     if (err) {
-      console.log(err);
       return err;
     } else {
       // console.log("issssssssssssss");
@@ -370,7 +366,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
   description='${req.body.description}'
    where transactionId='${req.body.trasactionId}' `;
       connection.query(update, (err, result) => {
-        if (err) console.log(err);
+        if (err) return res.json({ err });
         else {
           console.log(result);
         }
@@ -416,7 +412,7 @@ server.post(path + "searchProducts/", (req, res) => {
   if (selectSearches == "PRODUCTS") {
     let selectProducts = `select * from ${businessName}_products`;
     connection.query(selectProducts, (err, productResults) => {
-      if (err) console.log(err);
+      if (err) return res.json({ err });
       else {
         res.json({ data: "no results", products: productResults });
       }
@@ -425,7 +421,18 @@ server.post(path + "searchProducts/", (req, res) => {
     let select = `select * from ${businessName}_transaction , ${businessName}_products where productIDTransaction=ProductId and productName like '%${productName}%' and registeredTime between '${fromDate}' and '${toDate}'`;
     connection.query(select, (err, result) => {
       if (err) {
-        console.log(err);
+        return res.json({ err });
+      }
+      if (result) {
+        // console.log(result);
+        res.json({ data: result, products: "no result" });
+      }
+    });
+  } else if (selectSearches == "ALLTRANSACTION") {
+    let select = `select * from ${businessName}_transaction , ${businessName}_products where productIDTransaction=ProductId and registeredTime between '${fromDate}' and '${toDate}'`;
+    connection.query(select, (err, result) => {
+      if (err) {
+        return res.json({ err });
       }
       if (result) {
         // console.log(result);
@@ -446,7 +453,7 @@ server.post(path + "updateProducts/", (req, res) => {
     id = req.body.id;
   let update = `update ${businessName}_products set productsUnitCost='${productCost}', productsUnitPrice='${productPrice}', productName='${productName}' where  ProductId='${id}'`;
   connection.query(update, (err, result) => {
-    if (err) console.log(err);
+    if (err) return res.json({ err });
     if (result) console.log(result);
   });
   res.json({ data: "updated well" });
@@ -459,17 +466,14 @@ server.post(path + "getCostLists/", (req, res) => {
   // console.log(req.body);
   let select = `select * from ${req.body.businessName}_costs`;
   connection.query(select, (err, results) => {
+    console.log("line 458", results);
     if (err) {
-      console.log(err);
-      res.json({
-        data: "error " + 55,
-      });
+      return res.json({ err });
     }
     if (results) {
       res.json({
         data: results,
       });
-      // console.log(results);
     }
     //// console.log(businessName);
   });
@@ -482,7 +486,7 @@ server.post(`/registerCostTransaction/`, (req, res) => {
     rowData = req.body;
   let Check = `select * from ${req.body.businessName}_expenses where costRegisteredDate='${date}' `;
   connection.query(Check, (err, result) => {
-    if (err) console.log(err);
+    if (err) return res.json({ err });
     if (result) {
       // console.log("costDatecostDatecostDatecostDatecostDate");
       // console.log(result);
@@ -503,7 +507,7 @@ server.post(`/registerCostTransaction/`, (req, res) => {
           // console.log( "costAmount = " + costAmount, " costDescription=" + costDescription );
           let insert = `insert into ${req.body.businessName}_expenses (costId,costAmount,costDescription,costRegisteredDate) values('${costsId}','${costAmount}','${costDescription}','${date}')`;
           connection.query(insert, (err, result2) => {
-            if (err) console.log(err);
+            if (err) return res.json({ err });
             else if (result2) {
               // res.json({ data: "Inserted properly" });
               // console.log(result2);
@@ -526,7 +530,7 @@ server.post(path + "updateBusiness/", (req, res) => {
     costDescription_ = req.body.costDescription_;
   let update = `update ${businessName} set costAmount='${costAmount_}',costDescription='${costDescription_}' where expenseId='${req.body.ids}'`;
   connection.query(update, (err, result) => {
-    if (err) console.log(update);
+    if (err) return res.json({ err });
     if (result)
       // console.log(result);
       res.json({
@@ -545,7 +549,7 @@ let updateNextDateInventory = (
   let select = `select * from ${businessName} where productIDTransaction='${productId}' and registeredTime>'${date}' order by registeredTime asc`;
   connection.query(select, (err, results) => {
     if (err) {
-      console.log(err);
+      return res.json({ err });
     }
     if (results.length > 0) {
       // console.log("it is ok");
@@ -566,7 +570,7 @@ let updateNextDateInventory = (
           // console.log("results1 is " + results1.length);
           // console.log(results1);
           if (err) {
-            console.log(err);
+            return res.json({ err });
           }
           if (results1) {
             // console.log("updated " + results1);
@@ -585,13 +589,13 @@ function insertIntoCosts(businessName, data, res) {
   //  costName varchar(3000),unitCost
   let check = `select * from ${businessName} where costName='${data.Costname}' `;
   connection.query(check, (err, result1) => {
-    if (err) console.log(err);
+    if (err) return res.json({ err });
     if (result1.length > 0) {
       return res.json({ data: "already registered before" });
     } else {
       let insert = `insert into ${businessName} (costName,unitCost) values('${data.Costname}','${data.costPrice}')`;
       connection.query(insert, (err, result) => {
-        if (err) console.log(err);
+        if (err) return res.json({ err });
         if (result) {
           // console.log(result);
           return res.json({ data: "Registered successfully" });
@@ -601,68 +605,100 @@ function insertIntoCosts(businessName, data, res) {
   });
 }
 server.post(path + "updateBusinessName/", (req, res) => {
-  // console.log(req.body);
   let businessName = req.body.businessname,
     targetBusinessId = req.body.targetBusinessId;
-  // console.log("businessName", businessName);
-  let oldBusinessName = "";
-  let getOldtableName = `select * from Business where businessId='${targetBusinessId}'`;
-  connection.query(getOldtableName, (err, results) => {
-    if (err) console.log(err);
-    if (results) {
-      // console.log(results);
-      oldBusinessName = results[0].businessName;
-    }
-    // RENAME Cars To Car_2021_Details ;
-    // ALTER TABLE Student RENAME TO MCA_Student_Details ;
-    let alter_products = `ALTER TABLE  ${oldBusinessName}_products RENAME TO ${businessName}_products`;
-    connection.query(alter_products, (err, result) => {
-      if (err) console.log(err);
-      if (result) console.log(result);
-    });
+  let veifyName = `select * from Business where businessName='${businessName}' and  businessId!='${targetBusinessId}'`;
+  connection.query(veifyName, (err, results) => {
+    if (err) {
+      res.json({ data: "error", err });
+    } else if (results) {
+      if (results.length > 0) {
+        return res.json({ data: "reservedByOtherBusiness", results });
+      } else {
+        let oldBusinessName = "";
+        let getOldtableName = `select * from Business where businessId='${targetBusinessId}'`;
+        connection.query(getOldtableName, (err, results) => {
+          if (err) return res.json({ err });
+          if (results) {
+            // console.log(results);
+            oldBusinessName = results[0].BusinessName;
+            // res.json({ data: `${oldBusinessName}_products`, results });
+            // return;
+            let alter_products = `ALTER TABLE  ${oldBusinessName}_products RENAME TO ${businessName}_products`;
+            connection.query(alter_products, (err, result) => {
+              if (err) {
+                console.log(err);
+                // return res.json({ err });
+              }
+              if (result) console.log(result);
+            });
 
-    let alter_expenses = `ALTER TABLE ${oldBusinessName}_expenses RENAME TO ${businessName}_expenses`;
-    connection.query(alter_expenses, (err, result) => {
-      if (err) console.log(err);
-      if (result) console.log(result);
-    });
-    let alter_transaction = `ALTER TABLE ${oldBusinessName}_transaction RENAME TO ${businessName}_transaction`;
-    connection.query(alter_transaction, (err, result) => {
-      if (err) console.log(err);
-      if (result) console.log(result);
-    });
-    let alter_costs = `ALTER TABLE ${oldBusinessName}_costs RENAME TO ${businessName}_costs`;
-    connection.query(alter_costs, (err, result) => {
-      if (err) console.log(err);
-      if (result) console.log(result);
-    });
+            let alter_expenses = `ALTER TABLE ${oldBusinessName}_expenses RENAME TO ${businessName}_expenses`;
+            connection.query(alter_expenses, (err, result) => {
+              if (err) {
+                // return res.json({ err });
+                console.log(err);
+              }
+              if (result) console.log(result);
+            });
+            let alter_transaction = `ALTER TABLE ${oldBusinessName}_Transaction RENAME TO ${businessName}_Transaction`;
+            connection.query(alter_transaction, (err, result) => {
+              if (err) return res.json({ err });
+              if (result) console.log(result);
+            });
+            let alter_costs = `ALTER TABLE ${oldBusinessName}_Costs RENAME TO ${businessName}_Costs`;
+            connection.query(alter_costs, (err, result) => {
+              if (err) {
+                console.log(err);
+                return res.json({ err });
+              }
+              if (result) {
+                console.log(result);
+              }
+
+              let update = `update Business set businessName='${businessName}' where businessId='${targetBusinessId}'`;
+              // { businessname: 'waterBusiness', targetBusinessId: 37 }
+
+              connection.query(update, (err, result) => {
+                if (err) {
+                  console.log(err);
+                  return res.json({ err });
+                }
+                if (result) {
+                  // console.log(result);
+                }
+              });
+            });
+            res.json({ data: "update is successfull" });
+          }
+        });
+      }
+    }
   });
 
-  let update = `update Business set businessName='${businessName}' where businessId='${targetBusinessId}'`;
-  // { businessname: 'waterBusiness', targetBusinessId: 37 }
-  connection.query(update, (err, result) => {
-    if (err) console.log(err);
-    if (result) {
-      // console.log(result);
-    }
-  });
-  res.json({ data: "update is successfull" });
+  //////////////////
 });
 server.post(path + "searchEmployee/", (req, res) => {
-  let employeeNameToBeSearched = req.body.employeeNameToBeSearched;
-  let select = `select userId,employeeName,phoneNumber from userstable where  phoneNumber like '%${employeeNameToBeSearched}%' or employeeName like '%${employeeNameToBeSearched}%'`;
-  connection.query(select, (err, result) => {
-    if (err) console.log(err);
+  console.log("searchEmployee", req.body);
+  // return;
+  let employeeNameToBeSearched = req.body.employeeNameToBeSearched,
+    businessId = req.body.businessId;
+  let select = `select  * from usersTable where  (phoneNumber like '%${employeeNameToBeSearched}%' or employeeName like '%${employeeNameToBeSearched}%')`;
+  // select in select or nested select will be our target goal to get employees
+  connection.query(select, async (err, result) => {
+    if (err) return res.json({ err });
     if (result) {
-      res.json({ data: result });
-      // console.log("search employeee ");
-      // console.log(result);
+      let sql = `select * from usersTable,employeeTable where  (phoneNumber like '%${employeeNameToBeSearched}%' or employeeName like '%${employeeNameToBeSearched}%')  and  BusinessIDEmployee=${businessId} and userIdInEmployee=userId`;
+      connection.query(sql, (err, results1) => {
+        if (err) console.log(err);
+        else if (results1) res.json({ data: { result, results1 } });
+      });
     }
   });
   // console.log(req.body);
   // connection.query(select);
 });
-server.post(path + "addEmployee/", (req, res) => {
+server.post(path + "addEmployee/", async (req, res) => {
   let rowData = req.body,
     name = rowData.name,
     phone = rowData.phone,
@@ -670,18 +706,20 @@ server.post(path + "addEmployee/", (req, res) => {
     userId = rowData.userId;
   // console.log("rowData is ");
   // console.log(rowData);
+  let employerId = await Auth(req.body.storeToken);
+  // return;
 
   let check = `select * from employeeTable,Business where userIdInEmployee=${userId} and BusinessID=${businessId} and BusinessIDEmployee=BusinessID`;
   connection.query(check, (err, response) => {
-    if (err) console.log(err);
+    if (err) return res.json({ err });
     if (response) {
       //
       if (response.length > 0) {
         res.json({ data: "data is already registered bofore" });
       } else {
-        let insert = `insert into employeeTable(userIdInEmployee,BusinessIDEmployee)values('${userId}','${businessId}')`;
+        let insert = `insert into employeeTable(userIdInEmployee,BusinessIDEmployee,employerId)values('${userId}','${businessId}',${employerId})`;
         connection.query(insert, (err, result) => {
-          if (err) console.log(err);
+          if (err) return res.json({ err });
           if (result) {
             //
             res.json({ data: "data is inserted correctly." });
@@ -696,24 +734,37 @@ server.post(path + "addEmployee/", (req, res) => {
 });
 server.post(path + "getBusinessEmployee/", (req, res) => {
   // console.log(req.body);
-  // console.log("req.body.businessId " + req.body.businessId);
-  let select = `select * from employeetable,userstable where userId=userIdInEmployee and BusinessID='${req.body.businessId}'`;
+  console.log("req.body.businessId " + req.body.businessId);
+  let select = `select 
+    employeeId,
+    userIdInEmployee,
+    BusinessIDEmployee,
+    BusinessID,
+    BusinessName,
+    createdDate,
+    ownerId,
+    status,
+    userId,
+    phoneNumber,
+    employeeName from employeeTable,Business,usersTable where userId=userIdInEmployee and BusinessIDEmployee=BusinessID and BusinessID='${req.body.businessId}'`;
   connection.query(select, (Error, response) => {
     if (Error) {
-      // console.log(Error);
+      console.log(Error);
+      res.json({ data: response, error: "error to get employees" });
     }
     if (response) {
-      // console.log(response);
+      console.log("response", response);
+
       res.json({ data: response });
     }
   });
 });
 server.post(path + "removeEmployees/", (req, res) => {
   // console.log(req.body);
-  let deleteEmployee = `delete from employeetable where employeeId='${req.body.employeeId}'`;
+  let deleteEmployee = `delete from employeeTable where employeeId='${req.body.employeeId}'`;
   connection.query(deleteEmployee, (err, results) => {
     if (err) {
-      console.log(err);
+      return res.json({ err });
       return;
     }
     res.json({ Status: "deleted", EmployeeId: req.body.employeeId });
@@ -790,10 +841,116 @@ server.post(path + "getDailyTransaction/", (req, res) => {
   // res.json({ data: productId });
   // return;
   connection.query(getTransaction, (err, result) => {
-    if (err) console.log(err);
+    if (err) return res.json({ err });
     if (result) {
       // console.log(result);
       res.json({ data: result });
+    }
+  });
+});
+server.post(path + "deleteBusines/", async (req, res) => {
+  // console.log(req.body);
+  // businessName: 'Marew', businessId: 1
+  deleteBusiness(req.body.businessId, req.body.businessName, res);
+  // console.log("responce is === ", responce);
+  // res.json({ data: responce });
+});
+server.post(path + "getMyProfile/", async (req, res) => {
+  let userId = await Auth(req.body.myToken);
+  console.log("userId", userId);
+  let select = `select * from usersTable where userId=${userId}`;
+  connection.query(select, (err, results) => {
+    if (err) res.json({ data: "error No 5" });
+    else res.json({ data: results });
+  });
+  // res.json({ data: userId });
+});
+server.post(path + "updateUsers", async (req, res) => {
+  let fullName = req.body.fullName,
+    phoneNumber = req.body.phoneNumber,
+    oldPassword = req.body.oldPassword,
+    newPassword = req.body.newPassword,
+    myToken = req.body.myToken;
+  const salt = bcrypt.genSaltSync();
+  //changing the value of password from req.body with the encrypted password
+  const Encripted = bcrypt.hashSync(newPassword, salt);
+  // console.log("Encripted", Encripted);
+  let userID = await Auth(myToken);
+  let Select = `select * from usersTable where userId='${userID}'`;
+  connection.query(Select, (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ data: "error 06" });
+    }
+    if (results) {
+      if (results.length > 0) {
+        let savedPassword = results[0].password;
+        const isMatch = bcrypt.compareSync(oldPassword, savedPassword);
+        if (isMatch) {
+          let Update = `update usersTable set phoneNumber='${phoneNumber}',employeeName='${fullName}', password='${Encripted}' where userId='${userID}'`;
+          if (newPassword == "noChangeOnPassword") {
+            Update = `update usersTable set phoneNumber='${phoneNumber}',employeeName='${fullName}' where userId='${userID}'`;
+          }
+          connection.query(Update, (err, result) => {
+            if (err) {
+              console.log(err);
+              return res.json({ data: "error 06.1" });
+            } else {
+              res.json({ data: "your data is updated" });
+            }
+          });
+        } else {
+          res.json({ data: "wrong old password" });
+        }
+      } else res.json({ data: "no data found" });
+    }
+  });
+});
+
+server.post(path + "deleteUsers/", async (req, res) => {
+  let userID = await Auth(req.body.storeToken);
+  console.log("myId", userID);
+  // console.log(res.json({ data: myId }));
+  let Select = `select * from usersTable where userId='${userID}'`;
+  connection.query(Select, (err, results) => {
+    if (err) {
+      res.json({ data: "err 5.908" });
+    }
+    if (results) {
+      let Password = req.body.Password;
+      let savedPassword = results[0].password;
+      const isMatch = bcrypt.compareSync(Password, savedPassword);
+      if (!isMatch) {
+        res.json({ data: "wrong password" });
+        return;
+      }
+      if (results.length > 0) {
+        let selectBusiness = `select * from Business where ownerId=${userID}`;
+        connection.query(selectBusiness, (err, result1) => {
+          if (err) res.json({ data: "err 67" });
+          else {
+            // res.json({ data: result1 });
+            // BusinessID: 1, BusinessName: 'waterBusiness'
+            let BusinessName = result1[0].BusinessName,
+              Drop = `DROP TABLE IF EXISTS ${BusinessName}_expenses,${BusinessName}_Costs,${BusinessName}_products,${BusinessName}_Transaction,${BusinessName}`;
+            connection.query(Drop, (err, result2) => {
+              if (err) res.json({ data: "error 90" });
+              else {
+                let deleteBusiness = `Delete   Business,userstable   FROM Business  INNER JOIN userstable   where ownerId=${userID} and userId=ownerId`;
+                connection.query(deleteBusiness, (err, response) => {
+                  if (err) {
+                    console.log(err);
+                    res.json({ data: "error 456" });
+                  }
+                  if (response) {
+                    res.json({ data: "deleted data" });
+                  }
+                });
+              }
+            });
+          }
+        });
+      } else res.json({ data: results });
     }
   });
 });
