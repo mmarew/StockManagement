@@ -23,6 +23,8 @@ function Login() {
       );
     } else if (response.data.data == "password mismatch") {
       alert("password mismatch");
+    } else {
+      alert(response.data);
     }
     $("#LinearProgress").hide();
   };

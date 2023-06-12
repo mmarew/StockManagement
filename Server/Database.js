@@ -1,6 +1,13 @@
-let mysql = require("mysql");
+const mysql = require("mysql2");
 let bcript = require("bcryptjs");
 /*
+var connection = mysql.createConnection({
+  host: "localhost",
+  user: "masetawoshacom_stock",
+  password: "DBcp123$%^",
+  database: "masetawoshacom_store",
+});
+
 var connection = mysql.createConnection({
   host: "localhost",
   user: "guzowaycom_guzowaycom",
@@ -8,12 +15,8 @@ var connection = mysql.createConnection({
   database: "guzowaycom_stock",
  }); 
 server side connection
-var connection = mysql.createConnection({
-  host: "localhost",
-  user: "masetawoshacom_stock",
-  password: "DBcp123$%^",
-  database: "masetawoshacom_store",
-});*/
+
+*/
 let connection = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -22,6 +25,14 @@ let connection = mysql.createConnection({
 });
 connection.connect();
 function createBasicTables() {
+  let createTable = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int, salesQty int,businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date, primary key(dailySalesId) )`;
+  connection.query(createTable, (error, results) => {
+    if (error) {
+      // console.log(error);
+    } else {
+      // console.log(results.data);
+    }
+  });
   let create = `create table if not exists employeeTable(employeeId int auto_increment, userIdInEmployee int,BusinessIDEmployee int, employerId int, primary key(employeeId))`;
   connection.query(create, (err, result) => {
     if (err) console.log(err);
@@ -111,7 +122,7 @@ let insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
   const salt = bcript.genSaltSync();
   //changing the value of password from req.body with the encrypted password
   const Encripted = bcript.hashSync(password, salt);
-  let check = `select * from userstable where phoneNumber='${phoneNumber}'`;
+  let check = `select * from usersTable where phoneNumber='${phoneNumber}'`;
   connection.query(check, (err, results) => {
     if (err) {
       return res.json({ err });
@@ -120,7 +131,7 @@ let insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
       if (results.length > 0) {
         res.json({ data: "This phone number is registered before." });
       } else {
-        let insertIntoUsers = `insert into userstable (employeeName,phoneNumber,password) values('${fullName}','${phoneNumber}','${Encripted}')`;
+        let insertIntoUsers = `insert into usersTable (employeeName,phoneNumber,password) values('${fullName}','${phoneNumber}','${Encripted}')`;
         connection.query(insertIntoUsers, (err, result) => {
           if (err) return res.json({ err });
           else if (result) {

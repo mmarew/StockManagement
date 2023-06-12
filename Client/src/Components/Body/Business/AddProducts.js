@@ -1,7 +1,8 @@
 import axios from "axios";
 import "./AddProducts.css";
 import $ from "jquery";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import currentDates from "../Date/currentDate";
 const AddProducts = () => {
   let serverAddress = localStorage.getItem("targetUrl");
   let token = localStorage.getItem("storeToken");
@@ -18,7 +19,7 @@ const AddProducts = () => {
   };
   let registerProducts = async (e) => {
     e.preventDefault();
-    $(".LinearProgress").show();
+    $(".LinearProgress").css("display", "block");
     let response = await axios.post(serverAddress + "addProducts/", FormData);
     let data = response.data.data;
     console.log("response", response);
@@ -37,11 +38,26 @@ const AddProducts = () => {
     }
     $(".LinearProgress").hide();
   };
+
+  useEffect(() => {
+    let gateDate = async () => {
+      let date = document.getElementById("productDate").value;
+      console.log("date == ", date);
+      if (date == "") {
+        date = await currentDates();
+      }
+      console.log(date);
+      document.getElementById("productDate").value = date;
+    };
+    gateDate();
+  }, []);
   return (
     <div>
       <h4 className="registrationFormToproducts">Forms To Register Products</h4>
 
       <form id="registerProductsForm" onSubmit={registerProducts} method="post">
+        <div>Date</div>
+        <input required id="productDate" type="date" />
         <input
           className="registerProducts"
           onChange={CollectData}

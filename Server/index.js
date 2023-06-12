@@ -123,6 +123,10 @@ server.post(path + "Login/", (req, res) => {
   // console.log(req.body);
   let select = `select * from usersTable where phoneNumber='${req.body.phoneNumber}' limit 1`;
   connection.query(select, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ data: `error code 901` });
+    }
     if (result.length == 0) {
       return res.json({ data: "data not found" });
     } else {
@@ -221,25 +225,26 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
   // res.end("getRegisteredProducts lllllllllll");
 });
 server.post(path + "registerTransaction/", async (req, res) => {
+  // console.log("registerTransaction", req.body);
   let rowData = req.body,
     ProductsList = rowData.ProductsList,
     businessName = rowData.businessName;
   // check if it was registered before on this date
-  let selectToCheck = `select * from  ${businessName}_transaction where registeredTime like '%${req.body.dates}%'`;
+  let selectToCheck = `select * from  ${businessName}_Transaction where registeredTime like '%${req.body.dates}%'`;
   // console.log( "businessName " + businessName, " req.body.dates = " + req.body.dates  );
   connection.query(selectToCheck, async (err, results) => {
     if (err) {
+      console.log("error", err);
       return res.json({ err });
     }
     if (results.length > 0) {
-      //
-      // console.log("First check it out ");
-      // console.log(results);
-      // return;
-      // console.log("greater than it ");
       return res.json({ data: "This is already registered" });
     } else {
-      // console.log("results = " + results);
+      console.log(
+        "results = @registered time " + results,
+        `ProductsList = `,
+        ProductsList
+      );
       let values = "";
       for (let i = 0; i < ProductsList.length; i++) {
         let productID = ProductsList[i].ProductId,
@@ -248,12 +253,9 @@ server.post(path + "registerTransaction/", async (req, res) => {
           salesQuantity = "salesQuantity" + productID,
           purchaseQty = "purchaseQty" + productID,
           wrickageQty = "wrickageQty" + productID;
-        // console.log(rowData[salesQuantity],rowData[purchaseQty], rowData[wrickageQty]        );
-        // let prevDay = await getPreviousDay(new Date(req.body.dates));
-        //// console.log("prevDay = " + prevDay);
         let Inventory = 0;
-
-        let prevInventory = `select * from ${businessName}_transaction where productIDTransaction='${productID}' and registeredTime<'${req.body.dates}' order by registeredTime desc limit 1 `;
+        console.log("salesQuantity", salesQuantity);
+        let prevInventory = `select * from ${businessName}_Transaction where productIDTransaction='${productID}' and registeredTime<'${req.body.dates}' order by registeredTime desc limit 1 `;
         connection.query(prevInventory, (err, results) => {
           if (err) {
             return res.json({ err });
@@ -277,7 +279,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
             values += `('${unitCost}','${unitPrice}','${productID}','${rowData[salesQuantity]}','${rowData[purchaseQty]}','${req.body.dates}','${rowData[wrickageQty]}','${Inventory}')`;
 
             let insert =
-              `insert into ${businessName}_transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values ` +
+              `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values ` +
               values;
             if (i == ProductsList.length - 1)
               connection.query(insert, (err, result) => {
@@ -285,7 +287,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
                 else {
                   // console.log(result);
                   updateNextDateInventory(
-                    `${businessName}_transaction`,
+                    `${businessName}_Transaction`,
                     productID,
                     req.body.dates,
                     Inventory
@@ -306,7 +308,7 @@ server.post(path + "ViewTransactions/", (req, res) => {
   // console.log(req.body);
   let businessName = req.body.businessName,
     time = req.body.time;
-  let select = `select * from ${businessName}_transaction,${businessName}_products where ${businessName}_products.productId=${businessName}_transaction.productIDTransaction and registeredTime like '%${time}%'`;
+  let select = `select * from ${businessName}_Transaction,${businessName}_products where ${businessName}_products.productId=${businessName}_Transaction.productIDTransaction and registeredTime like '%${time}%'`;
   let salesTransaction = "",
     expenseTransaction = "";
   connection.query(select, (err, result) => {
@@ -341,7 +343,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
   //   req.body.businessName + "_transaction",
   //   52
   // );
-  let select = `select * from ${req.body.businessName}_transaction where registeredTime like '%${previous}%' and  transactionId='${req.body.transactionId}'`;
+  let select = `select * from ${req.body.businessName}_Transaction where registeredTime like '%${previous}%' and  transactionId='${req.body.transactionId}'`;
   let update = "";
   let xx = connection.query(select, async (err, result) => {
     if (err) {
@@ -394,15 +396,6 @@ async function getPreviousDay(date) {
   return previousDay;
 }
 server.post(path + "searchProducts/", (req, res) => {
-  // console.log(req.body.InputValue);
-  // {
-  //   businessName: 'marew_masresha_abate',
-  //   toDate: '2023-02-21',
-  //   fromDate: '2023-02-15',
-  //   selectSearches: 'TRANSACTION',
-  //   productName: 'pppppp'
-  // }
-
   let businessName = req.body.InputValue.businessName,
     productName = req.body.InputValue.productName,
     toDate = req.body.InputValue.toDate,
@@ -418,7 +411,7 @@ server.post(path + "searchProducts/", (req, res) => {
       }
     });
   } else if (selectSearches == "TRANSACTION") {
-    let select = `select * from ${businessName}_transaction , ${businessName}_products where productIDTransaction=ProductId and productName like '%${productName}%' and registeredTime between '${fromDate}' and '${toDate}'`;
+    let select = `select * from ${businessName}_Transaction , ${businessName}_products where productIDTransaction=ProductId and productName like '%${productName}%' and registeredTime between '${fromDate}' and '${toDate}'`;
     connection.query(select, (err, result) => {
       if (err) {
         return res.json({ err });
@@ -429,15 +422,37 @@ server.post(path + "searchProducts/", (req, res) => {
       }
     });
   } else if (selectSearches == "ALLTRANSACTION") {
-    let select = `select * from ${businessName}_transaction , ${businessName}_products where productIDTransaction=ProductId and registeredTime between '${fromDate}' and '${toDate}'`;
-    connection.query(select, (err, result) => {
+    let select = `select * from ${businessName}_Transaction , ${businessName}_products where productIDTransaction=ProductId and registeredTime between '${fromDate}' and '${toDate}'`;
+    let p = new Promise((resolve, reject) => {
+      connection.query(select, (err, result) => {
+        if (err) {
+          reject({ err });
+          // return res.json({ err });
+        }
+        if (result) {
+          resolve(result);
+        }
+      });
+    });
+
+    p.then((data) => {
+      let getExpences = `select * from ${businessName}_expenses, ${businessName}_Costs where costRegisteredDate  between '${fromDate}' and '${toDate}' and ${businessName}_expenses.costId=${businessName}_Costs.costsId`;
+      connection.query(getExpences, (err, results) => {
+        if (err) res.json({ err: err });
+        if (results) res.json({ expenceTransaction: results, data });
+      });
+
+      // res.json({ data });
+    }).catch((err) => {
+      res.json({ data: err });
+    });
+  } else if (selectSearches == "COSTS") {
+    let selectCost = `select * from ${businessName}_Costs`;
+    connection.query(selectCost, (err, costResults) => {
       if (err) {
-        return res.json({ err });
-      }
-      if (result) {
-        // console.log(result);
-        res.json({ data: result, products: "no result" });
-      }
+        console.log("err is", err);
+        return res.json({ data: "error 678" });
+      } else return res.json({ data: costResults });
     });
   } else {
     res.json({ data: "Bad request.", products: "Bad request" });
@@ -464,11 +479,11 @@ server.post(path + "AddCostItems/", (req, res) => {
 });
 server.post(path + "getCostLists/", (req, res) => {
   // console.log(req.body);
-  let select = `select * from ${req.body.businessName}_costs`;
+  let select = `select * from ${req.body.businessName}_Costs`;
   connection.query(select, (err, results) => {
     console.log("line 458", results);
     if (err) {
-      return res.json({ err });
+      return res.json({ data: "err", err });
     }
     if (results) {
       res.json({
@@ -794,6 +809,7 @@ server.post(path + "getsingleProducts/", (req, res) => {
   let selectProduct = `select * from ${businessName}_products where productName like '%${productName}%'`;
   connection.query(selectProduct, (error, results) => {
     if (error) {
+      return res.json({ data: "error 400" });
       // console.log(error);
     } else {
       // console.log("results");
@@ -810,14 +826,7 @@ server.post(path + "registerSinglesalesTransaction/", (req, res) => {
     salesQty = req.body.salesQty,
     ProductId = req.body.ProductId,
     currentDate = req.body.currentDate;
-  let createTable = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int, salesQty int,businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date, primary key(dailySalesId) )`;
-  connection.query(createTable, (error, results) => {
-    if (error) {
-      // console.log(error);
-    } else {
-      // console.log(results.data);
-    }
-  });
+
   let Insert = `insert into dailyTransaction(purchaseQty,salesQty,businessId,ProductId,brokenQty,Description,registrationDate)value('${purchaseQty}','${salesQty}','${businessId}','${ProductId}','${brokenQty}','${Description}','${currentDate}')`;
   connection.query(Insert, (error, results) => {
     if (error) {
@@ -834,10 +843,13 @@ server.post(path + "getDailyTransaction/", (req, res) => {
     businessId = req.body.businessId,
     currentDates = req.body.currentDates,
     businessName = req.body.businessName,
-    getTransaction = `select * from dailyTransaction,${businessName}_products where businessId='${businessId}' and dailyTransaction.ProductId='${productId}' and registrationDate='${currentDates}' and (${businessName}_products.ProductId=dailyTransaction.ProductId)`;
+    getTransaction = "";
+  // return res.json({ data: "res.data" + currentDates });
   if (productId == "getAllTransaction") {
     getTransaction = `select * from dailyTransaction,${businessName}_products where businessId='${businessId}' and registrationDate='${currentDates}' and (${businessName}_products.ProductId=dailyTransaction.ProductId)`;
-  }
+  } else
+    getTransaction = `select * from dailyTransaction,${businessName}_products where businessId='${businessId}' and dailyTransaction.ProductId='${productId}' and registrationDate='${currentDates}' and (${businessName}_products.ProductId=dailyTransaction.ProductId)`;
+
   // res.json({ data: productId });
   // return;
   connection.query(getTransaction, (err, result) => {
@@ -951,6 +963,45 @@ server.post(path + "deleteUsers/", async (req, res) => {
           }
         });
       } else res.json({ data: results });
+    }
+  });
+});
+server.post(path + "/updateCostData/", async (req, res) => {
+  {
+    CostName_: "others";
+    CostValue_: "890";
+  }
+  let businessName = req.body.businessName,
+    Token = req.body.Token,
+    CostName_ = req.body.CostName_,
+    CostValue_ = req.body.CostValue_,
+    costsId = req.body.costsId;
+  // let id = await Auth(Token);
+  let update = `update ${businessName}_Costs set costName='${CostName_}',
+    unitCost='${CostValue_}' where costsId=${costsId}`;
+  connection.query(update, (error, results) => {
+    if (error) res.json({ data: error });
+    if (results) res.json({ data: "updated successfully", results });
+  });
+});
+server.post(path + "updateMyexpencesList/", async (req, res) => {
+  // ExpId: 1;
+  // amount: "900";
+  // businessName: "waterBusiness";
+  // description: "8989";
+  let businessName = req.body.businessName,
+    description = req.body.description,
+    amount = req.body.amount,
+    ExpId = req.body.ExpId,
+    exp = `update ${businessName}_expenses set costDescription='${description}',costAmount='${amount}' where expenseId='${ExpId}'`;
+  connection.query(exp, (err, results) => {
+    if (err) {
+      console.log(err);
+      res.json({ data: "err 501.1" });
+    }
+    if (results) {
+      console.log(results);
+      res.json({ data: "updated" });
     }
   });
 });

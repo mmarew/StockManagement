@@ -9,7 +9,7 @@ import Login from "./Components/Body/Login/Login";
 import Register from "./Components/Body/Register/Register";
 import OpenBusiness from "./Components/Body/Business/OpenBusiness";
 import AddTransaction from "./Components/Body/Business/addTransaction";
-import SearchProducts from "./Components/Body/Business/SearchProducts";
+import SearchProducts from "./Components/Body/Business/SearchManager";
 import AddItems from "./Components/Body/Business/AddItems";
 import Employee from "./Components/Body/AddEmployee/Employee";
 import OpenEmployeersBusiness from "./Components/Body/Business/OpenEmployeersBusiness";

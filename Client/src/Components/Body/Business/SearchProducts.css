@@ -37,10 +37,65 @@ td {
 .trProductName td input {
   width: 100px;
 }
-table {
-  display: none;
-}
+
 .searchInputs {
   flex-direction: column;
   display: none;
+}
+#costTable {
+  display: block !important;
+}
+.btnUpdateCost {
+  background-color: blue;
+  margin: 3px;
+  color: white;
+  display: none;
+}
+.costTransaction {
+  display: block !important;
+  margin: 10px auto;
+}
+.costTransaction tr td {
+  padding: 10px !important;
+}
+
+.updateExpences {
+  /* background-color: blue; */
+  /* padding: 5px; */
+  cursor: pointer;
+  /* margin: 15px; */
+  /* color: white; */
+}
+.editExpences {
+  padding: 10px !important;
+  cursor: pointer;
+}
+.editExpences:hover {
+  background-color: yellow;
+}
+.editableTd {
+  background: aqua;
+}
+.cancelExpeEditing {
+  background-color: yellow;
+  padding: 5px;
+  cursor: pointer;
+}
+.searchedDatas td {
+  height: 30px;
+}
+.editableTD {
+  background-color: aqua;
+}
+.cancelOrEditTransaction {
+  cursor: pointer;
+}
+.cancelOrEditTransaction:hover {
+  background-color: yellow;
+}
+.updateTransaction {
+  background-color: green;
+  padding: 8px;
+  margin: 2px;
+  cursor: pointer;
 }

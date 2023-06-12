@@ -14,6 +14,10 @@ function AddCostTransaction() {
     let response = await axios.post(serverAddress + "getCostLists/", {
       businessName,
     });
+    if (response.data == "err") {
+      alert(response.data.err);
+      return;
+    }
     let costData = response.data.data;
     console.log("costData", costData);
     if (costData.length == 0) {
@@ -80,6 +84,7 @@ function AddCostTransaction() {
   return (
     <div>
       {console.log(Object.keys(Formdata).length)}
+
       {showCostForm ? (
         <form onSubmit={handleFormSubmit} className="costTransactionForm">
           <div className="dateDiv">
@@ -92,36 +97,44 @@ function AddCostTransaction() {
               id="costDate"
             />
           </div>
-          {costList?.map((items) => {
-            return (
-              <div className="" key={items.costsId}>
-                <div className="label"> {items.costName} </div>
-                <input
-                  required
-                  type="number"
-                  placeholder="Cost Amount"
-                  name={items.costName.replaceAll(/\s/g, "")}
-                  onChange={collectCotForm}
-                  className="formInputToTransaction"
-                />
-                <textarea
-                  required
-                  onChange={collectCotForm}
-                  placeholder="Cost Description"
-                  className="formInputToTransaction"
-                  name={"Description_" + items.costName.replaceAll(/\s/g, "")}
-                  type="text"
-                ></textarea>
-              </div>
-            );
-          })}
-          <button type="submit">Submit</button>
+          {costList.length > 0 ? (
+            <>
+              {costList?.map((items) => {
+                return (
+                  <div className="" key={items.costsId}>
+                    <div className="label"> {items.costName} </div>
+                    <input
+                      required
+                      type="number"
+                      placeholder="Cost Amount"
+                      name={items.costName.replaceAll(/\s/g, "")}
+                      onChange={collectCotForm}
+                      className="formInputToTransaction"
+                    />
+                    <textarea
+                      required
+                      onChange={collectCotForm}
+                      placeholder="Cost Description"
+                      className="formInputToTransaction"
+                      name={
+                        "Description_" + items.costName.replaceAll(/\s/g, "")
+                      }
+                      type="text"
+                    ></textarea>
+                  </div>
+                );
+              })}
+              <button type="submit">Submit</button>
+            </>
+          ) : (
+            <h4>
+              you haven't registered cost list data before. Please register cost
+              items by click on items then costs
+            </h4>
+          )}
         </form>
       ) : (
-        <h4>
-          you haven't registered cost list data before. Please register cost
-          items by click on items then costs
-        </h4>
+        <h4>Please wait while loading</h4>
       )}
     </div>
   );

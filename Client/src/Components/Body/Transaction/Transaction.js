@@ -16,7 +16,7 @@ export default function Transaction() {
     let inputsValue = document.getElementsByClassName(transactionId);
     console.log(inputsValue);
     let businessName = localStorage.getItem("businessName");
-    let date = document.getElementById("dateId").value;
+    let date = document.getElementById("dateIdTransaction").value;
     let ob = { businessName, date };
     ob.trasactionId = e.target.name;
     for (let i = 0; i < inputsValue.length; i++) {
@@ -29,7 +29,8 @@ export default function Transaction() {
       .post(serverAddress + "updateTransactions/", ob)
       .then((data) => {
         $("#" + id).hide();
-        console.log(data);
+        // console.log(data);
+        alert("updated well");
       });
   };
   let updateCosts = async (ids) => {
@@ -58,7 +59,8 @@ export default function Transaction() {
     let classNames = e.target.className;
     $(".updateBtn_" + classNames).show();
   };
-  let ViewTransactions = async () => {
+  let ViewTransactions = async (e) => {
+    if (e != "notEvent") e.preventDefault();
     console.log("ViewTransactions");
     let ob = {};
     let time = $("#dateIdTransaction").val();
@@ -131,7 +133,7 @@ export default function Transaction() {
     });
   }, [ExpenseTransaction]);
   useEffect(() => {
-    ViewTransactions();
+    ViewTransactions("notEvent");
   }, []);
   useEffect(() => {
     FetchedDatas?.map((Items) => {
@@ -153,12 +155,12 @@ export default function Transaction() {
   }, [FetchedDatas]);
   return (
     <div>
-      <div className="searchInputAndBtn">
-        <input type="date" name="" id="dateIdTransaction" />
-        <button className="searchView" onClick={ViewTransactions}>
+      <form className="searchInputAndBtn" onSubmit={(e) => ViewTransactions(e)}>
+        <input required type="date" name="" id="dateIdTransaction" />
+        <button type="submit" className="searchView">
           View
         </button>
-      </div>
+      </form>
       <table border="1" id="TransactionTable">
         <tr>
           <th>Product name</th>
