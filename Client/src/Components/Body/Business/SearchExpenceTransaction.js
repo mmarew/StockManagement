@@ -6,6 +6,8 @@ function SearchExpenceTransaction({
   response,
   setshowEachItems,
 }) {
+  console.log(showEachItems, "response is ", response, setshowEachItems);
+
   let handleExpencesTransactions = (response) => {
     let expenceTransaction = response.data.expenceTransaction;
     console.log("expenceTransaction = ", expenceTransaction);
@@ -62,12 +64,8 @@ function SearchExpenceTransaction({
       }
     });
     setAllMyExpences(costList);
-
-    // $("#searchInputs").hide();
   };
   let modifyAmountOrDescription = (e, updateBtnID) => {
-    // console.log("e is ", e);
-    // $(".updateExpences").hide();
     $("#" + updateBtnID).show();
   };
   const [TotalCostAmount, setTotalCostAmount] = useState(0);
@@ -101,6 +99,7 @@ function SearchExpenceTransaction({
       businessName,
       ExpId: costId,
     });
+    $(".LinearProgress").css("display", "none");
     console.log("responces", responces);
     let answer = responces.data.data;
     console.log(answer);
@@ -135,6 +134,7 @@ function SearchExpenceTransaction({
     getExpences();
   }, []);
   useEffect(() => {
+    console.log("ioioio");
     if (showEachItems) setViewCostList(ExpencesTransaction);
     else setViewCostList(AllMyExpences);
   }, [showEachItems]);

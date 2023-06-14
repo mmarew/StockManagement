@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import axios from "axios";
-function SearchSingleTransActions({
-  showEachItems,
-  response,
-  setshowEachItems,
-  requestFrom,
-}) {
-  const [SearchedDatas, setSearchedDatas] = useState([]);
+import SearchExpenceTransaction from "./SearchExpenceTransaction";
+function SearchSingleTransActions({ response, requestFrom }) {
+  // console.log(showEachItems, response, setshowEachItems, requestFrom);
 
+  const [showEachItems, setshowEachItems] = useState(false);
+  const [ShowExpences, setShowExpences] = useState();
+  const [SearchedDatas, setSearchedDatas] = useState([]);
   useEffect(() => {
+    console.log("first showEachValuesofSalesAndPurchase");
     let getSingleTransAction = async () => {
       let resData = response.data.data.map((items) => {
         return { ...items, contentEditable: false };
@@ -18,6 +18,13 @@ function SearchSingleTransActions({
       $("#productTransaction").css("display", "block");
     };
     getSingleTransAction();
+    setShowExpences(
+      <SearchExpenceTransaction
+        showEachItems={showEachItems}
+        response={response}
+        setshowEachItems={setshowEachItems}
+      />
+    );
   }, []);
 
   const [TotalPurchaseCost, setTotalPurchaseCost] = useState(0);
@@ -25,12 +32,20 @@ function SearchSingleTransActions({
   let serverAddress = localStorage.getItem("targetUrl");
   const [ListOfSalesAndPurchase, setListOfSalesAndPurchase] = useState([]);
   // const [showEachItems, setshowEachItems] = useState(false);
+  useEffect(() => {
+    setShowExpences(
+      <SearchExpenceTransaction
+        showEachItems={showEachItems}
+        response={response}
+        setshowEachItems={setshowEachItems}
+      />
+    );
+  }, [showEachItems]);
 
-  function showEachValues() {
-    // show all similar items together or individually
-    let showEachItems = $("#showEachItems").is(":checked");
-    setshowEachItems(showEachItems);
-    if (showEachItems) {
+  function showEachValuesofSalesAndPurchase() {
+    let showEachUnits = $("#showEachItems").is(":checked");
+    setshowEachItems(showEachUnits);
+    if (showEachUnits) {
       SearchedDatas.map((item) => {
         if (item.description == null) {
           item.description = "";
@@ -46,10 +61,8 @@ function SearchSingleTransActions({
         }
         return { ...j, contentEditable: false };
       });
-      console.log(copyOfData);
-      // return;
+
       SearchedDatas.map((item, index) => {
-        console.log("item", item, "index", index);
         if (item.description == null) {
           item.description = "";
         }
@@ -80,7 +93,6 @@ function SearchSingleTransActions({
         });
         registeredTime = registeredTime.slice(0, -2);
         description = description.slice(0, -2);
-        console.log("registeredTime is = ", registeredTime);
         // return;
         x.registeredTime = registeredTime;
         x.salesQty = salesQty;
@@ -89,13 +101,13 @@ function SearchSingleTransActions({
         x.purchaseQty = purchaseQty;
         collectedArray.push(x);
         setListOfSalesAndPurchase(collectedArray);
-        console.log("collectedArray", collectedArray);
       });
     }
   }
 
   useEffect(() => {
-    showEachValues();
+    // console.log("in useEffect");
+    showEachValuesofSalesAndPurchase();
   }, [SearchedDatas]);
 
   let changesOnInputsOfTransaction = (updateId, index) => {
@@ -181,18 +193,23 @@ function SearchSingleTransActions({
     });
     setListOfSalesAndPurchase(mapedList);
   };
+  //
+
   return (
     <div>
-      {requestFrom == "SearchManagerOnlySalesAndPurchase" && (
-        <div className="">
-          <br />
-          <input id="showEachItems" onChange={showEachValues} type="checkbox" />
-          &nbsp;
-          {"Show Each transaction"}
-          <br />
-          <br />
-        </div>
-      )}
+      <div className="">
+        <br />
+        <input
+          id="showEachItems"
+          onChange={showEachValuesofSalesAndPurchase}
+          type="checkbox"
+        />
+        &nbsp;
+        {"Show Each transaction"}
+        <br />
+        <br />
+      </div>
+
       {ListOfSalesAndPurchase.length > 0 && (
         <table id="productTransaction">
           <tr>
@@ -374,6 +391,7 @@ function SearchSingleTransActions({
           </tr>
         </table>
       )}
+      {requestFrom == "showExpencesList" && ShowExpences}
     </div>
   );
 }

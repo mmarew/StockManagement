@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import SearchExpenceTransaction from "./SearchExpenceTransaction";
-import SearchSingleTransActions from "./SearchSingleTransActions";
+import SearchSingleTransActions from "./SearchSales_Purchase";
 function SearchAllTransactions({ response }) {
   // const [TotalPurchaseCost, setTotalPurchaseCost] = useState(0);
   // const [TotalSalesRevenue, setTotalSalesRevenue] = useState(0);
@@ -414,11 +414,11 @@ function SearchAllTransactions({ response }) {
         requestFrom="expencesAndSales"
       />
       {/* showEachItems, response,setshowEachItems*/}
-      <SearchExpenceTransaction
+      {/* <SearchExpenceTransaction
         showEachItems={showEachItems}
         response={response}
         setshowEachItems={setshowEachItems}
-      />
+      /> */}
 
       {/* {TotalSalesRevenue == 0 &&
       TotalPurchaseCost == 0 &&

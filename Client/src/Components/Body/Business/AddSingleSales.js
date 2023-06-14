@@ -49,9 +49,10 @@ function AddSingleSales() {
     let responce = await axios.post(
       serverAddress + "registerSinglesalesTransaction/",
       {
+        // registerTransaction
         ...formInputValues,
         businessId: localStorage.getItem("businessId"),
-        currentDate: currentDates(),
+        currentDate: $("#singleSalesDate").val(),
       }
     );
     console.log(responce.data.data);

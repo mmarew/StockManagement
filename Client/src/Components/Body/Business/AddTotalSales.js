@@ -52,21 +52,31 @@ function AddTotalSales({ Time }) {
       serverAddress + "registerTransaction/",
       CollectedProducts
     );
+    $(".LinearProgress").hide();
 
     let datas = response.data.data;
-    console.log(datas);
+    console.log(datas, "response is = ", response);
     if (datas == "This is already registered") {
       alert(
         "Your data is not registered because, on this date data is already registered"
       );
     } else if (datas == "data is registered successfully") {
+      if (response.data.previouslyRegisteredData.length > 0) {
+        alert(
+          "some of your data is not registered but some of your data are registered well. so if u want to change saved datas please  try to search and make update on those data which are not registered now. "
+        );
+        return;
+      }
       alert("successfully registered. Thank you.");
       let byClass = document.getElementsByClassName("productInput");
       for (let i = 0; i < byClass.length; i++) {
         byClass[i].value = "";
       }
+    } else if (datas == "allDataAreRegisteredBefore") {
+      alert(
+        "Your data are not registered now.Because all of your data are registered before. Thank you"
+      );
     }
-    $(".LinearProgress").hide();
   };
   useEffect(() => {
     setCollectedProducts({ ...CollectedProducts, dates: selectedTime });

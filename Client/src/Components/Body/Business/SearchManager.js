@@ -4,10 +4,8 @@ import "./SearchProducts.css";
 import $ from "jquery";
 import SearchProducts from "./SearchProducts";
 import SearchCosts from "./SearchCosts";
-import SearchAllTransactions from "./SearchAllTransactions";
-import SearchSingleTransActions from "./SearchSingleTransActions";
+import SearchSingleTransActions from "./SearchSales_Purchase";
 function SearchManager() {
-  const [showEachItems, setshowEachItems] = useState(false);
   let serverAddress = localStorage.getItem("targetUrl");
   const [InputValue, setInputValue] = useState({});
   const [searchTarget, setsearchTarget] = useState();
@@ -47,9 +45,11 @@ function SearchManager() {
       }
     }
 
+    $(".LinearProgress").css("display", "block");
     let response = await axios.post(serverAddress + "searchProducts/", {
       InputValue,
     });
+    console.log("response", response);
     $(".LinearProgress").css("display", "none");
     if (searchTarget == "PRODUCTS") {
       setRequestedSearch(<SearchProducts response={response} />);
@@ -58,15 +58,16 @@ function SearchManager() {
       setRequestedSearch(<SearchCosts response={response} />);
       return;
     } else if (searchTarget == "ALLTRANSACTION") {
-      setRequestedSearch(<SearchAllTransactions response={response} />);
-      return;
-    } else if (searchTarget == "TRANSACTION") {
-      console.log(searchTarget);
-      $("#productTransaction").css("display", "block");
       setRequestedSearch(
         <SearchSingleTransActions
-          showEachItems={showEachItems}
-          setshowEachItems={setshowEachItems}
+          response={response}
+          requestFrom="showExpencesList"
+        />
+      );
+      return;
+    } else if (searchTarget == "TRANSACTION") {
+      setRequestedSearch(
+        <SearchSingleTransActions
           response={response}
           requestFrom="SearchManagerOnlySalesAndPurchase"
         />
