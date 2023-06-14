@@ -225,43 +225,86 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
   // res.end("getRegisteredProducts lllllllllll");
 });
 server.post(path + "registerTransaction/", async (req, res) => {
-  // console.log("registerTransaction", req.body);
+  console.log("registerTransaction", req.body);
+  // return;
   let rowData = req.body,
     ProductsList = rowData.ProductsList,
-    businessName = rowData.businessName;
-  // check if it was registered before on this date
-  let selectToCheck = `select * from  ${businessName}_Transaction where registeredTime like '%${req.body.dates}%'`;
-  // console.log( "businessName " + businessName, " req.body.dates = " + req.body.dates  );
-  connection.query(selectToCheck, async (err, results) => {
-    if (err) {
-      console.log("error", err);
-      return res.json({ err });
-    }
-    if (results.length > 0) {
-      return res.json({ data: "This is already registered" });
-    } else {
-      console.log(
-        "results = @registered time " + results,
-        `ProductsList = `,
-        ProductsList
-      );
-      let values = "";
-      for (let i = 0; i < ProductsList.length; i++) {
-        let productID = ProductsList[i].ProductId,
-          unitCost = ProductsList[i].productsUnitCost,
-          unitPrice = ProductsList[i].productsUnitPrice,
-          salesQuantity = "salesQuantity" + productID,
-          purchaseQty = "purchaseQty" + productID,
-          wrickageQty = "wrickageQty" + productID;
-        let Inventory = 0;
-        console.log("salesQuantity", salesQuantity);
-        let prevInventory = `select * from ${businessName}_Transaction where productIDTransaction='${productID}' and registeredTime<'${req.body.dates}' order by registeredTime desc limit 1 `;
+    businessName = rowData.businessName,
+    i = 0,
+    previouslyRegisteredData = [],
+    values = "",
+    length = ProductsList.length,
+    insertedProducts = [],
+    InventoryList = [];
+
+  let recurciveTorecheck = () => {
+    let productID = ProductsList[i].ProductId,
+      unitCost = ProductsList[i].productsUnitCost,
+      unitPrice = ProductsList[i].productsUnitPrice,
+      salesQuantity = "salesQuantity" + productID,
+      purchaseQty = "purchaseQty" + productID,
+      wrickageQty = "wrickageQty" + productID,
+      Inventory = 0;
+    // console.log("salesQuantity", salesQuantity);
+    let selectToCheck = `select * from  ${businessName}_Transaction where registeredTime like '%${req.body.dates}%' and productIDTransaction='${productID}'`;
+    connection.query(selectToCheck, (err, resultOfQuery) => {
+      if (err) {
+        console.log("err on selectToCheck", err);
+        return res.json({ data: "err", err });
+      }
+      // resultOfQuery.length > 0 if it was registered before
+      // console.log("resultOfQuery.length is " + resultOfQuery.length);
+
+      if (resultOfQuery.length > 0) {
+        // previouslyRegisteredData.push(resultOfQuery) collect previously registered
+        previouslyRegisteredData.push(resultOfQuery);
+
+        // i == length - 1 at last status
+        if (i == length - 1) {
+          if (previouslyRegisteredData.length == length) {
+            // previouslyRegisteredData.length - 1 == length - 1 are all registered before or not
+            return res.json({
+              data: "allDataAreRegisteredBefore",
+              previouslyRegisteredData,
+              date: req.body.dates,
+            });
+          } else {
+            let insert =
+              `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values ` +
+              values;
+            connection.query(insert, (err, result) => {
+              if (err) {
+                console.log("err on insert == ", err);
+                return res.json({ data: "err", err });
+              } else {
+                updateNextDateInventory(
+                  `${businessName}_Transaction`,
+                  insertedProducts,
+                  req.body.dates,
+                  InventoryList
+                );
+                return res.json({
+                  data: "data is registered successfully",
+                  previouslyRegisteredData,
+                });
+              }
+            });
+          }
+        } else {
+          console.log("recall to recursive");
+          i++;
+          recurciveTorecheck();
+        }
+      } else {
+        insertedProducts.push(ProductsList[i]);
+        let prevInventory = `select * from ${businessName}_Transaction where productIDTransaction='${productID}' and registeredTime<'${req.body.dates}' order by registeredTime desc limit 1`;
         connection.query(prevInventory, (err, results) => {
           if (err) {
-            return res.json({ err });
+            return res.json({ data: "err", err });
           } else {
             if (results.length == 0) {
               // console.log("no data found");
+              Inventory = 0;
             } else {
               Inventory = results[0].Inventory;
             }
@@ -270,39 +313,64 @@ server.post(path + "registerTransaction/", async (req, res) => {
               parseInt(rowData[salesQuantity]) +
               parseInt(Inventory) -
               parseInt(rowData[wrickageQty]);
-
-            // console.log(Inventory);
-
-            if (i > 0) {
+            InventoryList.push(Inventory);
+            if (values != "") {
               values += ",";
             }
             values += `('${unitCost}','${unitPrice}','${productID}','${rowData[salesQuantity]}','${rowData[purchaseQty]}','${req.body.dates}','${rowData[wrickageQty]}','${Inventory}')`;
-
-            let insert =
-              `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values ` +
-              values;
-            if (i == ProductsList.length - 1)
+          }
+          if (i == length - 1) {
+            if (previouslyRegisteredData.length == length) {
+              // previouslyRegisteredData.length - 1 == length - 1 are all registered before or not
+              return res.json({
+                data: "allDataAreRegisteredBefore",
+                previouslyRegisteredData,
+                date: req.body.dates,
+              });
+            } else {
+              console.log(
+                "332 InventoryList=",
+                InventoryList,
+                ", insertedProducts=",
+                insertedProducts,
+                ", ProductsList=",
+                ProductsList
+              );
+              // return;
+              let insert =
+                `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values ` +
+                values;
               connection.query(insert, (err, result) => {
-                if (err) return res.json({ err });
-                else {
+                if (err) {
+                  console.log("err on insert == ", err);
+                  return res.json({ data: "err", err });
+                } else {
                   // console.log(result);
                   updateNextDateInventory(
                     `${businessName}_Transaction`,
-                    productID,
+                    insertedProducts,
                     req.body.dates,
-                    Inventory
+                    InventoryList
                   );
-
                   return res.json({
                     data: "data is registered successfully",
+                    previouslyRegisteredData,
                   });
                 }
               });
+            }
+          } else {
+            // increase i by 1
+            // recal to recursive
+            console.log("recall to recursive");
+            i++;
+            recurciveTorecheck();
           }
         });
       }
-    }
-  });
+    });
+  };
+  recurciveTorecheck();
 });
 server.post(path + "ViewTransactions/", (req, res) => {
   // console.log(req.body);
@@ -319,8 +387,8 @@ server.post(path + "ViewTransactions/", (req, res) => {
       salesTransaction = result;
       // res.json({ data: result });
 
-      let selectCost = `select * from ${businessName}_expenses, ${businessName}_costs where 
-  ${businessName}_expenses.costId=${businessName}_costs.costsId and costRegisteredDate='${time}'`;
+      let selectCost = `select * from ${businessName}_expenses, ${businessName}_Costs where 
+  ${businessName}_expenses.costId=${businessName}_Costs.costsId and costRegisteredDate='${time}'`;
       connection.query(selectCost, (err, results) => {
         if (err) {
           return res.json({ err });
@@ -555,48 +623,67 @@ server.post(path + "updateBusiness/", (req, res) => {
 });
 let updateNextDateInventory = (
   businessName,
-  productId,
+  ProductsList,
   date,
   previousInventory
 ) => {
-  // console.log(`businessName, productId, date, previousInventory = ` + businessName,  productId, date,    previousInventory  );
-
-  let select = `select * from ${businessName} where productIDTransaction='${productId}' and registeredTime>'${date}' order by registeredTime asc`;
-  connection.query(select, (err, results) => {
-    if (err) {
-      return res.json({ err });
-    }
-    if (results.length > 0) {
-      // console.log("it is ok");
-      // use for loop
-      // console.log(results);
-
-      for (let i = 0; i < results.length; i++) {
-        let salesqty = results[i].salesQty,
-          purchaseQty = results[i].purchaseQty,
-          inventory = 0,
-          wrickages = results[i].wrickages;
-        inventory = purchaseQty + previousInventory - salesqty - wrickages;
-        // console.log(" inventory is @ " + i + " " + inventory);
-        // return;
-        let update = `update ${businessName} set inventory='${inventory}' where transactionId=${results[i].transactionId}`;
-        previousInventory = inventory;
-        connection.query(update, (err, results1) => {
-          // console.log("results1 is " + results1.length);
-          // console.log(results1);
-          if (err) {
-            return res.json({ err });
-          }
-          if (results1) {
-            // console.log("updated " + results1);
-          } else {
-          }
-        });
+  console.log("638 = ", businessName, ProductsList, date, previousInventory);
+  // return;
+  let index = 0;
+  let recurciveUpdate = () => {
+    let productId = ProductsList[index].ProductId,
+      select = `select * from ${businessName} where productIDTransaction='${productId}' and registeredTime>'${date}' order by registeredTime asc`;
+    connection.query(select, (err, results) => {
+      if (err) {
+        return res.json({ err });
       }
-    } else {
-    }
-    // return res.json({ data: req.body });
-  });
+      console.log("select is = ", select, "results are =", results);
+
+      if (results.length > 0) {
+        let j = 0,
+          prevInventory = 0;
+        for (let i = 0; i < results.length; i++) {
+          let salesqty = results[i].salesQty,
+            purchaseQty = results[i].purchaseQty,
+            inventory = 0,
+            wrickages = results[i].wrickages;
+          if (i == 0) {
+            inventory =
+              purchaseQty + previousInventory[index] - salesqty - wrickages;
+          } else {
+            inventory = purchaseQty + prevInventory - salesqty - wrickages;
+          }
+          prevInventory = inventory;
+          let update = `update ${businessName} set inventory='${inventory}' where transactionId=${results[i].transactionId}`;
+          // previousInventory = inventory;
+          connection.query(update, (err, results1) => {
+            if (err) {
+              console.log(err);
+              return res.json({ err });
+            }
+            if (results1) {
+              if (index < ProductsList.length - 1) {
+                if (j == results.length - 1) {
+                  index++;
+                  recurciveUpdate();
+                }
+              }
+              j++;
+              // console.log("updated " + results1);
+            } else {
+            }
+          });
+        }
+      } else {
+        if (index < ProductsList.length - 1) {
+          index++;
+          recurciveUpdate();
+        }
+      }
+      // return res.json({ data: req.body });
+    });
+  };
+  recurciveUpdate();
 };
 function insertIntoCosts(businessName, data, res) {
   // console.log("businessName " + businessName);
@@ -661,8 +748,8 @@ server.post(path + "updateBusinessName/", (req, res) => {
               if (err) return res.json({ err });
               if (result) console.log(result);
             });
-            let alter_costs = `ALTER TABLE ${oldBusinessName}_Costs RENAME TO ${businessName}_Costs`;
-            connection.query(alter_costs, (err, result) => {
+            let alter_Costs = `ALTER TABLE ${oldBusinessName}_Costs RENAME TO ${businessName}_Costs`;
+            connection.query(alter_Costs, (err, result) => {
               if (err) {
                 console.log(err);
                 return res.json({ err });
