@@ -1,0 +1,17 @@
+.maxSelectionForm {
+  max-width: 300px;
+  margin: 10px auto;
+  padding: 20px 10px;
+  background-color: white;
+}
+
+.othersDateRange {
+  max-width: 200px;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+}
+.maxSelectionForm select {
+  width: 100%;
+  max-width: 200px;
+}

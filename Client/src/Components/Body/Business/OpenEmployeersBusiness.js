@@ -6,6 +6,9 @@ function OpenEmployeersBusiness() {
   return (
     <div>
       <div className="navOFEmployerBusiness">
+        <Link to={"/"}>
+          <button> Home </button>
+        </Link>
         <Link to={"Register"}>
           <button> Register </button>
         </Link>

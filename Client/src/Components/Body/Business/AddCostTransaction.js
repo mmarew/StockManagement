@@ -20,11 +20,11 @@ function AddCostTransaction() {
     }
     let costData = response.data.data;
     console.log("costData", costData);
+    setshowCostForm(true);
     if (costData.length == 0) {
       // alert("No cost list data.");
       // $(".costTransactionForm").hide();
     } else {
-      setshowCostForm(true);
     }
     setcostList(costData);
     // setFormdata({ ...Formdata, costData });
@@ -127,14 +127,14 @@ function AddCostTransaction() {
               <button type="submit">Submit</button>
             </>
           ) : (
-            <h4>
+            <div>
               you haven't registered cost list data before. Please register cost
               items by click on items then costs
-            </h4>
+            </div>
           )}
         </form>
       ) : (
-        <h4>Please wait while loading</h4>
+        "please wait .. "
       )}
     </div>
   );

@@ -3,11 +3,40 @@ import $ from "jquery";
 import axios from "axios";
 import SearchExpenceTransaction from "./SearchExpenceTransaction";
 function SearchSingleTransActions({ response, requestFrom }) {
-  // console.log(showEachItems, response, setshowEachItems, requestFrom);
-
+  let openedBusiness = localStorage.getItem("openedBusiness");
+  let businessName = localStorage.getItem("businessName");
   const [showEachItems, setshowEachItems] = useState(false);
   const [ShowExpences, setShowExpences] = useState();
   const [SearchedDatas, setSearchedDatas] = useState([]);
+  let token = localStorage.getItem("storeToken");
+  let deleteSales_purchase = async (items) => {
+    items.businessName = businessName;
+    items.token = token;
+    console.log(items);
+    let responce = await axios.post(
+      serverAddress + "deleteSales_purchase/",
+      items
+    );
+    console.log("responce=== ", responce);
+    let x = [];
+    ListOfSalesAndPurchase.map((unit) => {
+      if (unit == items) {
+        // dont return items
+      } else {
+        x.push(unit);
+        return { ...unit };
+      }
+    });
+    console.log(x);
+    if (responce.data.data == "deleted") {
+      alert("your data is deleted successfully. thank you");
+      setListOfSalesAndPurchase(x);
+    } else if (responce.data.data == "NotAllowedByYou") {
+      alert("You are not allowed to do this. thank you");
+    } else {
+      alert("clientErr1010:");
+    }
+  };
   useEffect(() => {
     console.log("first showEachValuesofSalesAndPurchase");
     let getSingleTransAction = async () => {
@@ -167,7 +196,6 @@ function SearchSingleTransActions({ response, requestFrom }) {
       }
       // console.log(`Name: ${tdElement.name || ""}`);
     }
-    let businessName = localStorage.getItem("businessName");
     OB = { ...OB, businessName };
     OB.trasactionId = transactionId;
     console.log("OB", OB);
@@ -213,7 +241,7 @@ function SearchSingleTransActions({ response, requestFrom }) {
       {ListOfSalesAndPurchase.length > 0 && (
         <table id="productTransaction">
           <tr>
-            <td colSpan={13}>
+            <td colSpan={15}>
               <h3>purchase , sales, inventory and description table</h3>
             </td>
           </tr>
@@ -229,7 +257,7 @@ function SearchSingleTransActions({ response, requestFrom }) {
             <th>Broken</th>
             <th>Inventory</th>
             <th>Description</th>
-            <th>Action</th>
+            <th colSpan={2}>Action</th>
             <th>Status</th>
           </tr>
           {ListOfSalesAndPurchase?.map((items, index) => {
@@ -346,12 +374,19 @@ function SearchSingleTransActions({ response, requestFrom }) {
                 </td>
                 {showEachItems ? (
                   !items.contentEditable ? (
-                    <td
-                      className="cancelOrEditTransaction"
-                      onClick={(e) => editSalesAndPurchase(e, index)}
-                    >
-                      Edit
-                    </td>
+                    openedBusiness == "myBusiness" && (
+                      <>
+                        <td
+                          className="cancelOrEditTransaction"
+                          onClick={(e) => editSalesAndPurchase(e, index)}
+                        >
+                          Edit
+                        </td>
+                        <td onClick={() => deleteSales_purchase(items)}>
+                          Delete
+                        </td>
+                      </>
+                    )
                   ) : (
                     <td
                       className="cancelOrEditTransaction"

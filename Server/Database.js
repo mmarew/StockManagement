@@ -87,7 +87,7 @@ let createBusiness = (businessName, ownerId, createdDate, res, source) => {
         }
       });
 
-      let create = `create table if not exists ${businessName}_products(ProductId int auto_increment, productsUnitCost int, productsUnitPrice int ,productName varchar(900), primary key(ProductId))`;
+      let create = `create table if not exists ${businessName}_products(ProductId int auto_increment, productsUnitCost int, productsUnitPrice int ,productName varchar(900),minimumQty int, primary key(ProductId))`;
       connection.query(create, (err, result) => {
         if (err) {
           return res.json({ err });
@@ -143,25 +143,34 @@ let insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
     }
   });
 };
-let deleteBusiness = async (businessId, businessName, res) => {
+let deleteBusiness = (businessId, businessName, res) => {
   console.log("businessId in deleteBusiness", businessId);
   let sql = `delete from Business where BusinessID='${businessId}'`;
   let tables = ["_expenses", "_Costs", "_Transaction", "_products"];
-  tables.map((items) => {
-    let drop = `DROP TABLE ${businessName + items}`;
+  let tableLength = tables.length,
+    i = 0;
+  let deleteEachTable = () => {
+    let drop = `DROP TABLE ${businessName + tables[i]}`;
     connection.query(drop, (err, results) => {
       if (err) console.log(err);
       else console.log(results);
+      if (i == tableLength - 1) {
+        let responces = connection.query(sql, (err, result) => {
+          if (err) return res.json({ data: err });
+          if (result) {
+            console.log("result of deleted data is ", result);
+            return res.json({ data: result });
+          }
+        });
+        return responces;
+      } else if (i <= tableLength - 1) {
+        i++;
+        deleteEachTable();
+      } else {
+      }
     });
-  });
-  let responces = connection.query(sql, (err, result) => {
-    if (err) return res.json({ data: err });
-    if (result) {
-      console.log("result of deleted data is ", result);
-      return res.json({ data: result });
-    }
-  });
-  return responces;
+  };
+  deleteEachTable();
 };
 module.exports.deleteBusiness = deleteBusiness;
 module.exports.insertIntoUserTable = insertIntoUserTable;

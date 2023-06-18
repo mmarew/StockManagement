@@ -50,26 +50,31 @@ const EmployeeSearch = () => {
   let searchEmployees = async (e, employeeName) => {
     if (e != "noEvent") e.preventDefault();
     console.log("InputValue", InputValue);
-
+    $(".LinearProgress").css("display", "block");
     let response = await axios.post(
       serverAddress + "searchEmployee/",
       InputValue
     );
+    $(".LinearProgress").css("display", "none");
     console.log("searchEmployees", response);
-    let allEmployee = response.data.data.result;
-    let connectedEmployees = response.data.data.results1;
-    allEmployee.map((item, index1) => {
-      allEmployee[index1].connection = "notConnected";
-      connectedEmployees.map((employee, index) => {
-        let x = index;
-
-        if (employee.userId == item.userId) {
-          allEmployee[index1].connection = "connected";
-        }
+    let allEmployee = response.data.data.result,
+      connectedEmployees = response.data.data.results1,
+      SearchedEmployees = allEmployee.map((item, index1) => {
+        allEmployee[index1].connection = "notConnected";
+        // filter connected and not connected employees
+        connectedEmployees.map((employee, index) => {
+          let x = index;
+          console.log(employee, item);
+          if (employee.userId == item.userId) {
+            console.log(employee.userId, item.userId);
+            allEmployee[index1].connection = "connected";
+            return { ...item, connection: "connected" };
+          }
+        });
+        return item;
       });
-    });
-
-    setsearchedEmployee(allEmployee);
+    console.log("SearchedEmployees", SearchedEmployees);
+    setsearchedEmployee(SearchedEmployees);
   };
   // useEffect( , [searchedEmployee]);
   return (
@@ -84,6 +89,7 @@ const EmployeeSearch = () => {
       >
         <h4 className="nameLabel">Employee Name / Phone</h4>
         <input
+          required
           id="employeeNameToBeSearched"
           onChange={collectInput}
           name="employeeNameToBeSearched"
@@ -91,6 +97,7 @@ const EmployeeSearch = () => {
         />
         <input type="submit" value="search" />
       </form>
+      {console.log("searchedEmployee", searchedEmployee)}
       {searchedEmployee?.map((items) => {
         return (
           <div

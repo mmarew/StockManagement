@@ -50,6 +50,17 @@ function SearchManager() {
       InputValue,
     });
     console.log("response", response);
+    if (searchTarget == "TRANSACTION") {
+    } else if (searchTarget == "COSTS") {
+    } else if (searchTarget == "PRODUCTS") {
+    } else if (searchTarget == "ALLTRANSACTION") {
+      if (
+        response.data.expenceTransaction.length == 0 &&
+        response.data.data.length == 0
+      ) {
+        alert("No data on this date");
+      }
+    }
     $(".LinearProgress").css("display", "none");
     if (searchTarget == "PRODUCTS") {
       setRequestedSearch(<SearchProducts response={response} />);
@@ -77,8 +88,6 @@ function SearchManager() {
       alert("wrong selection");
     }
   };
-  ////////////////
-
   let getInputValues = (e) => {
     let value = e.target.value,
       name = e.target.name;
@@ -119,6 +128,7 @@ function SearchManager() {
     } else {
       value = e.target.value;
     }
+    console.log("value is ", value);
     setsearchTarget(value);
     $(".searchInputs").css("display", "flex");
   };

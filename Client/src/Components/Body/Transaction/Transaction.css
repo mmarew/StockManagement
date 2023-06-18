@@ -1,22 +1,24 @@
-tr input {
+#TransactionTable tr input {
   width: 60px;
   border: none;
   padding: 6px 4px;
 }
-tr input:focus {
+#TransactionTable tr input:focus {
   border-color: blue;
   outline: none;
   border: 2px solid blue;
 }
 td {
   background-color: white;
+  padding: 5px;
 }
-td button {
+#TransactionTable td button {
+  margin: 5px;
   background-color: green;
   color: white;
   border: none;
-  padding: 10px;
-  display: none;
+  padding: 5px;
+  /* display: none; */
 }
 .active {
   display: block;

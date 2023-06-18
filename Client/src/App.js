@@ -19,9 +19,13 @@ import AddSingleSales from "./Components/Body/Business/AddSingleSales";
 import AddTotalSales from "./Components/Body/Business/AddTotalSales";
 import AddCostTransaction from "./Components/Body/Business/AddCostTransaction";
 import AddSalesTransaction from "./Components/Body/Business/AddSalesTransaction";
+import GetMinimumQty from "./Components/Body/Business/GetMinimumQty";
+import GetMaximumSales from "./Components/Body/Business/GetMaximumSales";
+import SearchAppBar from "./MuiNav";
 function App() {
   return (
     <div className="App">
+      <SearchAppBar />
       <Router>
         <Routes>
           <Route
@@ -29,8 +33,8 @@ function App() {
             element={<OpenEmployeersBusiness />}
           >
             <Route path="Register" element={<RegisterEmployersProducts />} />
-            <Route path="view" element={<SearchProducts />} />
-            <Route path="Search" element={<Transaction />} />
+            <Route path="view" element={<Transaction />} />
+            <Route path="Search" element={<SearchProducts />} />
           </Route>
 
           <Route
@@ -111,6 +115,15 @@ function App() {
             }
           />
           <Route path="/OpenBusiness" element={<OpenBusiness />}>
+            <Route
+              path=""
+              element={
+                <>
+                  <GetMinimumQty />
+                  <GetMaximumSales />
+                </>
+              }
+            />
             <Route path="additems" element={<AddItems />} />
             <Route path="search" element={<SearchProducts />} />
             <Route path="view" element={<Transaction />} />

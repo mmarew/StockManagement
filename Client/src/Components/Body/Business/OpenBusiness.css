@@ -12,8 +12,9 @@
 .registerViewSearch .openBusinessTab {
   color: white;
   border: 0px;
-  padding: 1vw;
-  border-radius: 1vw;
+  padding: 10px 6px;
+  margin: 0 3px;
+  border-radius: 10px;
   cursor: pointer;
   text-decoration: none;
 }

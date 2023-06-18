@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import "./Business.css";
 import axios from "axios";
 import $ from "jquery";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import CreateBusiness from "./CreateBusiness";
 import { useNavigate } from "react-router-dom";
-import { LinearProgress } from "@mui/material";
+import { Button, LinearProgress } from "@mui/material";
 import DeleteBusiness from "./DeleteBusiness";
 let serverAddress = localStorage.getItem("targetUrl");
 function Business() {
@@ -60,7 +62,6 @@ function Business() {
               createdBusiness?.map((items) => {
                 console.log(items);
                 if (targetBusinessId == items.businessId) {
-                  console.log("items.businessId " + items.businessId);
                   $("#createdBusiness_" + targetBusinessId).remove();
                   setcreatedBusiness([
                     ...createdBusiness,
@@ -83,6 +84,7 @@ function Business() {
     localStorage.setItem("businessId", businessID);
     localStorage.setItem("businessName", businessName);
     localStorage.setItem("businessOwnreId", ownersId);
+    localStorage.setItem("openedBusiness", "employersBusiness");
     Navigate("/OpenEmployeersBusiness");
   };
 
@@ -148,8 +150,6 @@ function Business() {
 
   return (
     <>
-      {console.log("employeerBusiness is = " + employeerBusiness)}
-
       <div className="BusinessWrapper">
         <LinearProgress id="LinearProgress1" />
         <button onClick={AddBusiness} className="createBusiness">
@@ -187,7 +187,9 @@ function Business() {
                         className="businessButton"
                         id={"openEditWrapper" + datas.BusinessID}
                       >
-                        <button
+                        <Button
+                          variant="contained"
+                          color="success"
                           onClick={() =>
                             openThisBusiness(
                               datas.BusinessID,
@@ -196,18 +198,25 @@ function Business() {
                           }
                         >
                           open
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="success"
                           onClick={() =>
                             editThisBusiness(
                               datas.BusinessID,
                               datas.BusinessName
                             )
                           }
+                          startIcon={<EditIcon />}
                         >
                           Edit
-                        </button>
-                        <button
+                        </Button>
+                        {/* <Button>Delete</Button> */}
+                        <Button
+                          color="error"
+                          size="small"
                           id=""
                           onClick={() =>
                             DeleteBusiness(
@@ -217,9 +226,11 @@ function Business() {
                               setBusinessLists
                             )
                           }
+                          variant="outlined"
+                          startIcon={<DeleteIcon />}
                         >
                           Delete
-                        </button>
+                        </Button>
                       </div>
                       <div
                         id={"businessWrapper_" + datas.BusinessID}

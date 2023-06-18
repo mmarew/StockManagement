@@ -8,11 +8,12 @@ function SearchCosts({ response }) {
   let getCostLists = async () => {
     setMyCostData(response.data.data);
   };
+  let Token = localStorage.getItem("storeToken");
   let updateMycostData = async (e, id, cost) => {
     let CostName_ = $("#CostName_" + id).val(),
       CostValue_ = $("#CostValue_" + id).val(),
-      costsId = cost.costsId,
-      Token = localStorage.getItem("storeToken");
+      costsId = cost.costsId;
+
     $(".LinearProgress").css("display", "block");
     let responce = await axios.post(serverAddress + "/updateCostData/", {
       CostName_,
@@ -44,6 +45,18 @@ function SearchCosts({ response }) {
   let costInputEdits = (e, index) => {
     $(".btnUpdateCost").hide();
     $("#CostUpdate_" + index).show();
+  };
+  let deleteCostItem = async (item) => {
+    item.businessName = businessName;
+    item.Token = Token;
+    console.log(item);
+    // ownerId
+    let responce = await axios.post(serverAddress + "deleteCostData/", item);
+    console.log(responce);
+    if (responce.data.data == "deleted") {
+      alert("your data is deleted");
+    }
+    //   alert("you are not allowed to delete it");
   };
   return (
     <div>
@@ -82,6 +95,9 @@ function SearchCosts({ response }) {
                     type="button"
                     id={`CostUpdate_${MyCostData.indexOf(cost)}`}
                   />
+                </td>
+                <td>
+                  <button onClick={() => deleteCostItem(cost)}>Delete</button>
                 </td>
               </tr>
             );

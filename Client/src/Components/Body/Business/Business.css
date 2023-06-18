@@ -32,12 +32,12 @@
   justify-content: center;
 }
 .businessButton button {
-  background-color: blue;
-  color: white;
-  padding: 15px;
+  /* background-color: blue; */
+  /* color: white; */
+  /* padding: 15px; */
   border: none;
   margin: 0 5px;
-  border-radius: 10px;
+  /* border-radius: 10px; */
 }
 .update-wrapper {
   display: none;

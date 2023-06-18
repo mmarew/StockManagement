@@ -5,7 +5,7 @@ import "./Transaction.css";
 import currentDates from "../Date/currentDate";
 export default function Transaction() {
   let serverAddress = localStorage.getItem("targetUrl");
-  const [salesAmount, setSalesAmount] = useState(0);
+  const [salesAndPurchaseAmount, setSalesAndPurchaseAmount] = useState(0);
   const [FetchedDatas, setFetchedDatas] = useState([]);
   const [TotalExpenses, setTotalExpenses] = useState();
   const [ExpenseTransaction, setExpenseTransaction] = useState([]);
@@ -85,7 +85,7 @@ export default function Transaction() {
     ob.businessName = businessName;
     console.log(ob);
     let response = await axios.post(serverAddress + "ViewTransactions/", ob);
-    console.log("response", response);
+    console.log("@ViewTransactions = response", response);
     let arrayData = response.data.salesTransaction;
     let expenses = response.data.expenseTransaction;
     let exp = expenses?.reduce((a, c) => {
@@ -109,17 +109,23 @@ export default function Transaction() {
       $("#TransactionTable").show();
       setFetchedDatas(arrayData);
     }
-    let salesqty = arrayData?.reduce((a, c) => {
+    // productsUnitCost 38
+    // productsUnitPrice 60
+    // purchaseQty 100
+    let purchaseCost = 0;
+    let salesAmount = arrayData?.reduce((a, c) => {
       let productsUnitCost = c.productsUnitCost,
         productsUnitPrice = c.productsUnitPrice,
         purchaseQty = c.purchaseQty,
         salesQty = c.salesQty;
-      return (a =
-        -parseInt(purchaseQty) * parseFloat(productsUnitCost) +
-        parseFloat(productsUnitPrice) * parseInt(salesQty));
+      purchaseCost += purchaseQty * productsUnitCost;
+      return (a = a + parseFloat(productsUnitPrice) * parseInt(salesQty));
     }, 0);
-    setSalesAmount(salesqty);
-    console.log("salesqty is " + salesqty);
+    setSalesAndPurchaseAmount({ salesAmount, purchaseCost });
+    console.log(
+      "salesAmount is " + salesAmount,
+      " purchaseCost==" + purchaseCost
+    );
   };
   let handleChangeOnInputs = (e) => {
     console.log(e.target);
@@ -137,9 +143,11 @@ export default function Transaction() {
       $("#" + costAmount_).val(items.costAmount);
     });
   }, [ExpenseTransaction]);
+
   useEffect(() => {
     ViewTransactions("notEvent");
   }, []);
+
   useEffect(() => {
     FetchedDatas?.map((Items) => {
       let id = "unitPrice_" + Items.transactionId;
@@ -166,7 +174,8 @@ export default function Transaction() {
           View
         </button>
       </form>
-      {FetchedDatas > 0 ? (
+      {console.log("FetchedDatas == ", FetchedDatas)}
+      {FetchedDatas.length > 0 ? (
         <table border="1" id="TransactionTable">
           <tr>
             <th>Product name</th>
@@ -271,7 +280,25 @@ export default function Transaction() {
               </tr>
             );
           })}
-          {" Sales Amount- Purchase Amount " + salesAmount}
+          <tr>
+            <td colSpan={3}>Total Amount</td>
+            <td>{salesAndPurchaseAmount.salesAmount}</td>
+            <td></td>
+            <td></td>
+            <td>{salesAndPurchaseAmount.purchaseCost}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td colSpan={10}>
+              {`Sales Amount- Purchase Amount 
+                ${
+                  parseInt(salesAndPurchaseAmount.salesAmount) -
+                  parseInt(salesAndPurchaseAmount.purchaseCost)
+                }`}
+            </td>
+          </tr>
         </table>
       ) : (
         <h3>No purchase and sales transaction on this date</h3>
@@ -325,7 +352,7 @@ export default function Transaction() {
             })}
             {"Total expenses = " + TotalExpenses}
           </table>
-          net cash flow {salesAmount - TotalExpenses}
+          {/* net cash flow {salesAmount - TotalExpenses} */}
         </div>
       ) : (
         <h3>No expences list on this day</h3>

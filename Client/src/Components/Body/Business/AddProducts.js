@@ -69,15 +69,22 @@ const AddProducts = () => {
           className="registerProducts"
           onChange={CollectData}
           name="productUnitCost"
-          type="text"
+          type="number"
           placeholder="Purchasing unit cost"
         />
         <input
           className="registerProducts"
           onChange={CollectData}
           name="productUnitPrice"
-          type="text"
+          type="number"
           placeholder="Salling unit price"
+        />
+        <input
+          className="registerProducts"
+          onChange={CollectData}
+          type="number"
+          name="minimumQty"
+          placeholder="Minimum qty"
         />
         <input type="submit" value="Register" />
       </form>

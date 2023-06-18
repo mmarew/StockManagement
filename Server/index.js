@@ -165,6 +165,7 @@ server.post(path + "addProducts/", async (req, res) => {
     productPrice = rowData.productUnitPrice,
     productCost = rowData.productUnitCost,
     businessId = rowData.businessId,
+    minimumQty = rowData.minimumQty,
     userId = await Auth(rowData.token),
     businessName = "";
   let select = `select * from  Business where businessId=${businessId}`;
@@ -192,7 +193,7 @@ server.post(path + "addProducts/", async (req, res) => {
           return;
         }
         if (result.length == 0) {
-          let Insert = `insert into ${businessName}_products(productsUnitCost,productsUnitPrice,productName)values('${productCost}','${productPrice}','${productName}')`;
+          let Insert = `insert into ${businessName}_products(productsUnitCost,productsUnitPrice,productName,minimumQty)values('${productCost}','${productPrice}','${productName}','${minimumQty}')`;
           connection.query(Insert, (err, result) => {
             if (err) return res.json({ err });
             if (result) {
@@ -373,27 +374,26 @@ server.post(path + "registerTransaction/", async (req, res) => {
   recurciveTorecheck();
 });
 server.post(path + "ViewTransactions/", (req, res) => {
-  // console.log(req.body);
+  // console.log("/ViewTransactions is === ", req.body);
+  // return;
   let businessName = req.body.businessName,
     time = req.body.time;
   let select = `select * from ${businessName}_Transaction,${businessName}_products where ${businessName}_products.productId=${businessName}_Transaction.productIDTransaction and registeredTime like '%${time}%'`;
-  let salesTransaction = "",
+  // console.log("select is select", select);
+  // return;
+  let salesTransaction = [],
     expenseTransaction = "";
   connection.query(select, (err, result) => {
     if (err) {
       return res.json({ data: "data is full of err " });
     } else {
-      // console.log(result);
       salesTransaction = result;
-      // res.json({ data: result });
-
       let selectCost = `select * from ${businessName}_expenses, ${businessName}_Costs where 
   ${businessName}_expenses.costId=${businessName}_Costs.costsId and costRegisteredDate='${time}'`;
       connection.query(selectCost, (err, results) => {
         if (err) {
           return res.json({ err });
         } else {
-          // console.log(results);
           expenseTransaction = results;
           res.json({ expenseTransaction, salesTransaction });
         }
@@ -406,11 +406,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
   let currentInventory = "",
     prevInventory = "";
   let previous = getPreviousDay(new Date(req.body.date));
-  // prevInventory = getInventory(
-  //   previous,
-  //   req.body.businessName + "_transaction",
-  //   52
-  // );
+
   let select = `select * from ${req.body.businessName}_Transaction where registeredTime like '%${previous}%' and  transactionId='${req.body.transactionId}'`;
   let update = "";
   let xx = connection.query(select, async (err, result) => {
@@ -533,13 +529,16 @@ server.post(path + "updateProducts/", (req, res) => {
     productName = req.body.productName,
     productCost = req.body.productCost,
     businessName = req.body.businessName,
-    id = req.body.id;
-  let update = `update ${businessName}_products set productsUnitCost='${productCost}', productsUnitPrice='${productPrice}', productName='${productName}' where  ProductId='${id}'`;
+    id = req.body.id,
+    minimumQty = req.body.minimumQty;
+  let update = `update ${businessName}_products set productsUnitCost='${productCost}', productsUnitPrice='${productPrice}', productName='${productName}', minimumQty='${minimumQty}' where  ProductId='${id}'`;
   connection.query(update, (err, result) => {
     if (err) return res.json({ err });
-    if (result) console.log(result);
+    if (result) {
+      console.log(result);
+      res.json({ data: "updated well" });
+    }
   });
-  res.json({ data: "updated well" });
 });
 server.post(path + "AddCostItems/", (req, res) => {
   insertIntoCosts(`${req.body.businessName}_Costs`, req.body, res);
@@ -628,7 +627,6 @@ let updateNextDateInventory = (
   previousInventory
 ) => {
   console.log("638 = ", businessName, ProductsList, date, previousInventory);
-  // return;
   let index = 0;
   let recurciveUpdate = () => {
     let productId = ProductsList[index].ProductId,
@@ -686,9 +684,6 @@ let updateNextDateInventory = (
   recurciveUpdate();
 };
 function insertIntoCosts(businessName, data, res) {
-  // console.log("businessName " + businessName);
-  // console.log("datas=", data);
-  //  costName varchar(3000),unitCost
   let check = `select * from ${businessName} where costName='${data.Costname}' `;
   connection.query(check, (err, result1) => {
     if (err) return res.json({ err });
@@ -1091,4 +1086,96 @@ server.post(path + "updateMyexpencesList/", async (req, res) => {
       res.json({ data: "updated" });
     }
   });
+});
+
+server.post(path + "deleteSales_purchase/", async (req, res) => {
+  let transactionId = req.body.transactionId;
+  let businessName = req.body.businessName;
+  let Delet = `delete from ${businessName}_Transaction where transactionId=${transactionId}`;
+  let x = await Auth(req.body.token);
+  // ownerId;BusinessName;
+  let verify = `select * from Business where BusinessName='${businessName}' and ownerId='${x}' `;
+  connection.query(verify, (err, responce) => {
+    if (err) {
+      console.log(err);
+      res.json({ data: err, err });
+    } else {
+      console.log(responce);
+      if (responce.length > 0) {
+        // res.json({ data: responce });
+        connection.query(Delet, (err, results) => {
+          if (err) {
+            console.log(err);
+            return res.json({ data: err, err });
+          } else {
+            return res.json({ data: "deleted", results });
+          }
+        });
+      } else res.json({ data: "NotAllowedByYou" });
+      return;
+    }
+  });
+});
+server.post(path + "deleteCostData", async (req, res) => {
+  // businessName: "waterBusiness";
+  // costName: "taxi";
+  // costsId: 1;
+  // unitCost: 100;
+  let businessName = req.body.businessName,
+    costsId = req.body.costsId,
+    Token = req.body.Token;
+  let userId = await Auth(Token);
+  let select = `select * from Business where BusinessName= '${businessName}' and ownerId ='${userId}'`;
+  connection.query(select, (err, responce) => {
+    if (err) console.log(err);
+    if (responce.length > 0) {
+      let deleteCostItem = `delete from ${businessName}_Costs where costsId='${costsId}'`;
+      connection.query(deleteCostItem, (err, results) => {
+        if (err) console.log(err);
+        if (results) {
+          res.json({ data: "deleted" });
+        }
+        console.log(results);
+      });
+    } else {
+      res.json({ data: "youAreNotAllowed" });
+    }
+  });
+});
+server.post(path + "GetMinimumQty/", (req, res) => {
+  let token = req.body.token,
+    businessName = req.body.businessName,
+    select = `select * from ${businessName}_Transaction,${businessName}_products where productIDTransaction=ProductId order by registeredTime desc limit 1`;
+
+  connection.query(select, (err, results) => {
+    if (err) {
+      console.log(err);
+
+      res.json({ data: "err", err });
+    }
+    if (results) {
+      res.json({ data: results });
+      console.log("@GetMinimumQty ", results);
+    }
+  });
+  // res.json({ data: req.body });
+});
+server.post(path + "getMaximumSales/", (req, res) => {
+  let DateRange = req.body.DateRange,
+    fromDate = DateRange.fromDate,
+    toDate = DateRange.toDate,
+    businessName = req.body.businessName,
+    token = req.body.token;
+  let select = `select * from ${businessName}_products, ${businessName}_Transaction where  ProductId = productIDTransaction and registeredTime between '${toDate}' and '${fromDate}'`;
+  connection.query(select, (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({ data: "err", err });
+    }
+    if (results) {
+      console.log(results);
+      return res.json({ data: results });
+    }
+  });
+  // res.json({ data: req.body });
 });

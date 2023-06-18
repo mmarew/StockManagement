@@ -12,6 +12,7 @@ import { LinearProgress } from "@mui/material";
 import { InitialContext } from "../UserContext/UserContext";
 
 function OpenBusiness() {
+  localStorage.setItem("openedBusiness", "myBusiness");
   const savedContext = useContext(InitialContext);
   const [ownersName, setownersName] = savedContext;
   const [ActiveBody, setBody] = useState();
@@ -128,6 +129,7 @@ function OpenBusiness() {
       <LinearProgress id="LinearProgress" className="LinearProgress" />
       <div className="businessInfoWrapper">
         <Outlet />
+        <div></div>
       </div>
     </div>
   );

@@ -6,8 +6,6 @@ function SearchExpenceTransaction({
   response,
   setshowEachItems,
 }) {
-  console.log(showEachItems, "response is ", response, setshowEachItems);
-
   let handleExpencesTransactions = (response) => {
     let expenceTransaction = response.data.expenceTransaction;
     console.log("expenceTransaction = ", expenceTransaction);

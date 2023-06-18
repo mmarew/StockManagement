@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import axios from "axios";
-
+import "./SearchProducts.css";
 function SearchProducts({ response }) {
   let businessName = localStorage.getItem("businessName");
   let serverAddress = localStorage.getItem("targetUrl");
@@ -18,6 +18,7 @@ function SearchProducts({ response }) {
       $("#productName_" + items.ProductId).val(items.productName);
       $("#productPrice_" + items.ProductId).val(items.productsUnitPrice);
       $("#productCost_" + items.ProductId).val(items.productsUnitCost);
+      $("#minimumQty_" + items.ProductId).val(items.minimumQty);
     });
   }, [searchedProducts]);
   let handleProductsInput = (e) => {
@@ -34,8 +35,10 @@ function SearchProducts({ response }) {
       ob = {},
       productCost_ = "productCost_" + id,
       productPrice_ = "productPrice_" + id,
-      productName_ = "productName_" + id;
-    let btnId = "updateProducts_" + id;
+      productName_ = "productName_" + id,
+      btnId = "updateProducts_" + id,
+      minimumQty = "minimumQty_" + id;
+    ob.minimumQty = $("#" + minimumQty).val();
     ob.productPrice = $("#" + productPrice_).val();
     ob.productName = $("#" + productName_).val();
     ob.productCost = $("#" + productCost_).val();
@@ -60,6 +63,7 @@ function SearchProducts({ response }) {
             <th>product Name</th>
             <th>product Price</th>
             <th>product Cost</th>
+            <th>minimum Qty</th>
           </tr>
           {searchedProducts?.map((items) => {
             console.log(items);
@@ -81,7 +85,7 @@ function SearchProducts({ response }) {
                     name={items.ProductId}
                     onChange={handleProductsInput}
                     id={"productPrice_" + items.ProductId}
-                    type="text"
+                    type="number"
                   />
                 </td>
 
@@ -90,7 +94,15 @@ function SearchProducts({ response }) {
                     name={items.ProductId}
                     onChange={handleProductsInput}
                     id={"productCost_" + items.ProductId}
-                    type="text"
+                    type="number"
+                  />
+                </td>
+                <td>
+                  <input
+                    name={items.ProductId}
+                    onChange={handleProductsInput}
+                    id={"minimumQty_" + items.ProductId}
+                    type="number"
                   />
                 </td>
                 <td>
@@ -112,5 +124,4 @@ function SearchProducts({ response }) {
     </div>
   );
 }
-
 export default SearchProducts;
