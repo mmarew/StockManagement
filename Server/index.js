@@ -86,7 +86,7 @@ server.post(path + "getBusiness/", (req, res) => {
       // console.log(result);
       myBusiness = result;
     }
-    let getEmployeerBusiness = `select * from employeeTable , Business where userIdInEmployee='${userID}'and Business.BusinessID=employeeTable.BusinessIDEmployee`;
+    let getEmployeerBusiness = `select * from employeeTable , Business where userIdInEmployee='${userID}' and Business.BusinessID=employeeTable.BusinessIDEmployee`;
     connection.query(getEmployeerBusiness, (err, results) => {
       if (err) return res.json({ err });
       if (result) {
@@ -519,7 +519,7 @@ server.post(path + "searchProducts/", (req, res) => {
       } else return res.json({ data: costResults });
     });
   } else {
-    res.json({ data: "Bad request.", products: "Bad request" });
+    res.json({ data: "Bad request.", products: "Bad request", selectSearches });
   }
 });
 
@@ -1178,4 +1178,27 @@ server.post(path + "getMaximumSales/", (req, res) => {
     }
   });
   // res.json({ data: req.body });
+});
+server.post(path + "removeEmployeersBusiness/", async (req, res) => {
+  // return res.json({ data: req.body });
+  let userID = await Auth(req.body.token);
+  let getEmployeerBusiness = `select * from employeeTable where userIdInEmployee='${userID}' and BusinessIDEmployee='${req.body.BusinessID}'`;
+  connection.query(getEmployeerBusiness, (err, results) => {
+    if (err) console.log(err);
+    // res.json({ data: results });
+    if (results.length > 0) {
+      let deleteData = `delete from employeeTable where userIdInEmployee='${userID}' and BusinessIDEmployee='${req.body.BusinessID}'`;
+      connection.query(deleteData, (error, resultsOfSelect) => {
+        if (error) {
+          console.log(error);
+          return res.json({ data: error, error });
+        }
+        if (resultsOfSelect) {
+          return res.json({ data: resultsOfSelect });
+        } else return res.json({ data: "alreadyDeleted" });
+      });
+    } else {
+      res.json({ data: "NoDataLikeThis" });
+    }
+  });
 });
