@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
 import "./AddTotalSales.css";
 import $ from "jquery";
+import { Button, TextField } from "@mui/material";
 function AddTotalSales({ Time }) {
   let ProductId = [];
   let serverAddress = localStorage.getItem("targetUrl");
@@ -109,7 +110,7 @@ function AddTotalSales({ Time }) {
             action=""
             onSubmit={sendFormDataToServer}
           >
-            <input
+            <TextField
               onChange={(e) => {
                 console.log(e.target.value);
                 setselectedTime(e.target.value);
@@ -118,47 +119,55 @@ function AddTotalSales({ Time }) {
               type="date"
               name="dateInTotalSales"
               id="dateIdInTotalSales"
-            />
+            />{" "}
+            <br />
             {ProductsList?.map((item) => {
               return (
                 <div key={item.ProductId}>
-                  <br />
                   <div className="productName-transaction">
                     {" "}
                     <h4>{item.productName}</h4>
+                    <br />
                   </div>
-                  <input
+                  <TextField
                     required
                     target={item.ProductId}
                     onChange={collectFormData}
                     className={"productInput"}
                     type="text"
                     name={"purchaseQty" + item.ProductId}
-                    placeholder="Purchase quantity"
+                    label="Purchase quantity"
                   />
-
-                  <input
+                  <br />
+                  <TextField
                     required
                     onChange={collectFormData}
                     className={"productInput"}
                     type="text"
                     name={"salesQuantity" + item.ProductId}
-                    placeholder="Sales quantity"
+                    label="Sales quantity"
                   />
-                  <input
+                  <br />
+                  <TextField
                     required
                     onChange={collectFormData}
                     className={"productInput"}
                     type="text"
                     name={"wrickageQty" + item.ProductId}
-                    placeholder="Broken quantity"
+                    label="Broken quantity"
                   />
                 </div>
               );
             })}
-            <button type="submit" className="RegisterSales">
+            <br />
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              className="RegisterSales"
+            >
               Register
-            </button>
+            </Button>
           </form>
         ) : (
           "No product list found"

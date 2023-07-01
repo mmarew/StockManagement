@@ -3,7 +3,11 @@ import React, { useEffect, useState } from "react";
 import singleSalesCss from "./AddSingleSales.module.css";
 import $ from "jquery";
 import currentDates from "../Date/currentDate";
+import { Button } from "@material-ui/core";
+import { Input, TextField } from "@mui/material";
 function AddSingleSales() {
+  // setShowHiddenProducts;
+  const [showHiddenProducts, setShowHiddenProducts] = useState(false);
   const [DailyTransaction, setDailyTransaction] = useState([]);
   let serverAddress = localStorage.getItem("targetUrl");
   const [productDetailes, setproductDetailes] = useState([]);
@@ -62,7 +66,7 @@ function AddSingleSales() {
     }
     $(".LinearProgress").hide();
   };
-  let showHiddenProducts = (itemsId, itemsClass) => {
+  let showHiddenProducts1 = (itemsId, itemsClass) => {
     let singleTransactionForm = document.querySelectorAll(
       ".singleTransactionForm input"
     );
@@ -211,17 +215,26 @@ function AddSingleSales() {
         onSubmit={handleSearchSubmit}
       >
         <h3>Search Products</h3>
-        <input name="singleSalesDate" id="singleSalesDate" type="date" />
-
-        <input
+        <TextField
+          label="Date "
+          name="singleSalesDate"
+          id="singleSalesDate"
+          type="date"
+        />
+        <br />
+        <TextField
+          required
           name="searchInput"
           onInput={handleSearchableProductInput}
-          placeholder="Type Product Name"
+          label="Type Product Name"
           id=""
           className=""
           type={"search"}
         />
-        <button type="Submit">Search</button>
+        <br />
+        <Button color="primary" variant="contained" type="Submit">
+          Search
+        </Button>
       </form>
       {/* <button onClick={() => getTotalRegiters("getAllTransaction")}>
         View All Daily Transactions
@@ -237,7 +250,9 @@ function AddSingleSales() {
                 >
                   <h4>product Name: {items.productName}</h4>
                   <div className={singleSalesCss.getOrRegisterProducts}>
-                    <div
+                    <Button
+                      variant="contained"
+                      color="primary"
                       className={
                         "class_" +
                         items.ProductId +
@@ -245,48 +260,68 @@ function AddSingleSales() {
                         singleSalesCss.getProducts
                       }
                       onClick={() => {
-                        showHiddenProducts(
-                          items.ProductId,
-                          "class_" + items.ProductId
-                        );
+                        setShowHiddenProducts(true);
                       }}
                     >
                       Register
-                    </div>
-                    <div
+                    </Button>
+
+                    <Button
+                      color="primary"
+                      variant="contained"
                       onClick={() => getTotalRegiters(items.ProductId)}
                       className={singleSalesCss.getProducts}
                     >
                       Get
-                    </div>
+                    </Button>
                   </div>
-                  <input
-                    className={items.ProductId + " dailyRegistrationInputs"}
-                    onInput={handleSalesTransactionInput}
-                    name="purchaseQty"
-                    placeholder="purchase quantity"
-                  />
-                  <input
-                    className={items.ProductId + " dailyRegistrationInputs"}
-                    onInput={handleSalesTransactionInput}
-                    name="salesQty"
-                    placeholder="Sales quantity"
-                  />
-                  <input
-                    className={items.ProductId + " dailyRegistrationInputs"}
-                    onInput={handleSalesTransactionInput}
-                    name="brokenQty"
-                    placeholder="Broken quantity"
-                  />
-                  <input
-                    className={items.ProductId + " dailyRegistrationInputs"}
-                    onInput={handleSalesTransactionInput}
-                    name="Description"
-                    placeholder="Description"
-                  />
-                  <button className={items.ProductId} type="submit">
-                    ADD
-                  </button>
+                  <br />
+                  {showHiddenProducts && (
+                    <div>
+                      <TextField
+                        type="number"
+                        required
+                        className={items.ProductId + " dailyRegistrationInputs"}
+                        onInput={handleSalesTransactionInput}
+                        name="purchaseQty"
+                        label="purchase quantity"
+                      />
+                      <br />
+                      <br />
+                      <TextField
+                        type="number"
+                        required
+                        className={items.ProductId + " dailyRegistrationInputs"}
+                        onInput={handleSalesTransactionInput}
+                        name="salesQty"
+                        label="Sales quantity"
+                      />
+                      <br />
+                      <br />
+                      <TextField
+                        type="number"
+                        className={items.ProductId + " dailyRegistrationInputs"}
+                        onInput={handleSalesTransactionInput}
+                        name="brokenQty"
+                        label="Broken quantity"
+                      />
+                      <br />
+                      <br />
+                      <TextField
+                        required
+                        className={items.ProductId + " dailyRegistrationInputs"}
+                        onInput={handleSalesTransactionInput}
+                        name="Description"
+                        label="Description"
+                      />
+                      <br />
+                      <br />
+                      <Button color="primary" variant="contained" type="submit">
+                        ADD
+                      </Button>
+                    </div>
+                  )}
+                  <br />
                 </form>
               </div>
             );

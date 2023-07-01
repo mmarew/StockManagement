@@ -1,27 +1,31 @@
 .navLinks {
-  background-color: black;
   display: flex;
   justify-content: center;
 }
 .navLinks .Lists {
   color: white;
   text-decoration: none;
-  padding: 10px;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 16px;
+  margin-right: 3vw;
 }
 .Lists:hover {
-  background: green;
+  border-bottom: solid 3px white;
 }
-.Lists {
-  margin: 0 2px;
-  display: flex;
-  align-items: center;
-  height: 20px;
-  padding: 2px 0;
-  max-width: 100px;
-  overflow: hidden;
-}
+
 .active {
-  background-color: blue;
+  background-color: #1976d2;
+}
+.MuiBox-root header {
+  /* prevent popup notification color impact */
+  background-color: #1976d2;
+  color: #fff;
+}
+.navBar {
+  display: block;
+}
+@media screen and (min-width: 768px) {
+  .navBar {
+    display: none;
+  }
+  /* styles applied when screen width is at least 768 pixels */
 }

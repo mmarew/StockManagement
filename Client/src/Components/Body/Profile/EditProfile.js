@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import EditProfileCss from "./EditProfile.module.css";
 
 import $ from "jquery";
-import { LinearProgress } from "@mui/material";
+import { LinearProgress, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 let serverUrl = localStorage.getItem("targetUrl");
 function EditProfile() {
@@ -87,14 +87,16 @@ function EditProfile() {
           action=""
         >
           <LinearProgress id={EditProfileCss.LinearProgress2} />
-          <input
+          <TextField
+            className={EditProfileCss.TextFieldClass}
             required
             name="fullName"
             onChange={handleRegistrationChange}
             type="text"
             placeholder="Full Name"
           />
-          <input
+          <TextField
+            className={EditProfileCss.TextFieldClass}
             required
             name="registerPhone"
             onChange={handleRegistrationChange}
@@ -102,7 +104,8 @@ function EditProfile() {
             placeholder="phone number"
           />
 
-          <input
+          <TextField
+            className={EditProfileCss.TextFieldClass}
             required
             name="registerPassword"
             onChange={handleRegistrationChange}
@@ -112,13 +115,15 @@ function EditProfile() {
           {/* ////////////////// */}
           {changePassword ? (
             <>
-              <input
+              <TextField
+                className={EditProfileCss.TextFieldClass}
                 required
                 name="password"
                 type="password"
                 placeholder="Type new password"
               />
-              <input
+              <TextField
+                className={EditProfileCss.TextFieldClass}
                 required
                 type="password"
                 name="retypePassword"
@@ -141,6 +146,7 @@ function EditProfile() {
           )}
 
           <input
+            className={EditProfileCss.TextFieldClass}
             name="submitButton"
             type="submit"
             placeholder=""

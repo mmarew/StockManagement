@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useState } from "react";
 import $, { each } from "jquery";
 import { confirmAlert } from "react-confirm-alert";
+import { Button, TextField } from "@mui/material";
+import EmployeeSearchCss from "./EmployeeSearch.module.css";
 const EmployeeSearch = () => {
   let serverAddress = localStorage.getItem("targetUrl");
   const [InputValue, setInputValue] = useState();
@@ -88,14 +90,24 @@ const EmployeeSearch = () => {
         }}
       >
         <h4 className="nameLabel">Employee Name / Phone</h4>
-        <input
-          required
-          id="employeeNameToBeSearched"
-          onChange={collectInput}
-          name="employeeNameToBeSearched"
-          type="search"
-        />
-        <input type="submit" value="search" />
+        <div className={EmployeeSearchCss.searchWrapper}>
+          <TextField
+            label="Employee Name"
+            required
+            className={EmployeeSearchCss.MuiInputBase_root1}
+            id={EmployeeSearchCss.employeeNameToBeSearched}
+            onChange={collectInput}
+            name="employeeNameToBeSearched"
+            type="search"
+          />
+          <Button
+            className={EmployeeSearchCss.searchButton}
+            variant="contained"
+            type="submit"
+          >
+            search
+          </Button>
+        </div>
       </form>
       {console.log("searchedEmployee", searchedEmployee)}
       {searchedEmployee?.map((items) => {

@@ -1,23 +1,20 @@
 .userRegistrationForm {
   background-color: white;
-  padding: 20px 10px;
+  padding: 0 30px 20px 30px;
   margin: 20px auto;
   width: fit-content;
   display: flex;
   flex-direction: column;
   border-radius: 10px;
+  align-items: center;
 }
 .userRegistrationForm input {
-  margin: 10px auto;
+  /* margin: 10px auto; */
   width: 250px;
-  padding: 5px;
+  padding: 10px;
 }
-[name="submitButton"] {
-  background-color: blue;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
+.userRegistrationSubmitBtn {
+  margin: 20px 0;
 }
 #LinearProgress2 {
   display: none;

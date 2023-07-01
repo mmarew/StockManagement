@@ -1,0 +1,49 @@
+.LeftSideWrapper {
+  width: 100%;
+  text-align: center;
+}
+.imgLeft:hover,
+.imgLeftBusiness:hover,
+.LeftSideWrapper ul li:hover {
+  background-color: rgb(6, 101, 27);
+  color: white;
+}
+.activeClass {
+  background-color: rgb(25, 118, 210);
+  color: white;
+}
+.activeClass div img {
+  filter: invert(1);
+  color: white;
+}
+.LeftSideWrapper ul li:hover div img {
+  filter: invert(1);
+  color: white;
+}
+
+.LeftSideWrapper ul li {
+  padding: 10px 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-around;
+}
+.LeftSideWrapper ul li div {
+  width: 100px;
+  display: flex;
+  justify-content: flex-start;
+}
+.imgLeftBusiness {
+  width: 20px;
+  margin-right: 10px;
+}
+.imgLeft {
+  width: 30px;
+  margin-right: 10px;
+}
+.LeftSideWrapper ul {
+  list-style: none;
+  padding: 0px;
+  width: 80%;
+  margin: auto;
+  margin-top: 0px;
+}

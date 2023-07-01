@@ -1,0 +1,106 @@
+.createdBusinessWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.MainBusinessWrapper {
+  display: flex;
+  justify-content: center;
+}
+.LeftSideBusinessWrapper {
+  display: none;
+}
+.MiddelSideBusinessWrapper {
+  width: 100vw;
+  max-width: 700px;
+}
+.createBusiness {
+  max-width: fit-content;
+  margin-left: 15px !important;
+  /* margin: 1px auto !important; */
+}
+.Business {
+  margin-top: 10px;
+  padding: 10px 20px;
+  margin: 10px;
+  background-color: white;
+  border-radius: 10px;
+}
+.welcomeMessage {
+  text-align: center;
+}
+.BusinessWrapper {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.businessName {
+  padding: 10px;
+}
+.businessButton {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+}
+.businessButton button {
+  /* background-color: blue; */
+  /* color: white; */
+  /* padding: 15px; */
+  border: none;
+  margin: 0 5px;
+  /* border-radius: 10px; */
+}
+.updateWrapper {
+  display: none;
+  flex-direction: column;
+  margin-top: 20px;
+}
+.updateWrapper div {
+  text-align: center;
+  margin-top: 20px;
+}
+.updateWrapper input {
+  max-width: 300px;
+  padding: 7px;
+}
+.updateWrapper div button {
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 10px;
+  border: 10px;
+  margin: 0 5px;
+  border-radius: 10px;
+}
+.LinearProgress {
+  display: block;
+}
+
+@media screen and (min-width: 768px) {
+  .createdBusinessWrapper {
+    justify-content: flex-start;
+  }
+  .LeftSideBusinessWrapper {
+    width: 20vw;
+    background-color: white;
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .MainBusinessWrapper {
+    justify-content: flex-start;
+  }
+
+  .MiddelSideBusinessWrapper {
+    width: 80vw;
+    max-width: 700px;
+  }
+  .RightSideBusinessWrapper {
+    width: 0vw;
+  }
+}

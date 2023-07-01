@@ -1,7 +1,6 @@
 import "./App.css";
 import Transaction from "./Components/Body/Transaction/Transaction";
 import Report from "./Components/Body/Report/Report";
-import Nav from "./Components/Nav/Nav";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Profile from "./Components/Body/Profile/Profile";
 import Business from "./Components/Body/Business/Business";
@@ -21,11 +20,10 @@ import AddCostTransaction from "./Components/Body/Business/AddCostTransaction";
 import AddSalesTransaction from "./Components/Body/Business/AddSalesTransaction";
 import GetMinimumQty from "./Components/Body/Business/GetMinimumQty";
 import GetMaximumSales from "./Components/Body/Business/GetMaximumSales";
-import SearchAppBar from "./MuiNav";
+import NavBar from "./Components/Nav/MuiNav";
 function App() {
   return (
     <div className="App">
-      <SearchAppBar />
       <Router>
         <Routes>
           <Route
@@ -41,7 +39,7 @@ function App() {
             path="/help"
             element={
               <>
-                {/* <Nav /> */}
+                {/* <NavBar /> */}
                 <Help />
               </>
             }
@@ -66,7 +64,6 @@ function App() {
             path="/Reports"
             element={
               <>
-                <Nav />
                 <Report />
               </>
             }
@@ -75,7 +72,7 @@ function App() {
             path="/Profiles"
             element={
               <>
-                <Nav />
+                <NavBar />
                 <Profile />
               </>
             }
@@ -84,7 +81,7 @@ function App() {
             path="/Business"
             element={
               <>
-                <Nav />
+                <NavBar />
                 <Business />
               </>
             }
@@ -109,11 +106,13 @@ function App() {
             path="/"
             element={
               <>
-                <Nav />
+                <NavBar />
+                {/* <Nav /> */}
                 <Business />
               </>
             }
           />
+
           <Route path="/OpenBusiness" element={<OpenBusiness />}>
             <Route
               path=""
@@ -144,11 +143,11 @@ function App() {
                 element={<AddCostTransaction />}
               ></Route>
 
-              <Route
+              {/* <Route
                 path="singleSalestransaction"
                 element={<AddSingleSales />}
               />
-              <Route path="totalSalestransaction" element={<AddTotalSales />} />
+              <Route path="totalSalestransaction" element={<AddTotalSales />} /> */}
             </Route>
           </Route>
         </Routes>

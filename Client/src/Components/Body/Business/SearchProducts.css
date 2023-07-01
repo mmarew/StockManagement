@@ -1,17 +1,20 @@
 #searchProduct {
   display: flex;
-  width: fit-content;
+  max-width: 300px;
   margin: 10px auto;
   background-color: #ffffff;
   padding: 10px;
   border-radius: 10px;
   flex-direction: column;
 }
+.searchField {
+  /* padding: 40px 0; */
+}
 #searchProduct input,
 select {
-  padding: 5px;
+  /* padding: 5px;
   margin-left: 10px;
-  margin: 5px;
+  margin: 5px; */
 }
 .searchBtn {
   background-color: blue;

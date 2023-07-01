@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
 import "./AddCostItems.css";
 import $ from "jquery";
+import { Button, TextField } from "@mui/material";
 function AddCostItems() {
   let serverAddress = localStorage.getItem("targetUrl");
   const [data, setdata] = useState({});
@@ -45,24 +46,34 @@ function AddCostItems() {
     <div>
       <h1 className="titleToRegistrationForm">Forms To Register Costs</h1>
       <form className="form-add-cost" onSubmit={submitCosts}>
-        <div className="dates">
-          <span>Select Date</span>
-          <input required type="date" name="date" id="dateIdInCost" />
-        </div>
-        <input
+        <TextField
+          className="inputToCotsRegistration"
+          label="Date"
+          required
+          type="date"
+          name="date"
+          id="dateIdInCost"
+        />
+
+        <br />
+        <TextField
           className="inputToCotsRegistration"
           required
           name="Costname"
-          placeholder="Cost name"
+          label="Cost name"
           onChange={collectInputInformation}
         />
-        <input
+        <br />
+        <TextField
           className="inputToCotsRegistration"
           name="costPrice"
-          placeholder="Cost price"
+          label="Cost price"
           onChange={collectInputInformation}
         />
-        <button type="Submit">submit</button>
+        <br />
+        <Button variant="contained" type="Submit">
+          submit
+        </Button>
       </form>
     </div>
   );

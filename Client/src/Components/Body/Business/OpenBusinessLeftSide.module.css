@@ -1,0 +1,55 @@
+.listWrapper {
+  width: 80%;
+  margin: auto;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  padding: 0 5px;
+}
+.activeClass {
+  background-color: rgb(25, 118, 210);
+}
+.activeClass a {
+  color: white;
+}
+.activeClass .TransactionIcon {
+  color: white;
+  filter: invert(0);
+}
+.activeClass .nonTransaction {
+  color: white;
+  filter: invert(1);
+}
+.openBusinessTabLeft {
+  text-decoration: none;
+  margin: 5px 0;
+  /* padding: 5px 0; */
+  text-align: start;
+  padding: 5px 3vw;
+  display: flex;
+}
+
+.TransactionIcon {
+  filter: invert(1);
+  width: 20px;
+}
+.openBusinessTabLeft a {
+  text-decoration: none;
+  margin-left: 7px;
+  margin-top: 6px;
+}
+.openBusinessTabLeft:hover {
+  background-color: rgb(7, 136, 95);
+  text-decoration: none;
+}
+.openBusinessTabLeft:hover a {
+  color: white;
+}
+.openBusinessTabLeft:hover img {
+  filter: invert(0);
+}
+
+.openBusinessTabLeft:hover .nonTransaction {
+  filter: invert(1);
+}

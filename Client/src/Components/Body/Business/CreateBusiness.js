@@ -1,8 +1,11 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./CreateBusiness.css";
 import $ from "jquery";
-function CreateBusiness({ getBusiness, setnewBusiness }) {
+function CreateBusiness({ getBusiness, setnewBusiness, setShowProgressBar }) {
+  // console.log(getBusiness, setnewBusiness, setShowProgressBar);
+  // return;
+
   let serverAddress = localStorage.getItem("targetUrl");
   const [businessData, setbusinessData] = useState({});
   let handleCreateForm = (e) => {
@@ -31,11 +34,14 @@ function CreateBusiness({ getBusiness, setnewBusiness }) {
     {
       console.log("businessData is = ", businessData);
     }
-    $(".LinearProgress").show();
+    console.log("setShowProgressBar", setShowProgressBar);
+    setShowProgressBar(true);
+
     let response = await axios.post(
       serverAddress + "createBusiness/",
       businessData
     );
+    setShowProgressBar(false);
     console.log(response.data);
     let data = response.data.data;
     if (data == "created well") {
@@ -69,9 +75,13 @@ _products: 0 }  */
     console.log("cancelBusinessCreation");
     console.log("setnewBusiness", setnewBusiness);
     // newBusiness = "";
+    setShowProgressBar(false);
     setnewBusiness("");
     $(".LinearProgress").hide();
   };
+  useEffect(() => {
+    setShowProgressBar(false);
+  }, []);
   return (
     <div>
       <form action="" className="createBusinessForm" onSubmit={submitAlldatas}>

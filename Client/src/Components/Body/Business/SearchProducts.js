@@ -44,7 +44,7 @@ function SearchProducts({ response }) {
     ob.productCost = $("#" + productCost_).val();
     ob.id = id;
     ob.businessName = businessName;
-    $(".LinearProgress").css("display", "block");
+
     let response = await axios
       .post(serverAddress + "updateProducts/", ob)
       .then((datas) => {

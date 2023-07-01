@@ -1,6 +1,7 @@
+import { TextField, Button } from "@material-ui/core";
 import axios from "axios";
 import React, { useState } from "react";
-import "./Register.css";
+import RegisterCss from "./Register.module.css";
 import $ from "jquery";
 import { LinearProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -31,41 +32,138 @@ function Register() {
   };
   return (
     <form
-      className="userRegistrationForm"
+      className={RegisterCss.userRegistrationForm}
       onSubmit={handleRegistrationSubmit}
       action=""
     >
       <LinearProgress id="LinearProgress2" />
-      <input
+      <TextField
         required
         name="fullName"
         onChange={handleRegistrationChange}
         type="text"
-        placeholder="Full Name"
+        label="Full Name"
       />
-      <input
+      <TextField
         required
         name="registerPhone"
         onChange={handleRegistrationChange}
         type="tel"
-        placeholder="phone number"
+        label="phone number"
       />
-      <input
+      <TextField
         required
         name="registerPassword"
         onChange={handleRegistrationChange}
-        type="tel"
-        placeholder="Password"
+        type="password"
+        label="Password"
       />
-      <input
+      <Button
+        variant="contained"
         name="submitButton"
         type="submit"
         placeholder=""
-        value="Register"
-      />
-      <a href="/login">Login</a>
+        color="primary"
+        className={RegisterCss.userRegistrationSubmitBtn}
+      >
+        Register
+      </Button>
+      <a href="/login">Login?</a>
     </form>
   );
 }
 
 export default Register;
+
+// function Register() {
+//   const styles = {
+//     backgroundColor: "white",
+//     padding: "20px",
+//     borderRadius: "5px",
+//     width: "200px",
+//     margin: "center",
+//   };
+//   const [values, setValues] = React.useState({
+//     firstName: "",
+//     middleName: "",
+//     lastName: "",
+//     // email: "",
+//     password: "",
+//     confirmPassword: "",
+//   });
+
+//   const handleChange = (prop) => (event) => {
+//     setValues({ ...values, [prop]: event.target.value });
+//   };
+
+//   const handleSubmit = (event) => {
+//     event.preventDefault();
+//     console.log(values);
+//   };
+
+//   return (
+//     <form className={RegisterCss.userRegistrationForm} onSubmit={handleSubmit}>
+//       <TextField
+//         label="First Name"
+//         value={values.firstName}
+//         onChange={handleChange("firstName")}
+//         margin="normal"
+//         required
+//         fullWidth
+//       />
+//       <TextField
+//         label="Middle Name"
+//         value={values.middleName}
+//         onChange={handleChange("middleName")}
+//         margin="normal"
+//         required
+//         fullWidth
+//       />
+//       <TextField
+//         label="Last Name"
+//         value={values.lastName}
+//         onChange={handleChange("lastName")}
+//         margin="normal"
+//         required
+//         fullWidth
+//       />
+//       {/* <TextField
+//         label="Email"
+//         type="email"
+//         value={values.email}
+//         onChange={handleChange("email")}
+//         margin="normal"
+//         required
+//         fullWidth
+//       /> */}
+//       <TextField
+//         label="Password"
+//         type="password"
+//         value={values.password}
+//         onChange={handleChange("password")}
+//         margin="normal"
+//         required
+//         fullWidth
+//       />
+//       <TextField
+//         label="Confirm Password"
+//         type="password"
+//         value={values.confirmPassword}
+//         onChange={handleChange("confirmPassword")}
+//         margin="normal"
+//         required
+//         fullWidth
+//       />
+//       <br />
+//       <Button type="submit" variant="contained" color="primary" fullWidth>
+//         Sign Up
+//       </Button>
+//       <br />
+//       <Button color="primary" variant={"contained"}>
+//         <a href="/login">Login</a>
+//       </Button>
+//     </form>
+//   );
+// }
+
+// export default Register;

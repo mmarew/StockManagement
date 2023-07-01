@@ -3,6 +3,7 @@ import "./AddProducts.css";
 import $ from "jquery";
 import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
+import { Button, TextField } from "@mui/material";
 const AddProducts = () => {
   let serverAddress = localStorage.getItem("targetUrl");
   let token = localStorage.getItem("storeToken");
@@ -57,36 +58,43 @@ const AddProducts = () => {
 
       <form id="registerProductsForm" onSubmit={registerProducts} method="post">
         <div>Date</div>
-        <input required id="productDate" type="date" />
-        <input
+        <TextField required id="productDate" type="date" label="Date" />
+        <br />
+        <TextField
           className="registerProducts"
           onChange={CollectData}
           name="productName"
           type="text"
-          placeholder="Product name"
+          label="Product name"
         />
-        <input
+        <br />
+        <TextField
           className="registerProducts"
           onChange={CollectData}
           name="productUnitCost"
           type="number"
-          placeholder="Purchasing unit cost"
+          label="Purchasing unit cost"
         />
-        <input
+        <br />
+        <TextField
           className="registerProducts"
           onChange={CollectData}
           name="productUnitPrice"
           type="number"
-          placeholder="Salling unit price"
+          label="Salling unit price"
         />
-        <input
+        <br />
+        <TextField
           className="registerProducts"
           onChange={CollectData}
           type="number"
           name="minimumQty"
-          placeholder="Minimum qty"
+          label="Minimum qty"
         />
-        <input type="submit" value="Register" />
+        <br />
+        <Button variant="contained" type="submit">
+          Register
+        </Button>
       </form>
     </div>
   );

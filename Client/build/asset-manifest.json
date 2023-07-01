@@ -1,13 +1,22 @@
 {
   "files": {
-    "main.css": "/static/css/main.7bb7ea64.css",
-    "main.js": "/static/js/main.fd6fb661.js",
+    "main.css": "/static/css/main.df57e6f7.css",
+    "main.js": "/static/js/main.a2aa7b20.js",
+    "static/media/MASETAWOSHAICON.svg": "/static/media/MASETAWOSHAICON.54a2fd866e0f5c7049127a306c6f27f5.svg",
+    "static/media/iconEmployee.svg": "/static/media/iconEmployee.9557ca5a58a3c4a7c853ccd11236fd67.svg",
+    "static/media/SupportBlack.svg": "/static/media/SupportBlack.255c7a81f9ee6676465397a000f89417.svg",
+    "static/media/iconItems.svg": "/static/media/iconItems.50f94a2cc3a3d6b2c1286af495fc2e93.svg",
+    "static/media/iconView.svg": "/static/media/iconView.3f623519af924a2f62f4c4ce88207c0f.svg",
+    "static/media/userIcon.svg": "/static/media/userIcon.0f89759249611a44ce3dfad0b1ecd71c.svg",
+    "static/media/iconSearch.svg": "/static/media/iconSearch.1114e16c4aac3f925fe690d28f03a282.svg",
+    "static/media/businessBlack.svg": "/static/media/businessBlack.b50d998e76e1e743c50467260840a25d.svg",
     "index.html": "/index.html",
-    "main.7bb7ea64.css.map": "/static/css/main.7bb7ea64.css.map",
-    "main.fd6fb661.js.map": "/static/js/main.fd6fb661.js.map"
+    "static/media/icons_transaction.svg": "/static/media/icons_transaction.5dc8f7bb6e3d439ebc2e419fe814b4d2.svg",
+    "main.df57e6f7.css.map": "/static/css/main.df57e6f7.css.map",
+    "main.a2aa7b20.js.map": "/static/js/main.a2aa7b20.js.map"
   },
   "entrypoints": [
-    "static/css/main.7bb7ea64.css",
-    "static/js/main.fd6fb661.js"
+    "static/css/main.df57e6f7.css",
+    "static/js/main.a2aa7b20.js"
   ]
 }

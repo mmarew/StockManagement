@@ -1,20 +1,27 @@
 import React, { useEffect, useState } from "react";
-import "./Business.css";
 import axios from "axios";
 import $ from "jquery";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import CreateBusiness from "./CreateBusiness";
 import { useNavigate } from "react-router-dom";
 import { Button, LinearProgress } from "@mui/material";
-import DeleteBusiness from "./DeleteBusiness";
+import Businessmodulecss from "./Business.module.css";
+import { useContext } from "react";
+import { InitialContext } from "../UserContext/UserContext";
+import MUIConfirm from "../Others/MUIConfirm";
+import SuccessOrError from "../Others/SuccessOrError";
+import LeftSideBusiness from "./LeftSideBusiness";
 let serverAddress = localStorage.getItem("targetUrl");
 function Business() {
   const [BusinessLists, setBusinessLists] = useState(
-    <h4>Your business lists</h4>
+    <h4>Looking for your business lists .... </h4>
   );
+  const savedContext = useContext(InitialContext);
+  const [ownersName, setownersName, ShowProgressBar, setShowProgressBar] =
+    savedContext;
+  const [ShowSuccessError, setSuccessError] = useState({});
   const [newBusiness, setnewBusiness] = useState();
   const [createdBusiness, setcreatedBusiness] = useState([]);
   const [employeerBusiness, setemployeerBusiness] = useState([]);
@@ -26,59 +33,9 @@ function Business() {
     localStorage.setItem("businessName", businessName);
     Navigate("/OpenBusiness");
   };
-  let updateBusinesssName = async (targetBusinessId) => {
-    confirmAlert({
-      title: "Confirm to submit",
-      message: "Are you sure to update this Business name?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: async () => {
-            let businessId = "businessName_" + targetBusinessId,
-              businessname = $("#" + businessId).val();
-            console.log(businessname, targetBusinessId);
-            $("#LinearProgress").show();
-            let updateRes = await axios.post(
-              `${serverAddress}updateBusinessName/`,
-              {
-                businessname,
-                targetBusinessId,
-              }
-            );
-            $("#LinearProgress1").hide();
-            console.log(updateRes.data);
-            let data = updateRes.data.data;
-            if (data == "reservedByOtherBusiness") {
-              alert(
-                "This name is reserved by another company. So please try to use another name to remove naming conflicts. Thankyou"
-              );
-            } else if (data == "update is successfull") {
-              alert(data);
-              $("#businessWrapper_" + targetBusinessId).hide();
-              $("#openEditWrapper" + targetBusinessId).show();
-              $("#businessNameH2_" + targetBusinessId).text(businessname);
+  const [ConfirmRequest, setConfirmRequest] = useState();
+  const [open, setOpen] = useState({});
 
-              localStorage.setItem("businessname", businessname);
-              createdBusiness?.map((items) => {
-                console.log(items);
-                if (targetBusinessId == items.businessId) {
-                  $("#createdBusiness_" + targetBusinessId).remove();
-                  setcreatedBusiness([
-                    ...createdBusiness,
-                    { ...items, businessName: businessname },
-                  ]);
-                }
-              });
-            }
-          },
-        },
-        {
-          label: "No",
-          onClick: () => console.log("Click No"),
-        },
-      ],
-    });
-  };
   let openEmployeerBusiness = (businessID, ownersId, businessName) => {
     console.log(businessID, ownersId);
     localStorage.setItem("businessId", businessID);
@@ -91,8 +48,6 @@ function Business() {
   let editThisBusiness = (businessId, businessName) => {
     console.log(businessId);
     console.log("BusinessName", businessName);
-    // $(".businessButton").show();
-    // $(".update-wrapper").hide();
     $("#businessWrapper_" + businessId).show();
     $("#openEditWrapper" + businessId).hide();
     $("#businessName_" + businessId).val(businessName);
@@ -103,11 +58,13 @@ function Business() {
     setnewBusiness("allow");
   };
   let getBusiness = async () => {
-    $("#LinearProgress").show();
+    setShowProgressBar(true);
+    setcreatedBusiness([]);
+    setemployeerBusiness([]);
     let results = await axios.post(`${serverAddress}getBusiness/`, {
       token,
     });
-    $("#LinearProgress1").hide();
+    setShowProgressBar(false);
     console.log(results.data);
     if (
       results.data.myBusiness?.length == 0 &&
@@ -115,8 +72,8 @@ function Business() {
     ) {
       setBusinessLists(
         <h3>
-          You havn't created business or no business is allowed to administered
-          by you
+          You havn't created business or no business is allowed to be
+          administered by you
         </h3>
       );
       return;
@@ -137,7 +94,6 @@ function Business() {
     $("#businessWrapper_" + businessId).hide();
     $("#openEditWrapper" + businessId).show();
   };
-
   useEffect(() => {
     createdBusiness?.map((items) => {
       console.log(items);
@@ -145,158 +101,328 @@ function Business() {
     });
   }, [createdBusiness]);
   useEffect(() => {
+    console.log(window.location.pathname);
     getBusiness();
   }, []);
+  useEffect(() => {
+    if (open.open) {
+      console.log("open", open);
+      const { businessId, businessName, getBusiness, setBusinessLists } =
+        open.targetdBusiness;
+      if (open.Action == "deleteBusiness") {
+        setConfirmRequest(
+          <MUIConfirm
+            DialogMessage={" delete this business "}
+            Action="deleteBusiness"
+            ShowSuccessError={ShowSuccessError}
+            setSuccessError={setSuccessError}
+            open={open}
+            setOpen={setOpen}
+            targetdBusiness={{
+              businessId,
+              businessName,
+              getBusiness,
+              setBusinessLists,
+            }}
+          />
+        );
+      }
 
+      if (open.Action == "RemoveEmployerBusiness") {
+        let { getBusiness } = open.targetdBusiness;
+        setConfirmRequest(
+          <MUIConfirm
+            DialogMessage={" remove this business "}
+            Action="RemoveEmployerBusiness"
+            ShowSuccessError={ShowSuccessError}
+            setSuccessError={setSuccessError}
+            open={open}
+            setOpen={setOpen}
+            targetdBusiness={{
+              ownerId: open.targetdBusiness.ownerId,
+              businessId,
+              businessName,
+              getBusiness,
+            }}
+          />
+        );
+      }
+      if (open.Action == "updateBusinesssName") {
+        setConfirmRequest(
+          <MUIConfirm
+            DialogMessage={" update this business name "}
+            Action="updateBusinesssName"
+            ShowSuccessError={ShowSuccessError}
+            setSuccessError={setSuccessError}
+            open={open}
+            setOpen={setOpen}
+            targetdBusiness={{
+              businessId,
+              businessName,
+              getBusiness,
+              setBusinessLists,
+              setShowProgressBar,
+              setcreatedBusiness,
+              createdBusiness,
+            }}
+          />
+        );
+      }
+    }
+  }, [open]);
+  useEffect(() => {
+    $(".LinearProgress").css("display", "block");
+  }, [ShowProgressBar]);
   return (
     <>
-      <div className="BusinessWrapper">
-        <LinearProgress id="LinearProgress1" />
-        <button onClick={AddBusiness} className="createBusiness">
-          Create Business
-        </button>
-        <br />
-        {newBusiness == "allow" ? (
-          <CreateBusiness
-            getBusiness={getBusiness}
-            setnewBusiness={setnewBusiness}
-          />
-        ) : (
-          <div>
-            {BusinessLists}
-            <div className="createdBusinessWrapper">
-              {createdBusiness?.map((datas) => {
-                console.log(datas);
-                return (
-                  <div
-                    key={datas.BusinessID}
-                    className="createdBusiness"
-                    id={"createdBusiness_" + datas.BusinessID}
-                  >
-                    <div
-                      className="Business"
-                      id={"eachBusiness_" + datas.BusinessID}
-                    >
-                      <h2
-                        id={"businessNameH2_" + datas.BusinessID}
-                        className="businessName"
-                      >
-                        {datas.BusinessName}
-                      </h2>
-                      <div
-                        className="businessButton"
-                        id={"openEditWrapper" + datas.BusinessID}
-                      >
-                        <Button
-                          variant="contained"
-                          color="success"
-                          onClick={() =>
-                            openThisBusiness(
-                              datas.BusinessID,
-                              datas.BusinessName
-                            )
-                          }
-                        >
-                          open
-                        </Button>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          color="success"
-                          onClick={() =>
-                            editThisBusiness(
-                              datas.BusinessID,
-                              datas.BusinessName
-                            )
-                          }
-                          startIcon={<EditIcon />}
-                        >
-                          Edit
-                        </Button>
-                        {/* <Button>Delete</Button> */}
-                        <Button
-                          color="error"
-                          size="small"
-                          id=""
-                          onClick={() =>
-                            DeleteBusiness(
-                              datas.BusinessID,
-                              datas.BusinessName,
-                              getBusiness,
-                              setBusinessLists
-                            )
-                          }
-                          variant="outlined"
-                          startIcon={<DeleteIcon />}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                      <div
-                        id={"businessWrapper_" + datas.BusinessID}
-                        className="update-wrapper"
-                      >
-                        <input
-                          id={"businessName_" + datas.BusinessID}
-                          placeholder="Business name"
-                          type="text"
-                        />
-                        <div
-                          className="updateCancelWrapper"
-                          id={"updateCancelWrapper_" + datas.BusinessID}
-                        >
-                          <button
-                            onClick={() =>
-                              updateBusinesssName(datas.BusinessID)
-                            }
-                          >
-                            Update
-                          </button>
-                          <button
-                            onClick={() =>
-                              cancelBusinessUpdate(datas.BusinessID)
-                            }
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              {
-                <>
-                  {console.log("employeerBusiness")}
-                  {console.log(employeerBusiness)}
-                  {employeerBusiness?.map((items) => {
-                    console.log(items);
+      {ShowProgressBar && (
+        <LinearProgress
+          className={Businessmodulecss.LinearProgress}
+          id={Businessmodulecss.LinearProgress}
+        />
+      )}
+
+      <div className={Businessmodulecss.MainBusinessWrapper}>
+        <div className={Businessmodulecss.LeftSideBusinessWrapper}>
+          <LeftSideBusiness />
+        </div>
+        <div className={Businessmodulecss.MiddelSideBusinessWrapper}>
+          <div className={Businessmodulecss.BusinessWrapper}>
+            {ownersName != "" ? (
+              <>
+                <br />
+                <h4 className={Businessmodulecss.welcomeMessage}>
+                  Hello {ownersName} , welcome to Smart Stock management system
+                </h4>
+                <br />
+              </>
+            ) : (
+              "PROFILE"
+            )}
+            <Button
+              variant="contained"
+              onClick={AddBusiness}
+              className={Businessmodulecss.createBusiness}
+            >
+              Add
+            </Button>
+            <br />
+            {newBusiness == "allow" ? (
+              <CreateBusiness
+                ShowProgressBar={ShowProgressBar}
+                setShowProgressBar={setShowProgressBar}
+                getBusiness={getBusiness}
+                setnewBusiness={setnewBusiness}
+              />
+            ) : (
+              <div>
+                {BusinessLists}
+                <div className={Businessmodulecss.createdBusinessWrapper}>
+                  {createdBusiness?.map((datas) => {
+                    console.log(datas);
                     return (
-                      <div key={items.employeeId} className="Business">
-                        <h1>{items.BusinessName}</h1>
-                        <div className="businessButton">
-                          <button
-                            onClick={() => {
-                              openEmployeerBusiness(
-                                items.BusinessID,
-                                items.ownerId,
-                                items.BusinessName
-                              );
-                            }}
-                            className=""
+                      <div
+                        key={datas.BusinessID}
+                        className={Businessmodulecss.createdBusiness}
+                        id={"createdBusiness_" + datas.BusinessID}
+                      >
+                        <div
+                          className={Businessmodulecss.Business}
+                          id={"eachBusiness_" + datas.BusinessID}
+                        >
+                          <h2
+                            id={"businessNameH2_" + datas.BusinessID}
+                            className={Businessmodulecss.businessName}
                           >
-                            OPEN
-                          </button>
+                            {datas.BusinessName}
+                          </h2>
+                          <div
+                            className={Businessmodulecss.businessButton}
+                            id={"openEditWrapper" + datas.BusinessID}
+                          >
+                            <Button
+                              variant="contained"
+                              // sx={{
+                              //   width: 70,
+                              //   height: 25,
+                              //   "&:hover": {
+                              //     borderColor: "rgb(25, 118, 210)", // set your desired border color here
+                              //     borderWidth: 2,
+                              //     borderStyle: "solid",
+                              //   },
+                              // }}
+                              onClick={() =>
+                                openThisBusiness(
+                                  datas.BusinessID,
+                                  datas.BusinessName
+                                )
+                              }
+                            >
+                              open
+                            </Button>
+                            <Button
+                              size="small"
+                              sx={{
+                                "&:hover": {
+                                  borderColor: "rgb(25, 118, 210)", // set your desired border color here
+                                  borderWidth: 2,
+                                  borderStyle: "solid",
+                                },
+                              }}
+                              onClick={() =>
+                                editThisBusiness(
+                                  datas.BusinessID,
+                                  datas.BusinessName
+                                )
+                              }
+                              variant="outlined"
+                              startIcon={<EditIcon />}
+                            >
+                              Edit
+                            </Button>
+                            {/* <Button>Delete</Button> */}
+                            <Button
+                              variant="outlined"
+                              startIcon={<DeleteIcon />}
+                              color="error"
+                              size="small"
+                              id=""
+                              onClick={(event) => {
+                                event.preventDefault();
+                                setOpen({
+                                  Action: "deleteBusiness",
+                                  open: true,
+                                  targetdBusiness: {
+                                    businessId: datas.BusinessID,
+                                    businessName: datas.BusinessName,
+                                    getBusiness: getBusiness,
+                                    setBusinessLists: setBusinessLists,
+                                  },
+                                });
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+
+                          <div
+                            id={"businessWrapper_" + datas.BusinessID}
+                            className={Businessmodulecss.updateWrapper}
+                          >
+                            <input
+                              id={"businessName_" + datas.BusinessID}
+                              placeholder="Business name"
+                              type="text"
+                            />
+                            <div
+                              className={Businessmodulecss.updateCancelWrapper}
+                              id={"updateCancelWrapper_" + datas.BusinessID}
+                            >
+                              <Button
+                                onClick={() =>
+                                  // updateBusinesssName(datas.BusinessID)
+                                  setOpen({
+                                    Action: "updateBusinesssName",
+                                    open: true,
+                                    targetdBusiness: {
+                                      createdBusiness,
+                                      setcreatedBusiness,
+                                      setShowProgressBar,
+                                      businessId: datas.BusinessID,
+                                      businessName: datas.BusinessName,
+                                      getBusiness: getBusiness,
+                                      setBusinessLists: setBusinessLists,
+                                    },
+                                  })
+                                }
+                              >
+                                Update
+                              </Button>
+                              {/* //////////////////////////// */}
+                              <Button
+                                onClick={() =>
+                                  cancelBusinessUpdate(datas.BusinessID)
+                                }
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     );
                   })}
-                </>
-              }
-            </div>
+                  {
+                    <>
+                      {console.log("employeerBusiness")}
+                      {console.log(employeerBusiness)}
+                      {employeerBusiness?.map((items) => {
+                        console.log(items);
+                        return (
+                          <div
+                            key={items.employeeId}
+                            className={Businessmodulecss.Business}
+                          >
+                            <h1>{items.BusinessName}</h1>
+                            <div className={Businessmodulecss.businessButton}>
+                              <Button
+                                size="small"
+                                variant="contained"
+                                onClick={() => {
+                                  openEmployeerBusiness(
+                                    items.BusinessID,
+                                    items.ownerId,
+                                    items.BusinessName
+                                  );
+                                }}
+                                className=""
+                              >
+                                OPEN
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  // <MUIConfirm/
+                                  setOpen({
+                                    Action: "RemoveEmployerBusiness",
+                                    open: true,
+                                    targetdBusiness: {
+                                      ownerId: items.ownerId,
+                                      businessId: items.BusinessID,
+                                      businessName: items.BusinessName,
+                                      getBusiness: getBusiness,
+                                      setBusinessLists: setBusinessLists,
+                                    },
+                                  });
+                                }}
+                                // open.targetdBusiness.getBusiness
+                                size="small"
+                                variant="outlined"
+                                startIcon={<DeleteIcon />}
+                                color="error"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  }
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+        {/* <div className={Businessmodulecss.RightSideBusinessWrapper}>
+          Right Side Business Wrapper
+        </div> */}
       </div>
+      {console.log("open.open is ", open.open)}
+      {open.open && ConfirmRequest}
+      {console.log("ShowSuccessError == ", ShowSuccessError)}
+      {ShowSuccessError?.show && (
+        <SuccessOrError request={ShowSuccessError.message} />
+      )}
     </>
   );
 }

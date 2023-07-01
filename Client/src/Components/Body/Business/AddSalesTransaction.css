@@ -1,12 +1,7 @@
 .totalOrsingleSales {
-  background-color: green;
-  color: white;
-  border: none;
-  padding: 10px;
   text-decoration: none;
-  margin: 10px;
-  border-radius: 10px;
+  color: black;
 }
-.activeClas {
-  background-color: blue;
+.selectSalesMenue {
+  width: 300px;
 }

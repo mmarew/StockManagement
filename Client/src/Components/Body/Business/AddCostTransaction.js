@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
 import "./AddCostTransaction.css";
 import $ from "jquery";
+import { Button, TextField } from "@mui/material";
 function AddCostTransaction() {
   let serverAddress = localStorage.getItem("targetUrl");
   const [showCostForm, setshowCostForm] = useState(false);
@@ -89,7 +90,8 @@ function AddCostTransaction() {
         <form onSubmit={handleFormSubmit} className="costTransactionForm">
           <div className="dateDiv">
             <div>Date</div>
-            <input
+            <TextField
+              className="formInputToTransaction"
               required
               name="costDate"
               onChange={collectCotForm}
@@ -101,30 +103,38 @@ function AddCostTransaction() {
             <>
               {costList?.map((items) => {
                 return (
-                  <div className="" key={items.costsId}>
-                    <div className="label"> {items.costName} </div>
-                    <input
+                  <div className="" key={"CostTransAction_" + items.costsId}>
+                    <br />
+                    <div> {items.costName}</div>
+                    <br />
+                    <TextField
                       required
                       type="number"
-                      placeholder="Cost Amount"
+                      label="Cost Amount"
                       name={items.costName.replaceAll(/\s/g, "")}
                       onChange={collectCotForm}
                       className="formInputToTransaction"
                     />
-                    <textarea
+                    <br />
+                    <br />
+                    <TextField
                       required
                       onChange={collectCotForm}
-                      placeholder="Cost Description"
+                      label="Cost Description"
                       className="formInputToTransaction"
                       name={
                         "Description_" + items.costName.replaceAll(/\s/g, "")
                       }
                       type="text"
-                    ></textarea>
+                    ></TextField>
                   </div>
                 );
               })}
-              <button type="submit">Submit</button>
+              <br />
+              <Button variant="contained" color="primary" type="submit">
+                Submit
+              </Button>
+              <br /> <br />
             </>
           ) : (
             <div>

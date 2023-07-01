@@ -4,13 +4,16 @@ import GetMaximumStyle from "./GetMaximumSales.module.css";
 import CurrencyFormat from "react-currency-format";
 import {
   Button,
+  MenuItem,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
 } from "@mui/material";
 import axios from "axios";
 function GetMaximumSales() {
@@ -170,6 +173,7 @@ function GetMaximumSales() {
       }
     });
     console.log("collectedData", collectedData);
+    if (collectedData.length == 0) return;
     let newCollection = [];
     newCollection.push(collectedData[0]);
     for (let index = 1; index < collectedData.length; index++) {
@@ -214,28 +218,32 @@ function GetMaximumSales() {
         <div>
           <label>Select Date Range</label>
         </div>
-        <select
+        <Select
           name="selectTimeRange"
-          className="selectTimeRange"
+          className={GetMaximumStyle.selectTimeRange}
           id="selectTimeRange"
           onChange={changesOnDays}
         >
-          <option value="weekly"> weekly</option>
-          <option value="Monthly"> Monthly</option>
-          <option value="Annualy"> Annualy</option>
-          <option value="Others">Others</option>
-        </select>
+          <MenuItem value="weekly"> weekly</MenuItem>
+          <MenuItem value="Monthly"> Monthly</MenuItem>
+          <MenuItem value="Annualy"> Annualy</MenuItem>
+          <MenuItem value="Others">Others</MenuItem>
+        </Select>
         {SelectedTime == "Others" && (
           <div className={GetMaximumStyle.othersDateRange}>
+            <br />
             <label>From Date</label>
-            <input
+            <br />
+            <TextField
               onChange={handleChangeOnDate}
               required
               name="toDate"
               type="date"
             />
+            <br />
             <label>To Date</label>
-            <input
+            <br />
+            <TextField
               onChange={handleChangeOnDate}
               required
               name="fromDate"
@@ -248,7 +256,7 @@ function GetMaximumSales() {
       {/* {console.log("MaximumDataList", MaximumDataList)} */}
       {/* {JSON.stringify(MaximumDataList)} */}
       {console.log(MaximumDataList.length)}
-      {MaximumDataList?.length > 0 && (
+      {MaximumDataList?.length > 0 && MaximumDataList[0] != undefined && (
         <>
           <div>
             From Date {DateRange.fromDate} To Date {DateRange.toDate}

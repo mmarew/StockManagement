@@ -6,6 +6,7 @@ import ProfileCss from "./Profile.module.css";
 import EditProfile from "./EditProfile";
 import axios from "axios";
 import $ from "jquery";
+import LeftSideBusiness from "../Business/LeftSideBusiness";
 function Profile() {
   const [targetRender, settargetRender] = useState("");
   let navigate = useNavigate();
@@ -59,22 +60,30 @@ function Profile() {
     settargetRender("EditProfile");
   };
   return (
-    <>
-      <div className={ProfileCss.EditDeleteProfileWrapper}>
-        <button onClick={handleEditeProfile}>Edit My Profile</button>
-        <button onClick={deleteProfile}>Delete My profile</button>
+    <div className={ProfileCss.ProfileWrapper}>
+      <div className={ProfileCss.leftOfProfile}>
+        <LeftSideBusiness />
       </div>
-      {targetRender == "EditProfile" ? (
-        <EditProfile />
-      ) : targetRender == "DeleteProfile" ? (
-        ""
-      ) : (
-        ""
-      )}
-      <button onClick={logoutofThisPage} className={ProfileCss.LogoutButton}>
-        Logout My profile
-      </button>
-    </>
+      <div>
+        <div className={ProfileCss.EditDeleteProfileWrapper}>
+          <button onClick={handleEditeProfile}>Edit My Profile</button>
+          <button onClick={deleteProfile}>Delete My profile</button>
+          <button
+            onClick={logoutofThisPage}
+            className={ProfileCss.LogoutButton}
+          >
+            Logout My profile
+          </button>
+        </div>
+        {targetRender == "EditProfile" ? (
+          <EditProfile />
+        ) : targetRender == "DeleteProfile" ? (
+          ""
+        ) : (
+          ""
+        )}
+      </div>
+    </div>
   );
 }
 

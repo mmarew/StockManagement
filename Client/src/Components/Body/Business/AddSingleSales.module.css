@@ -1,31 +1,12 @@
-.singleSalesWrapper {
-  padding-top: 50px;
-}
-.singleSalesWrapper input {
-  margin: 10px;
-  padding: 10px;
-}
 .singleSalesWrapper button {
-  background-color: green;
-  color: white;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  margin: 0 auto;
 }
 .singleTransactionForm {
   width: 310px;
   margin: 10px auto;
   display: flex;
   flex-direction: column;
-  display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.singleTransactionForm input,
-.singleTransactionForm button {
-  display: none;
 }
 
 .getProducts {
@@ -39,6 +20,11 @@
 }
 .getOrRegisterProducts {
   display: flex;
+}
+.getOrRegisterProducts button {
+  padding: 2px 20px;
+  margin: 10px;
+  width: fit-content !important;
 }
 .formToSearchItems {
   display: flex;

@@ -5,6 +5,8 @@ import $ from "jquery";
 import SearchProducts from "./SearchProducts";
 import SearchCosts from "./SearchCosts";
 import SearchSingleTransActions from "./SearchSales_Purchase";
+import { Button, Select, TextField } from "@mui/material";
+import { MenuItem } from "@material-ui/core";
 function SearchManager() {
   let serverAddress = localStorage.getItem("targetUrl");
   const [InputValue, setInputValue] = useState({});
@@ -14,6 +16,14 @@ function SearchManager() {
   const [RequestedSearch, setRequestedSearch] = useState();
   let submitSearch = async (e) => {
     e.preventDefault();
+    console.log();
+    console.log("InputValue.selectSearches", InputValue);
+    if (InputValue.selectSearches == "") {
+      alert(InputValue.selectSearches);
+      new Promise((resolve, reject) => {});
+      return;
+    }
+    // console.log("InputValue", InputValue);
     $(".LinearProgress").css("display", "block");
     if (InputValue.selectSearches == "TRANSACTION") {
       if (InputValue.productName == "" || InputValue.productName == undefined) {
@@ -115,8 +125,10 @@ function SearchManager() {
   /////////////////////////////
 
   let handleChangeInSelect = (e) => {
+    console.log(e);
     if (e != undefined) {
-      let selectSearches = $("#selectSearches").val();
+      const selectSearches = e.target.value;
+      console.log("selectSearches", selectSearches);
       setInputValue({
         ...InputValue,
         selectSearches,
@@ -139,26 +151,38 @@ function SearchManager() {
   return (
     <>
       <form onSubmit={submitSearch} id="searchProduct">
-        <select onChange={handleChangeInSelect} name="" id="selectSearches">
-          <option value="TRANSACTION">SINGLE TRANSACTION</option>
-          <option value="ALLTRANSACTION">ALL TRANSACTION</option>
-          <option value="PRODUCTS">PRODUCTS</option>
-          <option value="COSTS">COSTS</option>
-        </select>
+        <Select
+          required
+          label="choose your "
+          onChange={handleChangeInSelect}
+          name=""
+          id="selectSearches"
+        >
+          {/* <MenuItem value={"default"}>Choose your search</MenuItem> */}
+          <MenuItem value="TRANSACTION">SINGLE TRANSACTION</MenuItem>
+          <MenuItem value="ALLTRANSACTION">ALL TRANSACTION</MenuItem>
+          <MenuItem value="PRODUCTS">PRODUCTS</MenuItem>
+          <MenuItem value="COSTS">COSTS</MenuItem>
+        </Select>
+        <br />
         <div className="searchInputs">
           {console.log("searchTarget", searchTarget)}
           {searchTarget == "ALLTRANSACTION" ? (
             <>
-              From Date
-              <input
+              <label>From Date</label>
+              <TextField
+                className="searchField"
+                label=""
                 required
                 id="fromDate"
                 name="fromDate"
                 type="date"
                 onChange={getInputValues}
               />
-              To Date{" "}
-              <input
+              <br />
+              <label>To Date</label>
+              <TextField
+                className="searchField"
                 required
                 id="toDate"
                 name="toDate"
@@ -168,24 +192,30 @@ function SearchManager() {
             </>
           ) : searchTarget == "TRANSACTION" ? (
             <>
-              <input
+              <TextField
+                className="searchField"
                 required
                 name="productName"
                 id="searchInputs"
                 onChange={getInputValues}
-                placeholder="product Name"
+                label="product Name"
                 type="text"
               />
-              From Date
-              <input
+              <br />
+              <label>From Date</label>
+              <TextField
+                className="searchField"
+                // label="From Date "
                 required
                 id="fromDate"
                 name="fromDate"
                 type="date"
                 onChange={getInputValues}
               />
-              To Date{" "}
-              <input
+              <br />
+              <label>To Date </label>
+              <TextField
+                className="searchField"
                 required
                 id="toDate"
                 name="toDate"
@@ -199,7 +229,10 @@ function SearchManager() {
             ""
           )}
         </div>
-        <input className="searchBtn" type="submit" value={"Search"} />
+        <br />
+        <Button variant="contained" className="searchBtn" type="submit">
+          Search
+        </Button>
       </form>
 
       {RequestedSearch}

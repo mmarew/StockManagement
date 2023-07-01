@@ -1,43 +1,31 @@
 import React, { useEffect } from "react";
-import $ from "jquery";
-import { Link, Outlet } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 import "./AddSalesTransaction.css";
+import { MenuItem, Select } from "@mui/material";
 function AddSalesTransaction() {
+  let myNavigate = useNavigate();
   useEffect(() => {
-    $(".salesOrCosts").hide();
+    // $(".salesOrCosts").hide();
   }, []);
 
-  let toggleActineness = (e) => {
-    console.log(e.target);
-    let totalOrsingleSales =
-      document.getElementsByClassName("totalOrsingleSales");
-    let i = 0;
-    for (i = 0; i < totalOrsingleSales.length; i++) {
-      console.log(totalOrsingleSales[i]);
-      totalOrsingleSales[i].classList.remove("activeClas");
+  let toggleActiveSelections = (e) => {
+    console.log(e.target.value);
+    if (e.target.value == "singleSales") {
+      myNavigate("addSingleSales");
     }
-    let currentBtn = e.target;
-    currentBtn.classList.toggle("activeClas");
-    return "";
+    if (e.target.value == "totalSales") {
+      myNavigate("addTotalSales");
+    }
   };
   return (
-    <div>
-      <Link
-        onClick={toggleActineness}
-        className="totalOrsingleSales"
-        to={"addTotalSales"}
-      >
-        Total Sales
-      </Link>
-      <Link
-        onClick={toggleActineness}
-        className="totalOrsingleSales"
-        to={"addSingleSales"}
-      >
-        Single Sales
-      </Link>
+    <>
+      <div value="default">Choose Sales type</div>
+      <Select className="selectSalesMenue" onChange={toggleActiveSelections}>
+        <MenuItem value="totalSales">Total Sales</MenuItem>
+        <MenuItem value="singleSales">Single Sales</MenuItem>
+      </Select>
       <Outlet />
-    </div>
+    </>
   );
 }
 export default AddSalesTransaction;

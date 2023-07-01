@@ -3,13 +3,10 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  max-width: 350px;
+  max-width: 300px;
   margin: 20px auto;
 }
-.form-add-cost input {
-  padding: 10px;
-  margin: 10px 0;
-}
+
 .form-add-cost button {
   background-color: green;
   color: white;
@@ -22,8 +19,7 @@
   cursor: pointer;
 }
 .dates {
-  display: flex;
-  align-items: center;
+  width: 100%;
 }
 .titleToRegistrationForm {
   padding-top: 10px;

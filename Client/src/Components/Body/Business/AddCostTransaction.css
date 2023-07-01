@@ -1,40 +1,28 @@
 .costTransactionForm {
   background-color: white;
-  padding: 10px;
-  width: 300px;
+  /* padding: 10px; */
+  /* width: 300px; */
   margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
+  /* display: flex; */
+  /* justify-content: center; */
+  /* flex-direction: column; */
 }
-.costTransactionForm div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
+
 .formInputToTransaction {
   padding: 5px;
-  width: 80%;
+  width: 300px;
   margin: 10px auto;
 }
-.costTransactionForm button {
+/* .costTransactionForm button {
   display: block;
-  margin: auto;
-  background-color: green;
+  margin: auto; 
   color: white;
   border: none;
   padding: 10px;
   border-radius: 10px;
   cursor: pointer;
-}
-.label {
-  width: fit-content;
-  margin: auto;
-}
-#costDate {
-  width: 100px;
-  margin: 10px auto;
-}
+} */
+
 .dateDiv {
   text-align: center;
 }

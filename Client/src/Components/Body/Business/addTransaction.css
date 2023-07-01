@@ -1,16 +1,21 @@
 .addTransaction {
   display: flex;
-  justify-content: center;
-  background-color: white;
+  justify-content: flex-start;
 }
 .addTransaction button {
-  background-color: green;
-  color: white;
-  padding: 7px;
-  margin: 5px;
-  border: 0px;
-  border-radius: 10px;
+  border: none;
+  /* color: #6998ff; */
+  font-size: 20px;
+  font-family: Manrope;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin: 10px 20px;
+}
+
+.addTransaction button:hover {
+  color: #6998ff;
 }
 .activeClass {
-  background-color: blue !important;
+  border-bottom: 3px solid #6998ff !important;
 }

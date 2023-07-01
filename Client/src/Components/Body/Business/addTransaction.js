@@ -46,6 +46,7 @@ function AddTransaction({ Time }) {
           Cost
         </button>
       </div>
+      <hr />
       <br />
       <div>{Transaction}</div>
       <Outlet />

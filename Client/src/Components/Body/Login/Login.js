@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import "./Login.css";
+import Loginmodulecss from "./Login.module.css";
 import axios from "axios";
 import $ from "jquery";
-import { LinearProgress } from "@mui/material";
+import loginimg from "../../ICONS/Login/store-5619201_1280.jpg";
+import { Button, LinearProgress, TextField } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 function Login() {
   let serverAddress = localStorage.getItem("targetUrl");
@@ -10,7 +11,8 @@ function Login() {
   const [loginForm, setloginForm] = useState({});
   let submitForm = async (e) => {
     e.preventDefault();
-    $("#LinearProgress").show();
+    $("#LinearProgress").css("display", "block");
+    // $("#LinearProgress").css("display", "block");
     let response = await axios.post(serverAddress + "Login/", loginForm);
     if (response.data.data == "loginSuccessFull") {
       let token = response.data.token;
@@ -35,42 +37,65 @@ function Login() {
   };
   useEffect(() => {
     console.log("verify login");
+    $("#LinearProgress").hide();
   }, []);
 
   return (
-    <div className="">
+    <div className={Loginmodulecss.loginWrapper}>
       {console.log(loginForm)}
-      <form className="loginForm" onSubmit={submitForm} action="">
+      <div className={Loginmodulecss.LeftSide}>
+        <div className={Loginmodulecss.gladMessage}>Glad to see you back</div>
+        <div className={Loginmodulecss.greetingToLogin}>
+          Login to your account to see how your shops are doing?
+        </div>
         <LinearProgress id="LinearProgress" />
-        <input
-          required
-          name="phoneNumber"
-          onChange={handleFormData}
-          type="text"
-          placeholder="phone number"
-        />
-        <input
-          required
-          name="Password"
-          onChange={handleFormData}
-          type="password"
-          placeholder="Password"
-        />
-        <button className="btnLogin" type="submit">
-          Login
-        </button>
-        <Link className="signupRegister" to="/register">
-          Register / Sign Up?
-        </Link>
-        <a
-          className="help"
-          onClick={() => {
-            Navigate("/help");
-          }}
+        <br />
+        <form
+          className={Loginmodulecss.loginForm}
+          onSubmit={submitForm}
+          action=""
         >
-          Help
-        </a>
-      </form>
+          <TextField
+            required
+            name="phoneNumber"
+            onChange={handleFormData}
+            type="text"
+            label="phone number"
+          />
+          <br />
+          <TextField
+            required
+            name="Password"
+            onChange={handleFormData}
+            type="password"
+            label="Password"
+          />
+          <br />
+          <Button
+            variant="contained"
+            color="primary"
+            className={Loginmodulecss.btnLogin}
+            type="submit"
+          >
+            Login
+          </Button>
+          <Link className={Loginmodulecss.signupRegister} to="/register">
+            Don't have an account? Register.
+          </Link>
+          <a
+            className={Loginmodulecss.help}
+            onClick={(e) => {
+              e.preventDefault();
+              Navigate("/help");
+            }}
+          >
+            <h3>Help?</h3>
+          </a>
+        </form>
+      </div>
+      <div className={Loginmodulecss.loginRightSide}>
+        <img src={loginimg} />
+      </div>
     </div>
   );
 }

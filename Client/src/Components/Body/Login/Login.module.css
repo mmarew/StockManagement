@@ -1,0 +1,97 @@
+.loginWrapper {
+  background-color: white;
+  display: flex;
+  height: 100vh;
+}
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  margin: auto;
+  background-color: white;
+  /* padding: 5vw; */
+  /* box-shadow: 2px 2px rgb(220, 244, 245); */
+  border-radius: 10px;
+  align-items: center;
+}
+.greetingToLogin {
+  display: flex;
+  max-width: 554px;
+  height: 35px;
+  flex-direction: column;
+  flex-shrink: 0;
+  margin: auto;
+  color: rgba(42, 42, 42, 0.5);
+  font-size: 20px;
+  font-family: Plus Jakarta Sans;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.loginRightSide {
+  width: 60vw;
+}
+.loginRightSide img {
+  width: 100%;
+}
+.LeftSide {
+  width: 40vw;
+}
+.gladMessage {
+  display: flex;
+  width: 367px;
+  height: 45px;
+  flex-direction: column;
+  flex-shrink: 0;
+  margin: auto;
+  color: #2a2a2a;
+  font-size: 36px;
+  font-family: Plus Jakarta Sans;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+.btnLogin {
+  width: fit-content;
+  margin: auto;
+  padding: 5px 20px;
+  border: none;
+  background-color: blue;
+  color: white;
+  border-radius: 10px;
+  font-size: 20px;
+}
+.loginForm input {
+  padding: 10px 0;
+  /* margin: 20px auto; */
+}
+body {
+  background-color: rgb(245, 245, 245);
+}
+.loginForm div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+#LinearProgress {
+  display: none;
+}
+.help {
+  cursor: pointer;
+  margin-top: 10px;
+}
+.signupRegister {
+  cursor: pointer;
+  text-decoration: none;
+  margin-top: 10px;
+  display: flex;
+  width: 249px;
+  height: 15px;
+  flex-direction: column;
+  flex-shrink: 0;
+  color: rgba(46, 46, 46, 0.5);
+  font-family: Plus Jakarta Sans;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
