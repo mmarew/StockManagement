@@ -29,7 +29,7 @@ function AddTransaction({ Time }) {
     $(".salesOrCosts").show();
   }, []);
   return (
-    <>
+    <div className="addTransactionWrapper">
       <div className="addTransaction">
         <button
           className="salesOrCosts"
@@ -50,7 +50,7 @@ function AddTransaction({ Time }) {
       <br />
       <div>{Transaction}</div>
       <Outlet />
-    </>
+    </div>
   );
 }
 export default AddTransaction;

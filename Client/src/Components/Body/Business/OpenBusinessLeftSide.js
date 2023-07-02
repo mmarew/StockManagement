@@ -8,7 +8,7 @@ import itemsIcon from "../../ICONS/BusinessJS/iconItems.svg";
 import iconView from "../../ICONS/BusinessJS/iconView.svg";
 import iconEmployee from "../../ICONS/BusinessJS/iconEmployee.svg";
 import iconSearch from "../../ICONS/BusinessJS/iconSearch.svg";
-
+import MASETAWOSHAICONICON from "../../ICONS/BusinessJS/MASETAWOSHAICON.svg";
 function OpenBusinessLeftSide() {
   let Navigate = useNavigate();
   let markTargetedLink = (e) => {
@@ -20,9 +20,16 @@ function OpenBusinessLeftSide() {
     );
     e.currentTarget.className += " " + OpenBusinessLeftCss.activeClass + " ";
   };
+
   return (
     <div id="Wrapper" className={OpenBusinessLeftCss.Wrapper}>
       <div className={OpenBusinessLeftCss.listWrapper}>
+        <div>
+          <img
+            className={OpenBusinessLeftCss.MASETAWOSHAICONICON}
+            src={MASETAWOSHAICONICON}
+          />
+        </div>
         <Link className={OpenBusinessLeftCss.openBusinessTabLeft} to="/">
           <img className={OpenBusinessLeftCss.TransactionIcon} src={HomeIcon} />
           <a> Home</a>
@@ -52,7 +59,7 @@ function OpenBusinessLeftSide() {
             Items
           </a>
         </Link>
-        <Link
+        {/* <Link
           to="view"
           onClick={markTargetedLink}
           className={OpenBusinessLeftCss.openBusinessTabLeft}
@@ -61,7 +68,7 @@ function OpenBusinessLeftSide() {
           <a id="View" name="View">
             View
           </a>
-        </Link>
+        </Link> */}
         <Link
           to="search"
           onClick={markTargetedLink}

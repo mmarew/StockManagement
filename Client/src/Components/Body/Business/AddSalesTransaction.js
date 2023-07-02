@@ -18,14 +18,14 @@ function AddSalesTransaction() {
     }
   };
   return (
-    <>
+    <div className="addSalesWrapper">
       <div value="default">Choose Sales type</div>
       <Select className="selectSalesMenue" onChange={toggleActiveSelections}>
         <MenuItem value="totalSales">Total Sales</MenuItem>
         <MenuItem value="singleSales">Single Sales</MenuItem>
       </Select>
       <Outlet />
-    </>
+    </div>
   );
 }
 export default AddSalesTransaction;

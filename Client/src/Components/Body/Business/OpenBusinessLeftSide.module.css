@@ -7,6 +7,9 @@
   justify-content: left;
   padding: 0 5px;
 }
+.MASETAWOSHAICONICON {
+  width: 70%;
+}
 .activeClass {
   background-color: rgb(25, 118, 210);
 }

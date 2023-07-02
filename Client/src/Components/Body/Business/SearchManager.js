@@ -63,7 +63,13 @@ function SearchManager() {
     console.log("response", response);
     if (searchTarget == "TRANSACTION") {
     } else if (searchTarget == "COSTS") {
+      if (response.data.data.length == 0) {
+        alert("You haven't registered Cost data.");
+      }
     } else if (searchTarget == "PRODUCTS") {
+      if (response.data.data == "no results") {
+        alert("You haven't registered Product data");
+      }
     } else if (searchTarget == "ALLTRANSACTION") {
       if (
         response.data.expenceTransaction.length == 0 &&
