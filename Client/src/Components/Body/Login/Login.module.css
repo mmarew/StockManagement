@@ -2,6 +2,7 @@
   background-color: white;
   display: flex;
   height: 100vh;
+  justify-content: center;
 }
 .loginForm {
   display: flex;
@@ -11,6 +12,7 @@
   background-color: white;
   /* padding: 5vw; */
   /* box-shadow: 2px 2px rgb(220, 244, 245); */
+  padding: 20px;
   border-radius: 10px;
   align-items: center;
 }
@@ -30,13 +32,12 @@
 }
 .loginRightSide {
   width: 60vw;
+  display: none;
 }
 .loginRightSide img {
   width: 100%;
 }
-.LeftSide {
-  width: 40vw;
-}
+
 .gladMessage {
   display: flex;
   width: 367px;
@@ -94,4 +95,16 @@ body {
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+}
+.LeftSide {
+  padding: 20px;
+}
+
+@media screen and (min-width: 768px) {
+  .loginRightSide {
+    display: block;
+  }
+  .LeftSide {
+    width: 40vw;
+  }
 }

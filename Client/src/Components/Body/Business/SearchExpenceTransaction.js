@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import axios from "axios";
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 function SearchExpenceTransaction({
   showEachItems,
   response,
@@ -155,124 +164,135 @@ function SearchExpenceTransaction({
   return (
     <div>
       {ViewCostList?.length > 0 ? (
-        <table className="costTransaction">
-          <tr>
-            <td colspan="6">
-              <h2>Cost List table</h2>
-            </td>
-          </tr>
-          <tr>
-            <th>Cost Name</th>
-            <th>Date</th>
-            <th>Cost Amount</th>
-            <th> Description</th>
-            <th> Action </th>
-            <th> Decision</th>
-          </tr>
-          {ViewCostList?.map((items, index) => {
-            console.log(items);
-            return (
-              <tr id={`expenceWrapper_${items.costId}`}>
-                <td id={`expName_${items.expenseId}`}>{items.costName}</td>
-                <td id={`costRegisteredDate_${items.expenseId}`}>
-                  {items.costRegisteredDate.split("T")[0]}
-                </td>
-                <td
-                  className={items.contentEditable && "editableTd"}
-                  onInput={(e) =>
-                    modifyAmountOrDescription(
-                      e,
-                      "updateExpences_" + items.expenseId
-                    )
-                  }
-                  contenteditable={`${items.contentEditable}`}
-                  id={`expAmount_${items.expenseId}`}
-                >
-                  {items.costAmount}
-                </td>
-                <td
-                  className={items.contentEditable && "editableTd"}
-                  onInput={(e) =>
-                    modifyAmountOrDescription(
-                      e,
-                      "updateExpences_" + items.expenseId
-                    )
-                  }
-                  contentEditable={`${items.contentEditable}`}
-                  id={`expDescription_${items.expenseId}`}
-                >
-                  {items.costDescription}
-                </td>
-                <td>
-                  {showEachItems ? (
-                    <>
-                      {items.contentEditable && (
+        <TableContainer>
+          <Table className="costTransaction">
+            <TableHead>
+              <TableRow>
+                <TableCell colspan="6">
+                  <h2>Expences List table</h2>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableHead>
+              <TableRow>
+                <TableCell>Cost Name</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Cost Amount</TableCell>
+                <TableCell> Description</TableCell>
+                <TableCell> Action </TableCell>
+                <TableCell> Decision</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {ViewCostList?.map((items, index) => {
+                console.log(items);
+                return (
+                  <TableRow id={`expenceWrapper_${items.costId}`}>
+                    <TableCell id={`expName_${items.expenseId}`}>
+                      {items.costName}
+                    </TableCell>
+                    <TableCell id={`costRegisteredDate_${items.expenseId}`}>
+                      {items.costRegisteredDate.split("T")[0]}
+                    </TableCell>
+                    <TableCell
+                      className={items.contentEditable && "editableTd"}
+                      onInput={(e) =>
+                        modifyAmountOrDescription(
+                          e,
+                          "updateExpences_" + items.expenseId
+                        )
+                      }
+                      contenteditable={`${items.contentEditable}`}
+                      id={`expAmount_${items.expenseId}`}
+                    >
+                      {items.costAmount}
+                    </TableCell>
+                    <TableCell
+                      className={items.contentEditable && "editableTd"}
+                      onInput={(e) =>
+                        modifyAmountOrDescription(
+                          e,
+                          "updateExpences_" + items.expenseId
+                        )
+                      }
+                      contentEditable={`${items.contentEditable}`}
+                      id={`expDescription_${items.expenseId}`}
+                    >
+                      {items.costDescription}
+                    </TableCell>
+                    <TableCell>
+                      {showEachItems ? (
                         <>
-                          {console.log("717", items.contentEditable)}
-                          <div
-                            className="cancelExpeEditing"
-                            id={`editExpences_` + items.expenseId}
-                            onClick={(e) => {
-                              cancelEditingProcess(e, index);
+                          {items.contentEditable && (
+                            <>
+                              {console.log("717", items.contentEditable)}
+                              <div
+                                className="cancelExpeEditing"
+                                id={`editExpences_` + items.expenseId}
+                                onClick={(e) => {
+                                  cancelEditingProcess(e, index);
+                                }}
+                              >
+                                CANCEL
+                              </div>
+                            </>
+                          )}
+                          {console.log(
+                            "items.contentEditable",
+                            items.contentEditable
+                          )}
+                          {!items.contentEditable && (
+                            <span
+                              id={`editExpences_` + items.expenseId}
+                              className="editExpences"
+                              onClick={(e) =>
+                                makeEditableTableData(
+                                  index,
+                                  `expAmount_${items.expenseId}`,
+                                  `expDescription_${items.expenseId}`,
+                                  `updateExpences_` + items.expenseId,
+                                  `editExpences_` + items.expenseId
+                                )
+                              }
+                            >
+                              Edit
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        ""
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <>
+                        {items.contentEditable && (
+                          <Button
+                            id={"updateExpences_" + items.expenseId}
+                            className="updateExpences"
+                            onClick={() => {
+                              updateExpences(
+                                items.expenseId,
+                                `expAmount_${items.expenseId}`,
+                                `expDescription_${items.expenseId}`,
+                                index
+                              );
                             }}
                           >
-                            CANCEL
-                          </div>
-                        </>
-                      )}
-                      {console.log(
-                        "items.contentEditable",
-                        items.contentEditable
-                      )}
-                      {!items.contentEditable && (
-                        <span
-                          id={`editExpences_` + items.expenseId}
-                          className="editExpences"
-                          onClick={(e) =>
-                            makeEditableTableData(
-                              index,
-                              `expAmount_${items.expenseId}`,
-                              `expDescription_${items.expenseId}`,
-                              `updateExpences_` + items.expenseId,
-                              `editExpences_` + items.expenseId
-                            )
-                          }
-                        >
-                          Edit
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </td>
-                <td>
-                  <>
-                    {items.contentEditable && (
-                      <button
-                        id={"updateExpences_" + items.expenseId}
-                        className="updateExpences"
-                        onClick={() => {
-                          updateExpences(
-                            items.expenseId,
-                            `expAmount_${items.expenseId}`,
-                            `expDescription_${items.expenseId}`,
-                            index
-                          );
-                        }}
-                      >
-                        Update
-                      </button>
-                    )}
-                  </>
-                </td>
-              </tr>
-            );
-          })}
-          <tr>
-            <td colSpan={2}>Total Cost</td> <td>{TotalCostAmount}</td>
-          </tr>
-        </table>
+                            Update
+                          </Button>
+                        )}
+                      </>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+            <TableRow>
+              <TableCell colSpan={2}>Total Cost</TableCell>
+              <TableCell>{TotalCostAmount}</TableCell>
+            </TableRow>
+          </Table>
+        </TableContainer>
       ) : (
         // <h4>No cost list table</h4>
         ""

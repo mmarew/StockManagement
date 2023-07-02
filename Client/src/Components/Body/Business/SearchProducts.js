@@ -2,6 +2,15 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import axios from "axios";
 import "./SearchProducts.css";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+} from "@mui/material";
 function SearchProducts({ response }) {
   let businessName = localStorage.getItem("businessName");
   let serverAddress = localStorage.getItem("targetUrl");
@@ -58,68 +67,73 @@ function SearchProducts({ response }) {
   return (
     <div>
       {searchedProducts?.length > 0 && (
-        <table id="savedProduct">
-          <tr>
-            <th>product Name</th>
-            <th>product Price</th>
-            <th>product Cost</th>
-            <th>minimum Qty</th>
-          </tr>
-          {searchedProducts?.map((items) => {
-            console.log(items);
-            return (
-              <tr
-                className="trProductName"
-                key={searchedProducts.indexOf(items)}
-              >
-                <td>
-                  <input
-                    name={items.ProductId}
-                    onChange={handleProductsInput}
-                    id={"productName_" + items.ProductId}
-                    type="text"
-                  />
-                </td>
-                <td>
-                  <input
-                    name={items.ProductId}
-                    onChange={handleProductsInput}
-                    id={"productPrice_" + items.ProductId}
-                    type="number"
-                  />
-                </td>
-
-                <td>
-                  <input
-                    name={items.ProductId}
-                    onChange={handleProductsInput}
-                    id={"productCost_" + items.ProductId}
-                    type="number"
-                  />
-                </td>
-                <td>
-                  <input
-                    name={items.ProductId}
-                    onChange={handleProductsInput}
-                    id={"minimumQty_" + items.ProductId}
-                    type="number"
-                  />
-                </td>
-                <td>
-                  <div
-                    onClick={updateProductsData}
-                    id={items.ProductId}
-                    className={
-                      "updateProducts updateProducts_" + items.ProductId
-                    }
+        <TableContainer>
+          <Table id="savedProduct">
+            <TableHead>
+              <TableRow>
+                <TableCell className="tableHeadTitle">product Name</TableCell>
+                <TableCell className="tableHeadTitle">product Price</TableCell>
+                <TableCell className="tableHeadTitle">product Cost</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {searchedProducts?.map((items) => {
+                console.log(items);
+                return (
+                  <TableRow
+                    className="trProductName"
+                    key={searchedProducts.indexOf(items)}
                   >
-                    UPDATE
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </table>
+                    <TableCell>
+                      <TextField
+                        name={items.ProductId}
+                        onChange={handleProductsInput}
+                        id={"productName_" + items.ProductId}
+                        type="text"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        name={items.ProductId}
+                        onChange={handleProductsInput}
+                        id={"productPrice_" + items.ProductId}
+                        type="number"
+                      />
+                    </TableCell>
+
+                    <TableCell>
+                      <TextField
+                        name={items.ProductId}
+                        onChange={handleProductsInput}
+                        id={"productCost_" + items.ProductId}
+                        type="number"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        name={items.ProductId}
+                        onChange={handleProductsInput}
+                        id={"minimumQty_" + items.ProductId}
+                        type="number"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div
+                        onClick={updateProductsData}
+                        id={items.ProductId}
+                        className={
+                          "updateProducts updateProducts_" + items.ProductId
+                        }
+                      >
+                        UPDATE
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </div>
   );

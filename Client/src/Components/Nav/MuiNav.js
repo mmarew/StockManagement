@@ -3,19 +3,16 @@ import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import "./Nav.css";
 import $ from "jquery";
 import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
-import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { InitialContext } from "../Body/UserContext/UserContext";
 import { useEffect } from "react";
 import axios from "axios";
 
+import "./Nav.css";
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -92,11 +89,12 @@ export default function NavBar() {
     VerifyLogin();
   }, []);
   return (
-    <div className="navBar">
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            {/* <IconButton
+    <>
+      <div className="navBar">
+        <Box sx={{ flexGrow: 1 }}>
+          <AppBar position="static">
+            <Toolbar>
+              {/* <IconButton
               size="large"
               edge="start"
               color="inherit"
@@ -105,37 +103,37 @@ export default function NavBar() {
             >
               <MenuIcon />
             </IconButton> */}
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{ flexGrow: 1, display: { xs: "block", sm: "block" } }}
-            >
-              <div className="navLinks">
-                <Link
-                  onClick={hundleNavigationBar}
-                  className="Lists"
-                  to="/Business"
-                >
-                  Business
-                </Link>
-                <Link
-                  onClick={hundleNavigationBar}
-                  className="Lists"
-                  to="/help"
-                >
-                  Help
-                </Link>
-                <Link
-                  onClick={hundleNavigationBar}
-                  className="Lists ownerName"
-                  to="/Profiles"
-                >
-                  Profile
-                </Link>
-              </div>
-            </Typography>
-            {/* <Search>
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{ flexGrow: 1, display: { xs: "block", sm: "block" } }}
+              >
+                <div className="navLinks">
+                  <Link
+                    onClick={hundleNavigationBar}
+                    className="Lists"
+                    to="/Business"
+                  >
+                    Business
+                  </Link>
+                  <Link
+                    onClick={hundleNavigationBar}
+                    className="Lists"
+                    to="/help"
+                  >
+                    Help
+                  </Link>
+                  <Link
+                    onClick={hundleNavigationBar}
+                    className="Lists ownerName"
+                    to="/Profiles"
+                  >
+                    Profile
+                  </Link>
+                </div>
+              </Typography>
+              {/* <Search>
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
@@ -144,9 +142,10 @@ export default function NavBar() {
                 inputProps={{ "aria-label": "search" }}
               />
             </Search> */}
-          </Toolbar>
-        </AppBar>
-      </Box>
-    </div>
+            </Toolbar>
+          </AppBar>
+        </Box>
+      </div>
+    </>
   );
 }

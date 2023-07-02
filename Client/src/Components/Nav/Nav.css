@@ -20,12 +20,7 @@
   background-color: #1976d2;
   color: #fff;
 }
-.navBar {
-  display: block;
-}
+
 @media screen and (min-width: 768px) {
-  .navBar {
-    display: none;
-  }
   /* styles applied when screen width is at least 768 pixels */
 }

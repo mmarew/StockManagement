@@ -99,9 +99,10 @@ function GetMaximumSales() {
     }
   }, [SelectedTime]);
   useEffect(() => {
-    let xx = $("#selectTimeRange").val();
-    console.log(xx);
-    setSelectedTime(xx);
+    let selectTimeRange = $("#selectTimeRange").val();
+    console.log("selectTimeRange = ", selectTimeRange);
+    if (selectTimeRange == "") setSelectedTime("weekly");
+    else setSelectedTime(selectTimeRange);
   }, []);
 
   let changesOnDays = (e) => {
@@ -210,6 +211,7 @@ function GetMaximumSales() {
   };
   return (
     <div>
+      <br />
       <h5>Maximum Transaction Data</h5>
       <form
         className={GetMaximumStyle.maxSelectionForm}
@@ -224,7 +226,9 @@ function GetMaximumSales() {
           id="selectTimeRange"
           onChange={changesOnDays}
         >
-          <MenuItem value="weekly"> weekly</MenuItem>
+          <MenuItem selected value="weekly">
+            weekly
+          </MenuItem>
           <MenuItem value="Monthly"> Monthly</MenuItem>
           <MenuItem value="Annualy"> Annualy</MenuItem>
           <MenuItem value="Others">Others</MenuItem>
@@ -256,7 +260,7 @@ function GetMaximumSales() {
       {/* {console.log("MaximumDataList", MaximumDataList)} */}
       {/* {JSON.stringify(MaximumDataList)} */}
       {console.log(MaximumDataList.length)}
-      {MaximumDataList?.length > 0 && MaximumDataList[0] != undefined && (
+      {MaximumDataList?.length > 0 && MaximumDataList[0] != undefined ? (
         <>
           <div>
             From Date {DateRange.fromDate} To Date {DateRange.toDate}
@@ -326,6 +330,8 @@ function GetMaximumSales() {
             </Table>
           </TableContainer>
         </>
+      ) : (
+        "No transaction  data to view maximum data on this date range"
       )}
     </div>
   );

@@ -40,3 +40,7 @@
   background-color: white;
   height: 100vh;
 }
+.leftOfProfile li:nth-child(2) {
+  background-color: rgb(25, 118, 210);
+  color: white;
+}

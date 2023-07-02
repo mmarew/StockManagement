@@ -7,6 +7,7 @@ import EditProfile from "./EditProfile";
 import axios from "axios";
 import $ from "jquery";
 import LeftSideBusiness from "../Business/LeftSideBusiness";
+import { Button } from "@mui/material";
 function Profile() {
   const [targetRender, settargetRender] = useState("");
   let navigate = useNavigate();
@@ -61,10 +62,15 @@ function Profile() {
   };
   return (
     <div className={ProfileCss.ProfileWrapper}>
-      <div className={ProfileCss.leftOfProfile}>
-        <LeftSideBusiness />
-      </div>
+      {window.innerWidth > 768 && (
+        <div className={ProfileCss.leftOfProfile}>
+          <LeftSideBusiness />
+        </div>
+      )}
       <div>
+        {/* <Button sx={{ margin: "auto" }} variant="contained" color="primary">
+          Home
+        </Button> */}
         <div className={ProfileCss.EditDeleteProfileWrapper}>
           <button onClick={handleEditeProfile}>Edit My Profile</button>
           <button onClick={deleteProfile}>Delete My profile</button>

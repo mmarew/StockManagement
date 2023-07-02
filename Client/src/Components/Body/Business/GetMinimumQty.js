@@ -25,7 +25,7 @@ function GetMinimumQty() {
       businessName,
     });
     $(".LinearProgress").css("display", "none");
-    console.log(responce);
+    console.log("getQtyFromServer == ", responce);
     let data = responce.data.data;
     setMinimumQty({ ...MinimumQty, progress: "done", data });
 
@@ -39,10 +39,11 @@ function GetMinimumQty() {
 
   return (
     <div>
+      <br />
       <h5>Current Minimum Qty</h5>
       {MinimumQty.progress == "wait" ? (
         <h4>please wait ...</h4>
-      ) : (
+      ) : MinimumQty.data.length > 0 ? (
         <TableContainer
           sx={{
             minWidth: 450,
@@ -54,6 +55,7 @@ function GetMinimumQty() {
           component={Paper}
           align="center"
         >
+          {console.log("MinimumQty", MinimumQty.data.length)}
           <Table>
             <TableHead>
               <TableRow>
@@ -87,6 +89,8 @@ function GetMinimumQty() {
             })}
           </Table>
         </TableContainer>
+      ) : (
+        "You haven't registered any transaction to view minimum qty"
       )}
     </div>
   );

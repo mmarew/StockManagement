@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import "./CreateBusiness.css";
 import $ from "jquery";
+import { Button, TextField } from "@mui/material";
 function CreateBusiness({ getBusiness, setnewBusiness, setShowProgressBar }) {
   // console.log(getBusiness, setnewBusiness, setShowProgressBar);
   // return;
@@ -85,24 +86,32 @@ _products: 0 }  */
   return (
     <div>
       <form action="" className="createBusinessForm" onSubmit={submitAlldatas}>
-        <input
+        <TextField
           required
           name="businessName"
           onChange={handleCreateForm}
-          placeholder="Business name"
+          label="Enter Business Name"
         />
+        <br /> <br />
         <div>
-          <button type="Submit" value={"Create"}>
+          <Button
+            variant="contained"
+            color="primary"
+            type="Submit"
+            value={"Create"}
+          >
             Create
-          </button>{" "}
-          <button
+          </Button>{" "}
+          <Button
             onClick={cancelBusinessCreation}
             id="cancelButton"
             type="button"
             value={"Cancel"}
+            variant="contained"
+            color="warning"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
     </div>

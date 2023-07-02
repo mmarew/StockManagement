@@ -58,6 +58,7 @@ function Register() {
         type="password"
         label="Password"
       />
+      <br />
       <Button
         variant="contained"
         name="submitButton"
@@ -68,7 +69,11 @@ function Register() {
       >
         Register
       </Button>
-      <a href="/login">Login?</a>
+      <br />
+      Do you have an account?
+      <a style={{ textDecoration: "none" }} href="/login">
+        Login here
+      </a>
     </form>
   );
 }

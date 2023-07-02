@@ -5,3 +5,11 @@
 button {
   cursor: pointer;
 }
+.leftSideDiv {
+  display: none;
+}
+@media screen and (min-width: 768px) {
+  .leftSideDiv {
+    display: block;
+  }
+}

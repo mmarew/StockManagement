@@ -8,6 +8,7 @@ import SearchSingleTransActions from "./SearchSales_Purchase";
 import { Button, Select, TextField } from "@mui/material";
 import { MenuItem } from "@material-ui/core";
 function SearchManager() {
+  const [selectedValue, setSelectedValue] = useState("default");
   let serverAddress = localStorage.getItem("targetUrl");
   const [InputValue, setInputValue] = useState({});
   const [searchTarget, setsearchTarget] = useState();
@@ -128,6 +129,7 @@ function SearchManager() {
     console.log(e);
     if (e != undefined) {
       const selectSearches = e.target.value;
+      setSelectedValue(e.target.value);
       console.log("selectSearches", selectSearches);
       setInputValue({
         ...InputValue,
@@ -150,15 +152,18 @@ function SearchManager() {
 
   return (
     <>
+      <br />
+      <h3>Search form to your business</h3>
       <form onSubmit={submitSearch} id="searchProduct">
         <Select
+          value={selectedValue}
           required
           label="choose your "
           onChange={handleChangeInSelect}
           name=""
           id="selectSearches"
         >
-          {/* <MenuItem value={"default"}>Choose your search</MenuItem> */}
+          <MenuItem value={"default"}>Choose your search</MenuItem>
           <MenuItem value="TRANSACTION">SINGLE TRANSACTION</MenuItem>
           <MenuItem value="ALLTRANSACTION">ALL TRANSACTION</MenuItem>
           <MenuItem value="PRODUCTS">PRODUCTS</MenuItem>

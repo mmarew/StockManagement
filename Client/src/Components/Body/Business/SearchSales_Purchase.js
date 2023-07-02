@@ -2,6 +2,14 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import axios from "axios";
 import SearchExpenceTransaction from "./SearchExpenceTransaction";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 function SearchSingleTransActions({ response, requestFrom }) {
   let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
@@ -239,192 +247,206 @@ function SearchSingleTransActions({ response, requestFrom }) {
       </div>
 
       {ListOfSalesAndPurchase.length > 0 && (
-        <table id="productTransaction">
-          <tr>
-            <td colSpan={15}>
-              <h3>purchase , sales, inventory and description table</h3>
-            </td>
-          </tr>
-          <tr>
-            <th>Product name</th>
-            <th>Registration Date</th>
-            <th>Unit price</th>
-            <th>Sold Qty</th>
-            <th>Total sales</th>
-            <th>Unit Cost</th>
-            <th>purchase Qty</th>
-            <th>Total Purchase</th>
-            <th>Broken</th>
-            <th>Inventory</th>
-            <th>Description</th>
-            <th colSpan={2}>Action</th>
-            <th>Status</th>
-          </tr>
-          {ListOfSalesAndPurchase?.map((items, index) => {
-            return (
-              <tr className={"searchedDatas  Transaction_" + index}>
-                <td id={"productName_" + items.transactionId} type="text">
-                  {items.productName}
-                </td>
-                <td
-                  type="text"
-                  id={"RegistrationDate_" + items.transactionId}
-                  className={
-                    items.contentEditable && "date" + items.transactionId
-                  }
-                >
-                  {items.registeredTime.split("T")[0]}
-                </td>
-                <td
-                  className={"unitPrice" + items.transactionId}
-                  id={"unitPrice_" + items.transactionId}
-                  type="text"
-                >
-                  {items.productsUnitPrice}
-                </td>
-                <td
-                  onInput={() =>
-                    changesOnInputsOfTransaction("updateId_" + index, index)
-                  }
-                  className={
-                    items.contentEditable &&
-                    `salesQty${items.transactionId} editableTD`
-                  }
-                  contentEditable={items.contentEditable}
-                  id={"salesQty_" + items.transactionId}
-                  type="text"
-                >
-                  {items.salesQty}
-                </td>
-                <td
-                  className={`totalSales${items.transactionId}`}
-                  id={"totalSales_" + items.transactionId}
-                  type="text"
-                >
-                  {items.salesQty * items.productsUnitPrice}
-                </td>
-                <td
-                  className={`unitCost${items.transactionId}`}
-                  name="unitCost"
-                  id={"unitCost_" + items.transactionId}
-                  type="text"
-                >
-                  {items.unitCost}
-                </td>
-                <td
-                  onInput={() =>
-                    changesOnInputsOfTransaction("updateId_" + index, index)
-                  }
-                  className={
-                    items.contentEditable &&
-                    `purchaseQty${items.transactionId} editableTD`
-                  }
-                  contentEditable={items.contentEditable}
-                  id={"purchaseQty_" + items.transactionId}
-                  type="text"
-                  name="purchaseQty"
-                >
-                  {items.purchaseQty}
-                </td>
-                <td
-                  className={`totalCost${items.transactionId}`}
-                  name="totalCost"
-                  id={"totalPurchase_" + items.transactionId}
-                  type="text"
-                >
-                  {items.unitCost * items.purchaseQty}
-                </td>
-                <td
-                  onInput={() =>
-                    changesOnInputsOfTransaction("updateId_" + index, index)
-                  }
-                  className={
-                    items.contentEditable &&
-                    `broken${items.transactionId} editableTD`
-                  }
-                  contentEditable={items.contentEditable}
-                  id={"wrickages_" + items.transactionId}
-                  type="text"
-                  name="broken"
-                >
-                  {items.wrickages}
-                </td>
-                <td
-                  className={`inventory${items.transactionId}`}
-                  id={"Inventory_" + items.transactionId}
-                  type="text"
-                >
-                  {items.Inventory}
-                </td>
-                <td
-                  onInput={() =>
-                    changesOnInputsOfTransaction("updateId_" + index, index)
-                  }
-                  className={
-                    items.contentEditable
-                      ? `description${items.transactionId} editableTD`
-                      : ""
-                  }
-                  contentEditable={items.contentEditable}
-                  id={"Description_" + items.transactionId}
-                  type="text"
-                  name="description"
-                >
-                  {items.description}
-                </td>
-                {showEachItems ? (
-                  !items.contentEditable ? (
-                    openedBusiness == "myBusiness" && (
-                      <>
-                        <td
-                          className="cancelOrEditTransaction"
-                          onClick={(e) => editSalesAndPurchase(e, index)}
-                        >
-                          Edit
-                        </td>
-                        <td onClick={() => deleteSales_purchase(items)}>
-                          Delete
-                        </td>
-                      </>
-                    )
-                  ) : (
-                    <td
-                      className="cancelOrEditTransaction"
-                      onClick={(e) => cancelSalesAndPurchase(e, index)}
+        <TableContainer>
+          <Table id="productTransaction">
+            <TableHead>
+              <TableRow>
+                <TableCell colSpan={15}>
+                  <h3>purchase , sales, inventory and description table</h3>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableRow>
+              <TableCell>Product name</TableCell>
+              <TableCell>Registration Date</TableCell>
+              <TableCell>Unit price</TableCell>
+              <TableCell>Sold Qty</TableCell>
+              <TableCell>Total sales</TableCell>
+              <TableCell>Unit Cost</TableCell>
+              <TableCell>purchase Qty</TableCell>
+              <TableCell>Total Purchase</TableCell>
+              <TableCell>Broken</TableCell>
+              <TableCell>Inventory</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell colSpan={2}>Action</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+            <TableBody>
+              {ListOfSalesAndPurchase?.map((items, index) => {
+                return (
+                  <TableRow className={"searchedDatas  Transaction_" + index}>
+                    <TableCell
+                      id={"productName_" + items.transactionId}
+                      type="text"
                     >
-                      cancel
-                    </td>
-                  )
-                ) : (
-                  <td></td>
-                )}
-                {items.updateEditedContent ? (
-                  <td>
-                    <span
-                      className="updateTransaction"
-                      id={"updateId_" + index}
-                      onClick={(e) =>
-                        updateTransactions(items.transactionId, index)
+                      {items.productName}
+                    </TableCell>
+                    <TableCell
+                      type="text"
+                      id={"RegistrationDate_" + items.transactionId}
+                      className={
+                        items.contentEditable && "date" + items.transactionId
                       }
                     >
-                      Update
-                    </span>
-                  </td>
-                ) : (
-                  <td> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</td>
-                )}
-              </tr>
-            );
-          })}
-          <tr>
-            <td colSpan={2}></td>
-            <td colSpan={2}>Sum of Sales</td>
-            <td>{TotalSalesRevenue}</td>
-            <td colSpan={2}>Sum of Purchase</td>
-            <td>{TotalPurchaseCost}</td>
-            <td colSpan={5}></td>
-          </tr>
-        </table>
+                      {items.registeredTime.split("T")[0]}
+                    </TableCell>
+                    <TableCell
+                      className={"unitPrice" + items.transactionId}
+                      id={"unitPrice_" + items.transactionId}
+                      type="text"
+                    >
+                      {items.productsUnitPrice}
+                    </TableCell>
+                    <TableCell
+                      onInput={() =>
+                        changesOnInputsOfTransaction("updateId_" + index, index)
+                      }
+                      className={
+                        items.contentEditable &&
+                        `salesQty${items.transactionId} editableTD`
+                      }
+                      contentEditable={items.contentEditable}
+                      id={"salesQty_" + items.transactionId}
+                      type="text"
+                    >
+                      {items.salesQty}
+                    </TableCell>
+                    <TableCell
+                      className={`totalSales${items.transactionId}`}
+                      id={"totalSales_" + items.transactionId}
+                      type="text"
+                    >
+                      {items.salesQty * items.productsUnitPrice}
+                    </TableCell>
+                    <TableCell
+                      className={`unitCost${items.transactionId}`}
+                      name="unitCost"
+                      id={"unitCost_" + items.transactionId}
+                      type="text"
+                    >
+                      {items.unitCost}
+                    </TableCell>
+                    <TableCell
+                      onInput={() =>
+                        changesOnInputsOfTransaction("updateId_" + index, index)
+                      }
+                      className={
+                        items.contentEditable &&
+                        `purchaseQty${items.transactionId} editableTD`
+                      }
+                      contentEditable={items.contentEditable}
+                      id={"purchaseQty_" + items.transactionId}
+                      type="text"
+                      name="purchaseQty"
+                    >
+                      {items.purchaseQty}
+                    </TableCell>
+                    <TableCell
+                      className={`totalCost${items.transactionId}`}
+                      name="totalCost"
+                      id={"totalPurchase_" + items.transactionId}
+                      type="text"
+                    >
+                      {items.unitCost * items.purchaseQty}
+                    </TableCell>
+                    <TableCell
+                      onInput={() =>
+                        changesOnInputsOfTransaction("updateId_" + index, index)
+                      }
+                      className={
+                        items.contentEditable &&
+                        `broken${items.transactionId} editableTD`
+                      }
+                      contentEditable={items.contentEditable}
+                      id={"wrickages_" + items.transactionId}
+                      type="text"
+                      name="broken"
+                    >
+                      {items.wrickages}
+                    </TableCell>
+                    <TableCell
+                      className={`inventory${items.transactionId}`}
+                      id={"Inventory_" + items.transactionId}
+                      type="text"
+                    >
+                      {items.Inventory}
+                    </TableCell>
+                    <TableCell
+                      onInput={() =>
+                        changesOnInputsOfTransaction("updateId_" + index, index)
+                      }
+                      className={
+                        items.contentEditable
+                          ? `description${items.transactionId} editableTD`
+                          : ""
+                      }
+                      contentEditable={items.contentEditable}
+                      id={"Description_" + items.transactionId}
+                      type="text"
+                      name="description"
+                    >
+                      {items.description}
+                    </TableCell>
+                    {showEachItems ? (
+                      !items.contentEditable ? (
+                        openedBusiness == "myBusiness" && (
+                          <>
+                            <TableCell
+                              className="cancelOrEditTransaction"
+                              onClick={(e) => editSalesAndPurchase(e, index)}
+                            >
+                              Edit
+                            </TableCell>
+                            <TableCell
+                              onClick={() => deleteSales_purchase(items)}
+                            >
+                              Delete
+                            </TableCell>
+                          </>
+                        )
+                      ) : (
+                        <tTableCelld
+                          className="cancelOrEditTransaction"
+                          onClick={(e) => cancelSalesAndPurchase(e, index)}
+                        >
+                          cancel
+                        </tTableCelld>
+                      )
+                    ) : (
+                      <TableCell></TableCell>
+                    )}
+                    {items.updateEditedContent ? (
+                      <TableCell>
+                        <span
+                          className="updateTransaction"
+                          id={"updateId_" + index}
+                          onClick={(e) =>
+                            updateTransactions(items.transactionId, index)
+                          }
+                        >
+                          Update
+                        </span>
+                      </TableCell>
+                    ) : (
+                      <TableCell>
+                        {" "}
+                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                      </TableCell>
+                    )}
+                  </TableRow>
+                );
+              })}
+              <TableRow>
+                <TableCell colSpan={2}></TableCell>
+                <TableCell colSpan={2}>Sum of Sales</TableCell>
+                <TableCell>{TotalSalesRevenue}</TableCell>
+                <TableCell colSpan={2}>Sum of Purchase</TableCell>
+                <TableCell>{TotalPurchaseCost}</TableCell>
+                <TableCell colSpan={5}></TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
       {requestFrom == "showExpencesList" && ShowExpences}
     </div>

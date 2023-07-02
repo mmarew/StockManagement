@@ -3,6 +3,15 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import "./Transaction.css";
 import currentDates from "../Date/currentDate";
+import { Button, TextField } from "@mui/material";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 export default function Transaction() {
   let serverAddress = localStorage.getItem("targetUrl");
   const [salesAndPurchaseAmount, setSalesAndPurchaseAmount] = useState(0);
@@ -169,189 +178,211 @@ export default function Transaction() {
   return (
     <div>
       <form className="searchInputAndBtn" onSubmit={(e) => ViewTransactions(e)}>
-        <input required type="date" name="" id="dateIdTransaction" />
-        <button type="submit" className="searchView">
+        <TextField required type="date" name="" id="dateIdTransaction" />
+        <Button
+          variant="contained"
+          color="primary"
+          type="submit"
+          className="searchView"
+        >
           View
-        </button>
+        </Button>
       </form>
       {console.log("FetchedDatas == ", FetchedDatas)}
       {FetchedDatas.length > 0 ? (
-        <table border="1" id="TransactionTable">
-          <tr>
-            <th>Product name</th>
-            <th>Unit price</th>
-            <th>Sold Qty</th>
-            <th>Total sales</th>
-            <th>Unit Cost</th>
-            <th>purchase Qty</th>
-            <th>Total Purchase</th>
-            <th>Broken</th>
-            <th>Inventory</th>
-            <th>Description</th>
-          </tr>
-          {FetchedDatas?.map((Items) => {
-            console.log(Items);
-            return (
-              <tr id={"tr_" + Items.transactionId} key={Items.transactionId}>
-                <td> {Items.productName}</td>
-                <td>
-                  <input
-                    name="unitPrice"
-                    id={"unitPrice_" + Items.transactionId}
-                    onChange={handleChangeOnInputs}
-                    className={Items.transactionId}
-                  />
-                </td>
-                <td>
-                  <input
-                    name="salesQty"
-                    id={"salesQty_" + Items.transactionId}
-                    onChange={handleChangeOnInputs}
-                    className={Items.transactionId}
-                  />
-                </td>
-                <td>
-                  <input
-                    name="totalSales"
-                    id={"totalSales_" + Items.transactionId}
-                    onChange={handleChangeOnInputs}
-                    className={Items.transactionId}
-                    value={Items.salesQty * Items.unitPrice}
-                  />
-                </td>
-                <td>
-                  <input
-                    name="unitCost"
-                    id={"unitCost_" + Items.transactionId}
-                    onChange={handleChangeOnInputs}
-                    className={Items.transactionId}
-                  />
-                </td>
-                <td>
-                  <input
-                    name="purchaseQty"
-                    id={"purchaseQty_" + Items.transactionId}
-                    onChange={handleChangeOnInputs}
-                    className={Items.transactionId}
-                  />
-                </td>
-                <td>
-                  <input
-                    name="totalCost"
-                    onChange={handleChangeOnInputs}
-                    className={Items.transactionId}
-                    value={Items.purchaseQty * Items.unitCost}
-                  />
-                </td>
-                <td>
-                  <input
-                    name="broken"
-                    onChange={handleChangeOnInputs}
-                    className={Items.transactionId}
-                    id={"broken_" + Items.transactionId}
-                  />
-                </td>
-                <td>
-                  <input
-                    name="inventory"
-                    onChange={handleChangeOnInputs}
-                    className={Items.transactionId}
-                    id={"inventory_" + Items.transactionId}
-                  />
-                </td>
-                <td>
-                  <textarea
-                    id={"description_" + Items.transactionId}
-                    name={"description"}
-                    onChange={handleChangeOnInputs}
-                    className={Items.transactionId}
-                  ></textarea>
-                </td>
-                <td>
-                  <button
-                    id={"btnUpdate_" + Items.transactionId}
-                    className="updateTransactions"
-                    name={Items.transactionId}
-                    onClick={updateTransactionItems}
+        <TableContainer>
+          <Table border="1" id="TransactionTable">
+            <TableHead>
+              <TableRow>
+                <TableCell>Product name</TableCell>
+                <TableCell>Unit price</TableCell>
+                <TableCell>Sold Qty</TableCell>
+                <TableCell>Total sales</TableCell>
+                <TableCell>Unit Cost</TableCell>
+                <TableCell>purchase Qty</TableCell>
+                <TableCell>Total Purchase</TableCell>
+                <TableCell>Broken</TableCell>
+                <TableCell>Inventory</TableCell>
+                <TableCell>Description</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {FetchedDatas?.map((Items) => {
+                console.log(Items);
+                return (
+                  <TableRow
+                    id={"tr_" + Items.transactionId}
+                    key={Items.transactionId}
                   >
-                    Update
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-          <tr>
-            <td colSpan={3}>Total Amount</td>
-            <td>{salesAndPurchaseAmount.salesAmount}</td>
-            <td></td>
-            <td></td>
-            <td>{salesAndPurchaseAmount.purchaseCost}</td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td colSpan={10}>
-              {`Sales Amount- Purchase Amount 
+                    <TableCell> {Items.productName}</TableCell>
+                    <TableCell>
+                      <TextField
+                        name="unitPrice"
+                        id={"unitPrice_" + Items.transactionId}
+                        onChange={handleChangeOnInputs}
+                        className={Items.transactionId}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        name="salesQty"
+                        id={"salesQty_" + Items.transactionId}
+                        onChange={handleChangeOnInputs}
+                        className={Items.transactionId}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        name="totalSales"
+                        id={"totalSales_" + Items.transactionId}
+                        onChange={handleChangeOnInputs}
+                        className={Items.transactionId}
+                        value={Items.salesQty * Items.unitPrice}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        name="unitCost"
+                        id={"unitCost_" + Items.transactionId}
+                        onChange={handleChangeOnInputs}
+                        className={Items.transactionId}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        name="purchaseQty"
+                        id={"purchaseQty_" + Items.transactionId}
+                        onChange={handleChangeOnInputs}
+                        className={Items.transactionId}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        name="totalCost"
+                        onChange={handleChangeOnInputs}
+                        className={Items.transactionId}
+                        value={Items.purchaseQty * Items.unitCost}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        name="broken"
+                        onChange={handleChangeOnInputs}
+                        className={Items.transactionId}
+                        id={"broken_" + Items.transactionId}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        name="inventory"
+                        onChange={handleChangeOnInputs}
+                        className={Items.transactionId}
+                        id={"inventory_" + Items.transactionId}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        id={"description_" + Items.transactionId}
+                        name={"description"}
+                        onChange={handleChangeOnInputs}
+                        className={Items.transactionId}
+                      ></TextField>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant=""
+                        color="primary"
+                        id={"btnUpdate_" + Items.transactionId}
+                        className="updateTransactions"
+                        name={Items.transactionId}
+                        onClick={updateTransactionItems}
+                      >
+                        Update
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+            <TableRow>
+              <TableCell colSpan={3}>Total Amount</TableCell>
+              <TableCell>{salesAndPurchaseAmount.salesAmount}</TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell>{salesAndPurchaseAmount.purchaseCost}</TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell colSpan={10}>
+                {`Sales Amount- Purchase Amount 
                 ${
                   parseInt(salesAndPurchaseAmount.salesAmount) -
                   parseInt(salesAndPurchaseAmount.purchaseCost)
                 }`}
-            </td>
-          </tr>
-        </table>
+              </TableCell>
+            </TableRow>
+          </Table>
+        </TableContainer>
       ) : (
         <h3>No purchase and sales transaction on this date</h3>
       )}
       {ExpenseTransaction.length > 0 ? (
         <div>
           <h4 id="ExpensesLists">Expenses list</h4>
-          <table className="tableExpenses">
-            <tr>
-              <th>Name</th>
-              <th>Amount</th>
-              <th>Description</th>
-            </tr>
-            {ExpenseTransaction?.map((items) => {
-              $(".tableExpenses").show();
-              console.log(ExpenseTransaction);
-              return (
-                <tr key={items.expenseId}>
-                  <td>{items.costName} </td>
-                  <td>
-                    <input
-                      name=""
-                      onChange={changesToupdateCosts}
-                      id={"costAmount_" + items.expenseId}
-                      className={items.expenseId}
-                      type="text"
-                      // value={items.costAmount}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      onChange={changesToupdateCosts}
-                      className={items.expenseId}
-                      name=""
-                      id={"costDescription_" + items.expenseId}
-                      type="text"
-                      // value={items.costDescription}
-                    />
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => updateCosts(items.expenseId)}
-                      name={items.expenseId}
-                      className={"updateBtn_" + items.expenseId}
-                    >
-                      Update
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-            {"Total expenses = " + TotalExpenses}
-          </table>
+          <TableContainer>
+            <Table className="tableExpenses">
+              <TableHead>
+                <TableCell>Name</TableCell>
+                <TableCell>Amount</TableCell>
+                <TableCell>Description</TableCell>
+              </TableHead>
+              <TableBody>
+                {ExpenseTransaction?.map((items) => {
+                  $(".tableExpenses").show();
+                  console.log(ExpenseTransaction);
+                  return (
+                    <TableRow key={items.expenseId}>
+                      <TableCell>{items.costName} </TableCell>
+                      <TableCell>
+                        <TextField
+                          name=""
+                          onChange={changesToupdateCosts}
+                          id={"costAmount_" + items.expenseId}
+                          className={items.expenseId}
+                          type="text"
+                          // value={items.costAmount}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField
+                          onChange={changesToupdateCosts}
+                          className={items.expenseId}
+                          name=""
+                          id={"costDescription_" + items.expenseId}
+                          type="text"
+                          // value={items.costDescription}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => updateCosts(items.expenseId)}
+                          name={items.expenseId}
+                          className={"updateBtn_" + items.expenseId}
+                        >
+                          Update
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+              {"Total expenses = " + TotalExpenses}
+            </Table>
+          </TableContainer>
           {/* net cash flow {salesAmount - TotalExpenses} */}
         </div>
       ) : (

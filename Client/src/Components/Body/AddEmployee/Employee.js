@@ -4,8 +4,16 @@ import EmployeeSearch from "./EmployeeSearch";
 import EmployeeView from "./EmoloyeeView";
 const Employee = () => {
   const [RequiredDiv, setRequiredDiv] = useState("");
-  let showTargetedDiv = (target) => {
+  let showTargetedDiv = (e, target) => {
     console.log(target);
+    let element = document.getElementsByClassName("activeClass");
+    console.log(element);
+    for (let i = 0; i < element.length; i++) {
+      element[i].classList.remove("activeClass");
+      // element.classList.remove("mystyle");
+    }
+    let targetElement = e.target;
+    targetElement.classList.add("activeClass");
     if (target == "search") {
       setRequiredDiv(<EmployeeSearch />);
     } else {
@@ -16,22 +24,22 @@ const Employee = () => {
   return (
     <div>
       <div className="EmployeeButton">
-        <button
+        <div
           className="SearchButton"
-          onClick={() => {
-            showTargetedDiv("search");
+          onClick={(e) => {
+            showTargetedDiv(e, "search");
           }}
         >
           Add Employee
-        </button>
-        <button
-          onClick={() => {
-            showTargetedDiv("view");
+        </div>
+        <div
+          onClick={(e) => {
+            showTargetedDiv(e, "view");
           }}
           className="ViewButton"
         >
           View
-        </button>
+        </div>
       </div>
       {RequiredDiv}
     </div>

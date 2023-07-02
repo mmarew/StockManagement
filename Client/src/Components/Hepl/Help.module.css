@@ -12,6 +12,10 @@
   background-color: white;
   height: 100vh;
 }
+.LeftHelpContainer li:nth-child(3) {
+  background-color: rgb(25, 118, 210);
+  color: white;
+}
 .helpMiddelContainer {
   width: 80%;
   text-align: center;

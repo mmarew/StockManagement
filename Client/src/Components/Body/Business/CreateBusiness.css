@@ -5,13 +5,12 @@
   margin: auto;
 }
 .createBusinessForm button {
-  background-color: blue;
-  color: white;
+  /* color: white;
   padding: 10px;
   margin: 10px auto;
   border: none;
-  border-radius: 10px;
+  border-radius: 10px; */
 }
 #cancelButton {
-  background-color: rgb(114, 114, 8);
+  /* background-color: rgb(114, 114, 8); */
 }

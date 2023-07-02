@@ -5,10 +5,15 @@ import "./AddItems.css";
 import AddProducts from "./AddProducts";
 function AddItems() {
   const [activeComponent, setActiveComponent] = useState();
-  let selectTarget = (e) => {
+  let selectTarget = (e, target) => {
     console.log(e.target.className);
-    if (e.target.className == "salesButton salesAndCostItems")
-      setActiveComponent(<AddProducts />);
+    let element = document.getElementsByClassName("salesAndCostItems");
+    for (let i = 0; i < element.length; i++) {
+      element[i].classList.remove("activeClass");
+    }
+
+    e.target.classList.add("activeClass");
+    if (target == "SALES") setActiveComponent(<AddProducts />);
     else if (e.target.className) {
       setActiveComponent(<AddCostItems />);
     }
@@ -16,15 +21,18 @@ function AddItems() {
   return (
     <>
       <div className="salesAndCostItemsWrapper">
-        <button
+        <div
           className="salesButton salesAndCostItems"
-          onClick={selectTarget}
+          onClick={(e) => selectTarget(e, "SALES")}
         >
           Sales
-        </button>
-        <button className="costButton salesAndCostItems" onClick={selectTarget}>
+        </div>
+        <div
+          className="costButton salesAndCostItems"
+          onClick={(e) => selectTarget(e, "COST")}
+        >
           Cost
-        </button>
+        </div>
       </div>
       {activeComponent}
     </>

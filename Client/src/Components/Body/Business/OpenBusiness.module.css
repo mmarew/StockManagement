@@ -4,7 +4,9 @@
   margin: 0;
   padding: 0;
 }
-
+.navBar {
+  display: block;
+}
 .openBusinessHeader {
   position: fixed;
   width: 100%;
@@ -32,6 +34,7 @@
   margin: 10px auto;
   display: block;
 }
+
 .activeLink {
   background-color: black;
 }
@@ -85,16 +88,12 @@ table {
   width: 20vw;
   min-width: fit-content;
   margin-right: 1vw;
-  display: none;
 }
 .middeleSideDiv {
   width: 100%;
 }
 @media screen and (min-width: 768px) {
-  .leftSideDiv {
-    display: block;
-  }
-  .middeleSideDiv {
-    max-width: 600px;
+  .navBar {
+    display: none;
   }
 }

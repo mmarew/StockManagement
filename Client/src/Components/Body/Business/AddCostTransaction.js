@@ -45,6 +45,7 @@ function AddCostTransaction() {
       alert("these data are registered before");
     } else if (data == "Inserted properly") {
       alert("Inserted properly");
+      $(".formInputToTransaction div input").val("");
     }
     $(".LinearProgress").hide();
   };

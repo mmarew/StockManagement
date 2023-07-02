@@ -183,9 +183,12 @@ function Business() {
       )}
 
       <div className={Businessmodulecss.MainBusinessWrapper}>
-        <div className={Businessmodulecss.LeftSideBusinessWrapper}>
-          <LeftSideBusiness />
-        </div>
+        {console.log("screenSize " + window.innerWidth)}
+        {window.innerWidth > 768 && (
+          <div className={Businessmodulecss.LeftSideBusinessWrapper}>
+            <LeftSideBusiness />
+          </div>
+        )}
         <div className={Businessmodulecss.MiddelSideBusinessWrapper}>
           <div className={Businessmodulecss.BusinessWrapper}>
             {ownersName != "" ? (

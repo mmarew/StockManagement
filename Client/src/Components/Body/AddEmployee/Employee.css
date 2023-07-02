@@ -1,11 +1,16 @@
 .EmployeeButton {
   background-color: white;
   margin-top: 20px;
+  font-weight: 900;
   padding: 10px;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
 }
-.EmployeeButton button {
-  background-color: green;
-  color: white;
+.EmployeeButton div:hover {
+  color: rgb(108, 108, 246);
+}
+.EmployeeButton div {
   padding: 10px;
   border: none;
   margin: 0 5px;
@@ -58,4 +63,7 @@
 }
 .EmployeeToBusiness {
   background-color: rgb(160, 160, 2) !important;
+}
+.activeClass {
+  border-bottom: 2px solid rgb(108, 108, 246);
 }

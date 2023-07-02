@@ -205,6 +205,7 @@ function AddSingleSales() {
   };
   useEffect(() => {
     $("#singleSalesDate").val(currentDates());
+    $(".LinearProgress").css("display", "none");
   }, []);
 
   return (
@@ -281,7 +282,7 @@ function AddSingleSales() {
                       <TextField
                         type="number"
                         required
-                        className={items.ProductId + " dailyRegistrationInputs"}
+                        className={"dailyRegistrationInputs"}
                         onInput={handleSalesTransactionInput}
                         name="purchaseQty"
                         label="purchase quantity"
@@ -291,7 +292,7 @@ function AddSingleSales() {
                       <TextField
                         type="number"
                         required
-                        className={items.ProductId + " dailyRegistrationInputs"}
+                        className={"dailyRegistrationInputs"}
                         onInput={handleSalesTransactionInput}
                         name="salesQty"
                         label="Sales quantity"
@@ -300,7 +301,7 @@ function AddSingleSales() {
                       <br />
                       <TextField
                         type="number"
-                        className={items.ProductId + " dailyRegistrationInputs"}
+                        className={"dailyRegistrationInputs"}
                         onInput={handleSalesTransactionInput}
                         name="brokenQty"
                         label="Broken quantity"
@@ -309,7 +310,7 @@ function AddSingleSales() {
                       <br />
                       <TextField
                         required
-                        className={items.ProductId + " dailyRegistrationInputs"}
+                        className={"dailyRegistrationInputs"}
                         onInput={handleSalesTransactionInput}
                         name="Description"
                         label="Description"

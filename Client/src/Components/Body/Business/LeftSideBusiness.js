@@ -3,8 +3,6 @@ import LeftSideBusinessCss from "./LeftSideBusiness.module.css";
 import masetawoshaIcon from "../../ICONS/BusinessJS/MASETAWOSHAICON.svg";
 import userProfileIcon from "../../ICONS/BusinessJS/userIcon.svg";
 import BusinessIcon from "../../ICONS/BusinessJS/businessBlack.svg";
-import $ from "jquery";
-
 import SupportIcon from "../../ICONS/BusinessJS/SupportBlack.svg";
 import { useNavigate } from "react-router-dom";
 function LeftSideBusiness() {
@@ -12,8 +10,6 @@ function LeftSideBusiness() {
   let navigeteToTargetedURL = (e, path) => {
     console.log(e);
     Navigate(path);
-
-    e.currentTarget.className += " " + LeftSideBusinessCss.activeClass + " ";
   };
   return (
     <div className={LeftSideBusinessCss.LeftSideWrapper}>
@@ -32,7 +28,7 @@ function LeftSideBusiness() {
         <li onClick={(e) => navigeteToTargetedURL(e, "/Profiles")}>
           <div>
             <img
-              className={LeftSideBusinessCss.imgLeft}
+              className={LeftSideBusinessCss.imgLeft + " imgLeft "}
               alt="Profile icon"
               src={userProfileIcon}
             />
@@ -45,7 +41,7 @@ function LeftSideBusiness() {
               className={LeftSideBusinessCss.imgLeft}
               src={SupportIcon}
               alt="Support icon"
-            />{" "}
+            />
             <p>Support</p>
           </div>
         </li>
@@ -53,5 +49,4 @@ function LeftSideBusiness() {
     </div>
   );
 }
-
 export default LeftSideBusiness;

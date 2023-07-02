@@ -48,13 +48,11 @@ function AddTotalSales({ Time }) {
       return;
     }
     $(".LinearProgress").show();
-
     let response = await axios.post(
       serverAddress + "registerTransaction/",
       CollectedProducts
     );
     $(".LinearProgress").hide();
-
     let datas = response.data.data;
     console.log(datas, "response is = ", response);
     if (datas == "This is already registered") {
@@ -69,10 +67,7 @@ function AddTotalSales({ Time }) {
         return;
       }
       alert("successfully registered. Thank you.");
-      let byClass = document.getElementsByClassName("productInput");
-      for (let i = 0; i < byClass.length; i++) {
-        byClass[i].value = "";
-      }
+      $(".productInput div input").val("");
     } else if (datas == "allDataAreRegisteredBefore") {
       alert(
         "Your data are not registered now.Because all of your data are registered before. Thank you"
@@ -112,7 +107,6 @@ function AddTotalSales({ Time }) {
           >
             <TextField
               onChange={(e) => {
-                console.log(e.target.value);
                 setselectedTime(e.target.value);
               }}
               required
@@ -134,7 +128,7 @@ function AddTotalSales({ Time }) {
                     target={item.ProductId}
                     onChange={collectFormData}
                     className={"productInput"}
-                    type="text"
+                    type="number"
                     name={"purchaseQty" + item.ProductId}
                     label="Purchase quantity"
                   />
@@ -143,7 +137,7 @@ function AddTotalSales({ Time }) {
                     required
                     onChange={collectFormData}
                     className={"productInput"}
-                    type="text"
+                    type="number"
                     name={"salesQuantity" + item.ProductId}
                     label="Sales quantity"
                   />
@@ -152,9 +146,18 @@ function AddTotalSales({ Time }) {
                     required
                     onChange={collectFormData}
                     className={"productInput"}
-                    type="text"
+                    type="number"
                     name={"wrickageQty" + item.ProductId}
                     label="Broken quantity"
+                  />
+                  <br />
+                  <TextField
+                    required
+                    onChange={collectFormData}
+                    className={"productInput"}
+                    type="text"
+                    name={"Description" + item.ProductId}
+                    label="Description"
                   />
                 </div>
               );

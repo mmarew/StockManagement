@@ -22,10 +22,12 @@
 }
 
 .LeftSideWrapper ul li {
-  padding: 10px 0;
+  margin: 5px;
+  padding: 5px 0;
   cursor: pointer;
   display: flex;
   justify-content: space-around;
+  border-radius: 10px;
 }
 .LeftSideWrapper ul li div {
   width: 100px;

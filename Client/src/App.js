@@ -32,14 +32,13 @@ function App() {
           >
             <Route path="Register" element={<RegisterEmployersProducts />} />
             <Route path="view" element={<Transaction />} />
-            <Route path="Search" element={<SearchProducts />} />
+            {/* <Route path="Search" element={<SearchProducts />} /> */}
           </Route>
 
           <Route
             path="/help"
             element={
               <>
-                {/* <NavBar /> */}
                 <Help />
               </>
             }
@@ -72,7 +71,7 @@ function App() {
             path="/Profiles"
             element={
               <>
-                <NavBar />
+                {window.innerWidth < 768 && <NavBar />}
                 <Profile />
               </>
             }
@@ -81,7 +80,7 @@ function App() {
             path="/Business"
             element={
               <>
-                <NavBar />
+                {window.innerWidth < 768 && <NavBar />}
                 <Business />
               </>
             }
@@ -106,8 +105,7 @@ function App() {
             path="/"
             element={
               <>
-                <NavBar />
-                {/* <Nav /> */}
+                {window.innerWidth < 768 && <NavBar />}
                 <Business />
               </>
             }

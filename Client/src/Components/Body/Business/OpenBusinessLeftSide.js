@@ -1,5 +1,6 @@
 import React from "react";
 import OpenBusinessLeftCss from "./OpenBusinessLeftSide.module.css";
+import HomeIcon from "../../ICONS/BusinessJS/clarity_home-line.svg";
 import $ from "jquery";
 import transactioIcon from "../../ICONS/BusinessJS/icons_transaction.svg";
 import { Link, Outlet, useNavigate } from "react-router-dom";
@@ -22,6 +23,10 @@ function OpenBusinessLeftSide() {
   return (
     <div id="Wrapper" className={OpenBusinessLeftCss.Wrapper}>
       <div className={OpenBusinessLeftCss.listWrapper}>
+        <Link className={OpenBusinessLeftCss.openBusinessTabLeft} to="/">
+          <img className={OpenBusinessLeftCss.TransactionIcon} src={HomeIcon} />
+          <a> Home</a>
+        </Link>
         <Link
           to="addTransaction"
           onClick={markTargetedLink}
