@@ -566,13 +566,11 @@ server.post(`/registerCostTransaction/`, (req, res) => {
   let costData = req.body.costData,
     date = req.body.costDate,
     rowData = req.body;
+
   let Check = `select * from ${req.body.businessName}_expenses where costRegisteredDate='${date}' `;
   connection.query(Check, (err, result) => {
     if (err) return res.json({ err });
     if (result) {
-      // console.log("costDatecostDatecostDatecostDatecostDate");
-      // console.log(result);
-      // console.log("date is " + date);
       if (result.length > 0) {
         return res.json({ data: "registered before" });
       } else {
@@ -581,12 +579,20 @@ server.post(`/registerCostTransaction/`, (req, res) => {
           //  costsId: 1, costName: '9990', unitCost: 890
           // console.log(costData[i]);
           let costsId = costData[i].costsId,
-            costName = costData[i].costName,
-            Description = "Description_" + costName;
-          // console.log("Description is " + Description);
+            costName = costData[i].costName;
+          costName = costName.replace(/ /g, "");
+          let Description = "Description_" + costName;
+
           let costAmount = rowData[costName],
             costDescription = rowData[Description];
-          // console.log( "costAmount = " + costAmount, " costDescription=" + costDescription );
+          console.log("@registerCostTransaction ", rowData);
+          console.log(
+            "costData == ",
+            costData,
+            "costAmount = " + costAmount,
+            " costDescription=" + costDescription
+          );
+          // return;
           let insert = `insert into ${req.body.businessName}_expenses (costId,costAmount,costDescription,costRegisteredDate) values('${costsId}','${costAmount}','${costDescription}','${date}')`;
           connection.query(insert, (err, result2) => {
             if (err) return res.json({ err });
@@ -596,7 +602,8 @@ server.post(`/registerCostTransaction/`, (req, res) => {
             }
           });
         }
-        return res.json({ data: "Inserted properly" });
+        if (i > 0) return res.json({ data: "Inserted properly" });
+        else res.json({ data: "error", error: "unable to insert" });
       }
     }
   });
@@ -690,7 +697,7 @@ function insertIntoCosts(businessName, data, res) {
     if (result1.length > 0) {
       return res.json({ data: "already registered before" });
     } else {
-      let insert = `insert into ${businessName} (costName,unitCost) values('${data.Costname}','${data.costPrice}')`;
+      let insert = `insert into ${businessName} (costName) values('${data.Costname}')`;
       connection.query(insert, (err, result) => {
         if (err) return res.json({ err });
         if (result) {

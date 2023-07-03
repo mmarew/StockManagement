@@ -1,13 +1,13 @@
 const mysql = require("mysql2");
 let bcript = require("bcryptjs");
-/*
+
 var connection = mysql.createConnection({
   host: "localhost",
   user: "masetawoshacom_stock",
   password: "DBcp123$%^",
   database: "masetawoshacom_store",
 });
-
+/*
 var connection = mysql.createConnection({
   host: "localhost",
   user: "guzowaycom_guzowaycom",
@@ -16,13 +16,13 @@ var connection = mysql.createConnection({
  }); 
 server side connection
 
-*/
+
 let connection = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
   database: "store",
-});
+});*/
 connection.connect();
 function createBasicTables() {
   let createTable = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int, salesQty int,businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date, primary key(dailySalesId) )`;
