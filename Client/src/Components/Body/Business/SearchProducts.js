@@ -11,6 +11,7 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
+import { Button } from "@material-ui/core";
 function SearchProducts({ response }) {
   let businessName = localStorage.getItem("businessName");
   let serverAddress = localStorage.getItem("targetUrl");
@@ -53,7 +54,7 @@ function SearchProducts({ response }) {
     ob.productCost = $("#" + productCost_).val();
     ob.id = id;
     ob.businessName = businessName;
-
+    $(".LinearProgress").css("display", "block");
     let response = await axios
       .post(serverAddress + "updateProducts/", ob)
       .then((datas) => {
@@ -67,13 +68,16 @@ function SearchProducts({ response }) {
   return (
     <div>
       {searchedProducts?.length > 0 && (
-        <TableContainer>
+        <TableContainer className="productContainer">
           <Table id="savedProduct">
             <TableHead>
               <TableRow>
                 <TableCell className="tableHeadTitle">product Name</TableCell>
                 <TableCell className="tableHeadTitle">product Price</TableCell>
-                <TableCell className="tableHeadTitle">product Cost</TableCell>
+                <TableCell className="tableHeadTitle">
+                  product Cost
+                </TableCell>{" "}
+                <TableCell className="tableHeadTitle">Minimum Qty</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -118,7 +122,9 @@ function SearchProducts({ response }) {
                       />
                     </TableCell>
                     <TableCell>
-                      <div
+                      <Button
+                        variant="contained"
+                        color="primary"
                         onClick={updateProductsData}
                         id={items.ProductId}
                         className={
@@ -126,7 +132,7 @@ function SearchProducts({ response }) {
                         }
                       >
                         UPDATE
-                      </div>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );

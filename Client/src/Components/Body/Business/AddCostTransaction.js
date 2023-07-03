@@ -31,15 +31,17 @@ function AddCostTransaction() {
     // setFormdata({ ...Formdata, costData });
     $(".LinearProgress").hide();
   };
+  /////////////////
   let handleFormSubmit = async (e) => {
     e.preventDefault();
-    console.log("Formdata", Formdata);
+    console.log("Formdata to cost ", Formdata);
     $(".LinearProgress").show();
+    // return;
     let response = await axios.post(
       serverAddress + `registerCostTransaction/`,
       Formdata
     );
-    console.log("response ", response.data.data);
+    console.log("response ", response);
     let data = response.data.data;
     if (data == "registered before") {
       alert("these data are registered before");
@@ -49,6 +51,7 @@ function AddCostTransaction() {
     }
     $(".LinearProgress").hide();
   };
+  //////////
   let collectCotForm = (e) => {
     console.log(e.target);
     console.log(Formdata);

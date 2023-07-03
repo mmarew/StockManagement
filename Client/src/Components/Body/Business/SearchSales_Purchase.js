@@ -429,7 +429,6 @@ function SearchSingleTransActions({ response, requestFrom }) {
                       </TableCell>
                     ) : (
                       <TableCell>
-                        {" "}
                         &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
                       </TableCell>
                     )}

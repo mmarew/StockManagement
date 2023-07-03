@@ -36,7 +36,7 @@ function AddCostItems() {
     let response = await axios.post(serverAddress + "AddCostItems/", data);
     if (response.data.data == "Registered successfully") {
       alert("Registered successfully");
-      $(".inputToCotsRegistration").val("");
+      $(".inputToCotsRegistration input").val("");
     } else if (response.data.data == "already registered before") {
       alert("Already registered before");
     }
@@ -64,13 +64,13 @@ function AddCostItems() {
           onChange={collectInputInformation}
         />
         <br />
-        <TextField
+        {/* <TextField
           className="inputToCotsRegistration"
           name="costPrice"
           label="Cost price"
           onChange={collectInputInformation}
         />
-        <br />
+        <br /> */}
         <Button variant="contained" type="Submit">
           submit
         </Button>

@@ -1,7 +1,55 @@
 import React, { useEffect, useState } from "react";
-import $ from "jquery";
+import $, { each } from "jquery";
 import axios from "axios";
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+} from "@mui/material";
+import MUIConfirm from "../Others/MUIConfirm";
 function SearchCosts({ response }) {
+  const [ConfirmRequest, setConfirmRequest] = useState({});
+  const [ConfirmDelete, setConfirmDelete] = useState({});
+  useEffect(() => {
+    console.log("ConfirmDelete == ", ConfirmDelete);
+    if (ConfirmDelete.Verify) {
+      let deleteMyCost = async () => {
+        let { item } = ConfirmDelete;
+        console.log("response = ", response.data.data);
+        // return;
+        let data = MyCostData.map((d) => d);
+        let index = data.indexOf(item);
+        console.log("index" + index, "item = ", item);
+        console.log("before splices data = ", data);
+        if (index >= 0) data.splice(index, 1);
+        console.log("after splices data= ", data);
+
+        $(".LinearProgress").css("display", "block");
+        // return;
+        let responce = await axios.post(
+          serverAddress + "deleteCostData/",
+          item
+        );
+        $(".LinearProgress").css("display", "none");
+
+        if (responce.data.data == "deleted") {
+          setMyCostData(data);
+          setOpen({ ...open, open: false });
+          // setConfirmRequest({});
+          alert("your data is deleted");
+          console.log(data);
+        }
+      };
+      deleteMyCost();
+    }
+  }, [ConfirmDelete]);
+
+  let businessId = localStorage.getItem("businessId");
   let businessName = localStorage.getItem("businessName");
   let serverAddress = localStorage.getItem("targetUrl");
   const [MyCostData, setMyCostData] = useState([]);
@@ -46,63 +94,95 @@ function SearchCosts({ response }) {
     $(".btnUpdateCost").hide();
     $("#CostUpdate_" + index).show();
   };
-  let deleteCostItem = async (item) => {
-    item.businessName = businessName;
+
+  const [ShowSuccessError, setSuccessError] = useState({});
+  const [open, setOpen] = useState({});
+  useEffect(() => {
+    console.log("open is = ", open);
+    console.log("ConfirmDelete", ConfirmDelete);
+    // return;
+    setConfirmRequest(
+      <MUIConfirm
+        ConfirmDelete={ConfirmDelete}
+        setConfirmDelete={setConfirmDelete}
+        DialogMessage={" delete this cost "}
+        Action="deleteCosts"
+        ShowSuccessError={ShowSuccessError}
+        setSuccessError={setSuccessError}
+        open={open}
+        setOpen={setOpen}
+        targetdBusiness={{
+          businessId,
+          businessName,
+        }}
+      />
+    );
+  }, [open]);
+
+  let deleteCostItem = async (e, item) => {
+    if (item) item.businessName = businessName;
     item.Token = Token;
-    console.log(item);
-    // ownerId
-    let responce = await axios.post(serverAddress + "deleteCostData/", item);
-    console.log(responce);
-    if (responce.data.data == "deleted") {
-      alert("your data is deleted");
-    }
-    //   alert("you are not allowed to delete it");
+    setConfirmDelete({ ...ConfirmDelete, item, Verify: false });
+    setTimeout(() => {
+      setOpen({ open: true });
+    }, 0);
+    return;
   };
   return (
     <div>
+      {console.log("MyCostData is ==", MyCostData)}
       {MyCostData?.length > 0 && (
-        <table id="costTable">
-          <tr>
-            <th>Cost Name</th>
-            <th>Unit Cost</th>
-          </tr>
-          {MyCostData?.map((cost) => {
-            // costsId: 1, costName: 'lunch', unitCost: 200
-            console.log(cost);
-            return (
-              <tr key={MyCostData.indexOf(cost)}>
-                <td>
-                  <input
-                    onInput={(e) => costInputEdits(e, MyCostData.indexOf(cost))}
-                    type="text"
-                    id={`CostName_${MyCostData.indexOf(cost)}`}
-                  />
-                </td>
-                <td>
-                  <input
-                    onInput={(e) => costInputEdits(e, MyCostData.indexOf(cost))}
-                    type="number"
-                    id={`CostValue_${MyCostData.indexOf(cost)}`}
-                  />
-                </td>
-                <td>
-                  <input
-                    onClick={(e) =>
-                      updateMycostData(e, MyCostData.indexOf(cost), cost)
-                    }
-                    className="btnUpdateCost"
-                    value={"Update"}
-                    type="button"
-                    id={`CostUpdate_${MyCostData.indexOf(cost)}`}
-                  />
-                </td>
-                <td>
-                  <button onClick={() => deleteCostItem(cost)}>Delete</button>
-                </td>
-              </tr>
-            );
-          })}
-        </table>
+        <div>
+          <TableContainer>
+            <Table id="costTable">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Cost Name</TableCell>
+                  <TableCell>Update / Delete</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {MyCostData?.map((cost, index) => {
+                  return (
+                    <TableRow key={"cost_" + index}>
+                      <TableCell>
+                        <TextField
+                          onInput={(e) =>
+                            costInputEdits(e, MyCostData.indexOf(cost))
+                          }
+                          type="text"
+                          id={`CostName_${MyCostData.indexOf(cost)}`}
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={(e) => updateMycostData(e, index, cost)}
+                          className="btnUpdateCost"
+                          id={`CostUpdate_${index}`}
+                        >
+                          Update
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={(e) => deleteCostItem(e, cost)}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          {open.open && ConfirmRequest}
+        </div>
       )}
     </div>
   );

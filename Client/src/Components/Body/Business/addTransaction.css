@@ -12,6 +12,8 @@
   font-weight: 600;
   line-height: normal;
   margin: 10px 20px;
+  border-radius: 10px;
+  padding: 2px 10px;
 }
 
 .addTransaction button:hover {

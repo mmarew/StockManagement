@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 function GetMaximumSales() {
+  const [selectedValue, setSelectedValue] = useState("default");
   const [MaximumDataList, setMaximumDataList] = useState([]);
   const [SelectedTime, setSelectedTime] = useState("");
   let token = localStorage.getItem("storeToken");
@@ -101,13 +102,15 @@ function GetMaximumSales() {
   useEffect(() => {
     let selectTimeRange = $("#selectTimeRange").val();
     console.log("selectTimeRange = ", selectTimeRange);
-    if (selectTimeRange == "") setSelectedTime("weekly");
+    if (selectTimeRange == "" || selectTimeRange == "default")
+      setSelectedTime("weekly");
     else setSelectedTime(selectTimeRange);
   }, []);
 
   let changesOnDays = (e) => {
     setSelectedTime(e.target.value);
     console.log(e);
+    setSelectedValue(e.target.value);
   };
   let submitMaximumSelection = async (e) => {
     if (e !== "notEvent") e.preventDefault();
@@ -209,6 +212,7 @@ function GetMaximumSales() {
     console.log(e.target.name, e.target.value);
     setDateRange({ ...DateRange, [e.target.name]: e.target.value });
   };
+
   return (
     <div>
       <br />
@@ -217,15 +221,14 @@ function GetMaximumSales() {
         className={GetMaximumStyle.maxSelectionForm}
         onSubmit={submitMaximumSelection}
       >
-        <div>
-          <label>Select Date Range</label>
-        </div>
         <Select
+          value={selectedValue}
           name="selectTimeRange"
           className={GetMaximumStyle.selectTimeRange}
-          id="selectTimeRange"
+          id={GetMaximumStyle.selectTimeRange}
           onChange={changesOnDays}
         >
+          <MenuItem value="default">Select Date Range</MenuItem>
           <MenuItem selected value="weekly">
             weekly
           </MenuItem>

@@ -36,14 +36,14 @@ function AddTransaction({ Time }) {
           name="Sales"
           onClick={setTargatedRegistration}
         >
-          Sales
+          Register Sales
         </button>
         <button
           className="salesOrCosts"
           name="Cost"
           onClick={setTargatedRegistration}
         >
-          Cost
+          Register Cost
         </button>
       </div>
       <hr />

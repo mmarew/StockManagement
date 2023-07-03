@@ -67,7 +67,7 @@ function SearchManager() {
         alert("You haven't registered Cost data.");
       }
     } else if (searchTarget == "PRODUCTS") {
-      if (response.data.data == "no results") {
+      if (response.data.products.length == 0) {
         alert("You haven't registered Product data");
       }
     } else if (searchTarget == "ALLTRANSACTION") {

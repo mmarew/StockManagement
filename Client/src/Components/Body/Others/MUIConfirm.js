@@ -19,14 +19,19 @@ function MUIConfirm({
   ShowSuccessError,
   setSuccessError,
   DialogMessage,
+  setConfirmDelete,
+  ConfirmDelete,
 }) {
   // console.log(open, setOpen, targetdBusiness);
+  // return;
   const handleClose = async (confirmed) => {
     setSuccessError({});
     let { businessId, businessName, getBusiness } = targetdBusiness;
     setOpen({ ...open, open: false });
     if (confirmed) {
-      if (Action == "deleteBusiness") {
+      if (Action == "deleteCosts") {
+        setConfirmDelete({ ...ConfirmDelete, Verify: true });
+      } else if (Action == "deleteBusiness") {
         // Handle confirmed action here
         let responce = await DeleteBusiness(
           businessId,
@@ -41,7 +46,11 @@ function MUIConfirm({
             message: "SUCCESS",
           });
         else
-          setSuccessError({ ...ShowSuccessError, show: true, message: "Fail" });
+          setSuccessError({
+            ...ShowSuccessError,
+            show: true,
+            message: "Fail",
+          });
       } else if (Action == "updateBusinesssName") {
         const { setShowProgressBar, setcreatedBusiness, createdBusiness } =
           targetdBusiness;

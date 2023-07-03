@@ -30,6 +30,7 @@ const AddProducts = () => {
       alert("Already registered");
     } else if (data == "productIsAdded") {
       alert("you have added products successfully");
+      $(".registerProducts input").val("");
     } else if (data == "created well") {
       alert("Your product is not registered. please try again.");
       return;

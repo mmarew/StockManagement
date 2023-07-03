@@ -7,15 +7,11 @@
   border-radius: 10px;
   flex-direction: column;
 }
-.searchField {
-  /* padding: 40px 0; */
+.productContainer {
+  max-width: fit-content;
+  margin: auto;
 }
-#searchProduct input,
-select {
-  /* padding: 5px;
-  margin-left: 10px;
-  margin: 5px; */
-}
+
 .searchBtn {
   background-color: blue;
   color: white;
@@ -37,8 +33,11 @@ td {
   border-radius: 10px;
   display: none;
 }
+.trProductName td {
+  max-width: fit-content;
+}
 .trProductName td input {
-  width: 100px;
+  max-width: fit-content;
 }
 
 .searchInputs {
