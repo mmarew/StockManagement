@@ -66,6 +66,9 @@ function Business() {
     });
     setShowProgressBar(false);
     console.log(results.data);
+    if (results.data.data == "You haven't loged in before.") {
+      Navigate("/login");
+    }
     if (
       results.data.myBusiness?.length == 0 &&
       results.data.employeerBusiness?.length == 0
@@ -200,7 +203,7 @@ function Business() {
                 <br />
               </>
             ) : (
-              "PROFILE"
+              ""
             )}
             <Button
               variant="contained"
@@ -357,8 +360,6 @@ function Business() {
                   })}
                   {
                     <>
-                      {console.log("employeerBusiness")}
-                      {console.log(employeerBusiness)}
                       {employeerBusiness?.map((items) => {
                         console.log(items);
                         return (

@@ -8,7 +8,7 @@
   flex-direction: column;
 }
 .productContainer {
-  max-width: fit-content;
+  max-width: 700px;
   margin: auto;
 }
 
@@ -45,7 +45,12 @@ td {
   display: none;
 }
 #costTable {
-  display: block !important;
+  max-width: 500px;
+  margin: auto;
+}
+.costWrapperDiv {
+  display: flex;
+  justify-content: center;
 }
 .btnUpdateCost {
   background-color: blue;
@@ -53,12 +58,11 @@ td {
   color: white;
   display: none;
 }
-.costTransaction {
-  display: block !important;
-  margin: 10px auto;
-}
-.costTransaction tr td {
-  padding: 10px !important;
+
+.productContainer td {
+  /* margin: 0 !important; */
+  padding: 0 !important;
+  /* padding: 10px !important; */
 }
 
 .updateExpences {

@@ -40,7 +40,6 @@ function AddTotalSales({ Time }) {
   };
   let sendFormDataToServer = async (e) => {
     e.preventDefault();
-    console.log(CollectedProducts);
     let dates = CollectedProducts.dates;
     if (dates == undefined) {
       alert("Date is not selected");

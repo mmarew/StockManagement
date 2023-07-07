@@ -56,3 +56,6 @@
 .openBusinessTabLeft:hover .nonTransaction {
   filter: invert(1);
 }
+.iconLogout {
+  width: 30px;
+}

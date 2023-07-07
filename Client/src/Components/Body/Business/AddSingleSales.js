@@ -1,10 +1,19 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import singleSalesCss from "./AddSingleSales.module.css";
-import $ from "jquery";
+import $, { data } from "jquery";
 import currentDates from "../Date/currentDate";
-import { Button } from "@material-ui/core";
-import { Input, TextField } from "@mui/material";
+import {
+  Button,
+  Input,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+} from "@mui/material";
 function AddSingleSales() {
   // setShowHiddenProducts;
   const [showHiddenProducts, setShowHiddenProducts] = useState(false);
@@ -34,12 +43,12 @@ function AddSingleSales() {
     else setSearchedProducts(responce.data.data);
     $(".LinearProgress").hide();
   };
-  let handleSalesTransactionInput = (e) => {
+  let handleSalesTransactionInput = (e, ProductId) => {
     console.log(e.target.value);
     setformInputValues({
       ...formInputValues,
       [e.target.name]: e.target.value,
-      ProductId: e.target.className,
+      ProductId,
     });
   };
   // collect input values of search form
@@ -49,6 +58,7 @@ function AddSingleSales() {
   };
   let registerSinglesalesTransaction = async (e) => {
     e.preventDefault();
+    // return console.log("formInputValues", formInputValues);
     $(".LinearProgress").css("display", "block");
     let responce = await axios.post(
       serverAddress + "registerSinglesalesTransaction/",
@@ -62,7 +72,7 @@ function AddSingleSales() {
     console.log(responce.data.data);
     if (responce.data.data == "successfullyRegistered") {
       alert("Successfully Registered");
-      $(".dailyRegistrationInputs").val("");
+      $(".dailyRegistrationInputs input").val("");
     }
     $(".LinearProgress").hide();
   };
@@ -91,6 +101,7 @@ function AddSingleSales() {
   };
   let getTotalRegiters = async (targetproductId) => {
     // clear datas of product detailes
+    console.log('$("#singleSalesDate").val()', $("#singleSalesDate").val());
     setSearchedProducts([]);
     let businessId = localStorage.getItem("businessId");
     let businessName = localStorage.getItem("businessName");
@@ -176,12 +187,35 @@ function AddSingleSales() {
     let serverAddress = localStorage.getItem("targetUrl");
     let businessName = localStorage.getItem("businessName"),
       BusinessId = localStorage.getItem("businessId");
+    console.log("allDailySales == ", allDailySales);
+    console.log("DailyTransaction[0]", DailyTransaction);
+    let ProductsList = [];
+    // filter products list to register in db
+    DailyTransaction.map((item) => {
+      let existsInProductsList = false;
+      // to check existance of item in ProductsList
+      ProductsList.map((products) => {
+        // Check existance of item in ProductsList and if exist please change existsInProductsList to true
+        if (products.ProductId == item.ProductId) existsInProductsList = true;
+      });
+      // if not exist in ProductsList add to ProductsList
+      if (existsInProductsList == false) {
+        ProductsList.push(item);
+      }
+    });
+    console.log(
+      "ProductsList",
+      ProductsList,
+      " allDailySales == ",
+      allDailySales
+    );
+    // return;
     let productsInfo = {
       ...allDailySales,
       businessName: businessName,
       BusinessId: BusinessId,
       // it is only information of product and no need of repetation is nedded
-      ProductsList: [DailyTransaction[0]],
+      ProductsList,
       dates: $("#singleSalesDate").val(),
     };
     console.log("productsInfo =");
@@ -194,12 +228,19 @@ function AddSingleSales() {
     );
     console.log("Response", Response);
     let datas = Response.data.data;
+    console.log(Response.data.data);
     if (datas == "This is already registered") {
       alert(
         "Your data is not registered because, on this date data is already registered"
       );
     } else if (datas == "data is registered successfully") {
       alert("successfully registered. Thank you.");
+    } else if (datas == "allDataAreRegisteredBefore") {
+      alert(
+        "These datas are registered before. so please remove registered datas first"
+      );
+    } else {
+      alert("unkown error");
     }
     $(".LinearProgress").hide();
   };
@@ -210,18 +251,15 @@ function AddSingleSales() {
 
   return (
     <div className={singleSalesCss.singleSalesWrapper}>
+      <h3>Search Products</h3>
       <form
         className={singleSalesCss.formToSearchItems}
         form
         onSubmit={handleSearchSubmit}
       >
-        <h3>Search Products</h3>
-        <TextField
-          label="Date "
-          name="singleSalesDate"
-          id="singleSalesDate"
-          type="date"
-        />
+        <label>Select Date</label>
+        <br />
+        <TextField name="singleSalesDate" id="singleSalesDate" type="date" />
         <br />
         <TextField
           required
@@ -237,9 +275,14 @@ function AddSingleSales() {
           Search
         </Button>
       </form>
-      {/* <button onClick={() => getTotalRegiters("getAllTransaction")}>
+
+      <Button
+        variant="contained"
+        color="success"
+        onClick={() => getTotalRegiters("getAllTransaction")}
+      >
         View All Daily Transactions
-      </button> */}
+      </Button>
       {searchedProducts.length > 0 && (
         <div className={singleSalesCss.searchedProductsLists}>
           {searchedProducts?.map((items) => {
@@ -283,7 +326,9 @@ function AddSingleSales() {
                         type="number"
                         required
                         className={"dailyRegistrationInputs"}
-                        onInput={handleSalesTransactionInput}
+                        onInput={(e) =>
+                          handleSalesTransactionInput(e, items.ProductId)
+                        }
                         name="purchaseQty"
                         label="purchase quantity"
                       />
@@ -293,7 +338,9 @@ function AddSingleSales() {
                         type="number"
                         required
                         className={"dailyRegistrationInputs"}
-                        onInput={handleSalesTransactionInput}
+                        onInput={(e) =>
+                          handleSalesTransactionInput(e, items.ProductId)
+                        }
                         name="salesQty"
                         label="Sales quantity"
                       />
@@ -302,7 +349,9 @@ function AddSingleSales() {
                       <TextField
                         type="number"
                         className={"dailyRegistrationInputs"}
-                        onInput={handleSalesTransactionInput}
+                        onInput={(e) =>
+                          handleSalesTransactionInput(e, items.ProductId)
+                        }
                         name="brokenQty"
                         label="Broken quantity"
                       />
@@ -311,7 +360,9 @@ function AddSingleSales() {
                       <TextField
                         required
                         className={"dailyRegistrationInputs"}
-                        onInput={handleSalesTransactionInput}
+                        onInput={(e) =>
+                          handleSalesTransactionInput(e, items.ProductId)
+                        }
                         name="Description"
                         label="Description"
                       />
@@ -319,6 +370,15 @@ function AddSingleSales() {
                       <br />
                       <Button color="primary" variant="contained" type="submit">
                         ADD
+                      </Button>
+                      &nbsp; &nbsp; &nbsp;
+                      <Button
+                        onClick={() => setShowHiddenProducts(false)}
+                        color="warning"
+                        variant="contained"
+                        type="submit"
+                      >
+                        CANCEL
                       </Button>
                     </div>
                   )}
@@ -331,36 +391,42 @@ function AddSingleSales() {
       )}
       {DailyTransaction.length > 0 && (
         <>
-          <table>
-            <tr>
-              <th>Product Name</th>
-              <th>Purchase Qty </th>
-              <th>Sales Qty</th>
-              <th>Broken Qty</th>
-              <th>Description</th>
-            </tr>
-
-            {DailyTransaction?.map((items, index) => {
-              console.log(items);
-              // return;
-              return (
-                <tr key={"detailes_" + index}>
-                  <td> {items.productName} </td>
-                  <td>{items.purchaseQty}</td>
-                  <td>{items.salesQty}</td>
-                  <td> {items.brokenQty} </td>
-                  <td> {items.Description}</td>
-                </tr>
-              );
-            })}
-            <tr></tr>
-          </table>
-          <button
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Product Name</TableCell>
+                  <TableCell>Purchase Qty </TableCell>
+                  <TableCell>Sales Qty</TableCell>
+                  <TableCell>Broken Qty</TableCell>
+                  <TableCell>Description</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {DailyTransaction?.map((items, index) => {
+                  console.log(items);
+                  // return;
+                  return (
+                    <TableRow key={"detailes_" + index}>
+                      <TableCell> {items.productName} </TableCell>
+                      <TableCell>{items.purchaseQty}</TableCell>
+                      <TableCell>{items.salesQty}</TableCell>
+                      <TableCell> {items.brokenQty} </TableCell>
+                      <TableCell> {items.Description}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Button
+            variant="contained"
+            color="primary"
             className={singleSalesCss.btnAddTotalSales}
             onClick={RegiterCollectedDailyTransaction}
           >
             Add As Total Sales
-          </button>
+          </Button>
         </>
       )}
     </div>

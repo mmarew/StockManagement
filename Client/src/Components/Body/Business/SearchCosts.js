@@ -28,9 +28,7 @@ function SearchCosts({ response }) {
         console.log("before splices data = ", data);
         if (index >= 0) data.splice(index, 1);
         console.log("after splices data= ", data);
-
         $(".LinearProgress").css("display", "block");
-        // return;
         let responce = await axios.post(
           serverAddress + "deleteCostData/",
           item
@@ -70,6 +68,14 @@ function SearchCosts({ response }) {
       Token,
       businessName,
     });
+
+    let costData = MyCostData.map((cost1, i) => {
+      if (i == id) {
+        cost1.updateStatus = false;
+      }
+      return cost1;
+    });
+    setMyCostData(costData);
     $(".LinearProgress").css("display", "none");
     if (responce.data.data == "updated successfully") {
       alert(`your data is updated. Thank you.`);
@@ -88,11 +94,20 @@ function SearchCosts({ response }) {
       $("#" + CostValue_).val(cost.unitCost);
       $("#" + CostName_).val(cost.costName);
     });
+    $(".btnUpdateCost").hide();
   }, [MyCostData]);
 
-  let costInputEdits = (e, index) => {
+  let costInputEdits = (e, index, id) => {
     $(".btnUpdateCost").hide();
     $("#CostUpdate_" + index).show();
+    let costData = MyCostData.map((cost, i) => {
+      if (i == index) {
+        cost.updateStatus = true;
+        cost.costName = e.target.value;
+      }
+      return cost;
+    });
+    setMyCostData(costData);
   };
 
   const [ShowSuccessError, setSuccessError] = useState({});
@@ -132,8 +147,8 @@ function SearchCosts({ response }) {
     <div>
       {console.log("MyCostData is ==", MyCostData)}
       {MyCostData?.length > 0 && (
-        <div>
-          <TableContainer>
+        <div className="costWrapperDiv">
+          <TableContainer className="">
             <Table id="costTable">
               <TableHead>
                 <TableRow>
@@ -148,24 +163,25 @@ function SearchCosts({ response }) {
                       <TableCell>
                         <TextField
                           onInput={(e) =>
-                            costInputEdits(e, MyCostData.indexOf(cost))
+                            costInputEdits(e, index, `CostName_${index}`)
                           }
                           type="text"
-                          id={`CostName_${MyCostData.indexOf(cost)}`}
+                          id={`CostName_${index}`}
                         />
                       </TableCell>
-
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={(e) => updateMycostData(e, index, cost)}
-                          className="btnUpdateCost"
-                          id={`CostUpdate_${index}`}
-                        >
-                          Update
-                        </Button>
-                      </TableCell>
+                      {cost.updateStatus && (
+                        <TableCell>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={(e) => updateMycostData(e, index, cost)}
+                            // className="btnUpdateCost CostUpdate_"
+                            // id={`CostUpdate_${index}`}
+                          >
+                            Update
+                          </Button>
+                        </TableCell>
+                      )}
                       <TableCell>
                         <Button
                           variant="contained"

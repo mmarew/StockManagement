@@ -23,11 +23,10 @@
 
 .LeftSideWrapper ul li {
   margin: 5px;
-  padding: 5px 0;
+  padding: 10px 0;
   cursor: pointer;
   display: flex;
   justify-content: space-around;
-  border-radius: 10px;
 }
 .LeftSideWrapper ul li div {
   width: 100px;
@@ -48,4 +47,7 @@
   width: 80%;
   margin: auto;
   margin-top: 0px;
+}
+.masetawoshaIcon {
+  width: 15vw;
 }

@@ -29,7 +29,9 @@ function MUIConfirm({
     let { businessId, businessName, getBusiness } = targetdBusiness;
     setOpen({ ...open, open: false });
     if (confirmed) {
-      if (Action == "deleteCosts") {
+      if (Action == "deleteProducts") {
+        setConfirmDelete({ ...ConfirmDelete, Verify: true });
+      } else if (Action == "deleteCosts") {
         setConfirmDelete({ ...ConfirmDelete, Verify: true });
       } else if (Action == "deleteBusiness") {
         // Handle confirmed action here

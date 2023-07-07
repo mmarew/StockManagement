@@ -13,13 +13,7 @@ function Profile() {
   let navigate = useNavigate();
   let serverUrl = localStorage.getItem("targetUrl");
   let storeToken = localStorage.getItem("storeToken");
-  let logoutofThisPage = () => {
-    localStorage.setItem("storeToken", "");
-    storeToken = localStorage.getItem("storeToken");
-    if (storeToken == "" || storeToken == null) {
-      navigate("/login");
-    }
-  };
+
   let deleteProfile = async () => {
     $("button").removeClass(ProfileCss.ActiveButton);
     settargetRender("DeleteProfile");
@@ -60,6 +54,13 @@ function Profile() {
     $(e.target).addClass(ProfileCss.ActiveButton);
     settargetRender("EditProfile");
   };
+  let Logout = async () => {
+    localStorage.setItem("storeToken", "");
+    let storeToken = localStorage.getItem("storeToken");
+    if (storeToken == "" || storeToken == null) {
+      navigate("/login");
+    }
+  };
   return (
     <div className={ProfileCss.ProfileWrapper}>
       {window.innerWidth > 768 && (
@@ -74,10 +75,7 @@ function Profile() {
         <div className={ProfileCss.EditDeleteProfileWrapper}>
           <button onClick={handleEditeProfile}>Edit My Profile</button>
           <button onClick={deleteProfile}>Delete My profile</button>
-          <button
-            onClick={logoutofThisPage}
-            className={ProfileCss.LogoutButton}
-          >
+          <button onClick={Logout} className={ProfileCss.LogoutButton}>
             Logout My profile
           </button>
         </div>

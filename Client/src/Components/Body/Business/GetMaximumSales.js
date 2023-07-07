@@ -102,7 +102,11 @@ function GetMaximumSales() {
   useEffect(() => {
     let selectTimeRange = $("#selectTimeRange").val();
     console.log("selectTimeRange = ", selectTimeRange);
-    if (selectTimeRange == "" || selectTimeRange == "default")
+    if (
+      selectTimeRange == undefined ||
+      selectTimeRange == "" ||
+      selectTimeRange == "default"
+    )
       setSelectedTime("weekly");
     else setSelectedTime(selectTimeRange);
   }, []);

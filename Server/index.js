@@ -226,7 +226,7 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
   // res.end("getRegisteredProducts lllllllllll");
 });
 server.post(path + "registerTransaction/", async (req, res) => {
-  console.log("registerTransaction", req.body);
+  // console.log("registerTransaction", req.body);
   // return;
   let rowData = req.body,
     ProductsList = rowData.ProductsList,
@@ -268,10 +268,11 @@ server.post(path + "registerTransaction/", async (req, res) => {
               data: "allDataAreRegisteredBefore",
               previouslyRegisteredData,
               date: req.body.dates,
+              values,
             });
           } else {
             let insert =
-              `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values ` +
+              `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory) values ` +
               values;
             connection.query(insert, (err, result) => {
               if (err) {
@@ -327,6 +328,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
                 data: "allDataAreRegisteredBefore",
                 previouslyRegisteredData,
                 date: req.body.dates,
+                values,
               });
             } else {
               console.log(
@@ -356,6 +358,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
                   return res.json({
                     data: "data is registered successfully",
                     previouslyRegisteredData,
+                    values,
                   });
                 }
               });
@@ -939,13 +942,13 @@ server.post(path + "getDailyTransaction/", (req, res) => {
   } else
     getTransaction = `select * from dailyTransaction,${businessName}_products where businessId='${businessId}' and dailyTransaction.ProductId='${productId}' and registrationDate='${currentDates}' and (${businessName}_products.ProductId=dailyTransaction.ProductId)`;
 
-  // res.json({ data: productId });
+  // res.json({ data: productId, getTransaction });
   // return;
   connection.query(getTransaction, (err, result) => {
     if (err) return res.json({ err });
     if (result) {
       // console.log(result);
-      res.json({ data: result });
+      res.json({ data: result, getTransaction });
     }
   });
 });
@@ -1207,5 +1210,20 @@ server.post(path + "removeEmployeersBusiness/", async (req, res) => {
     } else {
       res.json({ data: "NoDataLikeThis" });
     }
+  });
+});
+server.post(path + "deleteProducts/", async (req, res) => {
+  let businessName = req.body.businessName,
+    ProductId = req.body.ProductId;
+  // ProductId: 1,
+  // productsUnitCost: 20,
+  // productsUnitPrice: 30,
+  // productName: 'mirinda',
+  // minimumQty: 120,
+  // businessName: 'businessTwo'
+  let deleteData = `delete from ${businessName}_products where ProductId='${ProductId}'`;
+  connection.query(deleteData, (err, results) => {
+    if (err) res.json({ data: "error", error: err });
+    if (results) res.json({ data: results });
   });
 });

@@ -47,10 +47,26 @@ function SearchSingleTransActions({ response, requestFrom }) {
   };
   useEffect(() => {
     console.log("first showEachValuesofSalesAndPurchase");
+
     let getSingleTransAction = async () => {
+      let totalPurchaseCost = 0,
+        totalSalesAmt = 0;
       let resData = response.data.data.map((items) => {
+        // unitCost: 2500;
+        // salesQty: 631;
+        // purchaseQty: 10472;
+        // productsUnitCost: 300;
+        // productsUnitPrice: 350;
+        totalSalesAmt +=
+          parseFloat(items.salesQty) * parseFloat(items.productsUnitPrice);
+        totalPurchaseCost +=
+          parseFloat(items.purchaseQty) * parseFloat(items.productsUnitCost);
+        console.log("items in getSingleTransAction", items);
         return { ...items, contentEditable: false };
       });
+
+      setTotalPurchaseCost(totalPurchaseCost);
+      setTotalSalesRevenue(totalSalesAmt);
       setSearchedDatas(resData);
       $("#productTransaction").css("display", "block");
     };

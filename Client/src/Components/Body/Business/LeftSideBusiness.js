@@ -13,7 +13,10 @@ function LeftSideBusiness() {
   };
   return (
     <div className={LeftSideBusinessCss.LeftSideWrapper}>
-      <img width="100px" src={masetawoshaIcon} />
+      <img
+        className={LeftSideBusinessCss.masetawoshaIcon}
+        src={masetawoshaIcon}
+      />
       <ul>
         <li onClick={(e) => navigeteToTargetedURL(e, "/")}>
           <div>

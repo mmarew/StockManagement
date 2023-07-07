@@ -5,7 +5,7 @@ import $ from "jquery";
 import transactioIcon from "../../ICONS/BusinessJS/icons_transaction.svg";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import itemsIcon from "../../ICONS/BusinessJS/iconItems.svg";
-import iconView from "../../ICONS/BusinessJS/iconView.svg";
+import iconLogout from "../../ICONS/Login/logout-svgrepo-com.svg";
 import iconEmployee from "../../ICONS/BusinessJS/iconEmployee.svg";
 import iconSearch from "../../ICONS/BusinessJS/iconSearch.svg";
 import MASETAWOSHAICONICON from "../../ICONS/BusinessJS/MASETAWOSHAICON.svg";
@@ -93,6 +93,25 @@ function OpenBusinessLeftSide() {
             className={OpenBusinessLeftCss.nonTransaction}
           />
           <a name="Employee">Employee</a>
+        </Link>
+        <Link
+          id="Logout"
+          onClick={() => {
+            localStorage.setItem("storeToken", "");
+            let storeToken = localStorage.getItem("storeToken");
+          }}
+          className={OpenBusinessLeftCss.openBusinessTabLeft}
+          to="/login"
+        >
+          <img
+            src={iconLogout}
+            className={
+              OpenBusinessLeftCss.nonTransaction +
+              " " +
+              OpenBusinessLeftCss.iconLogout
+            }
+          />
+          <a name="Logout">Logout</a>
         </Link>
       </div>
     </div>
