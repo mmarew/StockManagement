@@ -15,7 +15,22 @@ function SearchExpenceTransaction({
   response,
   setshowEachItems,
 }) {
-  let handleExpencesTransactions = (response) => {
+  let deleteCostItems = async (e, items) => {
+    console.log({ ...items, businessName });
+    let responces = await axios.post(serverAddress + "deleteExpencesItem/", {
+      ...items,
+      businessName,
+    });
+    console.log("@responces deleteExpencesItem", responces);
+    let copy = [];
+    ViewCostList.map((cost) => {
+      if (cost.expenseId !== items.expenseId) {
+        copy.push(cost);
+      }
+      setViewCostList(copy);
+    });
+  };
+  let handleExpencesTransactions = async (response) => {
     let expenceTransaction = response.data.expenceTransaction;
     console.log("expenceTransaction = ", expenceTransaction);
     expenceTransaction.sort((a, b) =>
@@ -226,38 +241,49 @@ function SearchExpenceTransaction({
                           {items.contentEditable && (
                             <>
                               {console.log("717", items.contentEditable)}
-                              <div
-                                className="cancelExpeEditing"
+                              <Button
+                                className="cancelExpeEditing1"
                                 id={`editExpences_` + items.expenseId}
                                 onClick={(e) => {
                                   cancelEditingProcess(e, index);
                                 }}
                               >
                                 CANCEL
-                              </div>
+                              </Button>
                             </>
                           )}
                           {console.log(
                             "items.contentEditable",
                             items.contentEditable
                           )}
-                          {!items.contentEditable && (
-                            <span
-                              id={`editExpences_` + items.expenseId}
-                              className="editExpences"
-                              onClick={(e) =>
-                                makeEditableTableData(
-                                  index,
-                                  `expAmount_${items.expenseId}`,
-                                  `expDescription_${items.expenseId}`,
-                                  `updateExpences_` + items.expenseId,
-                                  `editExpences_` + items.expenseId
-                                )
-                              }
+                          <>
+                            {!items.contentEditable && (
+                              <Button
+                                color="primary"
+                                variant="contained"
+                                id={`editExpences_` + items.expenseId}
+                                className="editExpences1"
+                                onClick={(e) =>
+                                  makeEditableTableData(
+                                    index,
+                                    `expAmount_${items.expenseId}`,
+                                    `expDescription_${items.expenseId}`,
+                                    `updateExpences_` + items.expenseId,
+                                    `editExpences_` + items.expenseId
+                                  )
+                                }
+                              >
+                                Edit
+                              </Button>
+                            )}
+                            <Button
+                              color="error"
+                              variant="contained"
+                              onClick={(e) => deleteCostItems(e, items)}
                             >
-                              Edit
-                            </span>
-                          )}
+                              Delete
+                            </Button>
+                          </>
                         </>
                       ) : (
                         ""

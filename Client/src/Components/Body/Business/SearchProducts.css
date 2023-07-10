@@ -84,7 +84,7 @@ td {
 }
 .cancelExpeEditing {
   background-color: yellow;
-  padding: 5px;
+  /* padding: 5px; */
   cursor: pointer;
 }
 .searchedDatas td {

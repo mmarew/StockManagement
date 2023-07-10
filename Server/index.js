@@ -1101,6 +1101,8 @@ server.post(path + "updateMyexpencesList/", async (req, res) => {
 server.post(path + "deleteSales_purchase/", async (req, res) => {
   let transactionId = req.body.transactionId;
   let businessName = req.body.businessName;
+  // console.log(req.body);
+  // return;
   let Delet = `delete from ${businessName}_Transaction where transactionId=${transactionId}`;
   let x = await Auth(req.body.token);
   // ownerId;BusinessName;
@@ -1225,5 +1227,13 @@ server.post(path + "deleteProducts/", async (req, res) => {
   connection.query(deleteData, (err, results) => {
     if (err) res.json({ data: "error", error: err });
     if (results) res.json({ data: results });
+  });
+});
+server.post(path + "deleteExpencesItem", (req, res) => {
+  // res.json({ data: req.body });
+  let sql = `delete from ${req.body.businessName}_expenses where expenseId='${req.body.expenseId}'`;
+  connection.query(sql, (err, result) => {
+    if (err) res.json({ data: "err", err: err });
+    if (result) res.json({ data: "deleteSuccess" });
   });
 });

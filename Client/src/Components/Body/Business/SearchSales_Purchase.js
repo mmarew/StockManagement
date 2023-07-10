@@ -2,48 +2,80 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import axios from "axios";
 import SearchExpenceTransaction from "./SearchExpenceTransaction";
+import SearchSales_PurchaseCss from "./SearchSales_Purchase.module.css";
 import {
+  Button,
+  Checkbox,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
 } from "@mui/material";
+import ConfirmDialog from "../Others/Confirm";
 function SearchSingleTransActions({ response, requestFrom }) {
   let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
   const [showEachItems, setshowEachItems] = useState(false);
   const [ShowExpences, setShowExpences] = useState();
   const [SearchedDatas, setSearchedDatas] = useState([]);
+  const [ShowConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [ConfirmDeletePurchaseAndSales, setConfirmDeletePurchaseAndSales] =
+    useState({ Delete: false });
+  useEffect(() => {
+    let confirmDelete = ConfirmDeletePurchaseAndSales.Delete,
+      deletableItems = ConfirmDeletePurchaseAndSales.items;
+    console.log(
+      "confirmDelete= ",
+      confirmDelete,
+      "ShowConfirmDialog",
+      ShowConfirmDialog
+    );
+    if (confirmDelete) {
+      let deleteData = async () => {
+        let responce = await axios.post(
+          serverAddress + "deleteSales_purchase/",
+          { items: deletableItems }
+        );
+        console.log("responce=== ", responce);
+        let x = [];
+        ListOfSalesAndPurchase.map((unit) => {
+          if (unit == deletableItems) {
+            // dont return items
+          } else {
+            x.push(unit);
+            return { ...unit };
+          }
+        });
+        console.log(x);
+        if (responce.data.data == "deleted") {
+          alert("your data is deleted successfully. thank you");
+          setListOfSalesAndPurchase(x);
+        } else if (responce.data.data == "NotAllowedByYou") {
+          alert("You are not allowed to do this. thank you");
+        } else {
+          alert("clientErr1010:");
+        }
+      };
+      setShowConfirmDialog(false);
+      setConfirmDeletePurchaseAndSales({ Delete: false });
+      deleteData();
+    }
+  }, [ConfirmDeletePurchaseAndSales]);
+
   let token = localStorage.getItem("storeToken");
   let deleteSales_purchase = async (items) => {
     items.businessName = businessName;
     items.token = token;
     console.log(items);
-    let responce = await axios.post(
-      serverAddress + "deleteSales_purchase/",
-      items
-    );
-    console.log("responce=== ", responce);
-    let x = [];
-    ListOfSalesAndPurchase.map((unit) => {
-      if (unit == items) {
-        // dont return items
-      } else {
-        x.push(unit);
-        return { ...unit };
-      }
+    setConfirmDeletePurchaseAndSales({
+      ...ConfirmDeletePurchaseAndSales,
+      items,
     });
-    console.log(x);
-    if (responce.data.data == "deleted") {
-      alert("your data is deleted successfully. thank you");
-      setListOfSalesAndPurchase(x);
-    } else if (responce.data.data == "NotAllowedByYou") {
-      alert("You are not allowed to do this. thank you");
-    } else {
-      alert("clientErr1010:");
-    }
+    setShowConfirmDialog(true);
+    return;
   };
   useEffect(() => {
     console.log("first showEachValuesofSalesAndPurchase");
@@ -251,7 +283,7 @@ function SearchSingleTransActions({ response, requestFrom }) {
     <div>
       <div className="">
         <br />
-        <input
+        <Checkbox
           id="showEachItems"
           onChange={showEachValuesofSalesAndPurchase}
           type="checkbox"
@@ -261,7 +293,6 @@ function SearchSingleTransActions({ response, requestFrom }) {
         <br />
         <br />
       </div>
-
       {ListOfSalesAndPurchase.length > 0 && (
         <TableContainer>
           <Table id="productTransaction">
@@ -290,7 +321,13 @@ function SearchSingleTransActions({ response, requestFrom }) {
             <TableBody>
               {ListOfSalesAndPurchase?.map((items, index) => {
                 return (
-                  <TableRow className={"searchedDatas  Transaction_" + index}>
+                  <TableRow
+                    className={
+                      SearchSales_PurchaseCss.searchedDatas +
+                      " Transaction_" +
+                      index
+                    }
+                  >
                     <TableCell
                       id={"productName_" + items.transactionId}
                       type="text"
@@ -411,22 +448,22 @@ function SearchSingleTransActions({ response, requestFrom }) {
                               className="cancelOrEditTransaction"
                               onClick={(e) => editSalesAndPurchase(e, index)}
                             >
-                              Edit
+                              <Button>Edit</Button>
                             </TableCell>
                             <TableCell
                               onClick={() => deleteSales_purchase(items)}
                             >
-                              Delete
+                              <Button>Delete</Button>
                             </TableCell>
                           </>
                         )
                       ) : (
-                        <tTableCelld
+                        <TableCell
                           className="cancelOrEditTransaction"
                           onClick={(e) => cancelSalesAndPurchase(e, index)}
                         >
-                          cancel
-                        </tTableCelld>
+                          <Button>cancel</Button>
+                        </TableCell>
                       )
                     ) : (
                       <TableCell></TableCell>
@@ -444,9 +481,7 @@ function SearchSingleTransActions({ response, requestFrom }) {
                         </span>
                       </TableCell>
                     ) : (
-                      <TableCell>
-                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                      </TableCell>
+                      <TableCell>&nbsp;</TableCell>
                     )}
                   </TableRow>
                 );
@@ -464,6 +499,14 @@ function SearchSingleTransActions({ response, requestFrom }) {
         </TableContainer>
       )}
       {requestFrom == "showExpencesList" && ShowExpences}
+      {console.log("ShowConfirmDialog == ", ShowConfirmDialog)}
+      {ShowConfirmDialog && (
+        <ConfirmDialog
+          open={true}
+          setShowConfirmDialog={setShowConfirmDialog}
+          setConfirmDeletePurchaseAndSales={setConfirmDeletePurchaseAndSales}
+        />
+      )}
     </div>
   );
 }

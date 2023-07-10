@@ -272,70 +272,75 @@ function GetMaximumSales() {
           <div>
             From Date {DateRange.fromDate} To Date {DateRange.toDate}
           </div>
-          <TableContainer
-            sx={{ minWidth: 600, maxWidth: 800, margin: "auto" }}
-            component={Paper}
-          >
-            <Table aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">Product Name</TableCell>
-                  <TableCell align="center">Sales qty</TableCell>
-                  <TableCell align="center">Purchase Qty</TableCell>
-                  <TableCell align="center">Unit Price</TableCell>
-                  <TableCell align="center">Sales Amount</TableCell>
-                  <TableCell align="center">unit Cost</TableCell>
-                  <TableCell align="center">Purchase Amount</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {MaximumDataList?.map((row, index) => (
-                  <TableRow
-                    key={"key_" + index}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {row.productName}
-                    </TableCell>
-                    <TableCell align="center">{row.salesQty}</TableCell>
-                    <TableCell align="center">{row.purchaseQty}</TableCell>
-                    <TableCell align="center">
-                      <CurrencyFormat
-                        value={row.unitPrice}
-                        displayType={"text"}
-                        thousandSeparator={true}
-                        prefix={"Birr "}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CurrencyFormat
-                        value={row.unitPrice * row.salesQty}
-                        displayType={"text"}
-                        thousandSeparator={true}
-                        prefix={"Birr "}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CurrencyFormat
-                        value={row.unitCost}
-                        displayType={"text"}
-                        thousandSeparator={true}
-                        prefix={"Birr "}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CurrencyFormat
-                        value={row.unitCost * row.purchaseQty}
-                        displayType={"text"}
-                        thousandSeparator={true}
-                        prefix={"Birr "}
-                      />
-                    </TableCell>
+          <div className={GetMaximumStyle.tableWrapper}>
+            <TableContainer
+              sx={{
+                minWidth: "700px",
+                margin: "auto",
+              }}
+              component={Paper}
+            >
+              <Table sx={{ width: "100%" }} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center">Product Name</TableCell>
+                    <TableCell align="center">Sales qty</TableCell>
+                    <TableCell align="center">Purchase Qty</TableCell>
+                    <TableCell align="center">Unit Price</TableCell>
+                    <TableCell align="center">Sales Amount</TableCell>
+                    <TableCell align="center">unit Cost</TableCell>
+                    <TableCell align="center">Purchase Amount</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {MaximumDataList?.map((row, index) => (
+                    <TableRow
+                      key={"key_" + index}
+                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {row.productName}
+                      </TableCell>
+                      <TableCell align="center">{row.salesQty}</TableCell>
+                      <TableCell align="center">{row.purchaseQty}</TableCell>
+                      <TableCell align="center">
+                        <CurrencyFormat
+                          value={row.unitPrice}
+                          displayType={"text"}
+                          thousandSeparator={true}
+                          prefix={"Birr "}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <CurrencyFormat
+                          value={row.unitPrice * row.salesQty}
+                          displayType={"text"}
+                          thousandSeparator={true}
+                          prefix={"Birr "}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <CurrencyFormat
+                          value={row.unitCost}
+                          displayType={"text"}
+                          thousandSeparator={true}
+                          prefix={"Birr "}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <CurrencyFormat
+                          value={row.unitCost * row.purchaseQty}
+                          displayType={"text"}
+                          thousandSeparator={true}
+                          prefix={"Birr "}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
         </>
       ) : (
         "No transaction  data to view maximum data on this date range"

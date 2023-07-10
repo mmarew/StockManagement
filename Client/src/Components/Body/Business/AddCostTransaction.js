@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
-import "./AddCostTransaction.css";
+import AddCostTransactionCss from "./AddCostTransaction.module.css";
 import $ from "jquery";
 import { Button, TextField } from "@mui/material";
 function AddCostTransaction() {
@@ -47,7 +47,9 @@ function AddCostTransaction() {
       alert("these data are registered before");
     } else if (data == "Inserted properly") {
       alert("Inserted properly");
-      $(".formInputToTransaction div input").val("");
+      $("." + AddCostTransactionCss.formInputToTransaction + " div input").val(
+        ""
+      );
     }
     $(".LinearProgress").hide();
   };
@@ -91,11 +93,14 @@ function AddCostTransaction() {
       {console.log(Object.keys(Formdata).length)}
 
       {showCostForm ? (
-        <form onSubmit={handleFormSubmit} className="costTransactionForm">
-          <div className="dateDiv">
+        <form
+          onSubmit={handleFormSubmit}
+          className={AddCostTransactionCss.costTransactionForm}
+        >
+          <div className={AddCostTransactionCss.dateDiv}>
             <div>Date</div>
             <TextField
-              className="formInputToTransaction"
+              className={AddCostTransactionCss.formInputToTransaction}
               required
               name="costDate"
               onChange={collectCotForm}
@@ -108,24 +113,23 @@ function AddCostTransaction() {
               {costList?.map((items) => {
                 return (
                   <div className="" key={"CostTransAction_" + items.costsId}>
-                    <br />
                     <div> {items.costName}</div>
-                    <br />
+
                     <TextField
                       required
                       type="number"
                       label="Cost Amount"
                       name={items.costName.replaceAll(/\s/g, "")}
                       onChange={collectCotForm}
-                      className="formInputToTransaction"
+                      className={AddCostTransactionCss.formInputToTransaction}
                     />
                     <br />
-                    <br />
+
                     <TextField
                       required
                       onChange={collectCotForm}
                       label="Cost Description"
-                      className="formInputToTransaction"
+                      className={AddCostTransactionCss.formInputToTransaction}
                       name={
                         "Description_" + items.costName.replaceAll(/\s/g, "")
                       }
@@ -138,7 +142,9 @@ function AddCostTransaction() {
               <Button variant="contained" color="primary" type="submit">
                 Submit
               </Button>
-              <br /> <br />
+              <br />
+              <br />
+              <br />
             </>
           ) : (
             <div>

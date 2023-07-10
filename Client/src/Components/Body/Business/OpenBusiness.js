@@ -49,13 +49,13 @@ function OpenBusiness() {
   window.addEventListener("locationchange", function () {
     console.log("location changed!");
   });
+  const [screenSize, setScreenSize] = useState(window.innerWidth);
   useEffect(() => {
     $("#dateId").val(currentDate());
     $(".LinearProgress").css("display", "none");
+    window.addEventListener("resize", setScreenSize(window.innerWidth));
   }, []);
   // let sizeOfScreen = 0;
-  const [screenSize, setScreenSize] = useState(window.innerWidth);
-
   return (
     <div>
       <div className={OpenBusinesscss.openBusinesswrapper}>
