@@ -12,17 +12,38 @@ function ConfirmDialog(props) {
   };
   const handleConfirm = () => {
     props.setShowConfirmDialog(false);
-    props.setConfirmDeletePurchaseAndSales((prevState) => {
-      return { ...prevState, Delete: true };
-    });
+    if (props.action == "deleteSalesPurchase") {
+      props.onConfirm((prevState) => {
+        return { ...prevState, Delete: true };
+      });
+    } else if (props.action == "updateSalesAndPurchaseData") {
+      props.onConfirm((prevState) => {
+        return { ...prevState, status: "Verified" };
+      });
+    } else if (props.action == "updateExpencesList") {
+      props.onConfirm((prevState) => {
+        return { ...prevState, updateStatus: "Confirmed" };
+      });
+    } else if (props.action == "deleteExpencesRecord") {
+      //  deleteStatus: "notConfirmed",
+      props.onConfirm((prevState) => {
+        return { ...prevState, deleteStatus: "Confirmed" };
+      });
+    } else if (props.action == "addAsEmployee") {
+      props.onConfirm((prevState) => {
+        return { ...prevState, status: "Confirmed" };
+      });
+    } else if (props.action == "removeEmployee") {
+      props.onConfirm((prevState) => {
+        return { ...prevState, status: "Confirmed" };
+      });
+    }
   };
 
   return (
     <div>
       <Dialog open={open} onClose={handleClose}>
-        <DialogContent>
-          Are you sure you want to delete this item?
-        </DialogContent>
+        <DialogContent>{props.message} </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel

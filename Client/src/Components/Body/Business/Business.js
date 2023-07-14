@@ -325,6 +325,7 @@ function Business() {
                               id={"updateCancelWrapper_" + datas.BusinessID}
                             >
                               <Button
+                                variant="contained"
                                 onClick={() =>
                                   // updateBusinesssName(datas.BusinessID)
                                   setOpen({
@@ -346,6 +347,8 @@ function Business() {
                               </Button>
                               {/* //////////////////////////// */}
                               <Button
+                                variant="contained"
+                                color="warning"
                                 onClick={() =>
                                   cancelBusinessUpdate(datas.BusinessID)
                                 }

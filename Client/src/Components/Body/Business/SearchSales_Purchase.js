@@ -3,6 +3,8 @@ import $ from "jquery";
 import axios from "axios";
 import SearchExpenceTransaction from "./SearchExpenceTransaction";
 import SearchSales_PurchaseCss from "./SearchSales_Purchase.module.css";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Button,
   Checkbox,
@@ -13,17 +15,47 @@ import {
   TableHead,
   TableRow,
   TextField,
+  colors,
 } from "@mui/material";
 import ConfirmDialog from "../Others/Confirm";
 function SearchSingleTransActions({ response, requestFrom }) {
   let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
+  const [UpdateSalesAndPurchase, setUpdateSalesAndPurchase] = useState({});
   const [showEachItems, setshowEachItems] = useState(false);
   const [ShowExpences, setShowExpences] = useState();
   const [SearchedDatas, setSearchedDatas] = useState([]);
   const [ShowConfirmDialog, setShowConfirmDialog] = useState(false);
   const [ConfirmDeletePurchaseAndSales, setConfirmDeletePurchaseAndSales] =
     useState({ Delete: false });
+
+  const [confirmAction, setConfirmAction] = useState("");
+  const [confirmMessages, setConfirmMessages] = useState("");
+
+  let deleteData = async (deletableItems) => {
+    let responce = await axios.post(serverAddress + "deleteSales_purchase/", {
+      items: deletableItems,
+    });
+    console.log("responce=== ", responce);
+    let x = [];
+    ListOfSalesAndPurchase.map((unit) => {
+      if (unit == deletableItems) {
+        // dont return items
+      } else {
+        x.push(unit);
+        return { ...unit };
+      }
+    });
+    console.log(x);
+    if (responce.data.data == "deleted") {
+      alert("your data is deleted successfully. thank you");
+      setListOfSalesAndPurchase(x);
+    } else if (responce.data.data == "NotAllowedByYou") {
+      alert("You are not allowed to do this. thank you");
+    } else {
+      alert("clientErr1010:");
+    }
+  };
   useEffect(() => {
     let confirmDelete = ConfirmDeletePurchaseAndSales.Delete,
       deletableItems = ConfirmDeletePurchaseAndSales.items;
@@ -34,52 +66,40 @@ function SearchSingleTransActions({ response, requestFrom }) {
       ShowConfirmDialog
     );
     if (confirmDelete) {
-      let deleteData = async () => {
-        let responce = await axios.post(
-          serverAddress + "deleteSales_purchase/",
-          { items: deletableItems }
-        );
-        console.log("responce=== ", responce);
-        let x = [];
-        ListOfSalesAndPurchase.map((unit) => {
-          if (unit == deletableItems) {
-            // dont return items
-          } else {
-            x.push(unit);
-            return { ...unit };
-          }
-        });
-        console.log(x);
-        if (responce.data.data == "deleted") {
-          alert("your data is deleted successfully. thank you");
-          setListOfSalesAndPurchase(x);
-        } else if (responce.data.data == "NotAllowedByYou") {
-          alert("You are not allowed to do this. thank you");
-        } else {
-          alert("clientErr1010:");
-        }
-      };
       setShowConfirmDialog(false);
       setConfirmDeletePurchaseAndSales({ Delete: false });
-      deleteData();
+      deleteData(deletableItems);
     }
   }, [ConfirmDeletePurchaseAndSales]);
+  useEffect(() => {
+    console.log("UpdateSalesAndPurchase", UpdateSalesAndPurchase);
+    // return;
+    // updateTransactions(items.transactionId, index);
+    let status = UpdateSalesAndPurchase.status,
+      items = UpdateSalesAndPurchase.items,
+      index = UpdateSalesAndPurchase.index;
+    if (status == "Verified") {
+      updateTransactions(items.transactionId, index, items.ProductId);
+    }
+  }, [UpdateSalesAndPurchase]);
 
   let token = localStorage.getItem("storeToken");
   let deleteSales_purchase = async (items) => {
     items.businessName = businessName;
     items.token = token;
     console.log(items);
+
     setConfirmDeletePurchaseAndSales({
       ...ConfirmDeletePurchaseAndSales,
       items,
     });
+
+    setConfirmAction("deleteSalesPurchase");
+    setConfirmMessages("Are you sure to delete this record?");
     setShowConfirmDialog(true);
     return;
   };
   useEffect(() => {
-    console.log("first showEachValuesofSalesAndPurchase");
-
     let getSingleTransAction = async () => {
       let totalPurchaseCost = 0,
         totalSalesAmt = 0;
@@ -233,29 +253,58 @@ function SearchSingleTransActions({ response, requestFrom }) {
     });
     setListOfSalesAndPurchase(mapedList);
   };
-  let updateTransactions = async (transactionId, index) => {
+  let updateTransactions = async (transactionId, index, productId) => {
     let OB = {};
     const tdElements = document.querySelectorAll(`.Transaction_${index} td`);
     let id = "";
-    for (const tdElement of tdElements) {
-      console.log(`Class: ${tdElement.className}`);
-      let className = tdElement.className.split(" ")[0];
-      console.log(className);
-      className = className.replace(transactionId, "");
-      console.log(`ID: ${tdElement.id}`);
-      id = tdElement.id;
-      console.log(id);
-      if (id != "") {
-        let doc = $("#" + id).text();
-        console.log(doc);
-        OB[className] = doc;
-      }
-      // console.log(`Name: ${tdElement.name || ""}`);
+    // for (const tdElement of tdElements) {
+    //   console.log(`Class: ${tdElement.className}`);
+    //   let className = tdElement.className.split(" ")[0];
+    //   console.log(className);
+    //   className = className.replace(transactionId, "");
+    //   console.log(`ID: ${tdElement.id}`);
+    //   id = tdElement.id;
+    //   console.log(id);
+    //   if (id != "") {
+    //     let doc = $("#" + id).text();
+    //     console.log(doc);
+    //     OB[className] = doc;
+    //   }
+    //   // console.log(`Name: ${tdElement.name || ""}`);
+    // }
+    // salesQty_ purchaseQty_ wrickages_ Description_
+    let salesQty = $("#salesQty_" + transactionId).text();
+    let purchaseQty = $("#purchaseQty_" + transactionId).text();
+    let wrickages = $("#wrickages_" + transactionId).text();
+    let Description = $("#Description_" + transactionId).text();
+    if (isNaN(salesQty)) {
+      alert(" sales quantity should be number");
+      return;
     }
-    OB = { ...OB, businessName };
-    OB.trasactionId = transactionId;
+    if (isNaN(wrickages)) {
+      alert("Broken quantity should be number");
+      return;
+    }
+    if (isNaN(purchaseQty)) {
+      alert("Purchase quantity should be number");
+      return;
+    }
+    let date = $("#RegistrationDate_" + transactionId).text();
+    OB = {
+      ...OB,
+      date,
+      businessName,
+      salesQty,
+      purchaseQty,
+      wrickages,
+      Description,
+      transactionId,
+      productId,
+    };
+    // OB.trasactionId = transactionId;
     console.log("OB", OB);
     // return;
+
     $(".LinearProgress").css("display", "block");
     let updates = await axios
       .post(serverAddress + "updateTransactions/", OB)
@@ -448,12 +497,12 @@ function SearchSingleTransActions({ response, requestFrom }) {
                               className="cancelOrEditTransaction"
                               onClick={(e) => editSalesAndPurchase(e, index)}
                             >
-                              <Button>Edit</Button>
+                              <EditIcon sx={{ color: "blue" }} />
                             </TableCell>
                             <TableCell
                               onClick={() => deleteSales_purchase(items)}
                             >
-                              <Button>Delete</Button>
+                              <DeleteIcon sx={{ color: "red" }} />
                             </TableCell>
                           </>
                         )
@@ -470,15 +519,26 @@ function SearchSingleTransActions({ response, requestFrom }) {
                     )}
                     {items.updateEditedContent ? (
                       <TableCell>
-                        <span
+                        <Button
+                          variant="contained"
+                          color="info"
                           className="updateTransaction"
                           id={"updateId_" + index}
-                          onClick={(e) =>
-                            updateTransactions(items.transactionId, index)
-                          }
+                          onClick={(e) => {
+                            setConfirmMessages(
+                              "Are you sure to update this data?"
+                            );
+                            setConfirmAction("updateSalesAndPurchaseData");
+                            setUpdateSalesAndPurchase({
+                              items,
+                              index,
+                              status: "notVerified",
+                            });
+                            setShowConfirmDialog(true);
+                          }}
                         >
                           Update
-                        </span>
+                        </Button>
                       </TableCell>
                     ) : (
                       <TableCell>&nbsp;</TableCell>
@@ -502,9 +562,15 @@ function SearchSingleTransActions({ response, requestFrom }) {
       {console.log("ShowConfirmDialog == ", ShowConfirmDialog)}
       {ShowConfirmDialog && (
         <ConfirmDialog
-          open={true}
+          action={confirmAction}
+          message={confirmMessages}
+          open={ShowConfirmDialog}
           setShowConfirmDialog={setShowConfirmDialog}
-          setConfirmDeletePurchaseAndSales={setConfirmDeletePurchaseAndSales}
+          onConfirm={
+            confirmAction == "deleteSalesPurchase"
+              ? setConfirmDeletePurchaseAndSales
+              : setUpdateSalesAndPurchase
+          }
         />
       )}
     </div>

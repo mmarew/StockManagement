@@ -264,14 +264,14 @@ function GetMaximumSales() {
         )}
         <br />
       </form>
-      {/* {console.log("MaximumDataList", MaximumDataList)} */}
-      {/* {JSON.stringify(MaximumDataList)} */}
-      {console.log(MaximumDataList.length)}
+      {console.log("DateRange == ", DateRange)}
+      <h3>
+        From Date {DateRange.fromDate ? DateRange.fromDate : " not specified "}
+        &nbsp; To Date {DateRange.toDate ? DateRange.toDate : " not Specified "}
+      </h3>
+      <br />
       {MaximumDataList?.length > 0 && MaximumDataList[0] != undefined ? (
         <>
-          <div>
-            From Date {DateRange.fromDate} To Date {DateRange.toDate}
-          </div>
           <div className={GetMaximumStyle.tableWrapper}>
             <TableContainer
               sx={{

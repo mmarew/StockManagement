@@ -114,7 +114,6 @@ function AddCostTransaction() {
                 return (
                   <div className="" key={"CostTransAction_" + items.costsId}>
                     <div> {items.costName}</div>
-
                     <TextField
                       required
                       type="number"
@@ -124,7 +123,7 @@ function AddCostTransaction() {
                       className={AddCostTransactionCss.formInputToTransaction}
                     />
                     <br />
-
+                    <br />
                     <TextField
                       required
                       onChange={collectCotForm}

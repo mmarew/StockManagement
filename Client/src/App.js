@@ -21,6 +21,7 @@ import AddSalesTransaction from "./Components/Body/Business/AddSalesTransaction"
 import GetMinimumQty from "./Components/Body/Business/GetMinimumQty";
 import GetMaximumSales from "./Components/Body/Business/GetMaximumSales";
 import NavBar from "./Components/Nav/MuiNav";
+import ImageApp from "./ImgSlider";
 function App() {
   return (
     <div className="App">

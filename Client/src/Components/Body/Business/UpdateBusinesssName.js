@@ -1,7 +1,5 @@
 import axios from "axios";
 import $ from "jquery";
-import { InitialContext } from "../UserContext/UserContext";
-import { useContext } from "react";
 let serverAddress = localStorage.getItem("targetUrl");
 let UpdateBusinesssName = async (
   targetBusinessId,
@@ -9,8 +7,6 @@ let UpdateBusinesssName = async (
   setcreatedBusiness,
   createdBusiness
 ) => {
-  // const userContext = useContext(InitialContext);
-  // console.log("userContext", userContext);
   let businessId = "businessName_" + targetBusinessId,
     businessname = $("#" + businessId).val();
   console.log(businessname, targetBusinessId);

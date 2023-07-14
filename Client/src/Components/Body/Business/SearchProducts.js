@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import axios from "axios";
 import "./SearchProducts.css";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Button,
   Table,
@@ -245,9 +246,10 @@ function SearchProducts({ response }) {
                     )}
                     <TableCell>
                       <Button
+                        onClick={(e) => deleteProducts(e, items)}
                         variant="contained"
                         color="error"
-                        onClick={(e) => deleteProducts(e, items)}
+                        startIcon={<DeleteIcon />}
                       >
                         Delete
                       </Button>

@@ -67,13 +67,7 @@
   padding: 7px;
 }
 .updateWrapper div button {
-  background-color: blue;
-  color: white;
-  border: none;
-  padding: 10px;
-  border: 10px;
   margin: 0 5px;
-  border-radius: 10px;
 }
 .LinearProgress {
   display: block;

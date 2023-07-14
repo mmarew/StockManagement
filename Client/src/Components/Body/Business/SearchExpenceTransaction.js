@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import axios from "axios";
+
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Button,
   Table,
@@ -10,25 +13,30 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import ConfirmDialog from "../Others/Confirm";
 function SearchExpenceTransaction({
   showEachItems,
   response,
   setshowEachItems,
 }) {
-  let deleteCostItems = async (e, items) => {
+  let deleteCostItems = async (items) => {
     console.log({ ...items, businessName });
+    // return;
     let responces = await axios.post(serverAddress + "deleteExpencesItem/", {
       ...items,
       businessName,
     });
     console.log("@responces deleteExpencesItem", responces);
     let copy = [];
-    ViewCostList.map((cost) => {
-      if (cost.expenseId !== items.expenseId) {
-        copy.push(cost);
-      }
-      setViewCostList(copy);
-    });
+    if (responces.data.data == "deleteSuccess") {
+      ViewCostList.map((cost) => {
+        if (cost.expenseId !== items.expenseId) {
+          copy.push(cost);
+        }
+        setViewCostList(copy);
+      });
+      alert("Deleted success");
+    }
   };
   let handleExpencesTransactions = async (response) => {
     let expenceTransaction = response.data.expenceTransaction;
@@ -90,6 +98,33 @@ function SearchExpenceTransaction({
   let modifyAmountOrDescription = (e, updateBtnID) => {
     $("#" + updateBtnID).show();
   };
+  // ? setUpdateConfirmation
+  //             : setDeleteConfirmation
+  const [UpdateConfirmation, setUpdateConfirmation] = useState({});
+  useEffect(() => {
+    console.log(UpdateConfirmation);
+    let items = UpdateConfirmation.items;
+    if (UpdateConfirmation.updateStatus == "Confirmed")
+      updateExpences(
+        items.expenseId,
+        `expAmount_${items.expenseId}`,
+        `expDescription_${items.expenseId}`,
+        UpdateConfirmation.index
+      );
+  }, [UpdateConfirmation]);
+
+  const [DeleteConfirmation, setDeleteConfirmation] = useState({});
+  useEffect(() => {
+    console.log(DeleteConfirmation);
+    if (DeleteConfirmation.deleteStatus == "Confirmed") {
+      deleteCostItems(DeleteConfirmation.items);
+    }
+  }, [DeleteConfirmation]);
+  //  confirmAction, confirmMessages;
+  const [confirmAction, setconfirmAction] = useState("");
+  const [confirmMessages, setconfirmMessages] = useState("");
+
+  const [showConfirmDialog, setshowConfirmDialog] = useState(false);
   const [TotalCostAmount, setTotalCostAmount] = useState(0);
   const [ExpencesTransaction, setExpencesTransaction] = useState([]);
   let businessName = localStorage.getItem("businessName");
@@ -258,9 +293,8 @@ function SearchExpenceTransaction({
                           )}
                           <>
                             {!items.contentEditable && (
-                              <Button
-                                color="primary"
-                                variant="contained"
+                              <EditIcon
+                                sx={{ color: "blue" }}
                                 id={`editExpences_` + items.expenseId}
                                 className="editExpences1"
                                 onClick={(e) =>
@@ -272,17 +306,24 @@ function SearchExpenceTransaction({
                                     `editExpences_` + items.expenseId
                                   )
                                 }
-                              >
-                                Edit
-                              </Button>
+                              />
                             )}
-                            <Button
-                              color="error"
-                              variant="contained"
-                              onClick={(e) => deleteCostItems(e, items)}
-                            >
-                              Delete
-                            </Button>
+
+                            <DeleteIcon
+                              sx={{ color: "red" }}
+                              onClick={(e) => {
+                                setshowConfirmDialog(true);
+                                setconfirmMessages(
+                                  "Are you sure to delete this expences?"
+                                );
+                                setconfirmAction("deleteExpencesRecord");
+                                setDeleteConfirmation({
+                                  items,
+                                  deleteStatus: "notConfirmed",
+                                });
+                                // deleteCostItems(e, items)
+                              }}
+                            />
                           </>
                         </>
                       ) : (
@@ -296,12 +337,20 @@ function SearchExpenceTransaction({
                             id={"updateExpences_" + items.expenseId}
                             className="updateExpences"
                             onClick={() => {
-                              updateExpences(
-                                items.expenseId,
-                                `expAmount_${items.expenseId}`,
-                                `expDescription_${items.expenseId}`,
-                                index
+                              setconfirmAction("updateExpencesList");
+                              setconfirmMessages(
+                                "Are you sure to update this expences record?"
                               );
+
+                              setshowConfirmDialog(true);
+                              setUpdateConfirmation((prevstates) => {
+                                return {
+                                  ...prevstates,
+                                  items,
+                                  index,
+                                  updateStatus: "notConfirmed",
+                                };
+                              });
                             }}
                           >
                             Update
@@ -322,6 +371,21 @@ function SearchExpenceTransaction({
       ) : (
         // <h4>No cost list table</h4>
         ""
+      )}
+
+      {showConfirmDialog && (
+        <ConfirmDialog
+          action={confirmAction}
+          message={confirmMessages}
+          open={showConfirmDialog}
+          setShowConfirmDialog={setshowConfirmDialog}
+          onConfirm={
+            confirmAction == "updateExpencesList"
+              ? setUpdateConfirmation
+              : setDeleteConfirmation
+          }
+          // {setConfirmDeletePurchaseAndSales}
+        />
       )}
     </div>
   );

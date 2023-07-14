@@ -1,10 +1,26 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import $, { each } from "jquery";
-import { confirmAlert } from "react-confirm-alert";
 import { Button, TextField } from "@mui/material";
 import EmployeeSearchCss from "./EmployeeSearch.module.css";
+import ConfirmDialog from "../Others/Confirm";
 const EmployeeSearch = () => {
+  const [ShowConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setconfirmAction] = useState("");
+
+  const [PersonAsEmployee, setThisPersonAsEmployee] = useState({});
+  useEffect(() => {
+    console.log(PersonAsEmployee);
+    let items = PersonAsEmployee.items,
+      status = PersonAsEmployee.status;
+    // :
+    // {userId: 1, phoneNumber: '+251922112480', employeeName: 'marew masresha', password: '$2a$10$r.EtPByd2150pwNPGF7aXuto8.qlEpJqlGQXyh.JuBymza7E.BtiC', connection: 'notConnected'}
+    // status: "Confirmed"
+    if (status == "Confirmed")
+      addEmployeeDatas(items.employeeName, items.phoneNumber, items.userId);
+  }, [PersonAsEmployee]);
+
+  const [confirmMessages, setconfirmMessages] = useState("");
   let serverAddress = localStorage.getItem("targetUrl");
   const [InputValue, setInputValue] = useState();
   const [searchedEmployee, setsearchedEmployee] = useState([]);
@@ -12,36 +28,22 @@ const EmployeeSearch = () => {
     let businessId = localStorage.getItem("businessId");
     let storeToken = localStorage.getItem("storeToken");
 
-    confirmAlert({
-      title: "Confirm to submit",
-      message: "Are you sure to do this.",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: async () => {
-            let response = await axios.post(serverAddress + `addEmployee/`, {
-              name,
-              businessId,
-              phone,
-              storeToken,
-              userId,
-            });
-            if (response.data.data == "data is already registered bofore") {
-              alert(
-                "This Employee is already registered before in this business. Try other employee. Thank you."
-              );
-            } else {
-              alert(name + ` is registered as your employee. Thank you.`);
-              searchEmployees("noEvent", "");
-            }
-          },
-        },
-        {
-          label: "No",
-          onClick: () => {},
-        },
-      ],
+    let response = await axios.post(serverAddress + `addEmployee/`, {
+      name,
+      businessId,
+      phone,
+      storeToken,
+      userId,
     });
+    console.log("response", response);
+    if (response.data.data == "data is already registered bofore") {
+      alert(
+        "This Employee is already registered before in this business. Try other employee. Thank you."
+      );
+    } else {
+      alert(name + ` is registered as your employee. Thank you.`);
+      searchEmployees("noEvent", "");
+    }
   };
   let collectInput = (e) => {
     let name = e.target.name,
@@ -100,10 +102,12 @@ const EmployeeSearch = () => {
             name="employeeNameToBeSearched"
             type="search"
           />
+          &nbsp;&nbsp;
           <Button
             className={EmployeeSearchCss.searchButton}
             variant="contained"
             type="submit"
+            color="primary"
           >
             search
           </Button>
@@ -120,25 +124,41 @@ const EmployeeSearch = () => {
             <div>Name {items.employeeName}</div>
             <div>Phone {items.phoneNumber}</div>
             {items.connection == "connected" ? (
-              <button className="EmployeeToBusiness">
+              <Button
+                variant="contained"
+                color="primary"
+                className="EmployeeToBusiness"
+              >
                 Employee To This Business
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
+                variant="contained"
+                color="primary"
                 onClick={() => {
-                  addEmployeeDatas(
-                    items.employeeName,
-                    items.phoneNumber,
-                    items.userId
+                  setShowConfirmDialog(true);
+                  setconfirmAction("addAsEmployee");
+                  setconfirmMessages(
+                    "are you sure to add this person as employee"
                   );
+                  setThisPersonAsEmployee({ items, status: "notConfirmed" });
                 }}
               >
                 Add This Employee
-              </button>
+              </Button>
             )}
           </div>
         );
       })}
+      {ShowConfirmDialog && (
+        <ConfirmDialog
+          action={confirmAction}
+          message={confirmMessages}
+          open={ShowConfirmDialog}
+          setShowConfirmDialog={setShowConfirmDialog}
+          onConfirm={setThisPersonAsEmployee}
+        />
+      )}
     </div>
   );
 };

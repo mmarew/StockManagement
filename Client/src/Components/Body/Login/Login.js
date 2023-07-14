@@ -5,6 +5,7 @@ import $ from "jquery";
 import loginimg from "../../ICONS/Login/store-5619201_1280.jpg";
 import { Button, LinearProgress, TextField } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+import ImgApp from "../../../ImgSlider";
 function Login() {
   let serverAddress = localStorage.getItem("targetUrl");
   let Navigate = useNavigate();
@@ -94,7 +95,8 @@ function Login() {
         </form>
       </div>
       <div className={Loginmodulecss.loginRightSide}>
-        <img src={loginimg} />
+        {/* <img src={loginimg} /> */}
+        <ImgApp />
       </div>
     </div>
   );
