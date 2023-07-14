@@ -406,38 +406,37 @@ server.post(path + "ViewTransactions/", (req, res) => {
 });
 server.post(path + "updateTransactions/", async (req, res) => {
   // console.log(req.body);
+  // return;
   let currentInventory = "",
     prevInventory = "";
   let previous = getPreviousDay(new Date(req.body.date));
 
-  let select = `select * from ${req.body.businessName}_Transaction where registeredTime like '%${previous}%' and  transactionId='${req.body.transactionId}'`;
+  let select = `select * from ${req.body.businessName}_Transaction where registeredTime like '%${previous}%' and  productIDTransaction='${req.body.productId}'`;
   let update = "";
   let xx = connection.query(select, async (err, result) => {
     if (err) {
-      return err;
+      res.json({ data: err, err });
+      // return err;
     } else {
-      // console.log("issssssssssssss");
-      // console.log(result);
-      // console.log(result.length);
-      if (result.length > 0) {
-        currentInventory = parseInt(req.body.inventory) + prevInventory;
-      } else if (result.length == 0) {
-        currentInventory =
-          parseInt(req.body.purchaseQty) + parseInt(req.body.salesQty);
-      }
+      console.log("result on update ", result);
+
+      currentInventory =
+        parseInt(req.body.purchaseQty) -
+        parseInt(req.body.salesQty) -
+        parseInt(req.body.wrickages);
+      if (result.length > 0) currentInventory += prevInventory;
       update = `update ${req.body.businessName}_Transaction set 
-  wrickages='${req.body.broken}',
+  wrickages='${req.body.wrickages}',
   purchaseQty='${req.body.purchaseQty}',
   salesQty='${req.body.salesQty}',
-  unitCost='${req.body.unitCost}',
-  unitPrice='${req.body.unitPrice}',
   Inventory='${currentInventory}',
-  description='${req.body.description}'
-   where transactionId='${req.body.trasactionId}' `;
+  description='${req.body.Description}'
+   where transactionId='${req.body.transactionId}'`;
       connection.query(update, (err, result) => {
         if (err) return res.json({ err });
         else {
           console.log(result);
+          res.json({ data: result, update });
         }
       });
       // console.log("currentInventory " + currentInventory);
@@ -445,7 +444,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
     }
   });
 
-  res.json({ data: req.body });
+  // res.json({ data: req.body });
 });
 async function getPreviousDay(date) {
   const previous = new Date(date.getTime());
@@ -824,9 +823,9 @@ server.post(path + "addEmployee/", async (req, res) => {
       if (response.length > 0) {
         res.json({ data: "data is already registered bofore" });
       } else {
-        let insert = `insert into employeeTable(userIdInEmployee,BusinessIDEmployee,employerId)values('${userId}','${businessId}',${employerId})`;
+        let insert = `insert into employeeTable(userIdInEmployee,BusinessIDEmployee,employerId)values('${userId}','${businessId}','${employerId}')`;
         connection.query(insert, (err, result) => {
-          if (err) return res.json({ err });
+          if (err) return res.json({ data: err, err });
           if (result) {
             //
             res.json({ data: "data is inserted correctly." });
@@ -1099,21 +1098,23 @@ server.post(path + "updateMyexpencesList/", async (req, res) => {
 });
 
 server.post(path + "deleteSales_purchase/", async (req, res) => {
-  let transactionId = req.body.transactionId;
-  let businessName = req.body.businessName;
-  // console.log(req.body);
+  let transactionId = req.body.items.transactionId;
+  let businessName = req.body.items.businessName;
+  console.log(req.body.items);
+  // businessName:
   // return;
   let Delet = `delete from ${businessName}_Transaction where transactionId=${transactionId}`;
-  let x = await Auth(req.body.token);
+  let x = await Auth(req.body.items.token);
   // ownerId;BusinessName;
+  console.log("x is ", x);
+  // return;
   let verify = `select * from Business where BusinessName='${businessName}' and ownerId='${x}' `;
   connection.query(verify, (err, responce) => {
     if (err) {
       console.log(err);
       res.json({ data: err, err });
     } else {
-      console.log(responce);
-      if (responce.length > 0) {
+      if (responce[0].BusinessName == req.body.items.businessName) {
         // res.json({ data: responce });
         connection.query(Delet, (err, results) => {
           if (err) {
@@ -1231,6 +1232,7 @@ server.post(path + "deleteProducts/", async (req, res) => {
 });
 server.post(path + "deleteExpencesItem", (req, res) => {
   // res.json({ data: req.body });
+  // return;
   let sql = `delete from ${req.body.businessName}_expenses where expenseId='${req.body.expenseId}'`;
   connection.query(sql, (err, result) => {
     if (err) res.json({ data: "err", err: err });
