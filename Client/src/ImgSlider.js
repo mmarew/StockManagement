@@ -2,7 +2,6 @@ import React from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
 const ImageSlider = () => {
   const images = [
     "https://cdn.pixabay.com/photo/2020/10/01/17/11/store-5619201_640.jpg",
@@ -25,7 +24,16 @@ const ImageSlider = () => {
     <Slider {...settings}>
       {images.map((image) => (
         <div key={image}>
-          <img style={{ margin: "auto" }} src={image} alt="slide" />
+          <img
+            style={{
+              margin: "auto",
+              height: "100vh",
+              width: "100vw",
+              borderBottomLeftRadius: "20px",
+            }}
+            src={image}
+            alt="slide"
+          />
         </div>
       ))}
     </Slider>
@@ -34,10 +42,9 @@ const ImageSlider = () => {
 
 function ImgApp() {
   return (
-    <div className="App">
+    <div className={""}>
       <ImageSlider />
     </div>
   );
 }
-
 export default ImgApp;

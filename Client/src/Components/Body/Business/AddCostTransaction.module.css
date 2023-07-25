@@ -1,16 +1,10 @@
 .costTransactionForm {
   background-color: white;
-  /* padding: 10px; */
-  /* width: 300px; */
   margin: 0 auto;
-  /* display: flex; */
-  /* justify-content: center; */
-  /* flex-direction: column; */
 }
-
 .formInputToTransaction {
   padding: 5px;
-  width: 300px;
+  max-width: 300px;
   margin: 10px auto;
 }
 /* .costTransactionForm button {

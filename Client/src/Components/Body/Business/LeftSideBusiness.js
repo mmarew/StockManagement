@@ -17,7 +17,7 @@ function LeftSideBusiness() {
         className={LeftSideBusinessCss.masetawoshaIcon}
         src={masetawoshaIcon}
       />
-      <ul>
+      <ul className="">
         <li onClick={(e) => navigeteToTargetedURL(e, "/")}>
           <div>
             <img

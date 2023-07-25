@@ -31,6 +31,7 @@ function Business() {
     console.log(businessId);
     localStorage.setItem("businessId", businessId);
     localStorage.setItem("businessName", businessName);
+    localStorage.setItem("openedBusiness", "myBusiness");
     Navigate("/OpenBusiness");
   };
   const [ConfirmRequest, setConfirmRequest] = useState();
@@ -42,7 +43,7 @@ function Business() {
     localStorage.setItem("businessName", businessName);
     localStorage.setItem("businessOwnreId", ownersId);
     localStorage.setItem("openedBusiness", "employersBusiness");
-    Navigate("/OpenEmployeersBusiness");
+    Navigate("/OpenBusiness");
   };
 
   let editThisBusiness = (businessId, businessName) => {
@@ -106,6 +107,7 @@ function Business() {
   useEffect(() => {
     console.log(window.location.pathname);
     getBusiness();
+    setownersName(localStorage.getItem("ownersName"));
   }, []);
   useEffect(() => {
     if (open.open) {
@@ -248,15 +250,6 @@ function Business() {
                           >
                             <Button
                               variant="contained"
-                              // sx={{
-                              //   width: 70,
-                              //   height: 25,
-                              //   "&:hover": {
-                              //     borderColor: "rgb(25, 118, 210)", // set your desired border color here
-                              //     borderWidth: 2,
-                              //     borderStyle: "solid",
-                              //   },
-                              // }}
                               onClick={() =>
                                 openThisBusiness(
                                   datas.BusinessID,
@@ -385,6 +378,20 @@ function Business() {
                                 className=""
                               >
                                 OPEN
+                              </Button>
+                              <Button
+                                disabled
+                                sx={{
+                                  "&:hover": {
+                                    borderColor: "rgb(25, 118, 210)", // set your desired border color here
+                                    borderWidth: 2,
+                                    borderStyle: "solid",
+                                  },
+                                }}
+                                variant="outlined"
+                                startIcon={<EditIcon />}
+                              >
+                                Edit
                               </Button>
                               <Button
                                 onClick={() => {

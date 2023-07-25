@@ -29,16 +29,23 @@ function AddCostItems() {
     };
     gateDate();
   }, []);
+
+  let token = localStorage.getItem("storeToken");
   let submitCosts = async (e) => {
     e.preventDefault();
     $(".LinearProgress").css("display", "block");
     console.log("data", data);
+    data.token = token;
     let response = await axios.post(serverAddress + "AddCostItems/", data);
     if (response.data.data == "Registered successfully") {
       alert("Registered successfully");
       $(".inputToCotsRegistration input").val("");
     } else if (response.data.data == "already registered before") {
       alert("Already registered before");
+    } else if (response.data.data == "notallowedToU") {
+      alert(
+        `you can't make registration to this kinds of data please tell to owner of the business`
+      );
     }
     $(".LinearProgress").css("display", "none");
   };

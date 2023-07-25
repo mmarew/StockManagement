@@ -20,19 +20,31 @@
   filter: invert(1);
   color: white;
 }
+.LeftSideWrapper ul {
+  padding: 0 3vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
 
 .LeftSideWrapper ul li {
   margin: 5px;
   padding: 10px 0;
   cursor: pointer;
   display: flex;
-  justify-content: space-around;
-}
-.LeftSideWrapper ul li div {
-  width: 100px;
-  display: flex;
   justify-content: flex-start;
 }
+.LeftSideWrapper ul li div {
+  display: flex;
+  align-items: center;
+  font-family: "Manrope";
+  font-size: 1.5vw;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding-left: 15%;
+}
+
 .imgLeftBusiness {
   width: 20px;
   margin-right: 10px;

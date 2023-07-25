@@ -57,6 +57,7 @@ function Profile() {
   let Logout = async () => {
     localStorage.setItem("storeToken", "");
     let storeToken = localStorage.getItem("storeToken");
+    localStorage.clear();
     if (storeToken == "" || storeToken == null) {
       navigate("/login");
     }

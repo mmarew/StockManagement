@@ -1,0 +1,28 @@
+.retypePassword,
+.pincodeWrapper,
+.forgetForm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 50px;
+}
+.pincodeWrapper button,
+.forgetForm button {
+  margin-top: 10px;
+}
+.retypePassword div {
+  margin-top: 20px;
+}
+.retypePassword button {
+  margin-top: 20px;
+}
+.ForgefForMTitle {
+  width: fit-content;
+  margin: auto;
+  margin: 10px;
+}
+.linkToOthers {
+  text-decoration: none;
+  /* color: ; */
+}

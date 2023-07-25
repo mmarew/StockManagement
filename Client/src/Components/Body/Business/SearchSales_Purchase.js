@@ -497,12 +497,20 @@ function SearchSingleTransActions({ response, requestFrom }) {
                               className="cancelOrEditTransaction"
                               onClick={(e) => editSalesAndPurchase(e, index)}
                             >
-                              <EditIcon sx={{ color: "blue" }} />
+                              {openedBusiness == "myBusiness" && (
+                                <EditIcon sx={{ color: "blue" }} />
+                              )}
                             </TableCell>
                             <TableCell
                               onClick={() => deleteSales_purchase(items)}
                             >
-                              <DeleteIcon sx={{ color: "red" }} />
+                              {console.log(
+                                "openedBusiness is ",
+                                openedBusiness
+                              )}
+                              {openedBusiness == "myBusiness" && (
+                                <DeleteIcon sx={{ color: "red" }} />
+                              )}
                             </TableCell>
                           </>
                         )

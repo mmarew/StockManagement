@@ -5,14 +5,15 @@ import RegisterCss from "./Register.module.css";
 import $ from "jquery";
 import { LinearProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-let serverUrl = localStorage.getItem("targetUrl");
 function Register() {
+  let serverUrl = localStorage.getItem("targetUrl");
   const navigate = useNavigate();
   const [RegisterForm, setRegisterForm] = useState({});
   let handleRegistrationChange = (e) => {
     e.preventDefault();
     let value = e.target.value,
       names = e.target.name;
+
     setRegisterForm({ ...RegisterForm, [names]: value });
   };
   let handleRegistrationSubmit = async (e) => {

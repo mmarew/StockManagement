@@ -3,11 +3,12 @@
   display: flex;
   height: 100vh;
   justify-content: center;
+  overflow-y: hidden;
 }
 .loginForm {
   display: flex;
   flex-direction: column;
-  width: 250px;
+  width: 100%;
   margin: auto;
   background-color: white;
   /* padding: 5vw; */
@@ -53,26 +54,21 @@
   line-height: normal;
 }
 .btnLogin {
-  width: fit-content;
-  margin: auto;
-  padding: 5px 20px;
-  border: none;
-  background-color: blue;
-  color: white;
-  border-radius: 10px;
-  font-size: 20px;
-}
-.loginForm input {
-  padding: 10px 0;
-  /* margin: 20px auto; */
-}
-body {
-  background-color: rgb(245, 245, 245);
+  width: 200px;
 }
 .loginForm div {
+  width: 90%;
+  max-width: 400px;
+}
+.titleTohaveAccount {
   display: flex;
-  flex-direction: column;
-  justify-content: space-around;
+  /* text-align: center; */
+  justify-content: center;
+  width: fit-content;
+  margin: auto;
+}
+.titleTohaveAccount span:nth-child(2) {
+  color: #6998ff;
 }
 #LinearProgress {
   display: none;
@@ -86,18 +82,23 @@ body {
   text-decoration: none;
   margin-top: 10px;
   display: flex;
-  width: 249px;
+  flex-direction: row;
+  width: 100%;
   height: 15px;
-  flex-direction: column;
-  flex-shrink: 0;
   color: rgba(46, 46, 46, 0.5);
-  font-family: Plus Jakarta Sans;
+  font-family: "Plus Jakarta Sans";
   font-style: normal;
   font-weight: 400;
   line-height: normal;
 }
+
 .LeftSide {
   padding: 15px;
+}
+.passwordForgotten {
+  padding: 20px 0;
+  text-decoration: none;
+  color: #6998ff;
 }
 
 @media screen and (min-width: 768px) {

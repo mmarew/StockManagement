@@ -19,6 +19,7 @@ function SearchExpenceTransaction({
   response,
   setshowEachItems,
 }) {
+  let openedBusiness = localStorage.getItem("openedBusiness");
   let deleteCostItems = async (items) => {
     console.log({ ...items, businessName });
     // return;
@@ -291,40 +292,43 @@ function SearchExpenceTransaction({
                             "items.contentEditable",
                             items.contentEditable
                           )}
-                          <>
-                            {!items.contentEditable && (
-                              <EditIcon
-                                sx={{ color: "blue" }}
-                                id={`editExpences_` + items.expenseId}
-                                className="editExpences1"
-                                onClick={(e) =>
-                                  makeEditableTableData(
-                                    index,
-                                    `expAmount_${items.expenseId}`,
-                                    `expDescription_${items.expenseId}`,
-                                    `updateExpences_` + items.expenseId,
-                                    `editExpences_` + items.expenseId
-                                  )
-                                }
-                              />
-                            )}
 
-                            <DeleteIcon
-                              sx={{ color: "red" }}
-                              onClick={(e) => {
-                                setshowConfirmDialog(true);
-                                setconfirmMessages(
-                                  "Are you sure to delete this expences?"
-                                );
-                                setconfirmAction("deleteExpencesRecord");
-                                setDeleteConfirmation({
-                                  items,
-                                  deleteStatus: "notConfirmed",
-                                });
-                                // deleteCostItems(e, items)
-                              }}
-                            />
-                          </>
+                          {openedBusiness == "myBusiness" && (
+                            <>
+                              {!items.contentEditable && (
+                                <EditIcon
+                                  sx={{ color: "blue" }}
+                                  id={`editExpences_` + items.expenseId}
+                                  className="editExpences1"
+                                  onClick={(e) =>
+                                    makeEditableTableData(
+                                      index,
+                                      `expAmount_${items.expenseId}`,
+                                      `expDescription_${items.expenseId}`,
+                                      `updateExpences_` + items.expenseId,
+                                      `editExpences_` + items.expenseId
+                                    )
+                                  }
+                                />
+                              )}
+
+                              <DeleteIcon
+                                sx={{ color: "red" }}
+                                onClick={(e) => {
+                                  setshowConfirmDialog(true);
+                                  setconfirmMessages(
+                                    "Are you sure to delete this expences?"
+                                  );
+                                  setconfirmAction("deleteExpencesRecord");
+                                  setDeleteConfirmation({
+                                    items,
+                                    deleteStatus: "notConfirmed",
+                                  });
+                                  // deleteCostItems(e, items)
+                                }}
+                              />
+                            </>
+                          )}
                         </>
                       ) : (
                         ""

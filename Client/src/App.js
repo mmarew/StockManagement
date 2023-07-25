@@ -22,6 +22,7 @@ import GetMinimumQty from "./Components/Body/Business/GetMinimumQty";
 import GetMaximumSales from "./Components/Body/Business/GetMaximumSales";
 import NavBar from "./Components/Nav/MuiNav";
 import ImageApp from "./ImgSlider";
+import ForgetPassword from "./Components/Body/ForgetPassword/ForgetPassword";
 function App() {
   return (
     <div className="App">
@@ -49,6 +50,14 @@ function App() {
             element={
               <>
                 <Transaction />
+              </>
+            }
+          />
+          <Route
+            path="/forgetPaassword"
+            element={
+              <>
+                <ForgetPassword />
               </>
             }
           />

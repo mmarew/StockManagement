@@ -13,13 +13,9 @@ const EmployeeSearch = () => {
     console.log(PersonAsEmployee);
     let items = PersonAsEmployee.items,
       status = PersonAsEmployee.status;
-    // :
-    // {userId: 1, phoneNumber: '+251922112480', employeeName: 'marew masresha', password: '$2a$10$r.EtPByd2150pwNPGF7aXuto8.qlEpJqlGQXyh.JuBymza7E.BtiC', connection: 'notConnected'}
-    // status: "Confirmed"
     if (status == "Confirmed")
       addEmployeeDatas(items.employeeName, items.phoneNumber, items.userId);
   }, [PersonAsEmployee]);
-
   const [confirmMessages, setconfirmMessages] = useState("");
   let serverAddress = localStorage.getItem("targetUrl");
   const [InputValue, setInputValue] = useState();

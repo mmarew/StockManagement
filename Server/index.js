@@ -139,7 +139,11 @@ server.post(path + "Login/", (req, res) => {
     let token = jwt.sign({ userID: result[0].userId }, "shhhhh");
 
     if (isMatch) {
-      return res.json({ data: "loginSuccessFull", token });
+      return res.json({
+        data: "loginSuccessFull",
+        token,
+        usersFullName: result[0].employeeName,
+      });
     } else {
       return res.json({ data: "password mismatch" });
     }
@@ -542,9 +546,24 @@ server.post(path + "updateProducts/", (req, res) => {
     }
   });
 });
-server.post(path + "AddCostItems/", (req, res) => {
-  insertIntoCosts(`${req.body.businessName}_Costs`, req.body, res);
+server.post(path + "AddCostItems/", async (req, res) => {
   // console.log(req.body);
+  let myId = await Auth(req.body.token);
+  // console.log("myId === " + myId);
+  // return;
+  let select = `select * from Business where BusinessName='${req.body.businessName}' and ownerId='${myId}'`;
+  connection.query(select, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ data: "err", err });
+    }
+    console.log("result is ===", result);
+    if (result.length > 0) {
+      insertIntoCosts(`${req.body.businessName}_Costs`, req.body, res);
+      return;
+    }
+    res.json({ data: "notallowedToU" });
+  });
 });
 server.post(path + "getCostLists/", (req, res) => {
   // console.log(req.body);
@@ -1112,19 +1131,20 @@ server.post(path + "deleteSales_purchase/", async (req, res) => {
   connection.query(verify, (err, responce) => {
     if (err) {
       console.log(err);
-      res.json({ data: err, err });
+      return res.json({ data: err, err });
     } else {
-      if (responce[0].BusinessName == req.body.items.businessName) {
-        // res.json({ data: responce });
-        connection.query(Delet, (err, results) => {
-          if (err) {
-            console.log(err);
-            return res.json({ data: err, err });
-          } else {
-            return res.json({ data: "deleted", results });
-          }
-        });
-      } else res.json({ data: "NotAllowedByYou" });
+      if (responce.length > 0)
+        if (responce[0].BusinessName == req.body.items.businessName) {
+          // res.json({ data: responce });
+          connection.query(Delet, (err, results) => {
+            if (err) {
+              console.log(err);
+              return res.json({ data: err, err });
+            } else {
+              return res.json({ data: "deleted", results });
+            }
+          });
+        } else res.json({ data: "NotAllowedByYou" });
       return;
     }
   });
@@ -1237,5 +1257,110 @@ server.post(path + "deleteExpencesItem", (req, res) => {
   connection.query(sql, (err, result) => {
     if (err) res.json({ data: "err", err: err });
     if (result) res.json({ data: "deleteSuccess" });
+  });
+});
+server.post(path + "forgetRequest", (req, res) => {
+  // console.log(req.body.PhoneNumber);
+  let PhoneNumber = req.body.PhoneNumber;
+  let sql = `select * from usersTable where phoneNumber='${PhoneNumber}'`;
+  connection.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ data: "err", err });
+    }
+    if (result) {
+      console.log(result);
+      if (result.length > 0) {
+        let Rand = Math.floor(Math.random() * 1000000);
+
+        let updateForgetPassStatus = `update usersTable set passwordStatus ='requestedToReset',passwordResetPin='${Rand}' where phoneNumber='${PhoneNumber}'`;
+        connection.query(updateForgetPassStatus, (err, result) => {
+          if (err) {
+            console.log(err);
+            res.json({ data: "err", err });
+          }
+          if (result) {
+            // updateForgetPassStatus.query()
+            res.json({ data: "requestedToChangePassword" });
+            // res.json({ data: result });
+          }
+        });
+      }
+    }
+  });
+});
+
+server.post(path + "updateChangeInpassword/", (req, res) => {
+  let PhoneNumber = req.body.PhoneNumber; // "+251922112480";
+  console.log(req.body);
+  //   Password: { password: 'marew123', retypedPassword:
+  let password = req.body.Password.password,
+    retypedPassword = req.body.Password.retypedPassword;
+  console.log(retypedPassword, password, PhoneNumber);
+
+  const salt = bcrypt.genSaltSync();
+  //changing the value of password from req.body with the encrypted password
+  const Encripted = bcrypt.hashSync(password, salt);
+  console.log("Encripted is ", Encripted);
+  // return;
+  let update = `update usersTable set password='${Encripted}' where phoneNumber='${PhoneNumber}'`;
+  connection.query(update, (err, result) => {
+    if (err) console.log(err);
+    if (result.affectedRows > 0) {
+      console.log(result);
+      res.json({ data: "passwordChanged" });
+    } else {
+      res.json({ data: "unableToMakeChange" });
+    }
+  });
+});
+server.post(path + "verifyPin", (req, res) => {
+  let phone = req.body.PhoneNumber,
+    pincode = req.body.pincode;
+  let select = `select * from usersTable where phoneNumber='${phone}'`;
+
+  console.log("select", select);
+  connection.query(select, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ data: err });
+    }
+    if (result) {
+      let pin = result[0].passwordResetPin;
+      if (pincode == pin) {
+        res.json({ data: "correctPin" });
+      } else {
+        return res.json({ data: "wrongPin" });
+      }
+    }
+  });
+});
+//
+server.get(path + "requestPasswordReset/", (req, res) => {
+  console.log("requestPasswordReset", req);
+  let select = `select * from usersTable where passwordStatus='requestedToReset'`;
+  connection.query(select, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ data: err });
+    }
+    if (result) {
+      console.log(result);
+      if (result.length > 0) {
+        // wait here
+
+        let update = `update usersTable set passwordStatus='pinSentedToUser' where userId='${result[0].userId}'`;
+        connection.query(update, (err, result1) => {
+          if (err) return res.json({ data: err, err });
+          console.log("result1", result1);
+          res.json({
+            phoneNumber: result[0].phoneNumber,
+            pinCode: result[0].passwordResetPin,
+          });
+        });
+      } else {
+        res.json({ phoneNumber: "notFound", pinCode: "notFound" });
+      }
+    }
   });
 });

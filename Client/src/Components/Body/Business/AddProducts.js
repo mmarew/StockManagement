@@ -25,8 +25,12 @@ const AddProducts = () => {
     let data = response.data.data;
     console.log("response", response);
     let registerProducts = document.getElementsByClassName("registerProducts");
-
-    if (data == "productIsAlreadyAddedBefore") {
+    if (data == "notAllowedFroYou") {
+      alert(
+        `you haven't permit to make registration. so please tell to owner to make registration`
+      );
+      // return;
+    } else if (data == "productIsAlreadyAddedBefore") {
       alert("Already registered");
     } else if (data == "productIsAdded") {
       alert("you have added products successfully");

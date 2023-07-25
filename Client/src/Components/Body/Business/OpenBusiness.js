@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function OpenBusiness() {
-  localStorage.setItem("openedBusiness", "myBusiness");
+  // localStorage.setItem("openedBusiness", "myBusiness");
   const savedContext = useContext(InitialContext);
   const [ownersName, setownersName] = savedContext;
 
@@ -106,7 +106,7 @@ function OpenBusiness() {
                   to="search"
                   id="search"
                 >
-                  Search
+                  View
                 </Link>
                 <Link
                   onClick={registerItems}

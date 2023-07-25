@@ -1,13 +1,11 @@
 const mysql = require("mysql2");
 let bcript = require("bcryptjs");
-
 // var connection = mysql.createConnection({
 //   host: "localhost",
 //   user: "masetawoshacom_stock",
 //   password: "DBcp123$%^",
 //   database: "masetawoshacom_store",
 // });
-
 // var connection = mysql.createConnection({
 //   host: "localhost",
 //   user: "guzowaycom_guzowaycom",
@@ -45,7 +43,7 @@ function createBasicTables() {
       // console.log(results);
     }
   });
-  let queryTocreate = `create table if not exists usersTable(userId int auto_increment, phoneNumber varchar(200),employeeName varchar(600), password varchar(200),primary key(userId))`;
+  let queryTocreate = `create table if not exists usersTable(userId int auto_increment, phoneNumber varchar(200),employeeName varchar(600), passwordStatus varchar(40), passwordResetPin int, password varchar(200),primary key(userId))`;
   connection.query(queryTocreate, function (error, results, fields) {
     if (error) throw error;
     // console.log("The solution is: ", results);

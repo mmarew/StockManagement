@@ -1,20 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Loginmodulecss from "./Login.module.css";
 import axios from "axios";
 import $ from "jquery";
-import loginimg from "../../ICONS/Login/store-5619201_1280.jpg";
 import { Button, LinearProgress, TextField } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import ImgApp from "../../../ImgSlider";
+import { InitialContext } from "../UserContext/UserContext";
 function Login() {
   let serverAddress = localStorage.getItem("targetUrl");
   let Navigate = useNavigate();
   const [loginForm, setloginForm] = useState({});
+  const savedContext = useContext(InitialContext);
+  const [ownersName, setownersName] = savedContext;
   let submitForm = async (e) => {
     e.preventDefault();
     $("#LinearProgress").css("display", "block");
     // $("#LinearProgress").css("display", "block");
     let response = await axios.post(serverAddress + "Login/", loginForm);
+    // console.log("response", response.data);
+    localStorage.setItem("ownersName", response.data.usersFullName);
+
+    // return;
     if (response.data.data == "loginSuccessFull") {
       let token = response.data.token;
       localStorage.setItem("storeToken", token);
@@ -40,10 +46,10 @@ function Login() {
     console.log("verify login");
     $("#LinearProgress").hide();
   }, []);
-
+  localStorage.setItem("targetUrl", "https://mar.masetawosha.com/");
+  // localStorage.setItem("targetUrl", "http://localhost:2020/");
   return (
     <div className={Loginmodulecss.loginWrapper}>
-      {console.log(loginForm)}
       <div className={Loginmodulecss.LeftSide}>
         <div className={Loginmodulecss.gladMessage}>Glad to see you back</div>
         <div className={Loginmodulecss.greetingToLogin}>
@@ -71,7 +77,14 @@ function Login() {
             type="password"
             label="Password"
           />
-          <br />
+
+          <Link
+            className={Loginmodulecss.passwordForgotten}
+            to={"/forgetPaassword"}
+          >
+            Forgot Password?
+          </Link>
+
           <Button
             variant="contained"
             color="primary"
@@ -81,21 +94,28 @@ function Login() {
             Login
           </Button>
           <Link className={Loginmodulecss.signupRegister} to="/register">
-            Don't have an account? Register.
+            <div className={Loginmodulecss.titleTohaveAccount}>
+              <span> Don't have an account? </span>
+              <span className={Loginmodulecss.RegisterTex}>
+                &nbsp; Register.
+              </span>
+            </div>
           </Link>
           <a
+            to="/register"
             className={Loginmodulecss.help}
             onClick={(e) => {
               e.preventDefault();
               Navigate("/help");
             }}
           >
-            <h3>Help?</h3>
+            Help ?
           </a>
         </form>
       </div>
       <div className={Loginmodulecss.loginRightSide}>
         {/* <img src={loginimg} /> */}
+
         <ImgApp />
       </div>
     </div>

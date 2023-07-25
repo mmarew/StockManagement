@@ -2,6 +2,7 @@ import React from "react";
 import OpenBusinessLeftCss from "./OpenBusinessLeftSide.module.css";
 import HomeIcon from "../../ICONS/BusinessJS/clarity_home-line.svg";
 import $ from "jquery";
+import iconView from "../../ICONS/BusinessJS/iconView.svg";
 import transactioIcon from "../../ICONS/BusinessJS/icons_transaction.svg";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import itemsIcon from "../../ICONS/BusinessJS/iconItems.svg";
@@ -11,6 +12,8 @@ import iconSearch from "../../ICONS/BusinessJS/iconSearch.svg";
 import MASETAWOSHAICONICON from "../../ICONS/BusinessJS/MASETAWOSHAICON.svg";
 function OpenBusinessLeftSide() {
   let Navigate = useNavigate();
+  let openedBusiness = localStorage.getItem("openedBusiness");
+
   let markTargetedLink = (e) => {
     // e.preventDefault();
     // Navigate("/OpenBusiness/" + e.target.id);
@@ -49,18 +52,23 @@ function OpenBusinessLeftSide() {
           </a>
         </Link>
         {/* ///////////////////// */}
+        {openedBusiness == "myBusiness" && (
+          <Link
+            to="additems"
+            onClick={markTargetedLink}
+            className={OpenBusinessLeftCss.openBusinessTabLeft}
+          >
+            <img
+              src={itemsIcon}
+              className={OpenBusinessLeftCss.nonTransaction}
+            />
+            <a name="addItem" id="additems">
+              Items
+            </a>
+          </Link>
+        )}
         <Link
-          to="additems"
-          onClick={markTargetedLink}
-          className={OpenBusinessLeftCss.openBusinessTabLeft}
-        >
-          <img src={itemsIcon} className={OpenBusinessLeftCss.nonTransaction} />
-          <a name="addItem" id="additems">
-            Items
-          </a>
-        </Link>
-        {/* <Link
-          to="view"
+          to="search"
           onClick={markTargetedLink}
           className={OpenBusinessLeftCss.openBusinessTabLeft}
         >
@@ -68,8 +76,8 @@ function OpenBusinessLeftSide() {
           <a id="View" name="View">
             View
           </a>
-        </Link> */}
-        <Link
+        </Link>
+        {/* <Link
           to="search"
           onClick={markTargetedLink}
           className={OpenBusinessLeftCss.openBusinessTabLeft}
@@ -81,19 +89,21 @@ function OpenBusinessLeftSide() {
           <a name="Search" id="search">
             Search
           </a>
-        </Link>
-        <Link
-          to="Employee"
-          id="Employee"
-          onClick={markTargetedLink}
-          className={OpenBusinessLeftCss.openBusinessTabLeft}
-        >
-          <img
-            src={iconEmployee}
-            className={OpenBusinessLeftCss.nonTransaction}
-          />
-          <a name="Employee">Employee</a>
-        </Link>
+        </Link> */}
+        {openedBusiness == "myBusiness" && (
+          <Link
+            to="Employee"
+            id="Employee"
+            onClick={markTargetedLink}
+            className={OpenBusinessLeftCss.openBusinessTabLeft}
+          >
+            <img
+              src={iconEmployee}
+              className={OpenBusinessLeftCss.nonTransaction}
+            />
+            <a name="Employee">Employee</a>
+          </Link>
+        )}
         <Link
           id="Logout"
           onClick={() => {

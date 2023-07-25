@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import EditProfileCss from "./EditProfile.module.css";
 
 import $ from "jquery";
-import { LinearProgress, TextField } from "@mui/material";
+import { Button, LinearProgress, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 let serverUrl = localStorage.getItem("targetUrl");
 function EditProfile() {
@@ -93,25 +93,27 @@ function EditProfile() {
             name="fullName"
             onChange={handleRegistrationChange}
             type="text"
-            placeholder="Full Name"
+            label="Full Name"
           />
+          <br />
           <TextField
             className={EditProfileCss.TextFieldClass}
             required
             name="registerPhone"
             onChange={handleRegistrationChange}
             type="tel"
-            placeholder="phone number"
+            label="phone number"
           />
-
+          <br />
           <TextField
             className={EditProfileCss.TextFieldClass}
             required
             name="registerPassword"
             onChange={handleRegistrationChange}
             type="password"
-            placeholder="Old Password"
+            label="Old Password"
           />
+          <br />
           {/* ////////////////// */}
           {changePassword ? (
             <>
@@ -120,15 +122,17 @@ function EditProfile() {
                 required
                 name="password"
                 type="password"
-                placeholder="Type new password"
+                label="Type new password"
               />
+              <br />
               <TextField
                 className={EditProfileCss.TextFieldClass}
                 required
                 type="password"
                 name="retypePassword"
-                placeholder="Re type password"
+                label="Re type password"
               />
+              <br />
               <h4
                 className={EditProfileCss.changeOrNotPasswors}
                 onClick={() => setchangePassword(false)}
@@ -144,14 +148,16 @@ function EditProfile() {
               Edit My Password
             </h4>
           )}
-
-          <input
+          <br />
+          <Button
             className={EditProfileCss.TextFieldClass}
             name="submitButton"
             type="submit"
-            placeholder=""
-            value="Update"
-          />
+            variant="contained"
+            color="primary"
+          >
+            Update
+          </Button>
         </form>
       ) : (
         ""
