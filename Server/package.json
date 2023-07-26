@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "client": "cd .. && cd Client && npm start",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"nodemon index.js\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
@@ -14,11 +16,15 @@
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.13.5",
     "bcryptjs": "^2.4.3",
+    "concurrently": "^8.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "mysql": "^2.18.1",
     "mysql2": "^3.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

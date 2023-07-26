@@ -230,8 +230,7 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
   // res.end("getRegisteredProducts lllllllllll");
 });
 server.post(path + "registerTransaction/", async (req, res) => {
-  // console.log("registerTransaction", req.body);
-  // return;
+  let ProductId = req.body.ProductId;
   let rowData = req.body,
     ProductsList = rowData.ProductsList,
     businessName = rowData.businessName,

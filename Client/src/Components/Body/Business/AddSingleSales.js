@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import singleSalesCss from "./AddSingleSales.module.css";
-import $, { data } from "jquery";
+import $ from "jquery";
 import currentDates from "../Date/currentDate";
 import {
   Button,
@@ -274,15 +274,16 @@ function AddSingleSales() {
         <Button color="primary" variant="contained" type="Submit">
           Search
         </Button>
+        <br />
+        <Button
+          variant="contained"
+          color="success"
+          onClick={() => getTotalRegiters("getAllTransaction")}
+        >
+          View All Daily Transactions
+        </Button>
       </form>
 
-      <Button
-        variant="contained"
-        color="success"
-        onClick={() => getTotalRegiters("getAllTransaction")}
-      >
-        View All Daily Transactions
-      </Button>
       {searchedProducts.length > 0 && (
         <div className={singleSalesCss.searchedProductsLists}>
           {searchedProducts?.map((items) => {

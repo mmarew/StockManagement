@@ -1,6 +1,7 @@
 .LeftSideWrapper {
   width: 100%;
   text-align: center;
+  height: 100vh;
 }
 .imgLeft:hover,
 .imgLeftBusiness:hover,

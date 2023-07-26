@@ -1,11 +1,19 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
-import "./AddTotalSales.css";
+import CloseIcon from "@mui/icons-material/Close";
 import $ from "jquery";
-import { Button, TextField } from "@mui/material";
+import { Box, Button, IconButton, Modal, TextField } from "@mui/material";
+import AddTotalSalesCss from "./AddTotalSales.module.css";
 function AddTotalSales({ Time }) {
-  let ProductId = [];
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const [RegistrationModal, setRegistrationModal] = useState();
   let serverAddress = localStorage.getItem("targetUrl");
   const [ProductsList, setProductsList] = useState("Wait");
   const [CollectedProducts, setCollectedProducts] = useState({});
@@ -38,18 +46,25 @@ function AddTotalSales({ Time }) {
 
     $(".LinearProgress").hide();
   };
-  let sendFormDataToServer = async (e) => {
+  let sendFormDataToServer = async (e, ProductId) => {
     e.preventDefault();
     let dates = CollectedProducts.dates;
+    CollectedProducts.ProductId = ProductId;
     if (dates == undefined) {
       alert("Date is not selected");
       $("#dateId").css("backgroundColor", "red");
       return;
     }
+    let copy = [];
+    CollectedProducts.ProductsList.map((items) => {
+      if (ProductId == items.ProductId) copy.push(items);
+    });
+    let copyOfCollection = { ...CollectedProducts };
+    copyOfCollection.ProductsList = copy;
     $(".LinearProgress").show();
     let response = await axios.post(
       serverAddress + "registerTransaction/",
-      CollectedProducts
+      copyOfCollection
     );
     $(".LinearProgress").hide();
     let datas = response.data.data;
@@ -66,10 +81,10 @@ function AddTotalSales({ Time }) {
         return;
       }
       alert("successfully registered. Thank you.");
-      $(".productInput div input").val("");
+      setOpen(false);
     } else if (datas == "allDataAreRegisteredBefore") {
       alert(
-        "Your data are not registered now.Because all of your data are registered before. Thank you"
+        "Tese data are not registered now. Because these are registered before. Thank you. "
       );
     }
   };
@@ -93,40 +108,140 @@ function AddTotalSales({ Time }) {
       dates: CDATE,
     });
   }, []);
+  const [RegistrableProducts, setRegistrableProducts] = useState([{}]);
   return (
-    <div className="addTotalSalesWrapper">
+    <div className={AddTotalSalesCss.addTotalSalesWrapper}>
       {console.log(CollectedProducts)}
       {console.log("ProductsList", ProductsList)}
       {ProductsList !== "Wait" ? (
         ProductsList?.length > 0 ? (
-          <form
-            id="formOnAddTransaction"
-            action=""
-            onSubmit={sendFormDataToServer}
+          <>
+            <div className={AddTotalSalesCss.itemsTobesold}>
+              {ProductsList?.map((item) => {
+                return (
+                  <div className={AddTotalSalesCss.eachItem}>
+                    <p> {item.productName}</p>
+                    <Button
+                      onClick={() => {
+                        setRegistrableProducts([item]);
+                        setOpen(true);
+                        return "llllll";
+                      }}
+                      size="small"
+                      variant="contained"
+                      color="primary"
+                    >
+                      Add Transaction
+                    </Button>
+                  </div>
+                );
+                // return (
+                //   <div key={item.ProductId}>
+                //     <div className="productName-transaction">
+                //       {" "}
+                //       <h4>{item.productName}</h4>
+                //       <br />
+                //     </div>
+                //     <TextField
+                //       required
+                //       target={item.ProductId}
+                //       onChange={collectFormData}
+                //       className={"productInput"}
+                //       type="number"
+                //       name={"purchaseQty" + item.ProductId}
+                //       label="Purchase quantity"
+                //     />
+                //     <br />
+                //     <TextField
+                //       required
+                //       onChange={collectFormData}
+                //       className={"productInput"}
+                //       type="number"
+                //       name={"salesQuantity" + item.ProductId}
+                //       label="Sales quantity"
+                //     />
+                //     <br />
+                //     <TextField
+                //       required
+                //       onChange={collectFormData}
+                //       className={"productInput"}
+                //       type="number"
+                //       name={"wrickageQty" + item.ProductId}
+                //       label="Broken quantity"
+                //     />
+                //     <br />
+                //     <TextField
+                //       required
+                //       onChange={collectFormData}
+                //       className={"productInput"}
+                //       type="text"
+                //       name={"Description" + item.ProductId}
+                //       label="Description"
+                //     />
+                //   </div>
+                // );
+              })}
+            </div>
+          </>
+        ) : (
+          "No product list found"
+        )
+      ) : (
+        "please wait while fetching datas"
+      )}
+
+      <Modal open={open} onClose={handleClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            maxWidth: 400,
+            bgcolor: "background.paper",
+            p: 2,
+          }}
+        >
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+            }}
           >
-            <TextField
-              onChange={(e) => {
-                setselectedTime(e.target.value);
-              }}
-              required
-              type="date"
-              name="dateInTotalSales"
-              id="dateIdInTotalSales"
-            />{" "}
-            <br />
-            {ProductsList?.map((item) => {
-              return (
-                <div key={item.ProductId}>
-                  <div className="productName-transaction">
-                    {" "}
+            <CloseIcon />
+          </IconButton>
+
+          {RegistrableProducts.map((item) => {
+            return (
+              <form
+                id={AddTotalSalesCss.formOnAddTransaction}
+                action=""
+                onSubmit={(e) => sendFormDataToServer(e, item.ProductId)}
+              >
+                <div>Registration of product.</div>
+                <div key={"itemTransAction_" + item.ProductId}>
+                  <div className={AddTotalSalesCss.productNameTransaction}>
                     <h4>{item.productName}</h4>
                     <br />
                   </div>
                   <TextField
+                    onChange={(e) => {
+                      setselectedTime(e.target.value);
+                    }}
+                    required
+                    type="date"
+                    name="dateInTotalSales"
+                    id={AddTotalSalesCss.dateIdInTotalSales}
+                  />
+                  <br />
+                  <TextField
                     required
                     target={item.ProductId}
                     onChange={collectFormData}
-                    className={"productInput"}
+                    className={AddTotalSalesCss.productInput}
                     type="number"
                     name={"purchaseQty" + item.ProductId}
                     label="Purchase quantity"
@@ -135,7 +250,7 @@ function AddTotalSales({ Time }) {
                   <TextField
                     required
                     onChange={collectFormData}
-                    className={"productInput"}
+                    className={AddTotalSalesCss.productInput}
                     type="number"
                     name={"salesQuantity" + item.ProductId}
                     label="Sales quantity"
@@ -144,7 +259,7 @@ function AddTotalSales({ Time }) {
                   <TextField
                     required
                     onChange={collectFormData}
-                    className={"productInput"}
+                    className={AddTotalSalesCss.productInput}
                     type="number"
                     name={"wrickageQty" + item.ProductId}
                     label="Broken quantity"
@@ -153,30 +268,26 @@ function AddTotalSales({ Time }) {
                   <TextField
                     required
                     onChange={collectFormData}
-                    className={"productInput"}
+                    className={AddTotalSalesCss.productInput}
                     type="text"
                     name={"Description" + item.ProductId}
                     label="Description"
                   />
-                </div>
-              );
-            })}
-            <br />
-            <Button
-              variant="contained"
-              color="primary"
-              type="submit"
-              className="RegisterSales"
-            >
-              Register
-            </Button>
-          </form>
-        ) : (
-          "No product list found"
-        )
-      ) : (
-        "please wait while fetching datas"
-      )}
+                  <br />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    className={AddTotalSalesCss.RegisterSales}
+                  >
+                    Register
+                  </Button>
+                </div>{" "}
+              </form>
+            );
+          })}
+        </Box>
+      </Modal>
     </div>
   );
 }
