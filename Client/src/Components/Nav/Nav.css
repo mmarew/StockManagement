@@ -1,26 +1,49 @@
+.NavBar {
+  position: fixed;
+  bottom: 1px;
+  width: 100%;
+  background-color: #fff;
+  z-index: 20;
+  box-shadow: 15px 5px 10px 5px #888888;
+  /* display: flex; */
+  /* justify-content: space-around; */
+  margin: auto;
+}
+
 .navLinks {
   display: flex;
   justify-content: center;
+  align-items: end;
 }
 .navLinks .Lists {
-  color: white;
   text-decoration: none;
   font-size: 16px;
   margin-right: 3vw;
+  padding: 5px 15px;
+  border-radius: 5px;
 }
 .Lists:hover {
-  border-bottom: solid 3px white;
+  border-bottom: solid 3px #1976d2;
+}
+.Lists img {
+  margin-bottom: -8px;
+  width: 13vw;
+}
+.Lists img:nth-child(1) {
+  width: 8vw;
 }
 
-.active {
+.activeNav {
   background-color: #1976d2;
+  color: white;
 }
-.MuiBox-root header {
-  /* prevent popup notification color impact */
-  background-color: #1976d2;
-  color: #fff;
+.activeNav img {
+  filter: invert(100%) brightness(900%);
 }
 
 @media screen and (min-width: 768px) {
   /* styles applied when screen width is at least 768 pixels */
+  .NavBar {
+    display: none;
+  }
 }

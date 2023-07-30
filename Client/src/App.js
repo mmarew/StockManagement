@@ -41,6 +41,7 @@ function App() {
             path="/help"
             element={
               <>
+                {window.innerWidth < 768 && <NavBar />}
                 <Help />
               </>
             }

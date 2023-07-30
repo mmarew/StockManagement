@@ -6,6 +6,7 @@ import { Button, LinearProgress, TextField } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import ImgApp from "../../../ImgSlider";
 import { InitialContext } from "../UserContext/UserContext";
+
 function Login() {
   let serverAddress = localStorage.getItem("targetUrl");
   let Navigate = useNavigate();
@@ -48,6 +49,10 @@ function Login() {
   }, []);
   return (
     <div className={Loginmodulecss.loginWrapper}>
+      {
+        // localStorage.setItem("targetUrl", "https://mar.masetawosha.com/")
+        localStorage.setItem("targetUrl", "http://localhost:2020/")
+      }
       <div className={Loginmodulecss.LeftSide}>
         <div className={Loginmodulecss.gladMessage}>Glad to see you back</div>
         <div className={Loginmodulecss.greetingToLogin}>

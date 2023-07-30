@@ -16,24 +16,7 @@
   margin: 0 5px;
   border-radius: 10px;
 }
-.employeeList {
-  background-color: white;
-  margin: 10px auto;
-  padding: 10px;
-  border-radius: 10px;
-  width: 300px;
-}
-.employeeList div {
-  padding: 5px;
-}
-.employeeList button {
-  background-color: Red;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-}
+
 .searchedEmloyee {
   background-color: white;
   width: 300px;
@@ -66,4 +49,16 @@
 }
 .activeClass {
   border-bottom: 2px solid rgb(108, 108, 246);
+}
+/*  */
+.EmployeeListWrapper {
+  display: flex;
+  background-color: white;
+  margin-top: 10px;
+  width: fit-content;
+  padding: 10px;
+}
+.EmployeeListWrapper div {
+  padding: 10px;
+  /* border-bottom: 1px solid black; */
 }

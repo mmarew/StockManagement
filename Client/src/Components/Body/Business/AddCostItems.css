@@ -23,4 +23,12 @@
 }
 .titleToRegistrationForm {
   padding-top: 10px;
+  width: fit-content;
+  margin: auto;
+}
+@media screen and (min-width: 768px) {
+  .titleToRegistrationForm,
+  .form-add-cost {
+    margin: 0;
+  }
 }

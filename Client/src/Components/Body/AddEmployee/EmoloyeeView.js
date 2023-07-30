@@ -4,6 +4,7 @@ import $ from "jquery";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import ConfirmDialog from "../Others/Confirm";
+import { Button } from "@mui/material";
 function EmployeeView() {
   let serverAddress = localStorage.getItem("targetUrl");
   const [EmployeesList, setEmployeesList] = useState();
@@ -63,22 +64,35 @@ function EmployeeView() {
             <div
               id={items.employeeId}
               key={items.employeeId}
-              className="employeeList"
+              className="EmployeeListWrapper"
             >
-              <div> Name:- {items.employeeName}</div>
-              <div> Phone number:- {items.phoneNumber}</div>
-              <button
-                onClick={() => {
-                  setShowConfirmDialog(true);
-                  setconfirmMessages("Are you sure to remove this employee?");
-                  setconfirmAction("removeEmployee");
-                  setRemoveThisEmployee({ items, status: "notConfirmed" });
+              <div className="Employee">
+                <div> Name</div>
+                <div> {items.employeeName}</div>
+              </div>
+              <div>
+                <div> Phone number</div>
+                <div>
+                  <a href={"tel:+" + items.phoneNumber}>{items.phoneNumber}</a>
+                </div>
+              </div>
+              <div>
+                <div>Action</div>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => {
+                    setShowConfirmDialog(true);
+                    setconfirmMessages("Are you sure to remove this employee?");
+                    setconfirmAction("removeEmployee");
+                    setRemoveThisEmployee({ items, status: "notConfirmed" });
 
-                  // RemoveThisEmployee(items.employeeId);
-                }}
-              >
-                Remove
-              </button>
+                    // RemoveThisEmployee(items.employeeId);
+                  }}
+                >
+                  Remove
+                </Button>
+              </div>
             </div>
           );
         })}

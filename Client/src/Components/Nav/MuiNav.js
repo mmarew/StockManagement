@@ -11,7 +11,9 @@ import { useContext } from "react";
 import { InitialContext } from "../Body/UserContext/UserContext";
 import { useEffect } from "react";
 import axios from "axios";
-
+import BusinessLogo from "../../Components/ICONS/BusinessJS/businessBlack.svg";
+import HelpLogo from "../../Components/ICONS/BusinessJS/SupportBlack.svg";
+import ProfileLogo from "../../Components/ICONS/BusinessJS/ProfileBlack.svg";
 import "./Nav.css";
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -58,8 +60,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function NavBar() {
   let hundleNavigationBar = (e) => {
     console.log(e.target);
-    $(".Lists").removeClass("active");
-    $(e.target).addClass("active");
+    $(".Lists").removeClass("activeNav");
+    $(e.currentTarget).addClass("activeNav");
   };
   const savedContext = useContext(InitialContext);
   const [ownersName, setownersName] = savedContext;
@@ -89,12 +91,11 @@ export default function NavBar() {
     VerifyLogin();
   }, []);
   return (
-    <>
-      <div className="navBar">
-        <Box sx={{ flexGrow: 1 }}>
-          <AppBar position="static">
-            <Toolbar>
-              {/* <IconButton
+    <div className="NavBar">
+      <Box sx={{}}>
+        <AppBar position="static" sx={{ backgroundColor: "#fff" }}>
+          <Toolbar>
+            {/* <IconButton
               size="large"
               edge="start"
               color="inherit"
@@ -103,37 +104,43 @@ export default function NavBar() {
             >
               <MenuIcon />
             </IconButton> */}
-              <Typography
-                variant="h6"
-                noWrap
-                component="div"
-                sx={{ flexGrow: 1, display: { xs: "block", sm: "block" } }}
-              >
-                <div className="navLinks">
-                  <Link
-                    onClick={hundleNavigationBar}
-                    className="Lists"
-                    to="/Business"
-                  >
-                    Business
-                  </Link>
-                  <Link
-                    onClick={hundleNavigationBar}
-                    className="Lists"
-                    to="/help"
-                  >
-                    Help
-                  </Link>
-                  <Link
-                    onClick={hundleNavigationBar}
-                    className="Lists ownerName"
-                    to="/Profiles"
-                  >
-                    Profile
-                  </Link>
-                </div>
-              </Typography>
-              {/* <Search>
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{ flexGrow: 1, display: { xs: "block", sm: "block" } }}
+            >
+              <div className="navLinks">
+                <Link
+                  onClick={hundleNavigationBar}
+                  className="Lists"
+                  to="/Business"
+                >
+                  <div>
+                    <img className="listImg" src={BusinessLogo} />
+                  </div>
+                </Link>
+                <Link
+                  onClick={hundleNavigationBar}
+                  className="Lists"
+                  to="/help"
+                >
+                  <div>
+                    <img className="listImg" src={HelpLogo} />
+                  </div>
+                </Link>
+                <Link
+                  onClick={hundleNavigationBar}
+                  className="Lists ownerName"
+                  to="/Profiles"
+                >
+                  <div>
+                    <img className="listImg" src={ProfileLogo} />
+                  </div>
+                </Link>
+              </div>
+            </Typography>
+            {/* <Search>
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
@@ -142,10 +149,9 @@ export default function NavBar() {
                 inputProps={{ "aria-label": "search" }}
               />
             </Search> */}
-            </Toolbar>
-          </AppBar>
-        </Box>
-      </div>
-    </>
+          </Toolbar>
+        </AppBar>
+      </Box>
+    </div>
   );
 }

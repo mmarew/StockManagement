@@ -3,9 +3,13 @@ import React, { useEffect, useState } from "react";
 import singleSalesCss from "./AddSingleSales.module.css";
 import $ from "jquery";
 import currentDates from "../Date/currentDate";
+import CloseIcon from "@material-ui/icons/Close";
 import {
+  Box,
   Button,
+  IconButton,
   Input,
+  Modal,
   Table,
   TableBody,
   TableCell,
@@ -13,9 +17,17 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Typography,
 } from "@mui/material";
 function AddSingleSales() {
   // setShowHiddenProducts;
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
   const [showHiddenProducts, setShowHiddenProducts] = useState(false);
   const [DailyTransaction, setDailyTransaction] = useState([]);
   let serverAddress = localStorage.getItem("targetUrl");
@@ -251,7 +263,6 @@ function AddSingleSales() {
 
   return (
     <div className={singleSalesCss.singleSalesWrapper}>
-      <h3>Search Products</h3>
       <form
         className={singleSalesCss.formToSearchItems}
         form
@@ -289,10 +300,7 @@ function AddSingleSales() {
           {searchedProducts?.map((items) => {
             return (
               <div key={items.ProductId}>
-                <form
-                  className={singleSalesCss.singleTransactionForm}
-                  onSubmit={registerSinglesalesTransaction}
-                >
+                <>
                   <h4>product Name: {items.productName}</h4>
                   <div className={singleSalesCss.getOrRegisterProducts}>
                     <Button
@@ -306,6 +314,7 @@ function AddSingleSales() {
                       }
                       onClick={() => {
                         setShowHiddenProducts(true);
+                        handleOpen();
                       }}
                     >
                       Register
@@ -323,68 +332,131 @@ function AddSingleSales() {
                   <br />
                   {showHiddenProducts && (
                     <div>
-                      <TextField
-                        type="number"
-                        required
-                        className={"dailyRegistrationInputs"}
-                        onInput={(e) =>
-                          handleSalesTransactionInput(e, items.ProductId)
-                        }
-                        name="purchaseQty"
-                        label="purchase quantity"
-                      />
-                      <br />
-                      <br />
-                      <TextField
-                        type="number"
-                        required
-                        className={"dailyRegistrationInputs"}
-                        onInput={(e) =>
-                          handleSalesTransactionInput(e, items.ProductId)
-                        }
-                        name="salesQty"
-                        label="Sales quantity"
-                      />
-                      <br />
-                      <br />
-                      <TextField
-                        type="number"
-                        className={"dailyRegistrationInputs"}
-                        onInput={(e) =>
-                          handleSalesTransactionInput(e, items.ProductId)
-                        }
-                        name="brokenQty"
-                        label="Broken quantity"
-                      />
-                      <br />
-                      <br />
-                      <TextField
-                        required
-                        className={"dailyRegistrationInputs"}
-                        onInput={(e) =>
-                          handleSalesTransactionInput(e, items.ProductId)
-                        }
-                        name="Description"
-                        label="Description"
-                      />
-                      <br />
-                      <br />
-                      <Button color="primary" variant="contained" type="submit">
-                        ADD
-                      </Button>
-                      &nbsp; &nbsp; &nbsp;
-                      <Button
-                        onClick={() => setShowHiddenProducts(false)}
-                        color="warning"
-                        variant="contained"
-                        type="submit"
-                      >
-                        CANCEL
-                      </Button>
+                      <>
+                        {/* <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleOpen}
+                        >
+                          Open Modal
+                        </Button> */}
+                        <Modal open={open} onClose={handleClose}>
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)",
+                              maxWidth: 400,
+                              bgcolor: "background.paper",
+                              boxShadow: 24,
+                              p: 4,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                mb: 2,
+                              }}
+                            >
+                              <Typography variant="h6" component="h2">
+                                Single registration to {items.productName}
+                              </Typography>
+                              <IconButton onClick={handleClose}>
+                                <CloseIcon />
+                              </IconButton>
+                            </Box>
+                            <Typography variant="body1" component="p">
+                              <form
+                                className={singleSalesCss.singleTransactionForm}
+                                onSubmit={registerSinglesalesTransaction}
+                              >
+                                <TextField
+                                  type="number"
+                                  required
+                                  className={"dailyRegistrationInputs"}
+                                  onInput={(e) =>
+                                    handleSalesTransactionInput(
+                                      e,
+                                      items.ProductId
+                                    )
+                                  }
+                                  name="purchaseQty"
+                                  label="purchase quantity"
+                                />
+                                <br />
+
+                                <TextField
+                                  type="number"
+                                  required
+                                  className={"dailyRegistrationInputs"}
+                                  onInput={(e) =>
+                                    handleSalesTransactionInput(
+                                      e,
+                                      items.ProductId
+                                    )
+                                  }
+                                  name="salesQty"
+                                  label="Sales quantity"
+                                />
+                                <br />
+
+                                <TextField
+                                  type="number"
+                                  className={"dailyRegistrationInputs"}
+                                  onInput={(e) =>
+                                    handleSalesTransactionInput(
+                                      e,
+                                      items.ProductId
+                                    )
+                                  }
+                                  name="brokenQty"
+                                  label="Broken quantity"
+                                />
+                                <br />
+
+                                <TextField
+                                  required
+                                  className={"dailyRegistrationInputs"}
+                                  onInput={(e) =>
+                                    handleSalesTransactionInput(
+                                      e,
+                                      items.ProductId
+                                    )
+                                  }
+                                  name="Description"
+                                  label="Description"
+                                />
+                                <br />
+                                <div>
+                                  <Button
+                                    color="primary"
+                                    variant="contained"
+                                    type="submit"
+                                  >
+                                    ADD
+                                  </Button>
+                                  &nbsp; &nbsp; &nbsp;
+                                  <Button
+                                    onClick={() => setShowHiddenProducts(false)}
+                                    color="warning"
+                                    variant="contained"
+                                    type="submit"
+                                  >
+                                    CANCEL
+                                  </Button>
+                                </div>
+                              </form>
+                            </Typography>
+                          </Box>
+                        </Modal>
+                      </>
                     </div>
                   )}
                   <br />
-                </form>
+                </>
               </div>
             );
           })}

@@ -46,17 +46,13 @@ function GetMinimumQty() {
       ) : MinimumQty.data.length > 0 ? (
         <TableContainer
           sx={{
-            minWidth: 450,
-            maxWidth: 600,
-            margin: "auto",
-            marginTop: 10 + "px",
-            marginBottom: 10 + "px",
+            maxWidth: 500 + "px",
           }}
           component={Paper}
           align="center"
         >
           {console.log("MinimumQty", MinimumQty.data.length)}
-          <Table>
+          <Table sx={{ width: 100 + "%" }}>
             <TableHead>
               <TableRow>
                 <TableCell align="center" colSpan={5}>

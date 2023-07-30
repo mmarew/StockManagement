@@ -279,7 +279,6 @@ function Business() {
                             >
                               Edit
                             </Button>
-                            {/* <Button>Delete</Button> */}
                             <Button
                               variant="outlined"
                               startIcon={<DeleteIcon />}
@@ -320,7 +319,6 @@ function Business() {
                               <Button
                                 variant="contained"
                                 onClick={() =>
-                                  // updateBusinesssName(datas.BusinessID)
                                   setOpen({
                                     Action: "updateBusinesssName",
                                     open: true,
@@ -338,7 +336,6 @@ function Business() {
                               >
                                 Update
                               </Button>
-                              {/* //////////////////////////// */}
                               <Button
                                 variant="contained"
                                 color="warning"
@@ -360,7 +357,7 @@ function Business() {
                         console.log(items);
                         return (
                           <div
-                            key={items.employeeId}
+                            key={"EmployyersBusiness_" + items.employeeId}
                             className={Businessmodulecss.Business}
                           >
                             <h1>{items.BusinessName}</h1>
@@ -427,9 +424,6 @@ function Business() {
             )}
           </div>
         </div>
-        {/* <div className={Businessmodulecss.RightSideBusinessWrapper}>
-          Right Side Business Wrapper
-        </div> */}
       </div>
       {console.log("open.open is ", open.open)}
       {open.open && ConfirmRequest}
@@ -437,6 +431,7 @@ function Business() {
       {ShowSuccessError?.show && (
         <SuccessOrError request={ShowSuccessError.message} />
       )}
+      
     </>
   );
 }

@@ -4,6 +4,7 @@ import AddCostTransaction from "./AddCostTransaction";
 import AddSalesTranaction from "./AddSalesTranaction";
 import "./addTransaction.css";
 import $ from "jquery";
+import { Button } from "@mui/material";
 function AddTransaction({ Time }) {
   let navigate = useNavigate();
   const [Transaction, setTransaction] = useState("");
@@ -30,21 +31,22 @@ function AddTransaction({ Time }) {
   }, []);
   return (
     <div className="addTransactionWrapper">
+      <h5>Register Sales or Cost Transaction</h5>
       <div className="addTransaction">
-        <button
+        <Button
           className="salesOrCosts"
           name="Sales"
           onClick={setTargatedRegistration}
         >
           Register Sales
-        </button>
-        <button
+        </Button>
+        <Button
           className="salesOrCosts"
           name="Cost"
           onClick={setTargatedRegistration}
         >
           Register Cost
-        </button>
+        </Button>
       </div>
       <hr />
       <br />

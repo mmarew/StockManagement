@@ -11,7 +11,9 @@
   max-width: 700px;
   margin: auto;
 }
-
+.searchTitle {
+  text-align: center;
+}
 .searchBtn {
   background-color: blue;
   color: white;
@@ -107,4 +109,12 @@ td {
 }
 .updateProducts {
   cursor: pointer;
+}
+@media screen and (min-width: 768px) {
+  #searchProduct {
+    margin: 10px 0;
+  }
+  .searchTitle {
+    text-align: left;
+  }
 }

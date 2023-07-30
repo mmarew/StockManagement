@@ -63,6 +63,7 @@ const AddProducts = () => {
 
       <form id="registerProductsForm" onSubmit={registerProducts} method="post">
         <div>Date</div>
+        <br />
         <TextField required id="productDate" type="date" label="Date" />
         <br />
         <TextField

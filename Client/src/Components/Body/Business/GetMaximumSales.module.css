@@ -2,12 +2,12 @@
   max-width: 800px;
   min-width: 600px;
   overflow-x: scroll;
-  margin: auto;
+  /* margin: auto; */
 }
 
 .maxSelectionForm {
   max-width: 300px;
-  margin: 10px auto;
+  /* margin: 10px auto; */
   padding: 20px 10px;
   background-color: white;
 }
@@ -24,4 +24,10 @@
 .maxSelectionForm select {
   width: 100%;
   max-width: 200px;
+}
+.maximumTitle {
+  padding: 10px;
+}
+.fromDateToDate {
+  padding: 10px;
 }

@@ -1,11 +1,16 @@
 .openBusinesswrapper {
-  text-align: center;
+  /* text-align: center; */
   width: 100%;
   margin: 0;
   padding: 0;
 }
 .navBar {
   display: block;
+  position: fixed;
+  bottom: 1px;
+  width: 100%;
+  z-index: 20;
+  box-shadow: 15px 5px 10px 5px #888888;
 }
 .openBusinessHeader {
   position: fixed;
@@ -16,18 +21,23 @@
   width: 100%;
   /* background-color: blue; */
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
+  max-width: 500px;
+  margin: auto;
 }
 .registerViewSearch .openBusinessTab {
-  color: white;
   border: 0px;
-  padding: 10px 1vw;
+  padding: 5px 15px;
   border-radius: 10px;
   cursor: pointer;
   text-decoration: none;
+  display: flex;
+  align-items: end;
 }
+
 .openBusinessTab:hover {
-  background-color: rgb(172, 172, 223);
+  /* background-color: rgb(172, 172, 223); */
+  border-bottom: 1px solid rgb(25, 118, 210);
 }
 #dateId {
   margin: 10px auto;
@@ -35,8 +45,13 @@
 }
 
 .activeLink {
-  background-color: black;
+  background-color: rgb(25, 118, 210);
+  color: white;
 }
+.activeLink img {
+  filter: invert(100%) brightness(200%);
+}
+
 table {
   width: fit-content;
   margin: auto;
@@ -74,11 +89,7 @@ table {
   margin: 5px 0;
   display: none;
 }
-.businessInfoWrapper {
-  width: 100%;
-  overflow: scroll;
-  height: 95vh;
-}
+
 .MainWrapper {
   display: flex;
 }
@@ -90,10 +101,15 @@ table {
 }
 .middeleSideDiv {
   width: 100%;
+  overflow: hidden;
+  margin-left: 20px;
 }
 
 @media screen and (min-width: 768px) {
   .navBar {
     display: none;
+  }
+  .welcomeInfo {
+    text-align: left;
   }
 }

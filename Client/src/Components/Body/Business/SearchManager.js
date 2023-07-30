@@ -159,7 +159,7 @@ function SearchManager() {
   return (
     <>
       <br />
-      <h3>Search form to your business</h3>
+      <h3 className="searchTitle">Search form to your business</h3>
       <form onSubmit={submitSearch} id="searchProduct">
         <Select
           value={selectedValue}

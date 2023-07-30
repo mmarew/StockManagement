@@ -1,28 +1,31 @@
 {
   "files": {
-    "main.css": "/static/css/main.4659fc71.css",
-    "main.js": "/static/js/main.31b4f9a5.js",
+    "main.css": "/static/css/main.74ed0c03.css",
+    "main.js": "/static/js/main.4c767959.js",
     "static/media/MASETAWOSHAICON.svg": "/static/media/MASETAWOSHAICON.54a2fd866e0f5c7049127a306c6f27f5.svg",
     "static/media/iconEmployee.svg": "/static/media/iconEmployee.9557ca5a58a3c4a7c853ccd11236fd67.svg",
     "static/media/SupportBlack.svg": "/static/media/SupportBlack.255c7a81f9ee6676465397a000f89417.svg",
     "static/media/iconItems.svg": "/static/media/iconItems.50f94a2cc3a3d6b2c1286af495fc2e93.svg",
     "static/media/iconView.svg": "/static/media/iconView.3f623519af924a2f62f4c4ce88207c0f.svg",
     "static/media/slick.svg": "/static/media/slick.2630a3e3eab21c607e21.svg",
+    "static/media/ProfileBlack.svg": "/static/media/ProfileBlack.0f89759249611a44ce3dfad0b1ecd71c.svg",
     "static/media/userIcon.svg": "/static/media/userIcon.0f89759249611a44ce3dfad0b1ecd71c.svg",
     "static/media/slick.eot": "/static/media/slick.a4e97f5a2a64f0ab1323.eot",
     "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
     "static/media/logout-svgrepo-com.svg": "/static/media/logout-svgrepo-com.6ed8e0b8d5f8b18c37ef36f1c5ad6651.svg",
     "static/media/iconSearch.svg": "/static/media/iconSearch.1114e16c4aac3f925fe690d28f03a282.svg",
-    "static/media/businessBlack.svg": "/static/media/businessBlack.b50d998e76e1e743c50467260840a25d.svg",
     "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
     "index.html": "/index.html",
     "static/media/clarity_home-line.svg": "/static/media/clarity_home-line.b08dc7e47bf7fa7ce7101648341dcf3f.svg",
+    "static/media/businessBlack.svg": "/static/media/businessBlack.c10ea18849b14918f42a74c312362f38.svg",
+    "static/media/iconHomeBlack.svg": "/static/media/iconHomeBlack.35d540e138b4a8c56e2e83323d479aff.svg",
     "static/media/icons_transaction.svg": "/static/media/icons_transaction.5dc8f7bb6e3d439ebc2e419fe814b4d2.svg",
-    "main.4659fc71.css.map": "/static/css/main.4659fc71.css.map",
-    "main.31b4f9a5.js.map": "/static/js/main.31b4f9a5.js.map"
+    "static/media/transactionBlack.svg": "/static/media/transactionBlack.d8c725ff7032a88e7fbbee51b36b3c6a.svg",
+    "main.74ed0c03.css.map": "/static/css/main.74ed0c03.css.map",
+    "main.4c767959.js.map": "/static/js/main.4c767959.js.map"
   },
   "entrypoints": [
-    "static/css/main.4659fc71.css",
-    "static/js/main.31b4f9a5.js"
+    "static/css/main.74ed0c03.css",
+    "static/js/main.4c767959.js"
   ]
 }

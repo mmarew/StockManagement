@@ -1,5 +1,7 @@
 .registrationFormToproducts {
   padding: 20px 0;
+  width: fit-content;
+  margin: auto;
 }
 .registerProducts {
   margin: 5px 0;
@@ -7,11 +9,17 @@
 #registerProductsForm {
   display: flex;
   flex-direction: column;
-  max-width: 300px;
+  max-width: 500px;
   margin: auto;
   background-color: white;
   padding: 50px;
 }
 .registerProducts {
   margin: 10px;
+}
+@media screen and (min-width: 760px) {
+  .registrationFormToproducts,
+  #registerProductsForm {
+    margin: 0;
+  }
 }

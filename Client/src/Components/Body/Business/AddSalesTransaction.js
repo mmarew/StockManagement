@@ -31,8 +31,6 @@ function AddSalesTransaction() {
         <MenuItem value="totalSales">Total Sales</MenuItem>
         <MenuItem value="singleSales">Single Sales</MenuItem>
       </Select>
-      <br />
-      <br />
 
       <Outlet />
     </div>

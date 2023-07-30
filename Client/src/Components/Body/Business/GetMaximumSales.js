@@ -219,8 +219,8 @@ function GetMaximumSales() {
 
   return (
     <div>
-      <br />
-      <h5>Maximum Transaction Data</h5>
+      <h5 className={GetMaximumStyle.maximumTitle}>Maximum Transaction Data</h5>
+
       <form
         className={GetMaximumStyle.maxSelectionForm}
         onSubmit={submitMaximumSelection}
@@ -265,18 +265,17 @@ function GetMaximumSales() {
         <br />
       </form>
       {console.log("DateRange == ", DateRange)}
-      <h3>
+      <h3 className={GetMaximumStyle.fromDateToDate}>
         From Date {DateRange.fromDate ? DateRange.fromDate : " not specified "}
         &nbsp; To Date {DateRange.toDate ? DateRange.toDate : " not Specified "}
       </h3>
-      <br />
+
       {MaximumDataList?.length > 0 && MaximumDataList[0] != undefined ? (
         <>
           <div className={GetMaximumStyle.tableWrapper}>
             <TableContainer
               sx={{
-                minWidth: "700px",
-                margin: "auto",
+                maxWidth: "100vw",
               }}
               component={Paper}
             >
@@ -340,6 +339,13 @@ function GetMaximumSales() {
                 </TableBody>
               </Table>
             </TableContainer>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
           </div>
         </>
       ) : (
