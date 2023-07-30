@@ -1,4 +1,4 @@
-const mysql = require("mysql2");
+const mysql = require("mysql");
 let bcript = require("bcryptjs");
 // var connection = mysql.createConnection({
 //   host: "localhost",
@@ -51,7 +51,7 @@ function createBasicTables() {
 }
 let createBusiness = (businessName, ownerId, createdDate, res, source) => {
   console.log("createBusiness");
-  let select = `select * from Business where businessName='${businessName}'`;
+  let select = `select * from Business where businessName=${businessName}`;
   connection.query(select, (err, result) => {
     if (err) {
       return res.json({ err });
@@ -59,7 +59,7 @@ let createBusiness = (businessName, ownerId, createdDate, res, source) => {
     let tableCollections = {};
     if (result.length == 0) {
       let insert = `insert into Business (businessName,ownerId,createdDate)
-       values('${businessName}','${ownerId}','${createdDate}') `;
+       values(${businessName},${ownerId},'${createdDate}') `;
       connection.query(insert, (err, results) => {
         if (err) {
           return res.json({ err });
@@ -119,7 +119,7 @@ let insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
   const salt = bcript.genSaltSync();
   //changing the value of password from req.body with the encrypted password
   const Encripted = bcript.hashSync(password, salt);
-  let check = `select * from usersTable where phoneNumber='${phoneNumber}'`;
+  let check = `select * from usersTable where phoneNumber=${phoneNumber}`;
   connection.query(check, (err, results) => {
     if (err) {
       return res.json({ err });
@@ -128,7 +128,7 @@ let insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
       if (results.length > 0) {
         res.json({ data: "This phone number is registered before." });
       } else {
-        let insertIntoUsers = `insert into usersTable (employeeName,phoneNumber,password) values('${fullName}','${phoneNumber}','${Encripted}')`;
+        let insertIntoUsers = `insert into usersTable (employeeName,phoneNumber,password) values(${fullName},${phoneNumber},'${Encripted}')`;
         connection.query(insertIntoUsers, (err, result) => {
           if (err) return res.json({ err });
           else if (result) {

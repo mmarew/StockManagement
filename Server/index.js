@@ -3,6 +3,7 @@ let express = require("express");
 let bcrypt = require("bcryptjs");
 let Auth = require("./Auth.js").Auth;
 let dotenv = require("dotenv");
+let sqlstring = require("sqlstring");
 // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-let
 dotenv.config();
 let path = "/";
@@ -120,8 +121,14 @@ server.post(path + "verifyLogin/", async (req, res) => {
   // res.json({ data: "connection" });
 });
 server.post(path + "Login/", (req, res) => {
-  // console.log(req.body);
-  let select = `select * from usersTable where phoneNumber='${req.body.phoneNumber}' limit 1`;
+  console.log(req.body);
+  console.log("req.body.phoneNumber", req.body.phoneNumber);
+
+  let phoneNumber = sqlstring.escape(req.body.phoneNumber);
+  console.log("phoneNumber", phoneNumber);
+
+  // return;
+  let select = `select * from usersTable where phoneNumber=${phoneNumber} limit 1`;
   connection.query(select, (err, result) => {
     if (err) {
       console.log(err);
@@ -151,9 +158,9 @@ server.post(path + "Login/", (req, res) => {
   // res.json({ data: "connected" });
 });
 server.post(path + "RegisterUsers/", async (req, res) => {
-  let registerPhone = req.body.registerPhone,
+  let registerPhone = sqlstring.escape(req.body.registerPhone),
     registerPassword = req.body.registerPassword,
-    fullName = req.body.fullName;
+    fullName = sqlstring.escape(req.body.fullName);
   let results = await insertIntoUserTable(
     fullName,
     registerPhone,
@@ -165,11 +172,11 @@ server.post(path + "RegisterUsers/", async (req, res) => {
 server.post(path + "addProducts/", async (req, res) => {
   // console.log("Auth is ", Auth);
   let rowData = req.body,
-    productName = rowData.productName,
-    productPrice = rowData.productUnitPrice,
-    productCost = rowData.productUnitCost,
-    businessId = rowData.businessId,
-    minimumQty = rowData.minimumQty,
+    productName = sqlstring.escape(rowData.productName),
+    productPrice = sqlstring.escape(rowData.productUnitPrice),
+    productCost = sqlstring.escape(rowData.productUnitCost),
+    businessId = sqlstring.escape(rowData.businessId),
+    minimumQty = sqlstring.escape(rowData.minimumQty),
     userId = await Auth(rowData.token),
     businessName = "";
   let select = `select * from  Business where businessId=${businessId}`;
@@ -186,18 +193,18 @@ server.post(path + "addProducts/", async (req, res) => {
         res.json({ data: "notAllowedFroYou" });
         return;
       }
-      let selectProduct = `select productName from ${businessName}_products where productName='${productName}'`;
+      let selectProduct = `select productName from ${businessName}_products where productName=${productName}`;
       connection.query(selectProduct, (err, result) => {
         if (err) {
-          return res.json({ err });
           if (err.sqlState == `42S02`) {
             console.log("please recreate tables again");
             createBusiness(businessName, userId, fullTime, res, "recreate");
           }
-          return;
+          return res.json({ err });
+          // return;
         }
         if (result.length == 0) {
-          let Insert = `insert into ${businessName}_products(productsUnitCost,productsUnitPrice,productName,minimumQty)values('${productCost}','${productPrice}','${productName}','${minimumQty}')`;
+          let Insert = `insert into ${businessName}_products(productsUnitCost,productsUnitPrice,productName,minimumQty)values(${productCost},${productPrice},${productName},${minimumQty})`;
           connection.query(Insert, (err, result) => {
             if (err) return res.json({ err });
             if (result) {
@@ -213,14 +220,22 @@ server.post(path + "addProducts/", async (req, res) => {
   });
 });
 server.post(path + "createBusiness/", (req, res) => {
-  let businessName = req.body.businessName;
+  let businessName = sqlstring.escape(req.body.businessName);
+
   let decoded = jwt.verify(req.body.token, "shhhhh");
-  let userID = decoded.userID;
+  let userID = sqlstring.escape(decoded.userID);
   let response = createBusiness(businessName, userID, fullTime, res);
 });
 server.post(path + "getRegisteredProducts/", async (req, res) => {
   // console.log(req.body.BusinessId, req.body.token, req.body.businessName);
-  let select = `select * from ${req.body.businessName}_products`;
+  let validate = validateAlphabet(req.body.businessName, res);
+  if (validate == "correctData") {
+    businessName = req.body.businessName;
+  } else {
+    // this is just to stop execution res is done in validateAlphabet
+    return "This data contains string so no need of execution";
+  }
+  let select = `select * from ${businessName}_products`;
   connection.query(select, (err, result) => {
     if (err) return res.json({ err });
     if (result) console.log(result);
@@ -229,11 +244,12 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
   // let userId = await Auth(req.body.token);
   // res.end("getRegisteredProducts lllllllllll");
 });
+// to be seen in mornning mind
 server.post(path + "registerTransaction/", async (req, res) => {
-  let ProductId = req.body.ProductId;
+  let ProductId = sqlstring.escape(req.body.ProductId);
   let rowData = req.body,
     ProductsList = rowData.ProductsList,
-    businessName = rowData.businessName,
+    businessName = "",
     i = 0,
     previouslyRegisteredData = [],
     values = "",
@@ -241,15 +257,37 @@ server.post(path + "registerTransaction/", async (req, res) => {
     insertedProducts = [],
     InventoryList = [];
 
+  let validate = validateAlphabet(req.body.businessName, res);
+  if (validate == "correctData") {
+    businessName = req.body.businessName;
+  } else {
+    // this is just to stop execution res is done in validateAlphabet
+    return "This data contains string so no need of execution";
+  }
   let recurciveTorecheck = () => {
-    let productID = ProductsList[i].ProductId,
-      unitCost = ProductsList[i].productsUnitCost,
-      unitPrice = ProductsList[i].productsUnitPrice,
+    let productID = sqlstring.escape(ProductsList[i].ProductId),
+      unitCost = sqlstring.escape(ProductsList[i].productsUnitCost),
+      unitPrice = sqlstring.escape(ProductsList[i].productsUnitPrice),
       salesQuantity = "salesQuantity" + productID,
       purchaseQty = "purchaseQty" + productID,
       wrickageQty = "wrickageQty" + productID,
       Inventory = 0;
-    // console.log("salesQuantity", salesQuantity);
+    // console.log(
+    //   "productID",
+    //   productID,
+    //   "unitCost",
+    //   unitCost,
+    //   "unitPrice",
+    //   unitPrice,
+    //   "salesQuantity",
+    //   salesQuantity,
+    //   "purchaseQty",
+    //   purchaseQty,
+    //   "wrickageQty",
+    //   "wrickageQty" + productID
+    // );
+    // return;
+    let dates = sqlstring.escape(req.body.dates);
     let selectToCheck = `select * from  ${businessName}_Transaction where registeredTime like '%${req.body.dates}%' and productIDTransaction='${productID}'`;
     connection.query(selectToCheck, (err, resultOfQuery) => {
       if (err) {
@@ -302,7 +340,11 @@ server.post(path + "registerTransaction/", async (req, res) => {
         }
       } else {
         insertedProducts.push(ProductsList[i]);
-        let prevInventory = `select * from ${businessName}_Transaction where productIDTransaction='${productID}' and registeredTime<'${req.body.dates}' order by registeredTime desc limit 1`;
+        let prevInventory = `select * from ${businessName}_Transaction where productIDTransaction= ${sqlstring.escape(
+          productID
+        )} and registeredTime < ${sqlstring.escape(
+          req.body.dates
+        )} order by registeredTime desc limit 1`;
         connection.query(prevInventory, (err, results) => {
           if (err) {
             return res.json({ data: "err", err });
@@ -311,18 +353,37 @@ server.post(path + "registerTransaction/", async (req, res) => {
               // console.log("no data found");
               Inventory = 0;
             } else {
-              Inventory = results[0].Inventory;
+              Inventory = sqlstring.escape(results[0].Inventory);
             }
+
             Inventory =
               parseInt(rowData[purchaseQty]) -
               parseInt(rowData[salesQuantity]) +
               parseInt(Inventory) -
               parseInt(rowData[wrickageQty]);
+            console.log("typeof Inventory is ", typeof Inventory);
+            // return;
+            if (typeof Inventory == "string") {
+              console.log(
+                "Inventory is not number this may be in purchaseQty,salesQuantity,Inventory,wrickageQty"
+              );
+              return res.json({ data: "error", error: "error code 678," });
+            }
             InventoryList.push(Inventory);
             if (values != "") {
               values += ",";
             }
-            values += `('${unitCost}','${unitPrice}','${productID}','${rowData[salesQuantity]}','${rowData[purchaseQty]}','${req.body.dates}','${rowData[wrickageQty]}','${Inventory}')`;
+            values += `(${sqlstring.escape(unitCost)} , ${sqlstring.escape(
+              unitPrice
+            )} , ${sqlstring.escape(productID)} , ${sqlstring.escape(
+              rowData[salesQuantity]
+            )} , ${sqlstring.escape(rowData[purchaseQty])} , ${sqlstring.escape(
+              req.body.dates
+            )} , ${sqlstring.escape(
+              rowData[wrickageQty]
+            )} , '${sqlstring.escape(Inventory)}' )`;
+            console.log("values are ", values);
+            // return;
           }
           if (i == length - 1) {
             if (previouslyRegisteredData.length == length) {
@@ -334,14 +395,6 @@ server.post(path + "registerTransaction/", async (req, res) => {
                 values,
               });
             } else {
-              console.log(
-                "332 InventoryList=",
-                InventoryList,
-                ", insertedProducts=",
-                insertedProducts,
-                ", ProductsList=",
-                ProductsList
-              );
               // return;
               let insert =
                 `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values ` +
@@ -380,11 +433,17 @@ server.post(path + "registerTransaction/", async (req, res) => {
   recurciveTorecheck();
 });
 server.post(path + "ViewTransactions/", (req, res) => {
-  // console.log("/ViewTransactions is === ", req.body);
-  // return;
-  let businessName = req.body.businessName,
-    time = req.body.time;
-  let select = `select * from ${businessName}_Transaction,${businessName}_products where ${businessName}_products.productId=${businessName}_Transaction.productIDTransaction and registeredTime like '%${time}%'`;
+  let businessName = "",
+    time = sqlstring.escape(req.body.time);
+  let validate = validateAlphabet(req.body.businessName, res);
+  if (validate == "correctData") {
+    businessName = req.body.businessName;
+  } else {
+    // this is just to stop execution res is done in validateAlphabet
+    return "This data contains string so no need of execution";
+  }
+
+  let select = `select * from ${businessName}_Transaction,${businessName}_products where ${businessName}_products.productId=${businessName}_Transaction.productIDTransaction and registeredTime like %${time}%`;
   // console.log("select is select", select);
   // return;
   let salesTransaction = [],
@@ -395,7 +454,7 @@ server.post(path + "ViewTransactions/", (req, res) => {
     } else {
       salesTransaction = result;
       let selectCost = `select * from ${businessName}_expenses, ${businessName}_Costs where 
-  ${businessName}_expenses.costId=${businessName}_Costs.costsId and costRegisteredDate='${time}'`;
+  ${businessName}_expenses.costId=${businessName}_Costs.costsId and costRegisteredDate=${time}`;
       connection.query(selectCost, (err, results) => {
         if (err) {
           return res.json({ err });
@@ -413,8 +472,16 @@ server.post(path + "updateTransactions/", async (req, res) => {
   let currentInventory = "",
     prevInventory = "";
   let previous = getPreviousDay(new Date(req.body.date));
-
-  let select = `select * from ${req.body.businessName}_Transaction where registeredTime like '%${previous}%' and  productIDTransaction='${req.body.productId}'`;
+  let validate = validateAlphabet(req.body.businessName, res),
+    businessName = "";
+  if (validate == "correctData") {
+    businessName = req.body.businessName;
+  } else {
+    // this is just to stop execution res is done in validateAlphabet
+    return "This data contains string so no need of execution";
+  }
+  let productId = sqlstring.escape(req.body.productId);
+  let select = `select * from ${businessName}_Transaction where registeredTime like '%${previous}%' and  productIDTransaction='${productId}'`;
   let update = "";
   let xx = connection.query(select, async (err, result) => {
     if (err) {
@@ -428,13 +495,14 @@ server.post(path + "updateTransactions/", async (req, res) => {
         parseInt(req.body.salesQty) -
         parseInt(req.body.wrickages);
       if (result.length > 0) currentInventory += prevInventory;
-      update = `update ${req.body.businessName}_Transaction set 
-  wrickages='${req.body.wrickages}',
-  purchaseQty='${req.body.purchaseQty}',
-  salesQty='${req.body.salesQty}',
-  Inventory='${currentInventory}',
-  description='${req.body.Description}'
-   where transactionId='${req.body.transactionId}'`;
+      update = `update ${businessName}_Transaction set 
+  wrickages=${sqlstring.escape(req.body.wrickages)},
+  purchaseQty=${sqlstring.escape(req.body.purchaseQty)},
+  salesQty=${sqlstring.escape(req.body.salesQty)},
+  Inventory='${sqlstring.escape(currentInventory)}',
+  description=${sqlstring.escape(req.body.Description)}
+   where transactionId='${sqlstring.escape(req.body.transactionId)}'`;
+      // console.log("my update is ==", update);
       connection.query(update, (err, result) => {
         if (err) return res.json({ err });
         else {
@@ -1363,3 +1431,14 @@ server.get(path + "requestPasswordReset/", (req, res) => {
     }
   });
 });
+function validateAlphabet(reqData, res) {
+  const regex = /^[a-zA-Z0-9_]+$/;
+  const str = reqData; // Assumes the string to validate is in the `str` property of the request body
+
+  if (!regex.test(str)) {
+    return res.status(400).json({
+      data: "wrongCharacter",
+      message: "String must contain only letters from the alphabet (a-z)",
+    });
+  } else return "correctData";
+}
