@@ -1,5 +1,15 @@
 const mysql = require("mysql");
 let bcript = require("bcryptjs");
+const mysql2 = require("mysql2/promise");
+
+// Create a MySQL connection pool
+const pool = mysql2.createPool({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "store",
+});
+
 // var connection = mysql.createConnection({
 //   host: "localhost",
 //   user: "masetawoshacom_stock",
@@ -169,6 +179,8 @@ let deleteBusiness = (businessId, businessName, res) => {
   };
   deleteEachTable();
 };
+module.exports.Pool = pool;
+module.exports.mysql2 = mysql2;
 module.exports.deleteBusiness = deleteBusiness;
 module.exports.insertIntoUserTable = insertIntoUserTable;
 module.exports.createBusiness = createBusiness;

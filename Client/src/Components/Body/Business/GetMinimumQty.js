@@ -66,10 +66,10 @@ function GetMinimumQty() {
                 <TableCell align="center"> Status</TableCell>
               </TableRow>
             </TableHead>
-            {MinimumQty.data?.map((item) => {
+            {MinimumQty.data?.map((item, index) => {
               console.log(item);
               return (
-                <TableRow>
+                <TableRow key={"minimum_" + index}>
                   <TableCell align="center">{item.productName}</TableCell>
                   <TableCell align="center">{item.Inventory}</TableCell>
                   <TableCell align="center">{item.minimumQty}</TableCell>

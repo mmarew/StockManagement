@@ -56,13 +56,13 @@ const EmployeeSearch = () => {
       InputValue
     );
     $(".LinearProgress").css("display", "none");
-    console.log("searchEmployees", response);
+    console.log("searchEmployees", response.data.data);
     let allEmployee = response.data.data.result,
       connectedEmployees = response.data.data.results1,
-      SearchedEmployees = allEmployee.map((item, index1) => {
+      SearchedEmployees = allEmployee?.map((item, index1) => {
         allEmployee[index1].connection = "notConnected";
         // filter connected and not connected employees
-        connectedEmployees.map((employee, index) => {
+        connectedEmployees?.map((employee, index) => {
           let x = index;
           console.log(employee, item);
           if (employee.userId == item.userId) {
