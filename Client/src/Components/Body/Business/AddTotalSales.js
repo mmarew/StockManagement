@@ -7,6 +7,7 @@ import { Box, Button, IconButton, Modal, TextField } from "@mui/material";
 import AddTotalSalesCss from "./AddTotalSales.module.css";
 function AddTotalSales({ Time }) {
   const [open, setOpen] = useState(false);
+  const [RegistrableProducts, setRegistrableProducts] = useState([{}]);
   const handleOpen = () => {
     setOpen(true);
   };
@@ -48,6 +49,8 @@ function AddTotalSales({ Time }) {
   };
   let sendFormDataToServer = async (e, ProductId) => {
     e.preventDefault();
+    console.log("ProductId", ProductId);
+    // return;
     let dates = CollectedProducts.dates;
     CollectedProducts.ProductId = ProductId;
     if (dates == undefined) {
@@ -62,6 +65,8 @@ function AddTotalSales({ Time }) {
     let copyOfCollection = { ...CollectedProducts };
     copyOfCollection.ProductsList = copy;
     $(".LinearProgress").show();
+    console.log("copyOfCollection==", copyOfCollection);
+    // return;
     let response = await axios.post(
       serverAddress + "registerTransaction/",
       copyOfCollection
@@ -108,7 +113,6 @@ function AddTotalSales({ Time }) {
       dates: CDATE,
     });
   }, []);
-  const [RegistrableProducts, setRegistrableProducts] = useState([{}]);
   return (
     <div className={AddTotalSalesCss.addTotalSalesWrapper}>
       {console.log(CollectedProducts)}

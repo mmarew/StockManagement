@@ -37,6 +37,7 @@ function AddCostItems() {
     console.log("data", data);
     data.token = token;
     let response = await axios.post(serverAddress + "AddCostItems/", data);
+    console.log("response", response);
     if (response.data.data == "Registered successfully") {
       alert("Registered successfully");
       $(".inputToCotsRegistration input").val("");

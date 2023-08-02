@@ -60,68 +60,49 @@ function createBasicTables() {
   });
 }
 let createBusiness = (businessName, ownerId, createdDate, res, source) => {
-  console.log("createBusiness");
-  let select = `select * from Business where businessName=${businessName}`;
-  connection.query(select, (err, result) => {
-    if (err) {
-      return res.json({ err });
-    }
-    let tableCollections = {};
-    if (result.length == 0) {
-      let insert = `insert into Business (businessName,ownerId,createdDate)
-       values(${businessName},${ownerId},'${createdDate}') `;
-      connection.query(insert, (err, results) => {
-        if (err) {
-          return res.json({ err });
-        } else {
-          console.log("createdWell");
-        }
-      });
-      tableCollections.registerBusinessName = "regesteredAsNewBusiness";
-    } else {
-      tableCollections.registerBusinessName = "regesteredBefore";
-      // res.json({ data: "alreadyRegistered" });
-    }
-    {
-      let tableExpences = `create table if not exists ${businessName}_expenses(expenseId int auto_increment,costId int,costAmount int,costDescription varchar(9000),costRegisteredDate date,primary key(expenseId))`;
-
-      let costTable = `create table if not exists ${businessName}_Costs (costsId int auto_increment, costName varchar(3000),unitCost int, primary key(costsId))`;
-      connection.query(costTable, (err, result) => {
-        if (err) return res.json({ err });
-        if (result) {
-          console.log(result);
-          tableCollections._Costs = result.changedRows;
-        }
+  let select = "SELECT * FROM Business WHERE businessName = ?";
+  let insert =
+    "INSERT INTO Business (businessName, ownerId, createdDate) VALUES (?, ?, ?)";
+  let tableExpenses =
+    "CREATE TABLE IF NOT EXISTS ?? (expenseId INT(11) NOT NULL AUTO_INCREMENT, costId INT(11) NOT NULL, costAmount INT(11) NOT NULL, costDescription VARCHAR(9000) NOT NULL, costRegisteredDate DATE NOT NULL, PRIMARY KEY (expenseId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci";
+  let costTable =
+    "CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, unitCost INT(11) NOT NULL, PRIMARY KEY (costsId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci";
+  let create =
+    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, productsUnitCost INT(11) NOT NULL, productsUnitPrice INT(11) NOT NULL, productName VARCHAR(900) NOT NULL, minimumQty INT(11) NOT NULL, PRIMARY KEY (ProductId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci";
+  let createTransaction =
+    "CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL, salesQty INT(11) NOT NULL, purchaseQty INT(11) NOT NULL, wrickages INT(11) NOT NULL, Inventory INT(11) NOT NULL, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, PRIMARY KEY (transactionId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci";
+  let queries = [];
+  pool
+    .query(select, [businessName])
+    .then(([rows]) => {
+      let tableCollections = {};
+      if (rows.length == 0) {
+        return pool.query(insert, [businessName, ownerId, createdDate]);
+      } else {
+        tableCollections.registerBusinessName = "registeredBefore";
+        return Promise.resolve();
+      }
+    })
+    .then(() => {
+      let tables = ["_expenses", "_Costs", "_products", "_Transaction"];
+      queries = [tableExpenses, costTable, create, createTransaction];
+      let promises = queries.map((query, index) => {
+        return pool.query(query, [businessName + tables[index]]);
       });
 
-      let create = `create table if not exists ${businessName}_products(ProductId int auto_increment, productsUnitCost int, productsUnitPrice int ,productName varchar(900),minimumQty int, primary key(ProductId))`;
-      connection.query(create, (err, result) => {
-        if (err) {
-          return res.json({ err });
-        }
-        if (result) {
-          tableCollections._products = result.changedRows;
-        }
+      return Promise.all(promises);
+    })
+    .then((results) => {
+      let tableCollections = {};
+      results.forEach((result, index) => {
+        tableCollections[queries[index]] = result.rowCount;
       });
-
-      let createTransaction = `create table if not exists ${businessName}_Transaction(transactionId int auto_increment,unitCost int,unitPrice int,productIDTransaction int,salesQty int, purchaseQty int, wrickages int,Inventory int,description varchar(5000), registeredTime Date, primary key (transactionId))`;
-
-      connection.query(createTransaction, (err, result) => {
-        if (err) return res.json({ err });
-        if (result) {
-          tableCollections._Transaction = result.changedRows;
-        }
-      });
-      connection.query(tableExpences, (err, results) => {
-        if (err) return res.json({ err });
-        if (results) {
-          console.log("_expenses results", results, "");
-          tableCollections._expenses = results.changedRows;
-          res.json({ data: "created well", source, tableCollections });
-        }
-      });
-    }
-  });
+      res.json({ data: "created well", source, tableCollections });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.json({ error: "Unable to create tables." });
+    });
 };
 let insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
   // console.log(fullName,phoneNumber, password);

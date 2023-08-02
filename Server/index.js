@@ -72,97 +72,103 @@ server.get(path, (req, res) => {
   );
 });
 server.post(path + "getBusiness/", (req, res) => {
-  let Tokens = req.body.token;
-  if (Tokens == "" || Tokens == undefined) {
-    return res.json({ data: "You haven't loged in before." });
+  let tokens = req.body.token;
+
+  if (!tokens) {
+    return res.json({ data: "You haven't logged in before." });
   }
-  let decoded = jwt.verify(req.body.token, "shhhhh");
-  let userID = decoded.userID;
-  let getBusiness = `select * from Business where ownerId='${userID}'`;
-  let myBusiness = "",
-    employeerBusiness = "";
-  connection.query(getBusiness, (err, result) => {
-    if (err) {
-      return res.json({ err });
-    } else {
-      // console.log("getBusiness");
-      // console.log(result);
-      myBusiness = result;
-    }
-    let getEmployeerBusiness = `select * from employeeTable , Business where userIdInEmployee='${userID}' and Business.BusinessID=employeeTable.BusinessIDEmployee`;
-    connection.query(getEmployeerBusiness, (err, results) => {
-      if (err) return res.json({ err });
-      if (result) {
-        employeerBusiness = results;
-      }
-      res.json({ myBusiness, employeerBusiness });
-    });
-  });
+
+  try {
+    let decoded = jwt.verify(tokens, "shhhhh");
+    let userID = decoded.userID;
+
+    let getBusiness = `SELECT * FROM Business WHERE ownerId = ?`;
+    let myBusiness = "";
+    let employeerBusiness = "";
+
+    Pool.query(getBusiness, [userID])
+      .then(([rows]) => {
+        myBusiness = rows;
+
+        let getEmployeerBusiness = `SELECT * FROM employeeTable, Business WHERE userIdInEmployee = ? AND Business.BusinessID = employeeTable.BusinessIDEmployee`;
+        return Pool.query(getEmployeerBusiness, [userID]);
+      })
+      .then(([rows]) => {
+        employeerBusiness = rows;
+        res.json({ myBusiness, employeerBusiness });
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
+      });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: "Invalid token" });
+  }
 });
 server.post(path + "verifyLogin/", async (req, res) => {
   let token = req.body.token;
-  jwt.verify(token, "shhhhh", function (err, decoded) {
-    if (err) {
-      return res.json({ data: err });
-    }
+  try {
+    let decoded = jwt.verify(token, "shhhhh");
     let userID = decoded.userID;
-    let select = `select * from usersTable where userId='${userID}'`;
-    connection.query(select, (err, result) => {
-      if (err) {
-        return res.json({ err, data: "error in the database connection" });
-      } else {
-        if (result.length > 0) {
-          return res.json({ data: "alreadyConnected", decoded, result });
-        } else {
-          return res.json({ data: "dataNotFound", decoded });
-        }
-      }
-    });
-  });
+    let select = `SELECT * FROM usersTable WHERE userId = ?`;
 
-  // res.json({ data: "connection" });
+    Pool.query(select, [userID])
+      .then(([rows]) => {
+        if (rows.length > 0) {
+          res.json({ data: "alreadyConnected", decoded, result });
+        } else {
+          res.json({ data: "dataNotFound", decoded });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
+      });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: "Invalid token" });
+  }
 });
 server.post(path + "Login/", (req, res) => {
   console.log(req.body);
   console.log("req.body.phoneNumber", req.body.phoneNumber);
 
-  let phoneNumber = sqlstring.escape(req.body.phoneNumber);
+  let phoneNumber = req.body.phoneNumber;
   console.log("phoneNumber", phoneNumber);
 
-  // return;
-  let select = `select * from usersTable where phoneNumber=${phoneNumber} limit 1`;
-  connection.query(select, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.json({ data: `error code 901` });
-    }
-    if (result.length == 0) {
-      return res.json({ data: "data not found" });
-    } else {
-      // console.log(result[0].password);
-    }
-    let savedPassword = result[0].password;
-    const isMatch = bcrypt.compareSync(req.body.Password, savedPassword);
-    // console.log(isMatch);
+  let select = `SELECT * FROM usersTable WHERE phoneNumber = ? LIMIT 1`;
 
-    let token = jwt.sign({ userID: result[0].userId }, "shhhhh");
+  Pool.query(select, [req.body.phoneNumber])
+    .then(([rows]) => {
+      if (rows.length == 0) {
+        return res.json({ data: "data not found" });
+      }
 
-    if (isMatch) {
-      return res.json({
-        data: "loginSuccessFull",
-        token,
-        usersFullName: result[0].employeeName,
-      });
-    } else {
-      return res.json({ data: "password mismatch" });
-    }
-  });
-  // res.json({ data: "connected" });
+      let savedPassword = rows[0].password;
+      const isMatch = bcrypt.compareSync(req.body.Password, savedPassword);
+
+      let token = jwt.sign({ userID: rows[0].userId }, "shhhhh");
+
+      if (isMatch) {
+        return res.json({
+          data: "loginSuccessFull",
+          token,
+          usersFullName: rows[0].employeeName,
+        });
+      } else {
+        return res.json({ data: "password mismatch" });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+    });
 });
 server.post(path + "RegisterUsers/", async (req, res) => {
-  let registerPhone = sqlstring.escape(req.body.registerPhone),
+  let registerPhone = req.body.registerPhone,
     registerPassword = req.body.registerPassword,
-    fullName = sqlstring.escape(req.body.fullName);
+    fullName = req.body.fullName;
   let results = await insertIntoUserTable(
     fullName,
     registerPhone,
@@ -172,60 +178,72 @@ server.post(path + "RegisterUsers/", async (req, res) => {
   // console.log("results is " + results);
 });
 server.post(path + "addProducts/", async (req, res) => {
-  // console.log("Auth is ", Auth);
-  let rowData = req.body,
-    productName = sqlstring.escape(rowData.productName),
-    productPrice = sqlstring.escape(rowData.productUnitPrice),
-    productCost = sqlstring.escape(rowData.productUnitCost),
-    businessId = sqlstring.escape(rowData.businessId),
-    minimumQty = sqlstring.escape(rowData.minimumQty),
-    userId = await Auth(rowData.token),
-    businessName = "";
-  let select = `select * from  Business where businessId=${businessId}`;
-  connection.query(select, (err, result) => {
-    if (err) {
-      return res.json({ err });
-    } else {
-      businessName = result[0].BusinessName;
-      // console.log("result[0]");
-      // console.log(result);
+  let rowData = req.body;
+  let productName = rowData.productName;
+  let productPrice = rowData.productUnitPrice;
+  let productCost = rowData.productUnitCost;
+  let businessId = rowData.businessId;
+  let minimumQty = rowData.minimumQty;
+  let userId = await Auth(rowData.token);
 
-      // console.log(result[0].ownerId);
-      if (result[0].ownerId !== userId) {
-        res.json({ data: "notAllowedFroYou" });
-        return;
+  let select = `SELECT * FROM Business WHERE businessId = ?`;
+  Pool.query(select, [businessId])
+    .then(([rows]) => {
+      let result = rows;
+      if (result.length == 0) {
+        return res.json({ data: "businessNotFound", businessId });
       }
-      let selectProduct = `select productName from ${businessName}_products where productName=${productName}`;
-      connection.query(selectProduct, (err, result) => {
-        if (err) {
+
+      let businessName = result[0].BusinessName;
+
+      if (result[0].ownerId !== userId) {
+        return res.json({ data: "notAllowedFroYou" });
+      }
+
+      let selectProduct = `SELECT productName FROM ?? WHERE productName = ?`;
+      Pool.query(selectProduct, [`${businessName}_products`, productName])
+        .then(([rows]) => {
+          result = rows;
+          if (result.length == 0) {
+            let insertProduct = `INSERT INTO ?? (productsUnitCost, productsUnitPrice, productName, minimumQty) VALUES (?, ?, ?, ?)`;
+            Pool.query(insertProduct, [
+              `${businessName}_products`,
+              productCost,
+              productPrice,
+              productName,
+              minimumQty,
+            ])
+              .then(() => {
+                return res.json({ data: "productIsAdded" });
+              })
+              .catch((err) => {
+                console.error(err);
+                return res.status(500).json({ error: "Internal Server Error" });
+              });
+          } else {
+            return res.json({ data: "productIsAlreadyAddedBefore" });
+          }
+        })
+        .catch((err) => {
+          console.error(err);
           if (err.sqlState == `42S02`) {
             console.log("please recreate tables again");
             createBusiness(businessName, userId, fullTime, res, "recreate");
+          } else {
+            return res.status(500).json({ error: "Internal Server Error" });
           }
-          return res.json({ err });
-          // return;
-        }
-        if (result.length == 0) {
-          let Insert = `insert into ${businessName}_products(productsUnitCost,productsUnitPrice,productName,minimumQty)values(${productCost},${productPrice},${productName},${minimumQty})`;
-          connection.query(Insert, (err, result) => {
-            if (err) return res.json({ err });
-            if (result) {
-              // console.log(result);
-              res.json({ data: "productIsAdded" });
-            }
-          });
-        } else {
-          res.json({ data: "productIsAlreadyAddedBefore" });
-        }
-      });
-    }
-  });
+        });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    });
 });
+// i am here
 server.post(path + "createBusiness/", (req, res) => {
-  let businessName = sqlstring.escape(req.body.businessName);
-
+  let businessName = req.body.businessName;
   let decoded = jwt.verify(req.body.token, "shhhhh");
-  let userID = sqlstring.escape(decoded.userID);
+  let userID = decoded.userID;
   let response = createBusiness(businessName, userID, fullTime, res);
 });
 server.post(path + "getRegisteredProducts/", async (req, res) => {
@@ -237,18 +255,29 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
     // this is just to stop execution res is done in validateAlphabet
     return "This data contains string so no need of execution";
   }
-  let select = `select * from ${businessName}_products`;
-  connection.query(select, (err, result) => {
-    if (err) return res.json({ err });
-    if (result) console.log(result);
-    res.json({ data: result });
-  });
+  let select = "SELECT * FROM ??";
+  let table = `${businessName}_products`;
+  Pool.query(select, [table])
+    .then(([rows]) => {
+      console.log("in getRegisteredProducts", rows);
+      res.json({ data: rows });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.json({ error: "Unable to fetch data." });
+    });
+  // let select = `select * from ${businessName}_products`;
+  // connection.query(select, (err, result) => {
+  //   if (err) return res.json({ err });
+  //   if (result) console.log(result);
+  //   res.json({ data: result });
+  // });
   // let userId = await Auth(req.body.token);
   // res.end("getRegisteredProducts lllllllllll");
 });
 // to be seen in mornning mind
 server.post(path + "registerTransaction/", async (req, res) => {
-  let ProductId = sqlstring.escape(req.body.ProductId);
+  let ProductId = req.body.ProductId;
   let rowData = req.body,
     ProductsList = rowData.ProductsList,
     businessName = "",
@@ -267,126 +296,26 @@ server.post(path + "registerTransaction/", async (req, res) => {
     return "This data contains string so no need of execution";
   }
   let recurciveTorecheck = () => {
-    let productID = sqlstring.escape(ProductsList[i].ProductId),
-      unitCost = sqlstring.escape(ProductsList[i].productsUnitCost),
-      unitPrice = sqlstring.escape(ProductsList[i].productsUnitPrice),
+    let productID = ProductsList[i].ProductId,
+      unitCost = ProductsList[i].productsUnitCost,
+      unitPrice = ProductsList[i].productsUnitPrice,
       salesQuantity = "salesQuantity" + productID,
       purchaseQty = "purchaseQty" + productID,
       wrickageQty = "wrickageQty" + productID,
       Inventory = 0;
-    // console.log(
-    //   "productID",
-    //   productID,
-    //   "unitCost",
-    //   unitCost,
-    //   "unitPrice",
-    //   unitPrice,
-    //   "salesQuantity",
-    //   salesQuantity,
-    //   "purchaseQty",
-    //   purchaseQty,
-    //   "wrickageQty",
-    //   "wrickageQty" + productID
-    // );
-    // return;
-    let dates = sqlstring.escape(req.body.dates);
-    let selectToCheck = `select * from  ${businessName}_Transaction where registeredTime like '%${req.body.dates}%' and productIDTransaction='${productID}'`;
-    connection.query(selectToCheck, (err, resultOfQuery) => {
-      if (err) {
-        console.log("err on selectToCheck", err);
-        return res.json({ data: "err", err });
-      }
-      // resultOfQuery.length > 0 if it was registered before
-      // console.log("resultOfQuery.length is " + resultOfQuery.length);
+    console.log();
+    let dates = req.body.dates;
+    let selectToCheck = `select * from  ?? where registeredTime like ? and productIDTransaction=?`;
+    let table = `${businessName}_Transaction`;
+    let valuesOfTransactions = [table, `%${dates}%`, productID],
+      values = "";
+    Pool.query(selectToCheck, valuesOfTransactions)
+      .then(([rows]) => {
+        if (rows.length > 0) {
+          // previouslyRegisteredData.push(resultOfQuery) collect previously registered
+          previouslyRegisteredData.push(rows);
 
-      if (resultOfQuery.length > 0) {
-        // previouslyRegisteredData.push(resultOfQuery) collect previously registered
-        previouslyRegisteredData.push(resultOfQuery);
-
-        // i == length - 1 at last status
-        if (i == length - 1) {
-          if (previouslyRegisteredData.length == length) {
-            // previouslyRegisteredData.length - 1 == length - 1 are all registered before or not
-            return res.json({
-              data: "allDataAreRegisteredBefore",
-              previouslyRegisteredData,
-              date: req.body.dates,
-              values,
-            });
-          } else {
-            let insert =
-              `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory) values ` +
-              values;
-            connection.query(insert, (err, result) => {
-              if (err) {
-                console.log("err on insert == ", err);
-                return res.json({ data: "err", err });
-              } else {
-                updateNextDateInventory(
-                  `${businessName}_Transaction`,
-                  insertedProducts,
-                  req.body.dates,
-                  InventoryList
-                );
-                return res.json({
-                  data: "data is registered successfully",
-                  previouslyRegisteredData,
-                });
-              }
-            });
-          }
-        } else {
-          console.log("recall to recursive");
-          i++;
-          recurciveTorecheck();
-        }
-      } else {
-        insertedProducts.push(ProductsList[i]);
-        let prevInventory = `select * from ${businessName}_Transaction where productIDTransaction= ${sqlstring.escape(
-          productID
-        )} and registeredTime < ${sqlstring.escape(
-          req.body.dates
-        )} order by registeredTime desc limit 1`;
-        connection.query(prevInventory, (err, results) => {
-          if (err) {
-            return res.json({ data: "err", err });
-          } else {
-            if (results.length == 0) {
-              // console.log("no data found");
-              Inventory = 0;
-            } else {
-              Inventory = sqlstring.escape(results[0].Inventory);
-            }
-
-            Inventory =
-              parseInt(rowData[purchaseQty]) -
-              parseInt(rowData[salesQuantity]) +
-              parseInt(Inventory) -
-              parseInt(rowData[wrickageQty]);
-            console.log("typeof Inventory is ", typeof Inventory);
-            // return;
-            if (typeof Inventory == "string") {
-              console.log(
-                "Inventory is not number this may be in purchaseQty,salesQuantity,Inventory,wrickageQty"
-              );
-              return res.json({ data: "error", error: "error code 678," });
-            }
-            InventoryList.push(Inventory);
-            if (values != "") {
-              values += ",";
-            }
-            values += `(${sqlstring.escape(unitCost)} , ${sqlstring.escape(
-              unitPrice
-            )} , ${sqlstring.escape(productID)} , ${sqlstring.escape(
-              rowData[salesQuantity]
-            )} , ${sqlstring.escape(rowData[purchaseQty])} , ${sqlstring.escape(
-              req.body.dates
-            )} , ${sqlstring.escape(
-              rowData[wrickageQty]
-            )} , '${sqlstring.escape(Inventory)}' )`;
-            console.log("values are ", values);
-            // return;
-          }
+          // i == length - 1 at last status
           if (i == length - 1) {
             if (previouslyRegisteredData.length == length) {
               // previouslyRegisteredData.length - 1 == length - 1 are all registered before or not
@@ -397,16 +326,12 @@ server.post(path + "registerTransaction/", async (req, res) => {
                 values,
               });
             } else {
+              console.log("values @ 1", values);
               // return;
-              let insert =
-                `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values ` +
-                values;
-              connection.query(insert, (err, result) => {
-                if (err) {
-                  console.log("err on insert == ", err);
-                  return res.json({ data: "err", err });
-                } else {
-                  // console.log(result);
+              let insert = `insert into ?? (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory) values (?)`;
+              let insertValues = [[`${businessName}_Transaction`, values]];
+              Pool.query(insert, insertValues)
+                .then((result) => {
                   updateNextDateInventory(
                     `${businessName}_Transaction`,
                     insertedProducts,
@@ -416,27 +341,118 @@ server.post(path + "registerTransaction/", async (req, res) => {
                   return res.json({
                     data: "data is registered successfully",
                     previouslyRegisteredData,
-                    values,
                   });
-                }
-              });
+                })
+                .catch((error) => {
+                  console.log("error on 9090", error);
+                  res.json({ data: error });
+                });
             }
           } else {
-            // increase i by 1
-            // recal to recursive
             console.log("recall to recursive");
             i++;
             recurciveTorecheck();
           }
-        });
-      }
-    });
+        } else {
+          insertedProducts.push(ProductsList[i]);
+          // let prevInventory = `select * from ${businessName}_Transaction where productIDTransaction= ${(
+          //   productID
+          // )} and registeredTime < ${(
+          //   req.body.dates
+          // )} order by registeredTime desc limit 1`;
+          let prevInventory =
+            "SELECT * FROM ?? WHERE productIDTransaction = ? AND registeredTime < ? ORDER BY registeredTime DESC LIMIT 1";
+          let table = `${businessName}_Transaction`;
+          let valuesOfTransaction = [table, productID, req.body.dates];
+
+          Pool.query(prevInventory, valuesOfTransaction)
+            .then((results) => {
+              if (results.length == 0) {
+                // console.log("no data found");
+                Inventory = 0;
+              } else {
+                Inventory = results[0].Inventory;
+              }
+
+              Inventory =
+                parseInt(rowData[purchaseQty]) -
+                parseInt(rowData[salesQuantity]) +
+                parseInt(Inventory) -
+                parseInt(rowData[wrickageQty]);
+              console.log("typeof Inventory is ", typeof Inventory);
+              // return;
+              if (typeof Inventory == "string") {
+                console.log(
+                  "Inventory is not number this may be in purchaseQty,salesQuantity,Inventory,wrickageQty"
+                );
+                return res.json({ data: "error", error: "error code 678," });
+              }
+              InventoryList.push(Inventory);
+              if (values != "") {
+                values += ",";
+              }
+              values = `${unitCost} , ${unitPrice} , ${productID} , ${rowData[salesQuantity]} , ${rowData[purchaseQty]} , ${req.body.dates} , ${rowData[wrickageQty]} , ${Inventory}`;
+
+              console.log("values are ", values.split(","));
+              // return;
+
+              if (i == length - 1) {
+                if (previouslyRegisteredData.length == length) {
+                  // previouslyRegisteredData.length - 1 == length - 1 are all registered before or not
+                  return res.json({
+                    data: "allDataAreRegisteredBefore",
+                    previouslyRegisteredData,
+                    date: req.body.dates,
+                    values,
+                  });
+                } else {
+                  let insert = `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values(?) `;
+                  // insertvalues = values;
+                  Pool.query(insert, [values.split(",")])
+                    .then((result) => {
+                      {
+                        // console.log(result);
+                        updateNextDateInventory(
+                          `${businessName}_Transaction`,
+                          insertedProducts,
+                          req.body.dates,
+                          InventoryList
+                        );
+                        return res.json({
+                          data: "data is registered successfully",
+                          previouslyRegisteredData,
+                          values,
+                        });
+                      }
+                    })
+                    .catch((error) => {
+                      console.log("err on insert == ", error);
+                      return res.json({ data: "err", error });
+                    });
+                }
+              } else {
+                // increase i by 1
+                // recal to recursive
+                console.log("recall to recursive");
+                i++;
+                recurciveTorecheck();
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.log("error ", error);
+        res.json({ data: error });
+      });
   };
   recurciveTorecheck();
 });
 server.post(path + "ViewTransactions/", (req, res) => {
   let businessName = "",
-    time = sqlstring.escape(req.body.time);
+    time = req.body.time;
   let validate = validateAlphabet(req.body.businessName, res);
   if (validate == "correctData") {
     businessName = req.body.businessName;
@@ -444,32 +460,51 @@ server.post(path + "ViewTransactions/", (req, res) => {
     // this is just to stop execution res is done in validateAlphabet
     return "This data contains string so no need of execution";
   }
+  const transactionTable = `${businessName}_Transaction`;
+  const productsTable = `${businessName}_products`;
+  const select = `SELECT * FROM ?? t INNER JOIN ?? p ON p.productId = t.productIDTransaction WHERE t.registeredTime LIKE ?`;
+  const timeDate = `%${time}%`;
+  const values = [transactionTable, productsTable, time];
 
-  let select = `select * from ${businessName}_Transaction,${businessName}_products where ${businessName}_products.productId=${businessName}_Transaction.productIDTransaction and registeredTime like %${time}%`;
   // console.log("select is select", select);
   // return;
   let salesTransaction = [],
     expenseTransaction = "";
-  connection.query(select, (err, result) => {
-    if (err) {
-      return res.json({ data: "data is full of err " });
-    } else {
-      salesTransaction = result;
-      let selectCost = `select * from ${businessName}_expenses, ${businessName}_Costs where 
-  ${businessName}_expenses.costId=${businessName}_Costs.costsId and costRegisteredDate=${time}`;
-      connection.query(selectCost, (err, results) => {
-        if (err) {
-          return res.json({ err });
-        } else {
-          expenseTransaction = results;
-          res.json({ expenseTransaction, salesTransaction });
-        }
-      });
-    }
-  });
+  Pool.query(select, values)
+    .then(([rows]) => {
+      {
+        salesTransaction = rows;
+        //       let selectCost = `select * from ${businessName}_expenses, ${businessName}_Costs where
+        // ${businessName}_expenses.costId=${businessName}_Costs.costsId and costRegisteredDate=${time}`;
+
+        const selectCostQuery =
+          "SELECT * FROM ??_expenses, ??_Costs WHERE ??_expenses.costId = ??_Costs.costsId AND costRegisteredDate = ?";
+        const params = [
+          businessName,
+          businessName,
+          businessName,
+          businessName,
+          time,
+        ];
+
+        Pool.query(selectCostQuery, params)
+          .then(([rows]) => {
+            {
+              expenseTransaction = rows;
+              res.json({ expenseTransaction, salesTransaction });
+            }
+          })
+          .catch((error) => {
+            res.json({ error });
+          });
+      }
+    })
+    .catch((error) => {
+      res.json({ data: "data is full of err " });
+    });
 });
 server.post(path + "updateTransactions/", async (req, res) => {
-  // console.log(req.body);
+  // console.log("@updateTransactions" ,req.body);
   // return;
   let currentInventory = "",
     prevInventory = "";
@@ -482,42 +517,53 @@ server.post(path + "updateTransactions/", async (req, res) => {
     // this is just to stop execution res is done in validateAlphabet
     return "This data contains string so no need of execution";
   }
-  let productId = sqlstring.escape(req.body.productId);
-  let select = `select * from ${businessName}_Transaction where registeredTime like '%${previous}%' and  productIDTransaction='${productId}'`;
-  let update = "";
-  let xx = connection.query(select, async (err, result) => {
-    if (err) {
-      res.json({ data: err, err });
-      // return err;
-    } else {
-      console.log("result on update ", result);
+  let productId = req.body.productId;
+  const selectQuery =
+    "SELECT * FROM ?? WHERE registeredTime LIKE ? AND productIDTransaction = ?";
+  const params = [`${businessName}_Transaction`, `%${previous}%`, productId];
 
+  let update = "";
+  Pool.query(selectQuery, params)
+    .then(([rows]) => {
+      console.log("result on update ", result);
       currentInventory =
         parseInt(req.body.purchaseQty) -
         parseInt(req.body.salesQty) -
         parseInt(req.body.wrickages);
-      if (result.length > 0) currentInventory += prevInventory;
-      update = `update ${businessName}_Transaction set 
-  wrickages=${sqlstring.escape(req.body.wrickages)},
-  purchaseQty=${sqlstring.escape(req.body.purchaseQty)},
-  salesQty=${sqlstring.escape(req.body.salesQty)},
-  Inventory='${sqlstring.escape(currentInventory)}',
-  description=${sqlstring.escape(req.body.Description)}
-   where transactionId='${sqlstring.escape(req.body.transactionId)}'`;
+      if (rows.length > 0) currentInventory += prevInventory;
+      //       update = `update ${businessName}_Transaction set
+      // wrickages='${req.body.wrickages}',
+      // purchaseQty='${req.body.purchaseQty}',
+      // salesQty='${req.body.salesQty}',
+      // Inventory='${currentInventory}',
+      // description='${req.body.Description}'
+      //  where transactionId='${req.body.transactionId}'`;
       // console.log("my update is ==", update);
-      connection.query(update, (err, result) => {
-        if (err) return res.json({ err });
-        else {
-          console.log(result);
-          res.json({ data: result, update });
-        }
-      });
+      const updateQuery = `UPDATE ?? SET wrickages = ?, purchaseQty = ?, salesQty = ?, Inventory = ?, description = ? WHERE transactionId = ?`;
+      const params = [
+        `${businessName}_Transaction`,
+        req.body.wrickages,
+        req.body.purchaseQty,
+        req.body.salesQty,
+        currentInventory,
+        req.body.Description,
+        req.body.transactionId,
+      ];
+
+      Pool.query(updateQuery, params)
+        .then((results) => {
+          console.log(results);
+          res.json({ data: results, update });
+        })
+        .then((error) => {
+          res.json({ err: error });
+        });
       // console.log("currentInventory " + currentInventory);
       return result;
-    }
-  });
-
-  // res.json({ data: req.body });
+    })
+    .catch((error) => {
+      res.json({ data: error, error });
+    });
 });
 async function getPreviousDay(date) {
   const previous = new Date(date.getTime());
@@ -549,91 +595,95 @@ server.post(path + "searchProducts/", (req, res) => {
     return "This data contains string so no need of execution";
   }
   if (selectSearches == "PRODUCTS") {
-    let selectProducts = `select * from ${businessName}_products`;
-    connection.query(selectProducts, (err, productResults) => {
-      if (err) return res.json({ err });
-      else {
-        res.json({ data: "no results", products: productResults });
-      }
-    });
+    let selectProducts = `select * from ??`;
+    let tableName = `${businessName}_products`;
+    Pool.query(selectProducts, [tableName])
+      .then(([rows]) => {
+        res.json({ data: "no results", products: rows });
+      })
+      .catch((Error) => {
+        res.json({ Error });
+      });
   } else if (selectSearches == "TRANSACTION") {
-    // let select = `select * from ${businessName}_Transaction , ${businessName}_products where productIDTransaction=ProductId and productName like '%\n${sqlstring.escape(
+    // let select = `select * from ${businessName}_Transaction , ${businessName}_products where productIDTransaction=ProductId and productName like '%\n${(
     //   productName
     // )}\n%' and registeredTime between '${fromDate}' and '${toDate}'`;
     // connection.query(select, (err, result) => {
     // define the SQL query using placeholders
-    const sql = `SELECT *
-             FROM ${businessName}_Transaction, ${businessName}_products
-             WHERE productIDTransaction = ProductId
-             AND productName LIKE CONCAT('%', ?, '%')
-             AND registeredTime BETWEEN ? AND ?`;
+    // const sql = `SELECT *
+    //          FROM ${businessName}_Transaction, ${businessName}_products
+    //          WHERE productIDTransaction = ProductId
+    //          AND productName LIKE CONCAT('%', ?, '%')
+    //          AND registeredTime BETWEEN ? AND ?`;
+    const query = `SELECT *
+               FROM ??, ??
+               WHERE productIDTransaction = ProductId
+               AND productName LIKE CONCAT('%', ?, '%')
+               AND registeredTime BETWEEN ? AND ?`;
 
+    const table1 = `${businessName}_Transaction`;
+    const table2 = `${businessName}_products`;
     // define the input data as an array of values
-    const input = [productName, fromDate, toDate];
-
-    // execute the query with the input data
-    connection.query(sql, input, (error, results, fields) => {
-      if (error) {
-        return res.json({ error });
-      }
-      if (results) {
-        // console.log(result);
-        res.json({ data: results, products: "no result" });
-      }
-    });
+    const input = [];
+    Pool.query(query, [table1, table2, productName, fromDate, toDate])
+      .then(([rows]) => {
+        res.json({ data: rows });
+      })
+      .catch((error) => {
+        res.json({ error });
+      });
   } else if (selectSearches == "ALLTRANSACTION") {
-    // let select = `select * from ${businessName}_Transaction , ${businessName}_products where productIDTransaction=ProductId and registeredTime between '${fromDate}' and '${toDate}'`;
-    // define the SQL query using placeholders
-    // define the SQL query using placeholders
-    const sql = `SELECT *
-             FROM ${businessName}_Transaction t, ${businessName}_products p
-             WHERE t.productIDTransaction = p.ProductId
-             AND t.registeredTime BETWEEN ? AND ?`;
-
+    console.log("in ALLTRANSACTION req.body == ", req.body);
+    const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? AND ?`;
     // define the input data as an array of values
-    const input = [fromDate, toDate];
-
+    const input = [
+      `${businessName}_Transaction`,
+      `${businessName}_products`,
+      fromDate,
+      toDate,
+    ];
+    let data = "";
     // execute the query with the input data
+    Pool.query(sql, input)
+      .then(([rows]) => {
+        data = rows;
+        console.log("data in all", rows);
+        const sql = `SELECT * FROM ?? e, ?? c WHERE e.costRegisteredDate BETWEEN ? AND ? AND e.costId = c.costsId`;
+        // define the input data as an array of values
+        const input = [
+          `${businessName}_expenses`,
+          `${businessName}_Costs`,
+          fromDate,
+          toDate,
+        ];
 
-    let p = new Promise((resolve, reject) => {
-      connection.query(sql, input, (error, results, fields) => {
-        if (error) {
-          reject({ error });
-          // return res.json({ err });
-        }
-        if (results) {
-          resolve(results);
-        }
+        // execute the query with the input data
+        Pool.query(sql, input)
+          .then(([rows]) => {
+            res.json({ expenceTransaction: rows, data });
+          })
+          .catch((error) => {
+            res.json({ err: error });
+          });
+
+        // res.json({ data });
+      })
+      .catch((error) => {
+        console.log("error in alltransaction", error);
+        res.json({ data: error, error: "9090" });
       });
-    });
-
-    p.then((data) => {
-      // let getExpences = `select * from ${businessName}_expenses, ${businessName}_Costs where costRegisteredDate  between '${fromDate}' and '${toDate}' and ${businessName}_expenses.costId=${businessName}_Costs.costsId`;
-      // define the SQL query using placeholders
-      const sql = `SELECT * FROM ${businessName}_expenses e, ${businessName}_Costs c WHERE e.costRegisteredDate BETWEEN ? AND ? AND e.costId = c.costsId`;
-
-      // define the input data as an array of values
-      const input = [fromDate, toDate];
-
-      // execute the query with the input data
-      connection.query(sql, input, (err, results, fields) => {
-        // connection.query(getExpences, (err, results) => {
-        if (err) res.json({ err: err });
-        if (results) res.json({ expenceTransaction: results, data });
-      });
-
-      // res.json({ data });
-    }).catch((err) => {
-      res.json({ data: err });
-    });
   } else if (selectSearches == "COSTS") {
-    let selectCost = `select * from ${businessName}_Costs`;
-    connection.query(selectCost, (err, costResults) => {
-      if (err) {
-        console.log("err is", err);
+    console.log("in cost req.body==", req.body);
+    let selectCost = `select * from??`;
+    let costValues = `${businessName}_Costs`;
+    Pool.query(selectCost, costValues)
+      .then(([rows]) => {
+        return res.json({ data: rows });
+      })
+      .catch((error) => {
+        console.log("err is", error);
         return res.json({ data: "error 678" });
-      } else return res.json({ data: costResults });
-    });
+      });
   } else {
     res.json({ data: "Bad request.", products: "Bad request", selectSearches });
   }
@@ -684,19 +734,21 @@ server.post(path + "AddCostItems/", async (req, res) => {
   const input = [req.body.businessName, myId];
 
   // execute the query with the input data
-  connection.query(sql, input, (err, result, fields) => {
-    // connection.query(select, (err, result) => {
-    if (err) {
+  Pool.query(sql, input)
+    .then(([rows]) => {
+      // connection.query(select, (err, result) => {
+
+      console.log("result is ===", rows);
+      if (rows.length > 0) {
+        insertIntoCosts(`${req.body.businessName}_Costs`, req.body, res);
+        return;
+      }
+      res.json({ data: "notallowedToU" });
+    })
+    .catch((error) => {
       console.log(err);
-      return res.json({ data: "err", err });
-    }
-    console.log("result is ===", result);
-    if (result.length > 0) {
-      insertIntoCosts(`${req.body.businessName}_Costs`, req.body, res);
-      return;
-    }
-    res.json({ data: "notallowedToU" });
-  });
+      return res.json({ data: "err", error });
+    });
 });
 server.post(path + "getCostLists/", (req, res) => {
   // console.log(req.body);
@@ -869,28 +921,25 @@ let updateNextDateInventory = (
   recurciveUpdate();
 };
 function insertIntoCosts(businessName, data, res) {
-  // let check = `select * from ${businessName} where costName='${data.Costname}'`;
-
-  // Sanitize user input
-  const sanitizedBusinessName = mysql2.escape(businessName);
   const sanitizedCostName = mysql2.escape(data.Costname);
-
   // Build the sanitized SQL query
-  const checkQuery = `SELECT * FROM ${sanitizedBusinessName} WHERE costName=${sanitizedCostName}`;
-  Pool.execute(check)
+  const checkQuery = `SELECT * FROM ?? WHERE costName=${sanitizedCostName}`;
+  let values = [businessName];
+  Pool.query(checkQuery, values)
     .then(([rows]) => {
       let result = rows;
       if (result.length > 0) {
         return res.json({ data: "already registered before" });
       } else {
-        let insert = `insert into ${sanitizedBusinessName} (costName) values('${sanitizedCostName}')`;
-        Pool.execute(insert)
-          .then(([result]) => res.json({ data: "Registered successfully" }))
-          .catch((err) => res.json({ err }));
+        let insert = `insert into ?? (costName) values(${sanitizedCostName})`;
+        values = [businessName];
+        Pool.query(insert, values)
+          .then(([rows]) => res.json({ data: "Registered successfully" }))
+          .catch((error) => res.json({ err: error }));
       }
     })
-    .catch((err) => {
-      return res.json({ err });
+    .catch((error) => {
+      return res.json({ error });
     });
 }
 // pool system has to be tested
@@ -1857,134 +1906,171 @@ server.post(path + "removeEmployeersBusiness/", async (req, res) => {
   // });
 });
 server.post(path + "deleteProducts/", async (req, res) => {
-  let businessName = req.body.businessName,
-    ProductId = req.body.ProductId;
-  // ProductId: 1,
-  // productsUnitCost: 20,
-  // productsUnitPrice: 30,
-  // productName: 'mirinda',
-  // minimumQty: 120,
-  // businessName: 'businessTwo'
-  let deleteData = `delete from ${businessName}_products where ProductId='${ProductId}'`;
-  connection.query(deleteData, (err, results) => {
-    if (err) res.json({ data: "error", error: err });
-    if (results) res.json({ data: results });
-  });
+  let businessName = req.body.businessName;
+  let productId = req.body.ProductId;
+
+  let deleteData = `DELETE FROM ?? WHERE ProductId = ?`;
+
+  Pool.query(deleteData, [`${businessName}_products`, productId])
+    .then(([rows]) => {
+      res.status(200).json({ data: rows });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+    });
 });
 server.post(path + "deleteExpencesItem", (req, res) => {
-  // res.json({ data: req.body });
-  // return;
-  let sql = `delete from ${req.body.businessName}_expenses where expenseId='${req.body.expenseId}'`;
-  connection.query(sql, (err, result) => {
-    if (err) res.json({ data: "err", err: err });
-    if (result) res.json({ data: "deleteSuccess" });
-  });
+  // console.log('deleteExpencesItem')
+  // return
+  let sql = `DELETE FROM ?? WHERE expenseId = ?`;
+  let params = [`${req.body.businessName}_expenses`, req.body.expenseId];
+
+  Pool.query(sql, params)
+    .then((result) => {
+      res.status(200).json({ data: "deleteSuccess" });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+    });
 });
+
 server.post(path + "forgetRequest", (req, res) => {
-  // console.log(req.body.PhoneNumber);
-  let PhoneNumber = req.body.PhoneNumber;
-  let sql = `select * from usersTable where phoneNumber='${PhoneNumber}'`;
-  connection.query(sql, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.json({ data: "err", err });
-    }
-    if (result) {
-      console.log(result);
-      if (result.length > 0) {
+  let phoneNumber = req.body.PhoneNumber;
+  let sql = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
+
+  Pool.query(sql, [phoneNumber])
+    .then(([rows]) => {
+      if (rows.length > 0) {
         let Rand = Math.floor(Math.random() * 1000000);
+        let updateForgetPassStatus = `UPDATE usersTable SET passwordStatus = 'requestedToReset', passwordResetPin = ? WHERE phoneNumber = ?`;
 
-        let updateForgetPassStatus = `update usersTable set passwordStatus ='requestedToReset',passwordResetPin='${Rand}' where phoneNumber='${PhoneNumber}'`;
-        connection.query(updateForgetPassStatus, (err, result) => {
-          if (err) {
-            console.log(err);
-            res.json({ data: "err", err });
-          }
-          if (result) {
-            // updateForgetPassStatus.query()
-            res.json({ data: "requestedToChangePassword" });
-            // res.json({ data: result });
-          }
-        });
+        Pool.query(updateForgetPassStatus, [Rand, phoneNumber])
+          .then(() => {
+            res.status(200).json({ data: "requestedToChangePassword" });
+          })
+          .catch((err) => {
+            console.error(err);
+            res.status(500).json({ error: "Internal Server Error" });
+          });
+      } else {
+        res.status(404).json({ error: "Phone number not found" });
       }
-    }
-  });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+    });
 });
-
 server.post(path + "updateChangeInpassword/", (req, res) => {
-  let PhoneNumber = req.body.PhoneNumber; // "+251922112480";
-  console.log(req.body);
-  //   Password: { password: 'marew123', retypedPassword:
-  let password = req.body.Password.password,
-    retypedPassword = req.body.Password.retypedPassword;
-  console.log(retypedPassword, password, PhoneNumber);
+  let phoneNumber = req.body.PhoneNumber;
+  let password = req.body.Password.password;
+  let retypedPassword = req.body.Password.retypedPassword;
+
+  if (password !== retypedPassword) {
+    return res.status(400).json({ error: "Passwords do not match" });
+  }
 
   const salt = bcrypt.genSaltSync();
-  //changing the value of password from req.body with the encrypted password
-  const Encripted = bcrypt.hashSync(password, salt);
-  console.log("Encripted is ", Encripted);
-  // return;
-  let update = `update usersTable set password='${Encripted}' where phoneNumber='${PhoneNumber}'`;
-  connection.query(update, (err, result) => {
-    if (err) console.log(err);
-    if (result.affectedRows > 0) {
-      console.log(result);
-      res.json({ data: "passwordChanged" });
-    } else {
-      res.json({ data: "unableToMakeChange" });
-    }
-  });
-});
-server.post(path + "verifyPin", (req, res) => {
-  let phone = req.body.PhoneNumber,
-    pincode = req.body.pincode;
-  let select = `select * from usersTable where phoneNumber='${phone}'`;
+  const encryptedPassword = bcrypt.hashSync(password, salt);
 
-  console.log("select", select);
-  connection.query(select, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.json({ data: err });
-    }
-    if (result) {
-      let pin = result[0].passwordResetPin;
-      if (pincode == pin) {
-        res.json({ data: "correctPin" });
+  let update = `UPDATE usersTable SET password = ? WHERE phoneNumber = ?`;
+
+  Pool.query(update, [encryptedPassword, phoneNumber])
+    .then((result) => {
+      if (result.affectedRows > 0) {
+        res.status(200).json({ data: "passwordChanged" });
       } else {
-        return res.json({ data: "wrongPin" });
+        res.status(404).json({ data: "unableToMakeChange" });
       }
-    }
-  });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+    });
 });
-//
-server.get(path + "requestPasswordReset/", (req, res) => {
-  console.log("requestPasswordReset", req);
-  let select = `select * from usersTable where passwordStatus='requestedToReset'`;
-  connection.query(select, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.json({ data: err });
-    }
-    if (result) {
-      console.log(result);
-      if (result.length > 0) {
-        // wait here
 
-        let update = `update usersTable set passwordStatus='pinSentedToUser' where userId='${result[0].userId}'`;
-        connection.query(update, (err, result1) => {
-          if (err) return res.json({ data: err, err });
-          console.log("result1", result1);
-          res.json({
-            phoneNumber: result[0].phoneNumber,
-            pinCode: result[0].passwordResetPin,
+server.post(path + "verifyPin", (req, res) => {
+  let phone = req.body.PhoneNumber;
+  let pincode = req.body.pincode;
+  let select = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
+
+  Pool.query(select, [phone])
+    .then(([rows]) => {
+      if (rows.length > 0) {
+        let pin = result[0].passwordResetPin;
+        if (pincode === pin) {
+          res.json({ data: "correctPin" });
+        } else {
+          res.json({ data: "wrongPin" });
+        }
+      } else {
+        res.status(404).json({ error: "Phone number not found" });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+    });
+});
+
+server.get(path + "requestPasswordReset/", (req, res) => {
+  let select = `SELECT * FROM usersTable WHERE passwordStatus = 'requestedToReset'`;
+  Pool.query(select)
+    .then(([rows]) => {
+      let result = rows;
+      if (rows.length > 0) {
+        let userId = rows[0].userId;
+        let update = `UPDATE usersTable SET passwordStatus = 'pinSentedToUser' WHERE userId = ?`;
+
+        Pool.query(update, [userId])
+          .then(([rows]) => {
+            let phoneNumber = result[0].phoneNumber;
+            let pinCode = result[0].passwordResetPin;
+            res.json({ phoneNumber, pinCode });
+          })
+          .catch((err) => {
+            console.error(err);
+            res.status(500).json({ error: "Internal Server Error" });
           });
-        });
       } else {
         res.json({ phoneNumber: "notFound", pinCode: "notFound" });
       }
-    }
-  });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+    });
 });
+// server.get(path + "requestPasswordReset/", (req, res) => {
+//   console.log("requestPasswordReset", req);
+//   let select = `select * from usersTable where passwordStatus='requestedToReset'`;
+//   connection.query(select, (err, result) => {
+//     if (err) {
+//       console.log(err);
+//       return res.json({ data: err });
+//     }
+//     if (result) {
+//       console.log(result);
+//       if (result.length > 0) {
+//         // wait here
+
+//         let update = `update usersTable set passwordStatus='pinSentedToUser' where userId='${result[0].userId}'`;
+//         connection.query(update, (err, result1) => {
+//           if (err) return res.json({ data: err, err });
+//           console.log("result1", result1);
+//           res.json({
+//             phoneNumber: result[0].phoneNumber,
+//             pinCode: result[0].passwordResetPin,
+//           });
+//         });
+//       } else {
+//         res.json({ phoneNumber: "notFound", pinCode: "notFound" });
+//       }
+//     }
+//   });
+// });
 function validateAlphabet(reqData, res) {
   const regex = /^[a-zA-Z0-9_]+$/;
   const str = reqData; // Assumes the string to validate is in the `str` property of the request body
