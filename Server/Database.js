@@ -2,7 +2,7 @@ const mysql = require("mysql");
 let bcript = require("bcryptjs");
 const mysql2 = require("mysql2/promise");
 
-// Create a MySQL connection pool
+// Create a MySQL pool pool
 const pool = mysql2.createPool({
   host: "localhost",
   user: "root",
@@ -10,54 +10,130 @@ const pool = mysql2.createPool({
   database: "store",
 });
 
-// var connection = mysql.createConnection({
+// var pool = mysql.createpool({
 //   host: "localhost",
 //   user: "masetawoshacom_stock",
 //   password: "DBcp123$%^",
 //   database: "masetawoshacom_store",
 // });
-// var connection = mysql.createConnection({
+// var pool = mysql.createpool({
 //   host: "localhost",
 //   user: "guzowaycom_guzowaycom",
 //   password: "+oyTI,&_)Mq$",
 //   database: "guzowaycom_stock",
 //  });
-// server side connection
+// server side pool
 
-let connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "store",
-});
-connection.connect();
+// let pool = mysql.createpool({
+//   host: "localhost",
+//   user: "root",
+//   password: "",
+//   database: "store",
+// });
+// pool.connect();
+// function createBasicTables() {
+//   let createTable = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int, salesQty int,businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date, primary key(dailySalesId) )`;
+//   pool.query(createTable, (error, results) => {
+//     if (error) {
+//       // console.log(error);
+//     } else {
+//       // console.log(results.data);
+//     }
+//   });
+//   let create = `create table if not exists employeeTable(employeeId int auto_increment, userIdInEmployee int,BusinessIDEmployee int, employerId int, primary key(employeeId))`;
+//   pool.query(create, (err, result) => {
+//     if (err) console.log(err);
+//     if (result) console.log(result);
+//   });
+//   let creeateBusiness = `create table if not exists Business (BusinessID int auto_increment, BusinessName varchar(500), createdDate Date,ownerId int, status varchar(300), primary key(businessId))`;
+//   pool.query(creeateBusiness, (err, results) => {
+//     if (results) {
+//       if (err) console.log(err);
+//       // console.log("results in create Business");
+//       // console.log(results);
+//     }
+//   });
+//   let queryTocreate = `create table if not exists usersTable(userId int auto_increment, phoneNumber varchar(200),employeeName varchar(600), passwordStatus varchar(40), passwordResetPin int, password varchar(200),primary key(userId))`;
+//   pool.query(queryTocreate, function (error, results, fields) {
+//     if (error) throw error;
+//     // console.log("The solution is: ", results);
+//   });
+// }
 function createBasicTables() {
-  let createTable = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int, salesQty int,businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date, primary key(dailySalesId) )`;
-  connection.query(createTable, (error, results) => {
-    if (error) {
-      // console.log(error);
-    } else {
-      // console.log(results.data);
-    }
-  });
-  let create = `create table if not exists employeeTable(employeeId int auto_increment, userIdInEmployee int,BusinessIDEmployee int, employerId int, primary key(employeeId))`;
-  connection.query(create, (err, result) => {
-    if (err) console.log(err);
-    if (result) console.log(result);
-  });
-  let creeateBusiness = `create table if not exists Business (BusinessID int auto_increment, BusinessName varchar(500), createdDate Date,ownerId int, status varchar(300), primary key(businessId))`;
-  connection.query(creeateBusiness, (err, results) => {
-    if (results) {
-      if (err) console.log(err);
-      // console.log("results in create Business");
-      // console.log(results);
-    }
-  });
-  let queryTocreate = `create table if not exists usersTable(userId int auto_increment, phoneNumber varchar(200),employeeName varchar(600), passwordStatus varchar(40), passwordResetPin int, password varchar(200),primary key(userId))`;
-  connection.query(queryTocreate, function (error, results, fields) {
-    if (error) throw error;
-    // console.log("The solution is: ", results);
-  });
+  let createTable = `CREATE TABLE IF NOT EXISTS dailyTransaction (
+    dailySalesId INT AUTO_INCREMENT,
+    purchaseQty INT,
+    salesQty INT,
+    businessId INT,
+    ProductId INT,
+    brokenQty INT,
+    Description VARCHAR(2000),
+    registrationDate DATE,
+    PRIMARY KEY (dailySalesId)
+  )`;
+
+  let createEmployeeTable = `CREATE TABLE IF NOT EXISTS employeeTable (
+    employeeId INT AUTO_INCREMENT,
+    userIdInEmployee INT,
+    BusinessIDEmployee INT,
+    employerId INT,
+    PRIMARY KEY (employeeId)
+  )`;
+
+  let createBusinessTable = `CREATE TABLE IF NOT EXISTS Business (
+    BusinessID INT AUTO_INCREMENT,
+    BusinessName VARCHAR(500),
+    createdDate DATE,
+    ownerId INT,
+    status VARCHAR(300),
+    PRIMARY KEY (BusinessID)
+  )`;
+
+  let createUsersTable = `CREATE TABLE IF NOT EXISTS usersTable (
+    userId INT AUTO_INCREMENT,
+    phoneNumber VARCHAR(200),
+    employeeName VARCHAR(600),
+    passwordStatus VARCHAR(40),
+    passwordResetPin INT,
+    password VARCHAR(200),
+    PRIMARY KEY (userId)
+  )`;
+
+  pool
+    .query(createTable)
+    .then((result) => {
+      console.log("dailyTransaction table created");
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+  pool
+    .query(createEmployeeTable)
+    .then((result) => {
+      console.log("employeeTable created");
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+  pool
+    .query(createBusinessTable)
+    .then((result) => {
+      console.log("Business table created");
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+  pool
+    .query(createUsersTable)
+    .then((result) => {
+      console.log("usersTable created");
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
 let createBusiness = (businessName, ownerId, createdDate, res, source) => {
   let select = "SELECT * FROM Business WHERE businessName = ?";
@@ -104,60 +180,133 @@ let createBusiness = (businessName, ownerId, createdDate, res, source) => {
       res.json({ error: "Unable to create tables." });
     });
 };
-let insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
-  // console.log(fullName,phoneNumber, password);
-  //password encryption
+const insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
   const salt = bcript.genSaltSync();
-  //changing the value of password from req.body with the encrypted password
-  const Encripted = bcript.hashSync(password, salt);
-  let check = `select * from usersTable where phoneNumber=${phoneNumber}`;
-  connection.query(check, (err, results) => {
-    if (err) {
-      return res.json({ err });
-    } else {
-      console.log(results);
-      if (results.length > 0) {
+  const encryptedPassword = bcript.hashSync(password, salt);
+
+  let check = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
+  pool
+    .query(check, [phoneNumber])
+    .then(([rows]) => {
+      console.log(rows);
+      if (rows.length > 0) {
         res.json({ data: "This phone number is registered before." });
       } else {
-        let insertIntoUsers = `insert into usersTable (employeeName,phoneNumber,password) values(${fullName},${phoneNumber},'${Encripted}')`;
-        connection.query(insertIntoUsers, (err, result) => {
-          if (err) return res.json({ err });
-          else if (result) {
-            console.log("first Data is inserted well");
-            res.json({ data: "Data is inserted well." });
-          }
-        });
+        let insertIntoUsers = `INSERT INTO usersTable (employeeName, phoneNumber, password) VALUES (?, ?, ?)`;
+        pool
+          .query(insertIntoUsers, [fullName, phoneNumber, encryptedPassword])
+          .then(() => {
+            console.log("Data is inserted successfully");
+            res.json({ data: "Data is inserted successfully." });
+          })
+          .catch((error) => {
+            console.error(error);
+            res.json({ error: "An error occurred while inserting data." });
+          });
       }
-    }
-  });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.json({ error: "An error occurred while checking phone number." });
+    });
 };
-let deleteBusiness = (businessId, businessName, res) => {
+// let insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
+//   // console.log(fullName,phoneNumber, password);
+//   //password encryption
+//   const salt = bcript.genSaltSync();
+//   //changing the value of password from req.body with the encrypted password
+//   const Encripted = bcript.hashSync(password, salt);
+//   let check = `select * from usersTable where phoneNumber=${phoneNumber}`;
+//   pool.query(check, (err, results) => {
+//     if (err) {
+//       return res.json({ err });
+//     } else {
+//       console.log(results);
+//       if (results.length > 0) {
+//         res.json({ data: "This phone number is registered before." });
+//       } else {
+//         let insertIntoUsers = `insert into usersTable (employeeName,phoneNumber,password) values(${fullName},${phoneNumber},'${Encripted}')`;
+//         pool.query(insertIntoUsers, (err, result) => {
+//           if (err) return res.json({ err });
+//           else if (result) {
+//             console.log("first Data is inserted well");
+//             res.json({ data: "Data is inserted well." });
+//           }
+//         });
+//       }
+//     }
+//   });
+// };
+// let deleteBusiness = (businessId, businessName, res) => {
+//   console.log("businessId in deleteBusiness", businessId);
+//   let sql = `delete from Business where BusinessID='${businessId}'`;
+//   let tables = ["_expenses", "_Costs", "_Transaction", "_products"];
+//   let tableLength = tables.length,
+//     i = 0;
+//   let deleteEachTable = () => {
+//     let drop = `DROP TABLE ${businessName + tables[i]}`;
+//     pool.query(drop, (err, results) => {
+//       if (err) console.log(err);
+//       else console.log(results);
+//       if (i == tableLength - 1) {
+//         let responces = pool.query(sql, (err, result) => {
+//           if (err) return res.json({ data: err });
+//           if (result) {
+//             console.log("result of deleted data is ", result);
+//             return res.json({ data: result });
+//           }
+//         });
+//         return responces;
+//       } else if (i <= tableLength - 1) {
+//         i++;
+//         deleteEachTable();
+//       } else {
+//       }
+//     });
+//   };
+//   deleteEachTable();
+// };
+const deleteBusiness = (businessId, businessName, res) => {
   console.log("businessId in deleteBusiness", businessId);
-  let sql = `delete from Business where BusinessID='${businessId}'`;
+  let sql = `DELETE FROM Business WHERE BusinessID='${businessId}'`;
   let tables = ["_expenses", "_Costs", "_Transaction", "_products"];
   let tableLength = tables.length,
     i = 0;
+
   let deleteEachTable = () => {
     let drop = `DROP TABLE ${businessName + tables[i]}`;
-    connection.query(drop, (err, results) => {
-      if (err) console.log(err);
-      else console.log(results);
-      if (i == tableLength - 1) {
-        let responces = connection.query(sql, (err, result) => {
-          if (err) return res.json({ data: err });
-          if (result) {
-            console.log("result of deleted data is ", result);
-            return res.json({ data: result });
-          }
+    pool
+      .query(drop)
+      .then((results) => {
+        console.log(results);
+        if (i === tableLength - 1) {
+          pool
+            .query(sql)
+            .then((result) => {
+              console.log("result of deleted data is ", result);
+              return res.json({ data: result });
+            })
+            .catch((error) => {
+              console.error(error);
+              return res.json({
+                error: "An error occurred while deleting business data.",
+              });
+            });
+        } else if (i <= tableLength - 1) {
+          i++;
+          deleteEachTable();
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        return res.json({
+          error: `An error occurred while dropping ${
+            businessName + tables[i]
+          } table.`,
         });
-        return responces;
-      } else if (i <= tableLength - 1) {
-        i++;
-        deleteEachTable();
-      } else {
-      }
-    });
+      });
   };
+
   deleteEachTable();
 };
 module.exports.Pool = pool;
@@ -165,6 +314,6 @@ module.exports.mysql2 = mysql2;
 module.exports.deleteBusiness = deleteBusiness;
 module.exports.insertIntoUserTable = insertIntoUserTable;
 module.exports.createBusiness = createBusiness;
-module.exports.connection = connection;
+module.exports.pool = pool;
 module.exports.createBasicTables = createBasicTables;
 // console.log("module.exports", module.exports);

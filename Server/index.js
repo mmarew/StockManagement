@@ -51,7 +51,6 @@ let Database,
   {
     deleteBusiness,
     insertIntoUserTable,
-    connection,
     createBusiness,
   } = require("./Database.js");
 server.listen(process.env.serverPort, (err) => {
@@ -700,39 +699,33 @@ server.post(path + "updateProducts/", (req, res) => {
   // let update = `update ${businessName}_products set productsUnitCost='${productCost}', productsUnitPrice='${productPrice}', productName='${productName}', minimumQty='${minimumQty}' where  ProductId='${id}'`;
 
   // define the SQL query using placeholders
-  const sql = `UPDATE ${businessName}_products
-             SET productsUnitCost = ?,
-                 productsUnitPrice = ?,
-                 productName = ?,
-                 minimumQty = ?
-             WHERE ProductId = ?`;
+  const sql = `UPDATE ?? SET productsUnitCost = ?,  productsUnitPrice = ?,   productName = ?,  minimumQty = ?  WHERE ProductId = ?`;
 
   // define the input data as an array of values
-  const input = [productCost, productPrice, productName, minimumQty, id];
+  const input = [
+    `${businessName}_products`,
+    productCost,
+    productPrice,
+    productName,
+    minimumQty,
+    id,
+  ];
 
   // execute the query with the input data
-  connection.query(sql, input, (err, result, fields) => {
-    // connection.query(update, (err, result) => {
-    if (err) return res.json({ err });
-    if (result) {
-      console.log(result);
+  Pool.query(sql, input)
+    .then((results) => {
       res.json({ data: "updated well" });
-    }
-  });
+    })
+    .catch((error) => {
+      res.json({ err: error });
+    });
 });
 server.post(path + "AddCostItems/", async (req, res) => {
   // console.log(req.body);
   let myId = await Auth(req.body.token);
-  // console.log("myId === " + myId);
-  // // return;
-  // let select = `select * from Business where BusinessName='${req.body.businessName}' and ownerId='${myId}'`;
-
-  // define the SQL query using placeholders
   const sql = "SELECT * FROM Business WHERE BusinessName = ? AND ownerId = ?";
-
   // define the input data as an array of values
   const input = [req.body.businessName, myId];
-
   // execute the query with the input data
   Pool.query(sql, input)
     .then(([rows]) => {
@@ -760,74 +753,62 @@ server.post(path + "getCostLists/", (req, res) => {
     // this is just to stop execution res is done in validateAlphabet
     return "This data contains string so no need of execution";
   }
-  let select = `select * from ${businessName}_Costs`;
-  connection.query(select, (err, results) => {
-    console.log("line 458", results);
-    if (err) {
-      return res.json({ data: "err", err });
-    }
-    if (results) {
+  let select = `select * from ??`;
+  Pool.query(select, [`${businessName}_Costs`])
+    .then(([rows]) => {
+      console.log("line 458", rows);
       res.json({
-        data: results,
+        data: rows,
       });
-    }
-    //// console.log(businessName);
-  });
+      //// console.log(businessName);
+    })
+    .catch((error) => {
+      res.json({ data: "err", err: error });
+    });
 });
 server.post(`/registerCostTransaction/`, (req, res) => {
-  // console.log(req.body.businessName);
+  // console.log("in registerCostTransaction = ", req.body.costData[0].costsId);
+  // return;
   let costData = req.body.costData,
     date = req.body.costDate,
     rowData = req.body;
   // define the SQL query using placeholders for the table name and date parameter
-  const sql = "SELECT * FROM ?? WHERE costRegisteredDate = ?";
-
+  const sql = "SELECT * FROM ?? WHERE costRegisteredDate = ? and costId=?";
+  let costId = req.body.costData[0].costsId;
   // define the input data as an array of values
-  const input = [`${req.body.businessName}_expenses`, date];
-
+  const input = [`${req.body.businessName}_expenses`, date, costId];
   // execute the query with the input data
-  connection.query(sql, input, (err, result, fields) => {
-    if (err) return res.json({ err });
-    if (result) {
-      if (result.length > 0) {
+  Pool.query(sql, input)
+    .then(([rows]) => {
+      if (rows.length > 0) {
         return res.json({ data: "registered before" });
       } else {
         let i = 0;
-        for (; i < costData.length; i++) {
-          //  costsId: 1, costName: '9990', unitCost: 890
-          // console.log(costData[i]);
-          let costsId = costData[i].costsId,
-            costName = costData[i].costName;
-          costName = costName.replace(/ /g, "");
-          let Description = "Description_" + costName;
-
-          let costAmount = rowData[costName],
-            costDescription = rowData[Description];
-          console.log("@registerCostTransaction ", rowData);
-          console.log(
-            "costData == ",
-            costData,
-            "costAmount = " + costAmount,
-            " costDescription=" + costDescription
-          );
-          // return;
-          let insert = `insert into ${req.body.businessName}_expenses (costId,costAmount,costDescription,costRegisteredDate) values('${costsId}','${costAmount}','${costDescription}','${date}')`;
-          connection.query(insert, (err, result2) => {
-            if (err) return res.json({ err });
-            else if (result2) {
-              // res.json({ data: "Inserted properly" });
-              // console.log(result2);
-            }
+        let costsId = costData[i].costsId,
+          costName = costData[i].costName;
+        costName = costName.replace(/ /g, "");
+        let Description = "Description_" + costName;
+        let costAmount = rowData[costName],
+          costDescription = rowData[Description];
+        const table = `${req.body.businessName}_expenses`;
+        const insert = `INSERT INTO ?? (costId, costAmount, costDescription, costRegisteredDate) VALUES (?, ?, ?, ?)`;
+        const values = [table, costsId, costAmount, costDescription, date];
+        Pool.query(insert, values)
+          .then((results) => {
+            res.json({ data: "Inserted properly" });
+          })
+          .catch((error) => {
+            console.log("error");
+            res.json({ data: "error", error: "unable to insert" });
           });
-        }
-        if (i > 0) return res.json({ data: "Inserted properly" });
-        else res.json({ data: "error", error: "unable to insert" });
       }
-    }
-  });
+    })
+    .catch((error) => {
+      res.json({ err: error });
+    });
 });
 server.post(path + "updateBusiness/", (req, res) => {
-  return res.json({ data: "updateBusiness/" });
+  // return res.json({ data: "updateBusiness/" });
 
   let businessName = req.body.businessName + "_expenses",
     costAmount_ = req.body.costAmount_,
@@ -867,56 +848,64 @@ let updateNextDateInventory = (
   let index = 0;
   let recurciveUpdate = () => {
     let productId = ProductsList[index].ProductId,
-      select = `select * from ${businessName} where productIDTransaction='${productId}' and registeredTime>'${date}' order by registeredTime asc`;
-    connection.query(select, (err, results) => {
-      if (err) {
-        return res.json({ err });
-      }
-      console.log("select is = ", select, "results are =", results);
-
-      if (results.length > 0) {
-        let j = 0,
-          prevInventory = 0;
-        for (let i = 0; i < results.length; i++) {
-          let salesqty = results[i].salesQty,
-            purchaseQty = results[i].purchaseQty,
-            inventory = 0,
-            wrickages = results[i].wrickages;
-          if (i == 0) {
-            inventory =
-              purchaseQty + previousInventory[index] - salesqty - wrickages;
-          } else {
-            inventory = purchaseQty + prevInventory - salesqty - wrickages;
-          }
-          prevInventory = inventory;
-          let update = `update ${businessName} set inventory='${inventory}' where transactionId=${results[i].transactionId}`;
-          // previousInventory = inventory;
-          connection.query(update, (err, results1) => {
-            if (err) {
-              console.log(err);
-              return res.json({ err });
-            }
-            if (results1) {
-              if (index < ProductsList.length - 1) {
-                if (j == results.length - 1) {
-                  index++;
-                  recurciveUpdate();
-                }
-              }
-              j++;
-              // console.log("updated " + results1);
+      select = `select * from ?? where productIDTransaction=? and registeredTime>? order by registeredTime asc`;
+    let values = [`${businessName}`, productId, date];
+    Pool.query(select, values)
+      .then(([rows]) => {
+        console.log("select is = ", select, "results are =", results);
+        if (rows.length > 0) {
+          let j = 0,
+            prevInventory = 0;
+          for (let i = 0; i < results.length; i++) {
+            let salesqty = results[i].salesQty,
+              purchaseQty = results[i].purchaseQty,
+              inventory = 0,
+              wrickages = results[i].wrickages;
+            if (i == 0) {
+              inventory =
+                purchaseQty + previousInventory[index] - salesqty - wrickages;
             } else {
+              inventory = purchaseQty + prevInventory - salesqty - wrickages;
             }
-          });
+            prevInventory = inventory;
+            let update = `update ?? set inventory=? where transactionId=?`;
+            let valuesToUpdate = [
+              `${businessName}`,
+              `${inventory}`,
+              `${results[i].transactionId}`,
+            ];
+            // previousInventory = inventory;
+            Pool.query(update, valuesToUpdate)
+              .then((results) => {
+                if (results) {
+                  if (index < ProductsList.length - 1) {
+                    if (j == results.length - 1) {
+                      index++;
+                      recurciveUpdate();
+                    }
+                  }
+                  j++;
+                  // console.log("updated " + results1);
+                } else {
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+                return res.json({ err });
+              });
+          }
+        } else {
+          if (index < ProductsList.length - 1) {
+            index++;
+            recurciveUpdate();
+          }
         }
-      } else {
-        if (index < ProductsList.length - 1) {
-          index++;
-          recurciveUpdate();
-        }
-      }
-      // return res.json({ data: req.body });
-    });
+        // return res.json({ data: req.body });
+      })
+      .catch((error) => {
+        console.log(error);
+        res.json({ error });
+      });
   };
   recurciveUpdate();
 };
@@ -995,22 +984,6 @@ server.post(path + "updateBusinessName/", async (req, res) => {
                 .then(() => console.log("_products created well"))
                 .catch((error) => res.json({ error }));
 
-              // connection.query(alter_products, (err, result) => {
-              //   if (err) {
-              //     console.log(err);
-              //     // return res.json({ err });
-              //   }
-              //   if (result) console.log(result);
-              // });
-
-              // let alter_expenses = `ALTER TABLE ${oldBusinessName}_expenses RENAME TO ${businessName}_expenses`;
-              // connection.query(alter_expenses, (err, result) => {
-              //   if (err) {
-              //     // return res.json({ err });
-              //     console.log(err);
-              //   }
-              //   if (result) console.log(result);
-              // });
               const query_expenses = "ALTER TABLE ?? RENAME TO ??";
               const values_expenses = [
                 `${oldBusinessName}_expenses`,
@@ -1839,18 +1812,27 @@ server.post(path + "getMaximumSales/", (req, res) => {
     toDate = DateRange.toDate,
     businessName = req.body.businessName,
     token = req.body.token;
-  let select = `select * from ${businessName}_products, ${businessName}_Transaction where  ProductId = productIDTransaction and registeredTime between '${toDate}' and '${fromDate}'`;
-  connection.query(select, (err, results) => {
-    if (err) {
-      console.log(err);
-      return res.json({ data: "err", err });
-    }
-    if (results) {
-      console.log(results);
-      return res.json({ data: results });
-    }
-  });
-  // res.json({ data: req.body });
+  // let select = `select * from ${businessName}_products, ${businessName}_Transaction where  ProductId = productIDTransaction and registeredTime between '${toDate}' and '${fromDate}'`;
+  const table1 = `${businessName}_products`;
+  const table2 = `${businessName}_Transaction`;
+
+  const select = `SELECT *
+                FROM ??, ??
+                WHERE ProductId = productIDTransaction
+                AND registeredTime BETWEEN ? AND ?`;
+
+  const values = [table1, table2, fromDate, toDate];
+
+  Pool.query(select, values)
+    .then(([rows]) => {
+      if (rows) {
+        console.log(rows);
+        return res.json({ data: rows });
+      }
+    })
+    .catch((error) => {
+      res.json({ data: error });
+    });
 });
 server.post(path + "removeEmployeersBusiness/", async (req, res) => {
   const userID = await Auth(req.body.token);
