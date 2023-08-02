@@ -65,6 +65,13 @@
 }
 
 @media screen and (min-width: 768px) {
+  .noBusinessMessage {
+    padding: 20px;
+  }
+  .welcomeMessage {
+    text-align: left;
+    margin-left: 20px;
+  }
   .createdBusinessWrapper {
     justify-content: flex-start;
   }

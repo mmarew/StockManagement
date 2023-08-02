@@ -5,7 +5,9 @@
   justify-content: center;
   text-align: center;
 }
-
+.costName {
+  padding: 10px 2px;
+}
 /* .costTransactionForm button {
   display: block;
   margin: auto; 

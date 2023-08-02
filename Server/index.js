@@ -115,7 +115,7 @@ server.post(path + "verifyLogin/", async (req, res) => {
     Pool.query(select, [userID])
       .then(([rows]) => {
         if (rows.length > 0) {
-          res.json({ data: "alreadyConnected", decoded, result });
+          res.json({ data: "alreadyConnected", decoded, result: rows });
         } else {
           res.json({ data: "dataNotFound", decoded });
         }
@@ -327,8 +327,8 @@ server.post(path + "registerTransaction/", async (req, res) => {
             } else {
               console.log("values @ 1", values);
               // return;
-              let insert = `insert into ?? (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory) values (?)`;
-              let insertValues = [[`${businessName}_Transaction`, values]];
+              let insert = `insert into ${businessName}_Transaction(unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory) values (?)`;
+              let insertValues = [values.split(",")];
               Pool.query(insert, insertValues)
                 .then((result) => {
                   updateNextDateInventory(
@@ -365,12 +365,12 @@ server.post(path + "registerTransaction/", async (req, res) => {
           let valuesOfTransaction = [table, productID, req.body.dates];
 
           Pool.query(prevInventory, valuesOfTransaction)
-            .then((results) => {
-              if (results.length == 0) {
+            .then(([rows]) => {
+              if (rows.length == 0) {
                 // console.log("no data found");
                 Inventory = 0;
               } else {
-                Inventory = results[0].Inventory;
+                Inventory = rows[0].Inventory;
               }
 
               Inventory =
@@ -378,12 +378,24 @@ server.post(path + "registerTransaction/", async (req, res) => {
                 parseInt(rowData[salesQuantity]) +
                 parseInt(Inventory) -
                 parseInt(rowData[wrickageQty]);
-              console.log("typeof Inventory is ", typeof Inventory);
+              // console.log(
+              //   "rows=",
+              //   rows,
+              //   "purchaseQty",
+              //   parseInt(rowData[purchaseQty]),
+              //   "salesQuantity",
+              //   parseInt(rowData[salesQuantity]),
+              //   "Inventory",
+              //   parseInt(Inventory),
+              //   "wrickageQty",
+              //   parseInt(rowData[wrickageQty])
+              // );
+              // console.log("typeof Inventory is ", typeof Inventory);
               // return;
               if (typeof Inventory == "string") {
-                console.log(
-                  "Inventory is not number this may be in purchaseQty,salesQuantity,Inventory,wrickageQty"
-                );
+                // console.log(
+                //   "Inventory is not number this may be in purchaseQty,salesQuantity,Inventory,wrickageQty"
+                // );
                 return res.json({ data: "error", error: "error code 678," });
               }
               InventoryList.push(Inventory);
@@ -904,7 +916,7 @@ let updateNextDateInventory = (
       })
       .catch((error) => {
         console.log(error);
-        res.json({ error });
+        // res.json({ error });
       });
   };
   recurciveUpdate();
@@ -1506,7 +1518,7 @@ server.post(path + "deleteUsers/", async (req, res) => {
 
   let SelectAll = `SELECT * FROM usersTable WHERE userId = ?`;
   let selectBusiness = `SELECT * FROM Business WHERE ownerId = ?`;
-  let Drop = `DROP TABLE IF EXISTS ??_expenses, ??_Costs, ??_products, ??_Transaction, ??`;
+  let Drop = `DROP TABLE IF EXISTS ??, ??, ??, ??, ??`;
   let deleteBusiness = `DELETE Business, usersTable FROM Business INNER JOIN usersTable ON usersTable.userId = Business.ownerId WHERE ownerId = ?`;
 
   Pool.query(SelectAll, [userID])
@@ -1780,7 +1792,7 @@ server.post(path + "GetMinimumQty/", (req, res) => {
   const select = `SELECT * FROM ??, ?? WHERE productIDTransaction = ProductId ORDER BY registeredTime DESC LIMIT 1`;
   const table = `${businessName}_`;
 
-  Pool.query(select, [table + "Transaction", table + "Products"])
+  Pool.query(select, [table + "Transaction", table + "products"])
     .then(([rows]) => {
       return res.json({ data: rows });
       console.log("@GetMinimumQty ", rows);

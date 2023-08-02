@@ -43,8 +43,31 @@ function Login() {
     let names = e.target.name;
     setloginForm({ ...loginForm, [names]: values });
   };
+
+  let savedToken = localStorage.getItem("storeToken");
+  let navigate = useNavigate();
+  let VerifyLogin = async () => {
+    console.log("savedStore ===== " + savedToken);
+    if (savedToken == null || savedToken == "") {
+      // navigate("/login");
+      return;
+    }
+    let response = await axios.post(serverAddress + "verifyLogin/", {
+      token: savedToken,
+    });
+    console.log("in verifyLogin response", response);
+    if (response.data.data == "alreadyConnected") {
+      let employeeName = response.data.result[0].employeeName;
+      employeeName = employeeName.split(" ")[0];
+      setownersName(employeeName);
+      navigate("/");
+    } else {
+      // Navigate("/Login");
+    }
+  };
   useEffect(() => {
     console.log("verify login");
+    VerifyLogin();
     $("#LinearProgress").hide();
   }, []);
   return (

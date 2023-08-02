@@ -1,4 +1,4 @@
-const mysql = require("mysql");
+// const mysql = require("mysql");
 let bcript = require("bcryptjs");
 const mysql2 = require("mysql2/promise");
 
@@ -10,18 +10,18 @@ const pool = mysql2.createPool({
   database: "store",
 });
 
-// var pool = mysql.createpool({
+// const pool = mysql2.createPool({
 //   host: "localhost",
 //   user: "masetawoshacom_stock",
 //   password: "DBcp123$%^",
 //   database: "masetawoshacom_store",
 // });
-// var pool = mysql.createpool({
+// var pool = mysql2.createpool({
 //   host: "localhost",
 //   user: "guzowaycom_guzowaycom",
 //   password: "+oyTI,&_)Mq$",
 //   database: "guzowaycom_stock",
-//  });
+// });
 // server side pool
 
 // let pool = mysql.createpool({

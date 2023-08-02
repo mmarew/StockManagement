@@ -177,7 +177,7 @@ function AddCostTransaction() {
                   className={AddCostTransactionCss.costTransactionForm}
                 >
                   <br />
-                  <h6>Cost Transaction Registration Form</h6>
+                  <h3>Cost Transaction Registration Form</h3>
                   <br />
                   <div>Choose Date</div>
 
@@ -190,7 +190,9 @@ function AddCostTransaction() {
                     id="costDate"
                   />
 
-                  <h4> {items.costName}</h4>
+                  <h4 className={AddCostTransactionCss.costName}>
+                    {items.costName}
+                  </h4>
                   <TextField
                     required
                     type="number"

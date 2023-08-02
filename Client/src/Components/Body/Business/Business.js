@@ -75,7 +75,7 @@ function Business() {
       results.data.employeerBusiness?.length == 0
     ) {
       setBusinessLists(
-        <h3>
+        <h3 className={Businessmodulecss.noBusinessMessage}>
           You havn't created business or no business is allowed to be
           administered by you
         </h3>
@@ -431,7 +431,6 @@ function Business() {
       {ShowSuccessError?.show && (
         <SuccessOrError request={ShowSuccessError.message} />
       )}
-      
     </>
   );
 }
