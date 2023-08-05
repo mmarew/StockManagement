@@ -1,13 +1,12 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import $, { each } from "jquery";
+import $ from "jquery";
 import { Button, TextField } from "@mui/material";
 import EmployeeSearchCss from "./EmployeeSearch.module.css";
 import ConfirmDialog from "../Others/Confirm";
 const EmployeeSearch = () => {
   const [ShowConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmAction, setconfirmAction] = useState("");
-
   const [PersonAsEmployee, setThisPersonAsEmployee] = useState({});
   useEffect(() => {
     console.log(PersonAsEmployee);
@@ -31,7 +30,7 @@ const EmployeeSearch = () => {
       storeToken,
       userId,
     });
-    console.log("response", response);
+    console.log("response is", response);
     if (response.data.data == "data is already registered bofore") {
       alert(
         "This Employee is already registered before in this business. Try other employee. Thank you."

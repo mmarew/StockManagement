@@ -19,6 +19,29 @@ function SearchExpenceTransaction({
   response,
   setshowEachItems,
 }) {
+  console.log(
+    "showEachItems",
+    showEachItems,
+
+    "setshowEachItems",
+    setshowEachItems
+  );
+  let TotalSalesRevenue = 0,
+    TotalPurchaseCost = 0;
+  console.log("response is == ", response.data.data);
+  let data = response.data.data;
+  data.map((item) => {
+    console.log(item.unitCost, item.purchaseQty);
+    console.log(item.unitPrice, item.salesQty);
+    TotalPurchaseCost += parseInt(item.unitCost) * parseInt(item.purchaseQty);
+    TotalSalesRevenue += parseInt(item.unitPrice) * parseInt(item.salesQty);
+  });
+  console.log(
+    "TotalSalesRevenue==",
+    TotalSalesRevenue,
+    "TotalPurchaseCost==",
+    TotalPurchaseCost
+  );
   let openedBusiness = localStorage.getItem("openedBusiness");
   let deleteCostItems = async (items) => {
     console.log({ ...items, businessName });
@@ -215,166 +238,193 @@ function SearchExpenceTransaction({
   return (
     <div>
       {ViewCostList?.length > 0 ? (
-        <TableContainer>
-          <Table className="costTransaction">
-            <TableHead>
-              <TableRow>
-                <TableCell colspan="6">
-                  <h2>Expences List table</h2>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableHead>
-              <TableRow>
-                <TableCell>Cost Name</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Cost Amount</TableCell>
-                <TableCell> Description</TableCell>
-                <TableCell> Action </TableCell>
-                <TableCell> Decision</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {ViewCostList?.map((items, index) => {
-                console.log(items);
-                return (
-                  <TableRow id={`expenceWrapper_${items.costId}`}>
-                    <TableCell id={`expName_${items.expenseId}`}>
-                      {items.costName}
-                    </TableCell>
-                    <TableCell id={`costRegisteredDate_${items.expenseId}`}>
-                      {items.costRegisteredDate.split("T")[0]}
-                    </TableCell>
-                    <TableCell
-                      className={items.contentEditable && "editableTd"}
-                      onInput={(e) =>
-                        modifyAmountOrDescription(
-                          e,
-                          "updateExpences_" + items.expenseId
-                        )
-                      }
-                      contenteditable={`${items.contentEditable}`}
-                      id={`expAmount_${items.expenseId}`}
-                    >
-                      {items.costAmount}
-                    </TableCell>
-                    <TableCell
-                      className={items.contentEditable && "editableTd"}
-                      onInput={(e) =>
-                        modifyAmountOrDescription(
-                          e,
-                          "updateExpences_" + items.expenseId
-                        )
-                      }
-                      contentEditable={`${items.contentEditable}`}
-                      id={`expDescription_${items.expenseId}`}
-                    >
-                      {items.costDescription}
-                    </TableCell>
-                    <TableCell>
-                      {showEachItems ? (
+        <>
+          <TableContainer>
+            <Table className="costTransaction">
+              <TableHead>
+                <TableRow>
+                  <TableCell colspan="6">
+                    <h2>Expences List table</h2>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Cost Name</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Cost Amount</TableCell>
+                  <TableCell> Description</TableCell>
+                  <TableCell> Action </TableCell>
+                  <TableCell> Decision</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {ViewCostList?.map((items, index) => {
+                  console.log(items);
+                  return (
+                    <TableRow id={`expenceWrapper_${items.costId}`}>
+                      <TableCell id={`expName_${items.expenseId}`}>
+                        {items.costName}
+                      </TableCell>
+                      <TableCell id={`costRegisteredDate_${items.expenseId}`}>
+                        {items.costRegisteredDate.split("T")[0]}
+                      </TableCell>
+                      <TableCell
+                        className={items.contentEditable && "editableTd"}
+                        onInput={(e) =>
+                          modifyAmountOrDescription(
+                            e,
+                            "updateExpences_" + items.expenseId
+                          )
+                        }
+                        contenteditable={`${items.contentEditable}`}
+                        id={`expAmount_${items.expenseId}`}
+                      >
+                        {items.costAmount}
+                      </TableCell>
+                      <TableCell
+                        className={items.contentEditable && "editableTd"}
+                        onInput={(e) =>
+                          modifyAmountOrDescription(
+                            e,
+                            "updateExpences_" + items.expenseId
+                          )
+                        }
+                        contentEditable={`${items.contentEditable}`}
+                        id={`expDescription_${items.expenseId}`}
+                      >
+                        {items.costDescription}
+                      </TableCell>
+                      <TableCell>
+                        {showEachItems ? (
+                          <>
+                            {items.contentEditable && (
+                              <>
+                                {console.log("717", items.contentEditable)}
+                                <Button
+                                  className="cancelExpeEditing1"
+                                  id={`editExpences_` + items.expenseId}
+                                  onClick={(e) => {
+                                    cancelEditingProcess(e, index);
+                                  }}
+                                >
+                                  CANCEL
+                                </Button>
+                              </>
+                            )}
+                            {console.log(
+                              "items.contentEditable",
+                              items.contentEditable
+                            )}
+
+                            {openedBusiness == "myBusiness" && (
+                              <>
+                                {!items.contentEditable && (
+                                  <EditIcon
+                                    sx={{ color: "blue" }}
+                                    id={`editExpences_` + items.expenseId}
+                                    className="editExpences1"
+                                    onClick={(e) =>
+                                      makeEditableTableData(
+                                        index,
+                                        `expAmount_${items.expenseId}`,
+                                        `expDescription_${items.expenseId}`,
+                                        `updateExpences_` + items.expenseId,
+                                        `editExpences_` + items.expenseId
+                                      )
+                                    }
+                                  />
+                                )}
+
+                                <DeleteIcon
+                                  sx={{ color: "red" }}
+                                  onClick={(e) => {
+                                    setshowConfirmDialog(true);
+                                    setconfirmMessages(
+                                      "Are you sure to delete this expences?"
+                                    );
+                                    setconfirmAction("deleteExpencesRecord");
+                                    setDeleteConfirmation({
+                                      items,
+                                      deleteStatus: "notConfirmed",
+                                    });
+                                    // deleteCostItems(e, items)
+                                  }}
+                                />
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          ""
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <>
                           {items.contentEditable && (
-                            <>
-                              {console.log("717", items.contentEditable)}
-                              <Button
-                                className="cancelExpeEditing1"
-                                id={`editExpences_` + items.expenseId}
-                                onClick={(e) => {
-                                  cancelEditingProcess(e, index);
-                                }}
-                              >
-                                CANCEL
-                              </Button>
-                            </>
-                          )}
-                          {console.log(
-                            "items.contentEditable",
-                            items.contentEditable
-                          )}
+                            <Button
+                              id={"updateExpences_" + items.expenseId}
+                              className="updateExpences"
+                              onClick={() => {
+                                setconfirmAction("updateExpencesList");
+                                setconfirmMessages(
+                                  "Are you sure to update this expences record?"
+                                );
 
-                          {openedBusiness == "myBusiness" && (
-                            <>
-                              {!items.contentEditable && (
-                                <EditIcon
-                                  sx={{ color: "blue" }}
-                                  id={`editExpences_` + items.expenseId}
-                                  className="editExpences1"
-                                  onClick={(e) =>
-                                    makeEditableTableData(
-                                      index,
-                                      `expAmount_${items.expenseId}`,
-                                      `expDescription_${items.expenseId}`,
-                                      `updateExpences_` + items.expenseId,
-                                      `editExpences_` + items.expenseId
-                                    )
-                                  }
-                                />
-                              )}
-
-                              <DeleteIcon
-                                sx={{ color: "red" }}
-                                onClick={(e) => {
-                                  setshowConfirmDialog(true);
-                                  setconfirmMessages(
-                                    "Are you sure to delete this expences?"
-                                  );
-                                  setconfirmAction("deleteExpencesRecord");
-                                  setDeleteConfirmation({
+                                setshowConfirmDialog(true);
+                                setUpdateConfirmation((prevstates) => {
+                                  return {
+                                    ...prevstates,
                                     items,
-                                    deleteStatus: "notConfirmed",
-                                  });
-                                  // deleteCostItems(e, items)
-                                }}
-                              />
-                            </>
+                                    index,
+                                    updateStatus: "notConfirmed",
+                                  };
+                                });
+                              }}
+                            >
+                              Update
+                            </Button>
                           )}
                         </>
-                      ) : (
-                        ""
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <>
-                        {items.contentEditable && (
-                          <Button
-                            id={"updateExpences_" + items.expenseId}
-                            className="updateExpences"
-                            onClick={() => {
-                              setconfirmAction("updateExpencesList");
-                              setconfirmMessages(
-                                "Are you sure to update this expences record?"
-                              );
-
-                              setshowConfirmDialog(true);
-                              setUpdateConfirmation((prevstates) => {
-                                return {
-                                  ...prevstates,
-                                  items,
-                                  index,
-                                  updateStatus: "notConfirmed",
-                                };
-                              });
-                            }}
-                          >
-                            Update
-                          </Button>
-                        )}
-                      </>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-            <TableRow>
-              <TableCell colSpan={2}>Total Cost</TableCell>
-              <TableCell>{TotalCostAmount}</TableCell>
-            </TableRow>
-          </Table>
-        </TableContainer>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+              <TableRow>
+                <TableCell colSpan={2}>Total Cost</TableCell>
+                <TableCell>
+                  {TotalCostAmount.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "ETB",
+                  })}
+                </TableCell>
+              </TableRow>
+            </Table>
+          </TableContainer>
+          Net cash flow is=
+          {(
+            TotalSalesRevenue -
+            TotalPurchaseCost -
+            TotalCostAmount
+          ).toLocaleString("en-US", {
+            style: "currency",
+            currency: "ETB",
+          })}
+        </>
       ) : (
-        // <h4>No cost list table</h4>
-        ""
+        <>
+          <br />
+          <center>
+            Note:- On this day you have not expencess.
+            <br /> <br />
+            Net Cash Flow &nbsp;&nbsp;&nbsp;
+            {(TotalSalesRevenue - TotalPurchaseCost).toLocaleString("en-US", {
+              style: "currency",
+              currency: "ETB",
+            })}
+          </center>
+        </>
+        // ""
       )}
 
       {showConfirmDialog && (

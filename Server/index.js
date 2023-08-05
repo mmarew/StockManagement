@@ -5,6 +5,7 @@ let Auth = require("./Auth.js").Auth;
 let dotenv = require("dotenv");
 let sqlstring = require("sqlstring");
 let mysql2 = require("mysql2");
+
 // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-let
 dotenv.config();
 let path = "/";
@@ -146,9 +147,7 @@ server.post(path + "Login/", (req, res) => {
 
       let savedPassword = rows[0].password;
       const isMatch = bcrypt.compareSync(req.body.Password, savedPassword);
-
       let token = jwt.sign({ userID: rows[0].userId }, "shhhhh");
-
       if (isMatch) {
         return res.json({
           data: "loginSuccessFull",
@@ -174,6 +173,7 @@ server.post(path + "RegisterUsers/", async (req, res) => {
     registerPassword,
     res
   );
+
   // console.log("results is " + results);
 });
 server.post(path + "addProducts/", async (req, res) => {
@@ -276,6 +276,7 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
 });
 // to be seen in mornning mind
 server.post(path + "registerTransaction/", async (req, res) => {
+  // return console.log("registerTransaction", req.body);
   let ProductId = req.body.ProductId;
   let rowData = req.body,
     ProductsList = rowData.ProductsList,
@@ -304,6 +305,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
       Inventory = 0;
     console.log();
     let dates = req.body.dates;
+    // return console.log("dates are ", dates);
     let selectToCheck = `select * from  ?? where registeredTime like ? and productIDTransaction=?`;
     let table = `${businessName}_Transaction`;
     let valuesOfTransactions = [table, `%${dates}%`, productID],
@@ -404,7 +406,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
               }
               values = `${unitCost} , ${unitPrice} , ${productID} , ${rowData[salesQuantity]} , ${rowData[purchaseQty]} , ${req.body.dates} , ${rowData[wrickageQty]} , ${Inventory}`;
 
-              console.log("values are ", values.split(","));
+              // console.log("values are ", values.split(","));
               // return;
 
               if (i == length - 1) {
@@ -515,13 +517,14 @@ server.post(path + "ViewTransactions/", (req, res) => {
     });
 });
 server.post(path + "updateTransactions/", async (req, res) => {
-  // console.log("@updateTransactions" ,req.body);
+  console.log("@updateTransactions", req.body);
   // return;
   let currentInventory = "",
     prevInventory = "";
-  let previous = getPreviousDay(new Date(req.body.date));
+  let previousDay = await getPreviousDay(new Date(req.body.date));
   let validate = validateAlphabet(req.body.businessName, res),
     businessName = "";
+  console.log("validate", validate);
   if (validate == "correctData") {
     businessName = req.body.businessName;
   } else {
@@ -529,27 +532,32 @@ server.post(path + "updateTransactions/", async (req, res) => {
     return "This data contains string so no need of execution";
   }
   let productId = req.body.productId;
-  const selectQuery =
-    "SELECT * FROM ?? WHERE registeredTime LIKE ? AND productIDTransaction = ?";
-  const params = [`${businessName}_Transaction`, `%${previous}%`, productId];
+  const selectQuery = `SELECT * FROM ?? WHERE registeredTime <=? AND productIDTransaction = ?  order by registeredTime limit 1 `;
+  const params = [`${businessName}_Transaction`, previousDay, productId];
 
   let update = "";
   Pool.query(selectQuery, params)
     .then(([rows]) => {
-      console.log("result on update ", result);
+      console.log("result on selectQuery ", rows, "previousDay", previousDay);
+      return rows;
+    })
+    .then((data) => {
       currentInventory =
         parseInt(req.body.purchaseQty) -
         parseInt(req.body.salesQty) -
         parseInt(req.body.wrickages);
-      if (rows.length > 0) currentInventory += prevInventory;
-      //       update = `update ${businessName}_Transaction set
-      // wrickages='${req.body.wrickages}',
-      // purchaseQty='${req.body.purchaseQty}',
-      // salesQty='${req.body.salesQty}',
-      // Inventory='${currentInventory}',
-      // description='${req.body.Description}'
-      //  where transactionId='${req.body.transactionId}'`;
-      // console.log("my update is ==", update);
+
+      if (data.length > 0) {
+        prevInventory = parseInt(data[0].wrickages);
+        currentInventory += prevInventory;
+      }
+      console.log(
+        "prevInventory",
+        prevInventory,
+        "currentInventory",
+        currentInventory
+      );
+      // return;
       const updateQuery = `UPDATE ?? SET wrickages = ?, purchaseQty = ?, salesQty = ?, Inventory = ?, description = ? WHERE transactionId = ?`;
       const params = [
         `${businessName}_Transaction`,
@@ -563,16 +571,15 @@ server.post(path + "updateTransactions/", async (req, res) => {
 
       Pool.query(updateQuery, params)
         .then((results) => {
-          console.log(results);
+          console.log("results on UPDATE", results);
           res.json({ data: results, update });
         })
-        .then((error) => {
-          res.json({ err: error });
+        .catch((error) => {
+          res.json({ data: "error", error });
         });
-      // console.log("currentInventory " + currentInventory);
-      return result;
     })
     .catch((error) => {
+      console.log("error", error);
       res.json({ data: error, error });
     });
 });
@@ -581,16 +588,28 @@ async function getPreviousDay(date) {
   previous.setDate(date.getDate() - 1);
   let previousFormat = new Date(previous),
     previousDay = "";
-  previousDay =
-    previousFormat.getFullYear() +
-    "-0" +
-    (previousFormat.getMonth() + 1) +
-    "-" +
-    previousFormat.getDate();
-  // console.log("previousDay = " + previousDay);
-
+  const year = previousFormat.getFullYear();
+  const month = (previousFormat.getMonth() + 1).toString().padStart(2, "0");
+  const day = previousFormat.getDate().toString().padStart(2, "0");
+  previousDay = `${year}-${month}-${day}`;
   return previousDay;
 }
+// async function getPreviousDay(date) {
+//   return;
+//   const previous = new Date(date.getTime());
+//   previous.setDate(date.getDate() - 1);
+//   let previousFormat = new Date(previous),
+//     previousDay = "";
+//   previousDay =
+//     previousFormat.getFullYear() +
+//     "-0" +
+//     (previousFormat.getMonth() + 1) +
+//     "-" +
+//     previousFormat.getDate();
+//   // console.log("previousDay = " + previousDay);
+
+//   return previousDay;
+// }
 server.post(path + "searchProducts/", (req, res) => {
   let businessName = "",
     productName = req.body.InputValue.productName,
@@ -864,7 +883,12 @@ let updateNextDateInventory = (
     let values = [`${businessName}`, productId, date];
     Pool.query(select, values)
       .then(([rows]) => {
-        console.log("select is = ", select, "results are =", results);
+        console.log(
+          "select query is = ",
+          select,
+          "select   results are =",
+          rows
+        );
         if (rows.length > 0) {
           let j = 0,
             prevInventory = 0;

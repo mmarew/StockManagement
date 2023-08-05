@@ -1,10 +1,11 @@
 import { TextField, Button } from "@material-ui/core";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import RegisterCss from "./Register.module.css";
 import $ from "jquery";
 import { LinearProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { InitialContext } from "../UserContext/UserContext";
 function Register() {
   let serverUrl = localStorage.getItem("targetUrl");
   const navigate = useNavigate();
@@ -13,22 +14,33 @@ function Register() {
     e.preventDefault();
     let value = e.target.value,
       names = e.target.name;
-
     setRegisterForm({ ...RegisterForm, [names]: value });
   };
+  const savedContext = useContext(InitialContext);
+  const [ownersName, setownersName] = savedContext;
   let handleRegistrationSubmit = async (e) => {
     e.preventDefault();
     $("#LinearProgress2").show();
-    let response = await axios.post(serverUrl + "RegisterUsers/", RegisterForm);
+    console.log("RegisterForm", RegisterForm);
 
-    let data = response.data.data;
-    console.log("response is ", response);
-    if (response.data.data == "This phone number is registered before.")
-      alert(response.data.data);
-    else if (response.data.data == "Data is inserted well.") {
+    let response = await axios.post(serverUrl + "RegisterUsers/", RegisterForm);
+    let data = response.data.data,
+      token = response.data.token;
+    console.log("response.data.data is ", data);
+    if (data == "This phone number is registered before.") {
+      alert(data);
+    } else if (data == "Data is inserted successfully.") {
       alert("You are registered as user in stock management system. Thankyou");
-      navigate("/");
-    } else navigate("/");
+      console.log("fullName =", RegisterForm.fullName);
+      setownersName(RegisterForm.fullName);
+      localStorage.setItem("storeToken", token);
+      localStorage.setItem("ownersName", RegisterForm.fullName);
+      navigate("/login");
+    } else {
+      localStorage.setItem("ownersName", RegisterForm.fullName);
+      setownersName(RegisterForm.fullName);
+      navigate("/login");
+    }
     $("#LinearProgress2").hide();
   };
   return (
@@ -80,96 +92,3 @@ function Register() {
 }
 
 export default Register;
-
-// function Register() {
-//   const styles = {
-//     backgroundColor: "white",
-//     padding: "20px",
-//     borderRadius: "5px",
-//     width: "200px",
-//     margin: "center",
-//   };
-//   const [values, setValues] = React.useState({
-//     firstName: "",
-//     middleName: "",
-//     lastName: "",
-//     // email: "",
-//     password: "",
-//     confirmPassword: "",
-//   });
-
-//   const handleChange = (prop) => (event) => {
-//     setValues({ ...values, [prop]: event.target.value });
-//   };
-
-//   const handleSubmit = (event) => {
-//     event.preventDefault();
-//     console.log(values);
-//   };
-
-//   return (
-//     <form className={RegisterCss.userRegistrationForm} onSubmit={handleSubmit}>
-//       <TextField
-//         label="First Name"
-//         value={values.firstName}
-//         onChange={handleChange("firstName")}
-//         margin="normal"
-//         required
-//         fullWidth
-//       />
-//       <TextField
-//         label="Middle Name"
-//         value={values.middleName}
-//         onChange={handleChange("middleName")}
-//         margin="normal"
-//         required
-//         fullWidth
-//       />
-//       <TextField
-//         label="Last Name"
-//         value={values.lastName}
-//         onChange={handleChange("lastName")}
-//         margin="normal"
-//         required
-//         fullWidth
-//       />
-//       {/* <TextField
-//         label="Email"
-//         type="email"
-//         value={values.email}
-//         onChange={handleChange("email")}
-//         margin="normal"
-//         required
-//         fullWidth
-//       /> */}
-//       <TextField
-//         label="Password"
-//         type="password"
-//         value={values.password}
-//         onChange={handleChange("password")}
-//         margin="normal"
-//         required
-//         fullWidth
-//       />
-//       <TextField
-//         label="Confirm Password"
-//         type="password"
-//         value={values.confirmPassword}
-//         onChange={handleChange("confirmPassword")}
-//         margin="normal"
-//         required
-//         fullWidth
-//       />
-//       <br />
-//       <Button type="submit" variant="contained" color="primary" fullWidth>
-//         Sign Up
-//       </Button>
-//       <br />
-//       <Button color="primary" variant={"contained"}>
-//         <a href="/login">Login</a>
-//       </Button>
-//     </form>
-//   );
-// }
-
-// export default Register;

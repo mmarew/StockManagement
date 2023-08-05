@@ -1,9 +1,5 @@
 import axios from "axios";
 import $ from "jquery";
-import { confirmAlert } from "react-confirm-alert";
-import SuccessOrError from "../Others/SuccessOrError";
-import { useState } from "react";
-
 let serverAddress = localStorage.getItem("targetUrl");
 async function DeleteBusiness(businessId, businessName, getBusiness) {
   $(".LinearProgress").css("display", "block");
@@ -13,9 +9,10 @@ async function DeleteBusiness(businessId, businessName, getBusiness) {
     businessName,
     businessId,
   });
+  console.log("updateRes", updateRes);
   if (updateRes.data.data.affectedRows > 0) {
     // setShowPopUP(true);
-    // alert("your Business is  deleted successfully thank you.");
+    alert("your Business is  deleted successfully thank you.");
     $("#eachBusiness_" + businessId).remove();
     getBusiness();
     return "deletedWell";

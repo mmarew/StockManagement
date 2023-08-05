@@ -4,9 +4,6 @@ import "./CreateBusiness.css";
 import $ from "jquery";
 import { Button, TextField } from "@mui/material";
 function CreateBusiness({ getBusiness, setnewBusiness, setShowProgressBar }) {
-  // console.log(getBusiness, setnewBusiness, setShowProgressBar);
-  // return;
-
   let serverAddress = localStorage.getItem("targetUrl");
   const [businessData, setbusinessData] = useState({});
   let handleCreateForm = (e) => {
@@ -32,9 +29,8 @@ function CreateBusiness({ getBusiness, setnewBusiness, setShowProgressBar }) {
         return;
       }
     }
-    {
-      console.log("businessData is = ", businessData);
-    }
+    console.log("businessData is = ", businessData);
+    // return;
     console.log("setShowProgressBar", setShowProgressBar);
     setShowProgressBar(true);
 
@@ -42,6 +38,7 @@ function CreateBusiness({ getBusiness, setnewBusiness, setShowProgressBar }) {
       serverAddress + "createBusiness/",
       businessData
     );
+    console.log("createBusiness response is =", response);
     setShowProgressBar(false);
     console.log(response.data);
     let data = response.data.data;
@@ -67,9 +64,16 @@ _products: 0 }  */
         alert("Your business is created well. Thankyou.");
         getBusiness();
       }
-    }
-    if (data == "alreadyRegistered") {
+    } else if (data == "alreadyRegistered") {
       alert("Error. Because this business name is already registered before.");
+    }
+    if (response.data.error == "Unable to create tables.") {
+      alert(response.data.error);
+    }
+    if (response.data.error == "registeredBefore") {
+      alert(
+        "Sorry, you cann't create this business. Because it's name is already reserved before."
+      );
     }
   };
   let cancelBusinessCreation = () => {

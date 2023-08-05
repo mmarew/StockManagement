@@ -6,6 +6,7 @@ import { Button, LinearProgress, TextField } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import ImgApp from "../../../ImgSlider";
 import { InitialContext } from "../UserContext/UserContext";
+import Localstorage from "../LocalStorage/Localstorage";
 
 function Login() {
   let serverAddress = localStorage.getItem("targetUrl");
@@ -21,7 +22,6 @@ function Login() {
     // console.log("response", response.data);
     localStorage.setItem("ownersName", response.data.usersFullName);
 
-    // return;
     if (response.data.data == "loginSuccessFull") {
       let token = response.data.token;
       localStorage.setItem("storeToken", token);
@@ -68,14 +68,11 @@ function Login() {
   useEffect(() => {
     console.log("verify login");
     VerifyLogin();
+    Localstorage();
     $("#LinearProgress").hide();
   }, []);
   return (
     <div className={Loginmodulecss.loginWrapper}>
-      {
-        // localStorage.setItem("targetUrl", "https://mar.masetawosha.com/")
-        localStorage.setItem("targetUrl", "http://localhost:2020/")
-      }
       <div className={Loginmodulecss.LeftSide}>
         <div className={Loginmodulecss.gladMessage}>Glad to see you back</div>
         <div className={Loginmodulecss.greetingToLogin}>

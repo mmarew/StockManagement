@@ -7,7 +7,6 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import $ from "jquery";
 import DeleteBusiness from "../Business/DeleteBusiness";
 import UpdateBusinesssName from "../Business/UpdateBusinesssName";
 import { RemoveMyEmployeersBusiness } from "../Business/__Business";
@@ -77,7 +76,7 @@ function MUIConfirm({
         );
         console.log(
           "responce.data.data= ",
-          responce,
+          responce.data.data,
           "getBusiness = ",
           getBusiness
         );
@@ -87,7 +86,8 @@ function MUIConfirm({
           getBusiness();
           return;
         }
-        let affectedRows = responce.data.data.affectedRows;
+        let affectedRows = responce.data.data[0].affectedRows;
+        console.log("affectedRows ==", affectedRows);
         if (affectedRows > 0) {
           getBusiness();
           setSuccessError({

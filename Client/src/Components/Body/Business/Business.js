@@ -279,6 +279,7 @@ function Business() {
                             >
                               Edit
                             </Button>
+
                             <Button
                               variant="outlined"
                               startIcon={<DeleteIcon />}
@@ -302,7 +303,6 @@ function Business() {
                               Delete
                             </Button>
                           </div>
-
                           <div
                             id={"businessWrapper_" + datas.BusinessID}
                             className={Businessmodulecss.updateWrapper}

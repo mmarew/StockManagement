@@ -1,12 +1,13 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import "./SearchProducts.css";
 import $ from "jquery";
 import SearchProducts from "./SearchProducts";
 import SearchCosts from "./SearchCosts";
-import SearchSingleTransActions from "./SearchSales_Purchase";
+import SearchSales_Purchase from "./SearchSales_Purchase";
 import { Button, Select, TextField } from "@mui/material";
 import { MenuItem } from "@material-ui/core";
+
 function SearchManager() {
   const [selectedValue, setSelectedValue] = useState("default");
   let serverAddress = localStorage.getItem("targetUrl");
@@ -87,7 +88,7 @@ function SearchManager() {
       return;
     } else if (searchTarget == "ALLTRANSACTION") {
       setRequestedSearch(
-        <SearchSingleTransActions
+        <SearchSales_Purchase
           response={response}
           requestFrom="showExpencesList"
         />
@@ -95,7 +96,7 @@ function SearchManager() {
       return;
     } else if (searchTarget == "TRANSACTION") {
       setRequestedSearch(
-        <SearchSingleTransActions
+        <SearchSales_Purchase
           response={response}
           requestFrom="SearchManagerOnlySalesAndPurchase"
         />

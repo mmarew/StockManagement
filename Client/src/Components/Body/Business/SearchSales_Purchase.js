@@ -18,7 +18,7 @@ import {
   colors,
 } from "@mui/material";
 import ConfirmDialog from "../Others/Confirm";
-function SearchSingleTransActions({ response, requestFrom }) {
+function SearchSales_Purchase({ response, requestFrom }) {
   let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
   const [UpdateSalesAndPurchase, setUpdateSalesAndPurchase] = useState({});
@@ -99,6 +99,8 @@ function SearchSingleTransActions({ response, requestFrom }) {
     setShowConfirmDialog(true);
     return;
   };
+  const [TotalPurchaseCost, setTotalPurchaseCost] = useState(0);
+  const [TotalSalesRevenue, setTotalSalesRevenue] = useState(0);
   useEffect(() => {
     let getSingleTransAction = async () => {
       let totalPurchaseCost = 0,
@@ -120,20 +122,25 @@ function SearchSingleTransActions({ response, requestFrom }) {
       setTotalPurchaseCost(totalPurchaseCost);
       setTotalSalesRevenue(totalSalesAmt);
       setSearchedDatas(resData);
+      // alert(
+      //   "totalSalesAmt" +
+      //     totalSalesAmt +
+      //     " " +
+      //     "totalPurchaseCost" +
+      //     totalPurchaseCost
+      // );
+      setShowExpences(
+        <SearchExpenceTransaction
+          showEachItems={showEachItems}
+          response={response}
+          setshowEachItems={setshowEachItems}
+        />
+      );
       $("#productTransaction").css("display", "block");
     };
     getSingleTransAction();
-    setShowExpences(
-      <SearchExpenceTransaction
-        showEachItems={showEachItems}
-        response={response}
-        setshowEachItems={setshowEachItems}
-      />
-    );
   }, []);
 
-  const [TotalPurchaseCost, setTotalPurchaseCost] = useState(0);
-  const [TotalSalesRevenue, setTotalSalesRevenue] = useState(0);
   let serverAddress = localStorage.getItem("targetUrl");
   const [ListOfSalesAndPurchase, setListOfSalesAndPurchase] = useState([]);
   // const [showEachItems, setshowEachItems] = useState(false);
@@ -303,9 +310,9 @@ function SearchSingleTransActions({ response, requestFrom }) {
     };
     // OB.trasactionId = transactionId;
     console.log("OB", OB);
-    // return;
 
     $(".LinearProgress").css("display", "block");
+    // return;
     let updates = await axios
       .post(serverAddress + "updateTransactions/", OB)
       .then((data) => {
@@ -397,7 +404,10 @@ function SearchSingleTransActions({ response, requestFrom }) {
                       id={"unitPrice_" + items.transactionId}
                       type="text"
                     >
-                      {items.productsUnitPrice}
+                      {items.productsUnitPrice.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "ETB",
+                      })}
                     </TableCell>
                     <TableCell
                       onInput={() =>
@@ -418,7 +428,12 @@ function SearchSingleTransActions({ response, requestFrom }) {
                       id={"totalSales_" + items.transactionId}
                       type="text"
                     >
-                      {items.salesQty * items.productsUnitPrice}
+                      {(
+                        items.salesQty * items.productsUnitPrice
+                      ).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "ETB",
+                      })}
                     </TableCell>
                     <TableCell
                       className={`unitCost${items.transactionId}`}
@@ -426,7 +441,10 @@ function SearchSingleTransActions({ response, requestFrom }) {
                       id={"unitCost_" + items.transactionId}
                       type="text"
                     >
-                      {items.unitCost}
+                      {items.unitCost.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "ETB",
+                      })}
                     </TableCell>
                     <TableCell
                       onInput={() =>
@@ -449,7 +467,13 @@ function SearchSingleTransActions({ response, requestFrom }) {
                       id={"totalPurchase_" + items.transactionId}
                       type="text"
                     >
-                      {items.unitCost * items.purchaseQty}
+                      {(items.unitCost * items.purchaseQty).toLocaleString(
+                        "en-US",
+                        {
+                          style: "currency",
+                          currency: "ETB",
+                        }
+                      )}
                     </TableCell>
                     <TableCell
                       onInput={() =>
@@ -557,10 +581,26 @@ function SearchSingleTransActions({ response, requestFrom }) {
               <TableRow>
                 <TableCell colSpan={2}></TableCell>
                 <TableCell colSpan={2}>Sum of Sales</TableCell>
-                <TableCell>{TotalSalesRevenue}</TableCell>
+                <TableCell>
+                  {TotalSalesRevenue.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "ETB",
+                  })}
+                </TableCell>
                 <TableCell colSpan={2}>Sum of Purchase</TableCell>
-                <TableCell>{TotalPurchaseCost}</TableCell>
-                <TableCell colSpan={5}></TableCell>
+                <TableCell>
+                  {TotalPurchaseCost.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "ETB",
+                  })}
+                </TableCell>
+                <TableCell colSpan={2}>Sales - Purchases</TableCell>
+                <TableCell>
+                  {(TotalSalesRevenue - TotalPurchaseCost).toLocaleString(
+                    "en-US",
+                    { style: "currency", currency: "ETB" }
+                  )}
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -585,4 +625,4 @@ function SearchSingleTransActions({ response, requestFrom }) {
   );
 }
 
-export default SearchSingleTransActions;
+export default SearchSales_Purchase;

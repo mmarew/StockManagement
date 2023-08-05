@@ -1,7 +1,7 @@
 // const mysql = require("mysql");
 let bcript = require("bcryptjs");
 const mysql2 = require("mysql2/promise");
-
+const JWT = require("jsonwebtoken");
 // Create a MySQL pool pool
 const pool = mysql2.createPool({
   host: "localhost",
@@ -140,23 +140,25 @@ let createBusiness = (businessName, ownerId, createdDate, res, source) => {
   let insert =
     "INSERT INTO Business (businessName, ownerId, createdDate) VALUES (?, ?, ?)";
   let tableExpenses =
-    "CREATE TABLE IF NOT EXISTS ?? (expenseId INT(11) NOT NULL AUTO_INCREMENT, costId INT(11) NOT NULL, costAmount INT(11) NOT NULL, costDescription VARCHAR(9000) NOT NULL, costRegisteredDate DATE NOT NULL, PRIMARY KEY (expenseId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci";
+    "CREATE TABLE IF NOT EXISTS ?? (expenseId INT(11) NOT NULL AUTO_INCREMENT, costId INT(11) NOT NULL, costAmount INT(11) NOT NULL, costDescription VARCHAR(9000) NOT NULL, costRegisteredDate DATE NOT NULL, PRIMARY KEY (expenseId)) ";
   let costTable =
-    "CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, unitCost INT(11) NOT NULL, PRIMARY KEY (costsId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci";
+    "CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, unitCost INT(11) NOT NULL, PRIMARY KEY (costsId)) ";
   let create =
-    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, productsUnitCost INT(11) NOT NULL, productsUnitPrice INT(11) NOT NULL, productName VARCHAR(900) NOT NULL, minimumQty INT(11) NOT NULL, PRIMARY KEY (ProductId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci";
+    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, productsUnitCost INT(11) NOT NULL, productsUnitPrice INT(11) NOT NULL, productName VARCHAR(900) NOT NULL, minimumQty INT(11) NOT NULL, PRIMARY KEY (ProductId)) ";
   let createTransaction =
-    "CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL, salesQty INT(11) NOT NULL, purchaseQty INT(11) NOT NULL, wrickages INT(11) NOT NULL, Inventory INT(11) NOT NULL, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, PRIMARY KEY (transactionId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci";
-  let queries = [];
+    "CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL, salesQty INT(11) NOT NULL, purchaseQty INT(11) NOT NULL, wrickages INT(11) NOT NULL, Inventory INT(11) NOT NULL, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, PRIMARY KEY (transactionId)) ";
+  let queries = [],
+    tableCollections = {};
   pool
     .query(select, [businessName])
     .then(([rows]) => {
-      let tableCollections = {};
+      console.log("rows in create table", rows);
+      // return;
       if (rows.length == 0) {
         return pool.query(insert, [businessName, ownerId, createdDate]);
       } else {
         tableCollections.registerBusinessName = "registeredBefore";
-        return Promise.resolve();
+        throw "registeredBefore";
       }
     })
     .then(() => {
@@ -169,14 +171,14 @@ let createBusiness = (businessName, ownerId, createdDate, res, source) => {
       return Promise.all(promises);
     })
     .then((results) => {
-      let tableCollections = {};
       results.forEach((result, index) => {
         tableCollections[queries[index]] = result.rowCount;
       });
       res.json({ data: "created well", source, tableCollections });
     })
-    .catch((err) => {
-      console.error(err);
+    .catch((error) => {
+      console.error("errors on table creating systems", error);
+      if (error == "registeredBefore") return res.json({ error });
       res.json({ error: "Unable to create tables." });
     });
 };
@@ -190,14 +192,18 @@ const insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
     .then(([rows]) => {
       console.log(rows);
       if (rows.length > 0) {
-        res.json({ data: "This phone number is registered before." });
+        let token = JWT.sign({ userID: rows[0].userId }, "shhhhh");
+        res.json({ data: "This phone number is registered before.", token });
       } else {
         let insertIntoUsers = `INSERT INTO usersTable (employeeName, phoneNumber, password) VALUES (?, ?, ?)`;
         pool
           .query(insertIntoUsers, [fullName, phoneNumber, encryptedPassword])
-          .then(() => {
+          .then((result) => {
+            const insertedId = result.insertId; // Get the ID of the inserted row
+            let token = JWT.sign({ userID: insertedId }, "shhhhh");
+
             console.log("Data is inserted successfully");
-            res.json({ data: "Data is inserted successfully." });
+            res.json({ data: "Data is inserted successfully.", token });
           })
           .catch((error) => {
             console.error(error);
@@ -267,28 +273,37 @@ const insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
 //   deleteEachTable();
 // };
 const deleteBusiness = (businessId, businessName, res) => {
-  console.log("businessId in deleteBusiness", businessId);
-  let sql = `DELETE FROM Business WHERE BusinessID='${businessId}'`;
+  console.log(
+    "businessId in deleteBusiness",
+    businessId,
+    "businessName",
+    businessName
+  );
+  // return;
+  let sql = `DELETE FROM Business WHERE BusinessID=?`;
   let tables = ["_expenses", "_Costs", "_Transaction", "_products"];
   let tableLength = tables.length,
     i = 0;
+  let sqlValues = [businessId];
 
   let deleteEachTable = () => {
-    let drop = `DROP TABLE ${businessName + tables[i]}`;
+    let drop = `DROP TABLE IF EXISTS ??`;
+    dropvalues = [businessName + tables[i]];
     pool
-      .query(drop)
+      .query(drop, dropvalues)
       .then((results) => {
-        console.log(results);
+        console.log("dropvalues =", dropvalues, " i is", i);
         if (i === tableLength - 1) {
           pool
-            .query(sql)
+            .query(sql, sqlValues)
             .then((result) => {
               console.log("result of deleted data is ", result);
-              return res.json({ data: result });
+              return res.json({ data: result[0] });
             })
             .catch((error) => {
               console.error(error);
               return res.json({
+                message: error,
                 error: "An error occurred while deleting business data.",
               });
             });
