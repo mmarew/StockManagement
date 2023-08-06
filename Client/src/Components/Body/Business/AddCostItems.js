@@ -52,7 +52,7 @@ function AddCostItems() {
   };
   return (
     <div>
-      <h1 className="titleToRegistrationForm">Forms To Register Costs</h1>
+      <h5 className="titleToRegistrationForm">Forms To Register Costs</h5>
       <form className="form-add-cost" onSubmit={submitCosts}>
         <TextField
           className="inputToCotsRegistration"

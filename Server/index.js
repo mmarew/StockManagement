@@ -570,9 +570,25 @@ server.post(path + "updateTransactions/", async (req, res) => {
       ];
 
       Pool.query(updateQuery, params)
-        .then((results) => {
-          console.log("results on UPDATE", results);
-          res.json({ data: results, update });
+        .then((data) => {
+          console.log("in ALLTRANSACTION req.body == ", req.body);
+          const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.transactionId=?`;
+          // define the input data as an array of values
+          const input = [
+            `${businessName}_Transaction`,
+            `${businessName}_products`,
+            req.body.transactionId,
+          ];
+
+          // execute the query with the input data
+          Pool.query(sql, input)
+            .then(([rows]) => {
+              res.json({ data: rows });
+            })
+            .catch((error) => {
+              console.log("error in alltransaction", error);
+              res.json({ data: error, error: "9090" });
+            });
         })
         .catch((error) => {
           res.json({ data: "error", error });
@@ -977,17 +993,17 @@ server.post(path + "updateBusinessName/", async (req, res) => {
     .then(([rows]) => {
       const verifyName = rows;
       if (rows.length > 0) {
-        return res.json({ data: "reservedByOtherBusiness", results });
+        return res.json({ data: "reservedByOtherBusiness", rows });
       } else {
         let oldBusinessName = "";
         let getOldtableName = `select * from Business where businessId=?`,
           v = targetBusinessId;
 
         Pool.query(getOldtableName, [v])
-          .then(([result]) => {
-            if (result) {
+          .then(([rows]) => {
+            if (rows) {
               // console.log(results);
-              oldBusinessName = result[0].BusinessName;
+              oldBusinessName = rows[0].BusinessName;
               // res.json({ data: `${oldBusinessName}_products`, results });
               // return;
               // let alter_products = `ALTER TABLE  ${oldBusinessName}_products RENAME TO ${businessName}_products`;
@@ -1002,8 +1018,8 @@ server.post(path + "updateBusinessName/", async (req, res) => {
               ];
 
               Pool.query(query_updateBusinessName, values_updateBusinessName)
-                .then(([result]) => {
-                  console.log("Update successful:", result);
+                .then(([results]) => {
+                  console.log("Update successful:", results);
                   // Do something else
                 })
                 .catch((error) => {

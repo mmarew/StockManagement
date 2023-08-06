@@ -6,7 +6,9 @@ import $ from "jquery";
 
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, IconButton, Modal, TextField } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 function AddCostTransaction() {
+  let Navigate = useNavigate();
   const [RegisterableCots, setRegisterableCots] = useState([{}]);
   // open={open} onClose={handleClose}
   const [open, setopen] = useState(false);
@@ -137,7 +139,15 @@ function AddCostTransaction() {
           ) : (
             <div>
               you haven't registered cost list data before. Please register cost
-              items by click on items then costs
+              items by{" "}
+              <span
+                className={AddCostTransactionCss.navigateToAddItems}
+                onClick={() => {
+                  Navigate("/OpenBusiness/additems");
+                }}
+              >
+                click here
+              </span>
             </div>
           )}
         </>

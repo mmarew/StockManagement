@@ -37,3 +37,7 @@
   transform: scale(1.1);
   border-bottom: solid 2px blue;
 }
+.navigateToAddItems {
+  color: #1976d2;
+  cursor: pointer;
+}

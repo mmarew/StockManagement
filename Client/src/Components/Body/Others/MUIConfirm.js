@@ -55,12 +55,14 @@ function MUIConfirm({
       } else if (Action == "updateBusinesssName") {
         const { setShowProgressBar, setcreatedBusiness, createdBusiness } =
           targetdBusiness;
-        await UpdateBusinesssName(
+        let x = await UpdateBusinesssName(
           businessId,
           setShowProgressBar,
           setcreatedBusiness,
           createdBusiness
         );
+        let { getBusiness } = targetdBusiness;
+        getBusiness();
       } else if (Action == "RemoveEmployerBusiness") {
         console.log("targetdBusiness", targetdBusiness);
         const { ownerId, getBusiness } = targetdBusiness;

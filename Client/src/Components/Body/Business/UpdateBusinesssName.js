@@ -28,18 +28,6 @@ let UpdateBusinesssName = async (
     $("#businessWrapper_" + targetBusinessId).hide();
     $("#openEditWrapper" + targetBusinessId).show();
     $("#businessNameH2_" + targetBusinessId).text(businessname);
-
-    localStorage.setItem("businessname", businessname);
-    createdBusiness?.map((items) => {
-      console.log(items);
-      if (targetBusinessId == items.businessId) {
-        $("#createdBusiness_" + targetBusinessId).remove();
-        setcreatedBusiness([
-          ...createdBusiness,
-          { ...items, businessName: businessname },
-        ]);
-      }
-    });
     return "update is successfull";
   }
 };

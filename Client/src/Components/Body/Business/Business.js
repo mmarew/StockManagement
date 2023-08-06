@@ -307,45 +307,67 @@ function Business() {
                             id={"businessWrapper_" + datas.BusinessID}
                             className={Businessmodulecss.updateWrapper}
                           >
-                            <input
-                              id={"businessName_" + datas.BusinessID}
-                              placeholder="Business name"
-                              type="text"
-                            />
-                            <div
-                              className={Businessmodulecss.updateCancelWrapper}
-                              id={"updateCancelWrapper_" + datas.BusinessID}
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                let id = "businessName_" + datas.BusinessID;
+                                let EditedBusinessName = $("#" + id).val();
+                                // alert(EditedBusinessName);
+                                // return;
+                                var pattern = /[^a-zA-Z0-9_]/;
+                                if (pattern.test(EditedBusinessName)) {
+                                  alert(
+                                    "Business name should not contain special character or space ."
+                                  );
+                                  return;
+                                } else if (
+                                  EditedBusinessName == datas.BusinessName
+                                ) {
+                                  alert("No Change On Business Name ");
+                                  return;
+                                }
+
+                                setOpen({
+                                  Action: "updateBusinesssName",
+                                  open: true,
+                                  targetdBusiness: {
+                                    getBusiness,
+                                    createdBusiness,
+                                    setcreatedBusiness,
+                                    setShowProgressBar,
+                                    businessId: datas.BusinessID,
+                                    businessName: datas.BusinessName,
+                                    getBusiness: getBusiness,
+                                    setBusinessLists: setBusinessLists,
+                                  },
+                                });
+                              }}
                             >
-                              <Button
-                                variant="contained"
-                                onClick={() =>
-                                  setOpen({
-                                    Action: "updateBusinesssName",
-                                    open: true,
-                                    targetdBusiness: {
-                                      createdBusiness,
-                                      setcreatedBusiness,
-                                      setShowProgressBar,
-                                      businessId: datas.BusinessID,
-                                      businessName: datas.BusinessName,
-                                      getBusiness: getBusiness,
-                                      setBusinessLists: setBusinessLists,
-                                    },
-                                  })
+                              <input
+                                id={"businessName_" + datas.BusinessID}
+                                placeholder="Business name"
+                                type="text"
+                              />
+                              <div
+                                className={
+                                  Businessmodulecss.updateCancelWrapper
                                 }
+                                id={"updateCancelWrapper_" + datas.BusinessID}
                               >
-                                Update
-                              </Button>
-                              <Button
-                                variant="contained"
-                                color="warning"
-                                onClick={() =>
-                                  cancelBusinessUpdate(datas.BusinessID)
-                                }
-                              >
-                                Cancel
-                              </Button>
-                            </div>
+                                <Button type="submit" variant="contained">
+                                  Update
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  color="warning"
+                                  onClick={() =>
+                                    cancelBusinessUpdate(datas.BusinessID)
+                                  }
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </form>
                           </div>
                         </div>
                       </div>

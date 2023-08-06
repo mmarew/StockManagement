@@ -5,7 +5,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import $ from "jquery";
 import { Box, Button, IconButton, Modal, TextField } from "@mui/material";
 import AddTotalSalesCss from "./AddTotalSales.module.css";
+import { useNavigate } from "react-router-dom";
 function AddTotalSales({ Time }) {
+  let navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [RegistrableProducts, setRegistrableProducts] = useState([{}]);
   const handleOpen = () => {
@@ -139,56 +141,21 @@ function AddTotalSales({ Time }) {
                     </Button>
                   </div>
                 );
-                // return (
-                //   <div key={item.ProductId}>
-                //     <div className="productName-transaction">
-                //       {" "}
-                //       <h4>{item.productName}</h4>
-                //       <br />
-                //     </div>
-                //     <TextField
-                //       required
-                //       target={item.ProductId}
-                //       onChange={collectFormData}
-                //       className={"productInput"}
-                //       type="number"
-                //       name={"purchaseQty" + item.ProductId}
-                //       label="Purchase quantity"
-                //     />
-                //     <br />
-                //     <TextField
-                //       required
-                //       onChange={collectFormData}
-                //       className={"productInput"}
-                //       type="number"
-                //       name={"salesQuantity" + item.ProductId}
-                //       label="Sales quantity"
-                //     />
-                //     <br />
-                //     <TextField
-                //       required
-                //       onChange={collectFormData}
-                //       className={"productInput"}
-                //       type="number"
-                //       name={"wrickageQty" + item.ProductId}
-                //       label="Broken quantity"
-                //     />
-                //     <br />
-                //     <TextField
-                //       required
-                //       onChange={collectFormData}
-                //       className={"productInput"}
-                //       type="text"
-                //       name={"Description" + item.ProductId}
-                //       label="Description"
-                //     />
-                //   </div>
-                // );
               })}
             </div>
           </>
         ) : (
-          "No product list found"
+          <h5>
+            No product list found{" "}
+            <span
+              className={AddTotalSalesCss.navigateToAddItems}
+              onClick={(e) => {
+                navigate("/OpenBusiness/additems");
+              }}
+            >
+              click here to register
+            </span>
+          </h5>
         )
       ) : (
         "please wait while fetching datas"

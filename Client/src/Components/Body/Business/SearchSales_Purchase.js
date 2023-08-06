@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import $ from "jquery";
+import $, { error } from "jquery";
 import axios from "axios";
 import SearchExpenceTransaction from "./SearchExpenceTransaction";
 import SearchSales_PurchaseCss from "./SearchSales_Purchase.module.css";
@@ -316,22 +316,28 @@ function SearchSales_Purchase({ response, requestFrom }) {
     let updates = await axios
       .post(serverAddress + "updateTransactions/", OB)
       .then((data) => {
-        console.log(data);
-        alert("updated well");
+        console.log(data.data.data[0]);
+        let mapedList = ListOfSalesAndPurchase.map((item, i) => {
+          if (i == index) {
+            console.log(item);
+            let resItem = data.data.data[0];
+            alert("updated well");
+            return {
+              ...resItem,
+              contentEditable: false,
+              updateEditedContent: false,
+            };
+          }
+          return item;
+        });
+        setListOfSalesAndPurchase(mapedList);
+      })
+      .catch((error) => {
+        console.log("error", error);
       });
     $(".LinearProgress").css("display", "none");
-    let mapedList = ListOfSalesAndPurchase.map((item, i) => {
-      if (i == index) {
-        console.log(item);
-        return {
-          ...item,
-          contentEditable: false,
-          updateEditedContent: false,
-        };
-      }
-      return item;
-    });
-    setListOfSalesAndPurchase(mapedList);
+    // console.log("updates", updates);
+    // return;
   };
   //
 

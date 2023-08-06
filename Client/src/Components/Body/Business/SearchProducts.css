@@ -9,7 +9,7 @@
 }
 .productContainer {
   max-width: 700px;
-  margin: auto;
+  /* margin: auto; */
 }
 .searchTitle {
   text-align: center;
@@ -48,12 +48,12 @@ td {
 }
 #costTable {
   max-width: 500px;
-  margin: auto;
+  /* margin: auto; */
 }
-.costWrapperDiv {
+/* .costWrapperDiv {
   display: flex;
   justify-content: center;
-}
+} */
 .btnUpdateCost {
   background-color: blue;
   margin: 3px;
