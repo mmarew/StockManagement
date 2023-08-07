@@ -18,7 +18,14 @@ import {
   colors,
 } from "@mui/material";
 import ConfirmDialog from "../Others/Confirm";
+import { DateFormatter } from "../Date/currentDate";
 function SearchSales_Purchase({ response, requestFrom }) {
+  // set correct data format to time because it is bringing us like registeredTime: "2023-08-05T21:00:00.000Z". The correct format is year month day
+  console.log("response is ", response);
+  response.data.data.map((item) => {
+    item.registeredTime = DateFormatter(item.registeredTime);
+  });
+  // return;
   let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
   const [UpdateSalesAndPurchase, setUpdateSalesAndPurchase] = useState({});
@@ -197,8 +204,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
             purchaseQty += transaction.purchaseQty;
             salesQty += transaction.salesQty;
             wrickages += transaction.wrickages;
-            registeredTime += transaction.registeredTime.split("T")[0] + ", ";
-
+            registeredTime += transaction.registeredTime + ", ";
             description += transaction.description + ", ";
             x = transaction;
           }
@@ -297,7 +303,11 @@ function SearchSales_Purchase({ response, requestFrom }) {
       return;
     }
     let date = $("#RegistrationDate_" + transactionId).text();
+    let fromDate = $("#fromDate").val();
+    let toDate = $("#toDate").val();
     OB = {
+      fromDate,
+      toDate,
       ...OB,
       date,
       businessName,
@@ -317,17 +327,13 @@ function SearchSales_Purchase({ response, requestFrom }) {
       .post(serverAddress + "updateTransactions/", OB)
       .then((data) => {
         console.log(data.data.data[0]);
-        let mapedList = ListOfSalesAndPurchase.map((item, i) => {
-          if (i == index) {
-            console.log(item);
-            let resItem = data.data.data[0];
-            alert("updated well");
-            return {
-              ...resItem,
-              contentEditable: false,
-              updateEditedContent: false,
-            };
-          }
+        let mapedList = data.data.data.map((item, i) => {
+          // if (i == index) {
+          //   console.log(item);
+          //   let resItem = data.data.data[0];
+          //   alert("updated well");
+
+          // }
           return item;
         });
         setListOfSalesAndPurchase(mapedList);
@@ -403,7 +409,12 @@ function SearchSales_Purchase({ response, requestFrom }) {
                         items.contentEditable && "date" + items.transactionId
                       }
                     >
-                      {items.registeredTime.split("T")[0]}
+                      {/* const dateTimeString = "2023-08-05T21:00:00.000Z"; const
+                      date = new Date(dateTimeString); const formattedDate =
+                      date.toLocaleDateString("en-US");
+                      console.log(formattedDate); // Output: "8/5/2023" (or any
+                      other format based on your system's locale) */}
+                      {items.registeredTime}
                     </TableCell>
                     <TableCell
                       className={"unitPrice" + items.transactionId}

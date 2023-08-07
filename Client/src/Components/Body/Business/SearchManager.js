@@ -58,10 +58,13 @@ function SearchManager() {
     }
 
     $(".LinearProgress").css("display", "block");
+    console.log("InputValue", InputValue);
+    // return;
     let response = await axios.post(serverAddress + "searchProducts/", {
       InputValue,
     });
     console.log("response", response);
+    // return;
     if (searchTarget == "TRANSACTION") {
     } else if (searchTarget == "COSTS") {
       if (response.data.data.length == 0) {
@@ -73,8 +76,8 @@ function SearchManager() {
       }
     } else if (searchTarget == "ALLTRANSACTION") {
       if (
-        response.data.expenceTransaction.length == 0 &&
-        response.data.data.length == 0
+        response?.data?.expenceTransaction?.length == 0 &&
+        response?.data?.data?.length == 0
       ) {
         alert("No data on this date");
       }

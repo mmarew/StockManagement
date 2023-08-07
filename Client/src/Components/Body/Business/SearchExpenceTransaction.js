@@ -29,8 +29,8 @@ function SearchExpenceTransaction({
   let TotalSalesRevenue = 0,
     TotalPurchaseCost = 0;
   console.log("response is == ", response.data.data);
-  let data = response.data.data;
-  data.map((item) => {
+  let data = response?.data?.data;
+  data?.map((item) => {
     console.log(item.unitCost, item.purchaseQty);
     console.log(item.unitPrice, item.salesQty);
     TotalPurchaseCost += parseInt(item.unitCost) * parseInt(item.purchaseQty);

@@ -20,5 +20,13 @@ function currentDates() {
   console.log(currentDate);
   return currentDate;
 }
+export let DateFormatter = (dateTimeString) => {
+  // const dateTimeString = "2023-08-05T21:00:00.000Z";
+  const date = new Date(dateTimeString);
+  const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+  const formattedDate = date.toLocaleDateString("en-US", options);
+  return formattedDate;
+  console.log(formattedDate);
+};
 
 export default currentDates;

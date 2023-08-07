@@ -48,6 +48,7 @@ fullTime = year + "-" + month + "-" + day + "" + hour + ":" + minuite;
 createBasicTables.createBasicTables();
 let jwt = require("jsonwebtoken");
 const { Pool } = require("./Database.js");
+const { DateFormatter } = require("./DateFormatter.js");
 let Database,
   {
     deleteBusiness,
@@ -535,7 +536,6 @@ server.post(path + "updateTransactions/", async (req, res) => {
   const selectQuery = `SELECT * FROM ?? WHERE registeredTime <=? AND productIDTransaction = ?  order by registeredTime limit 1 `;
   const params = [`${businessName}_Transaction`, previousDay, productId];
 
-  let update = "";
   Pool.query(selectQuery, params)
     .then(([rows]) => {
       console.log("result on selectQuery ", rows, "previousDay", previousDay);
@@ -546,9 +546,8 @@ server.post(path + "updateTransactions/", async (req, res) => {
         parseInt(req.body.purchaseQty) -
         parseInt(req.body.salesQty) -
         parseInt(req.body.wrickages);
-
       if (data.length > 0) {
-        prevInventory = parseInt(data[0].wrickages);
+        prevInventory = parseInt(data[0].Inventory);
         currentInventory += prevInventory;
       }
       console.log(
@@ -557,8 +556,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
         "currentInventory",
         currentInventory
       );
-      // return;
-      const updateQuery = `UPDATE ?? SET wrickages = ?, purchaseQty = ?, salesQty = ?, Inventory = ?, description = ? WHERE transactionId = ?`;
+      const updateQuery = `UPDATE ?? SET wrickages=?, purchaseQty=?, salesQty=?, Inventory=?, description=? WHERE transactionId=?`;
       const params = [
         `${businessName}_Transaction`,
         req.body.wrickages,
@@ -568,26 +566,48 @@ server.post(path + "updateTransactions/", async (req, res) => {
         req.body.Description,
         req.body.transactionId,
       ];
-
+      console.log(" params_is_param= ", params, " updateQuery==", updateQuery);
+      // return;
       Pool.query(updateQuery, params)
-        .then((data) => {
+        .then((results) => {
+          console.log("results are well = ", results);
+          // return;
           console.log("in ALLTRANSACTION req.body == ", req.body);
-          const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.transactionId=?`;
+          const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? and ?`;
           // define the input data as an array of values
           const input = [
             `${businessName}_Transaction`,
             `${businessName}_products`,
-            req.body.transactionId,
+            req.body.fromDate,
+            req.body.toDate,
           ];
 
           // execute the query with the input data
           Pool.query(sql, input)
             .then(([rows]) => {
-              res.json({ data: rows });
+              rows.map((item) => {
+                // console.log(
+                //   "req.body.transactionId,item.transactionId",
+                //   req.body.transactionId,
+                //   item.transactionId,
+                //   "rows",
+                //   rows
+                // );
+                if (req.body.transactionId == item.transactionId) {
+                  console.log("item.registeredTime", item.registeredTime);
+                  updateNextDateInventory(
+                    `${businessName}_Transaction`,
+                    rows,
+                    DateFormatter(item.registeredTime),
+                    [currentInventory]
+                  );
+                  res.json({ data: rows });
+                }
+              });
             })
             .catch((error) => {
               console.log("error in alltransaction", error);
-              res.json({ data: error, error: "9090" });
+              res.json({ data: error, error: "621" });
             });
         })
         .catch((error) => {
@@ -600,15 +620,25 @@ server.post(path + "updateTransactions/", async (req, res) => {
     });
 });
 async function getPreviousDay(date) {
-  const previous = new Date(date.getTime());
-  previous.setDate(date.getDate() - 1);
-  let previousFormat = new Date(previous),
-    previousDay = "";
-  const year = previousFormat.getFullYear();
-  const month = (previousFormat.getMonth() + 1).toString().padStart(2, "0");
-  const day = previousFormat.getDate().toString().padStart(2, "0");
-  previousDay = `${year}-${month}-${day}`;
-  return previousDay;
+  // Get the current date
+  const currentDate = new Date(date);
+
+  // Subtract one day from the current date
+  const previousDate = new Date();
+  previousDate.setDate(currentDate.getDate() - 1);
+
+  // Extract the year, month, and day from the previous date
+  const year = previousDate.getFullYear();
+  const month = previousDate.getMonth() + 1; // Month is zero-based, so add 1
+  const day = previousDate.getDate();
+
+  // Format the date components as a string (YYYY-MM-DD)
+  const formattedDate = `${year}-${month.toString().padStart(2, "0")}-${day
+    .toString()
+    .padStart(2, "0")}`;
+
+  console.log("Previous day:", formattedDate);
+  return formattedDate;
 }
 // async function getPreviousDay(date) {
 //   return;
@@ -885,21 +915,24 @@ server.post(path + "updateBusiness/", (req, res) => {
       res.json({ err });
     });
 });
-let updateNextDateInventory = (
+let updateNextDateInventory = async (
   businessName,
   ProductsList,
   date,
   previousInventory
 ) => {
   console.log("638 = ", businessName, ProductsList, date, previousInventory);
+  // return;
   let index = 0;
   let recurciveUpdate = () => {
     let productId = ProductsList[index].ProductId,
-      select = `select * from ?? where productIDTransaction=? and registeredTime>? order by registeredTime asc`;
+      select = `select * from ?? where productIDTransaction=? and registeredTime > ? order by registeredTime asc`;
     let values = [`${businessName}`, productId, date];
     Pool.query(select, values)
       .then(([rows]) => {
         console.log(
+          "values are",
+          values,
           "select query is = ",
           select,
           "select   results are =",
@@ -908,11 +941,11 @@ let updateNextDateInventory = (
         if (rows.length > 0) {
           let j = 0,
             prevInventory = 0;
-          for (let i = 0; i < results.length; i++) {
-            let salesqty = results[i].salesQty,
-              purchaseQty = results[i].purchaseQty,
+          for (let i = 0; i < rows.length; i++) {
+            let salesqty = rows[i].salesQty,
+              purchaseQty = rows[i].purchaseQty,
               inventory = 0,
-              wrickages = results[i].wrickages;
+              wrickages = rows[i].wrickages;
             if (i == 0) {
               inventory =
                 purchaseQty + previousInventory[index] - salesqty - wrickages;
@@ -924,7 +957,7 @@ let updateNextDateInventory = (
             let valuesToUpdate = [
               `${businessName}`,
               `${inventory}`,
-              `${results[i].transactionId}`,
+              `${rows[i].transactionId}`,
             ];
             // previousInventory = inventory;
             Pool.query(update, valuesToUpdate)
