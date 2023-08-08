@@ -5,6 +5,7 @@ import SearchExpenceTransaction from "./SearchExpenceTransaction";
 import SearchSales_PurchaseCss from "./SearchSales_Purchase.module.css";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+
 import {
   Button,
   Checkbox,
@@ -14,17 +15,19 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  colors,
 } from "@mui/material";
 import ConfirmDialog from "../Others/Confirm";
 import { DateFormatter } from "../Date/currentDate";
+const timeZone = "Africa/Addis_Ababa";
 function SearchSales_Purchase({ response, requestFrom }) {
   // set correct data format to time because it is bringing us like registeredTime: "2023-08-05T21:00:00.000Z". The correct format is year month day
-  console.log("response is ", response);
-  response.data.data.map((item) => {
-    item.registeredTime = DateFormatter(item.registeredTime);
+  let dateData = [...response.data.data];
+  console.log("response is ", response.data.data);
+  dateData.map((item) => {
+    item.registeredTime = DateFormatter(item.registeredTime, timeZone);
   });
+  console.log("dateData is ", dateData);
+  // return;
   // return;
   let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
@@ -129,13 +132,6 @@ function SearchSales_Purchase({ response, requestFrom }) {
       setTotalPurchaseCost(totalPurchaseCost);
       setTotalSalesRevenue(totalSalesAmt);
       setSearchedDatas(resData);
-      // alert(
-      //   "totalSalesAmt" +
-      //     totalSalesAmt +
-      //     " " +
-      //     "totalPurchaseCost" +
-      //     totalPurchaseCost
-      // );
       setShowExpences(
         <SearchExpenceTransaction
           showEachItems={showEachItems}
@@ -270,22 +266,6 @@ function SearchSales_Purchase({ response, requestFrom }) {
     let OB = {};
     const tdElements = document.querySelectorAll(`.Transaction_${index} td`);
     let id = "";
-    // for (const tdElement of tdElements) {
-    //   console.log(`Class: ${tdElement.className}`);
-    //   let className = tdElement.className.split(" ")[0];
-    //   console.log(className);
-    //   className = className.replace(transactionId, "");
-    //   console.log(`ID: ${tdElement.id}`);
-    //   id = tdElement.id;
-    //   console.log(id);
-    //   if (id != "") {
-    //     let doc = $("#" + id).text();
-    //     console.log(doc);
-    //     OB[className] = doc;
-    //   }
-    //   // console.log(`Name: ${tdElement.name || ""}`);
-    // }
-    // salesQty_ purchaseQty_ wrickages_ Description_
     let salesQty = $("#salesQty_" + transactionId).text();
     let purchaseQty = $("#purchaseQty_" + transactionId).text();
     let wrickages = $("#wrickages_" + transactionId).text();
@@ -328,12 +308,12 @@ function SearchSales_Purchase({ response, requestFrom }) {
       .then((data) => {
         console.log(data.data.data[0]);
         let mapedList = data.data.data.map((item, i) => {
-          // if (i == index) {
-          //   console.log(item);
-          //   let resItem = data.data.data[0];
-          //   alert("updated well");
-
-          // }
+          console.log(
+            "item.registeredTime ==== ",
+            DateFormatter(item.registeredTime)
+          );
+          let correctDateFormat = DateFormatter(item.registeredTime);
+          item.registeredTime = correctDateFormat;
           return item;
         });
         setListOfSalesAndPurchase(mapedList);

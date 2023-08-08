@@ -1,13 +1,21 @@
-function DateFormatter(dateTimeString) {
-  const date = new Date(dateTimeString);
-  const options = { year: "numeric", month: "2-digit", day: "2-digit" };
-  const formattedDate = date
-    .toLocaleDateString("en-US", options)
-    .split("/")
-    .reverse()
-    .join("-");
-  console.log(formattedDate);
+function DateFormatter(dateTimeString, timeZone) {
+  console.log("dateTimeString==", new Date(dateTimeString));
+  let date = new Date(dateTimeString);
+  let Year = date.getFullYear();
+  let Month = date.getMonth();
+  let Day = date.getDate();
+
+  let formattedDate =
+    Year +
+    "-" +
+    (Month + 1).toString().padStart(2, "0") +
+    "-" +
+    Day.toString().padStart(2, "0");
+
+  console.log("formattedDate", formattedDate);
+
   return formattedDate;
 }
+
 module.exports.DateFormatter = DateFormatter;
 // export default DateFormatter;

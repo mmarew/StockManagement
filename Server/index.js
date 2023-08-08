@@ -329,7 +329,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
               });
             } else {
               console.log("values @ 1", values);
-              // return;
+
               let insert = `insert into ${businessName}_Transaction(unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory) values (?)`;
               let insertValues = [values.split(",")];
               Pool.query(insert, insertValues)
@@ -357,11 +357,6 @@ server.post(path + "registerTransaction/", async (req, res) => {
           }
         } else {
           insertedProducts.push(ProductsList[i]);
-          // let prevInventory = `select * from ${businessName}_Transaction where productIDTransaction= ${(
-          //   productID
-          // )} and registeredTime < ${(
-          //   req.body.dates
-          // )} order by registeredTime desc limit 1`;
           let prevInventory =
             "SELECT * FROM ?? WHERE productIDTransaction = ? AND registeredTime < ? ORDER BY registeredTime DESC LIMIT 1";
           let table = `${businessName}_Transaction`;
@@ -381,24 +376,8 @@ server.post(path + "registerTransaction/", async (req, res) => {
                 parseInt(rowData[salesQuantity]) +
                 parseInt(Inventory) -
                 parseInt(rowData[wrickageQty]);
-              // console.log(
-              //   "rows=",
-              //   rows,
-              //   "purchaseQty",
-              //   parseInt(rowData[purchaseQty]),
-              //   "salesQuantity",
-              //   parseInt(rowData[salesQuantity]),
-              //   "Inventory",
-              //   parseInt(Inventory),
-              //   "wrickageQty",
-              //   parseInt(rowData[wrickageQty])
-              // );
-              // console.log("typeof Inventory is ", typeof Inventory);
-              // return;
+
               if (typeof Inventory == "string") {
-                // console.log(
-                //   "Inventory is not number this may be in purchaseQty,salesQuantity,Inventory,wrickageQty"
-                // );
                 return res.json({ data: "error", error: "error code 678," });
               }
               InventoryList.push(Inventory);
@@ -518,14 +497,14 @@ server.post(path + "ViewTransactions/", (req, res) => {
     });
 });
 server.post(path + "updateTransactions/", async (req, res) => {
-  console.log("@updateTransactions", req.body);
+  // console.log("@updateTransactions", req.body);
   // return;
   let currentInventory = "",
     prevInventory = "";
   let previousDay = await getPreviousDay(new Date(req.body.date));
   let validate = validateAlphabet(req.body.businessName, res),
     businessName = "";
-  console.log("validate", validate);
+  // console.log("validate", validate);
   if (validate == "correctData") {
     businessName = req.body.businessName;
   } else {
@@ -542,6 +521,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
       return rows;
     })
     .then((data) => {
+      // return;
       currentInventory =
         parseInt(req.body.purchaseQty) -
         parseInt(req.body.salesQty) -
@@ -556,6 +536,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
         "currentInventory",
         currentInventory
       );
+      // return;
       const updateQuery = `UPDATE ?? SET wrickages=?, purchaseQty=?, salesQty=?, Inventory=?, description=? WHERE transactionId=?`;
       const params = [
         `${businessName}_Transaction`,
@@ -566,42 +547,34 @@ server.post(path + "updateTransactions/", async (req, res) => {
         req.body.Description,
         req.body.transactionId,
       ];
-      console.log(" params_is_param= ", params, " updateQuery==", updateQuery);
-      // return;
+
       Pool.query(updateQuery, params)
         .then((results) => {
-          console.log("results are well = ", results);
+          console.log("results on updateQuery======", results);
           // return;
-          console.log("in ALLTRANSACTION req.body == ", req.body);
-          const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? and ?`;
+          const sqlToSelect = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? and ?`;
           // define the input data as an array of values
-          const input = [
+          const inputToSelect = [
             `${businessName}_Transaction`,
             `${businessName}_products`,
             req.body.fromDate,
             req.body.toDate,
           ];
-
+          let dataToSendResponceToClient = { sqlToSelect, inputToSelect, res };
           // execute the query with the input data
-          Pool.query(sql, input)
+          Pool.query(sqlToSelect, inputToSelect)
             .then(([rows]) => {
-              rows.map((item) => {
-                // console.log(
-                //   "req.body.transactionId,item.transactionId",
-                //   req.body.transactionId,
-                //   item.transactionId,
-                //   "rows",
-                //   rows
-                // );
+              rows.map(async (item) => {
                 if (req.body.transactionId == item.transactionId) {
-                  console.log("item.registeredTime", item.registeredTime);
-                  updateNextDateInventory(
+                  // console.log("item.registeredTime", item.registeredTime);
+                  await updateNextDateInventory(
                     `${businessName}_Transaction`,
-                    rows,
+                    [item],
                     DateFormatter(item.registeredTime),
-                    [currentInventory]
+                    [currentInventory],
+                    dataToSendResponceToClient
                   );
-                  res.json({ data: rows });
+                  // res.json({ data: rows });
                 }
               });
             })
@@ -622,7 +595,6 @@ server.post(path + "updateTransactions/", async (req, res) => {
 async function getPreviousDay(date) {
   // Get the current date
   const currentDate = new Date(date);
-
   // Subtract one day from the current date
   const previousDate = new Date();
   previousDate.setDate(currentDate.getDate() - 1);
@@ -640,22 +612,7 @@ async function getPreviousDay(date) {
   console.log("Previous day:", formattedDate);
   return formattedDate;
 }
-// async function getPreviousDay(date) {
-//   return;
-//   const previous = new Date(date.getTime());
-//   previous.setDate(date.getDate() - 1);
-//   let previousFormat = new Date(previous),
-//     previousDay = "";
-//   previousDay =
-//     previousFormat.getFullYear() +
-//     "-0" +
-//     (previousFormat.getMonth() + 1) +
-//     "-" +
-//     previousFormat.getDate();
-//   // console.log("previousDay = " + previousDay);
 
-//   return previousDay;
-// }
 server.post(path + "searchProducts/", (req, res) => {
   let businessName = "",
     productName = req.body.InputValue.productName,
@@ -919,9 +876,11 @@ let updateNextDateInventory = async (
   businessName,
   ProductsList,
   date,
-  previousInventory
+  previousInventory,
+  dataToSendResponceToClient
 ) => {
-  console.log("638 = ", businessName, ProductsList, date, previousInventory);
+  let { sqlToSelect, inputToSelect, res } = dataToSendResponceToClient;
+  console.log("903 = ", businessName, ProductsList, date, previousInventory);
   // return;
   let index = 0;
   let recurciveUpdate = () => {
@@ -930,14 +889,6 @@ let updateNextDateInventory = async (
     let values = [`${businessName}`, productId, date];
     Pool.query(select, values)
       .then(([rows]) => {
-        console.log(
-          "values are",
-          values,
-          "select query is = ",
-          select,
-          "select   results are =",
-          rows
-        );
         if (rows.length > 0) {
           let j = 0,
             prevInventory = 0;
@@ -953,18 +904,20 @@ let updateNextDateInventory = async (
               inventory = purchaseQty + prevInventory - salesqty - wrickages;
             }
             prevInventory = inventory;
+            // set inventory
             let update = `update ?? set inventory=? where transactionId=?`;
             let valuesToUpdate = [
               `${businessName}`,
               `${inventory}`,
               `${rows[i].transactionId}`,
             ];
+
             // previousInventory = inventory;
             Pool.query(update, valuesToUpdate)
               .then((results) => {
                 if (results) {
                   if (index < ProductsList.length - 1) {
-                    if (j == results.length - 1) {
+                    if (j >= results.length - 1) {
                       index++;
                       recurciveUpdate();
                     }
@@ -972,6 +925,11 @@ let updateNextDateInventory = async (
                   j++;
                   // console.log("updated " + results1);
                 } else {
+                  sqlToSelect, inputToSelect, res;
+
+                  Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
+                    res.json({ data: rows });
+                  });
                 }
               })
               .catch((err) => {
@@ -983,6 +941,10 @@ let updateNextDateInventory = async (
           if (index < ProductsList.length - 1) {
             index++;
             recurciveUpdate();
+          } else {
+            Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
+              res.json({ data: rows });
+            });
           }
         }
         // return res.json({ data: req.body });
