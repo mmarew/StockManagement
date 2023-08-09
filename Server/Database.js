@@ -3,19 +3,19 @@ let bcript = require("bcryptjs");
 const mysql2 = require("mysql2/promise");
 const JWT = require("jsonwebtoken");
 // Create a MySQL pool pool
-const pool = mysql2.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "store",
-});
-
 // const pool = mysql2.createPool({
 //   host: "localhost",
-//   user: "masetawoshacom_stock",
-//   password: "DBcp123$%^",
-//   database: "masetawoshacom_store",
+//   user: "root",
+//   password: "",
+//   database: "store",
 // });
+
+const pool = mysql2.createPool({
+  host: "localhost",
+  user: "masetawoshacom_stock",
+  password: "DBcp123$%^",
+  database: "masetawoshacom_store",
+});
 // var pool = mysql2.createpool({
 //   host: "localhost",
 //   user: "guzowaycom_guzowaycom",

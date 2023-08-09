@@ -370,7 +370,6 @@ server.post(path + "registerTransaction/", async (req, res) => {
               } else {
                 Inventory = rows[0].Inventory;
               }
-
               Inventory =
                 parseInt(rowData[purchaseQty]) -
                 parseInt(rowData[salesQuantity]) +
@@ -401,22 +400,21 @@ server.post(path + "registerTransaction/", async (req, res) => {
                 } else {
                   let insert = `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values(?) `;
                   // insertvalues = values;
+                  let dataToSendResponceToClient = "NoNeed";
                   Pool.query(insert, [values.split(",")])
                     .then((result) => {
-                      {
-                        // console.log(result);
-                        updateNextDateInventory(
-                          `${businessName}_Transaction`,
-                          insertedProducts,
-                          req.body.dates,
-                          InventoryList
-                        );
-                        return res.json({
-                          data: "data is registered successfully",
-                          previouslyRegisteredData,
-                          values,
-                        });
-                      }
+                      updateNextDateInventory(
+                        `${businessName}_Transaction`,
+                        insertedProducts,
+                        req.body.dates,
+                        InventoryList
+                      );
+                      return res.json({
+                        data: "data is registered successfully",
+                        previouslyRegisteredData,
+                        values,
+                        dataToSendResponceToClient,
+                      });
                     })
                     .catch((error) => {
                       console.log("err on insert == ", error);
@@ -551,8 +549,8 @@ server.post(path + "updateTransactions/", async (req, res) => {
       Pool.query(updateQuery, params)
         .then((results) => {
           console.log("results on updateQuery======", results);
-          // return;
-          const sqlToSelect = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? and ?`;
+
+          const sqlToSelect = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? and ? order by  t.registeredTime desc`;
           // define the input data as an array of values
           const inputToSelect = [
             `${businessName}_Transaction`,
@@ -667,7 +665,7 @@ server.post(path + "searchProducts/", (req, res) => {
       });
   } else if (selectSearches == "ALLTRANSACTION") {
     console.log("in ALLTRANSACTION req.body == ", req.body);
-    const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? AND ?`;
+    const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? AND ? order by t.registeredTime desc`;
     // define the input data as an array of values
     const input = [
       `${businessName}_Transaction`,
@@ -879,16 +877,23 @@ let updateNextDateInventory = async (
   previousInventory,
   dataToSendResponceToClient
 ) => {
-  let { sqlToSelect, inputToSelect, res } = dataToSendResponceToClient;
+  let sqlToSelect, inputToSelect, res;
+  if (dataToSendResponceToClient !== "NoNeed") {
+    sqlToSelect = dataToSendResponceToClient.sqlToSelect;
+    inputToSelect = dataToSendResponceToClient.inputToSelect;
+    res = dataToSendResponceToClient.res;
+  }
   console.log("903 = ", businessName, ProductsList, date, previousInventory);
   // return;
-  let index = 0;
+  let index = 0,
+    productId = ProductsList[index].ProductId;
   let recurciveUpdate = () => {
-    let productId = ProductsList[index].ProductId,
-      select = `select * from ?? where productIDTransaction=? and registeredTime > ? order by registeredTime asc`;
+    let select = `select * from ?? where productIDTransaction=? and registeredTime > ? order by registeredTime asc`;
     let values = [`${businessName}`, productId, date];
     Pool.query(select, values)
-      .then(([rows]) => {
+      .then(async ([rows]) => {
+        console.log("my rows===", rows);
+
         if (rows.length > 0) {
           let j = 0,
             prevInventory = 0;
@@ -911,25 +916,21 @@ let updateNextDateInventory = async (
               `${inventory}`,
               `${rows[i].transactionId}`,
             ];
-
             // previousInventory = inventory;
-            Pool.query(update, valuesToUpdate)
+            await Pool.query(update, valuesToUpdate)
               .then((results) => {
                 if (results) {
-                  if (index < ProductsList.length - 1) {
-                    if (j >= results.length - 1) {
-                      index++;
-                      recurciveUpdate();
+                  if (dataToSendResponceToClient !== "NoNeed")
+                    if (i >= rows.length - 1) {
+                      Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
+                        res.json({ data: rows });
+                      });
                     }
-                  }
-                  j++;
-                  // console.log("updated " + results1);
                 } else {
-                  sqlToSelect, inputToSelect, res;
-
-                  Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
-                    res.json({ data: rows });
-                  });
+                  if (dataToSendResponceToClient !== "NoNeed")
+                    Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
+                      res.json({ data: rows });
+                    });
                 }
               })
               .catch((err) => {
@@ -938,20 +939,19 @@ let updateNextDateInventory = async (
               });
           }
         } else {
-          if (index < ProductsList.length - 1) {
-            index++;
-            recurciveUpdate();
-          } else {
-            Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
-              res.json({ data: rows });
-            });
-          }
+          // if (index < ProductsList.length - 1) {
+          //   index++;
+          //   recurciveUpdate();
+          // }
+          // else {
+          Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
+            res.json({ data: rows });
+          });
+          // }
         }
-        // return res.json({ data: req.body });
       })
       .catch((error) => {
         console.log(error);
-        // res.json({ error });
       });
   };
   recurciveUpdate();
