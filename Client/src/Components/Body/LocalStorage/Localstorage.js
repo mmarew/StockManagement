@@ -1,6 +1,6 @@
 function Localstorage() {
-  localStorage.setItem("targetUrl", "https://mar.masetawosha.com/");
-  // localStorage.setItem("targetUrl", "http://localhost:2020/");
+  // localStorage.setItem("targetUrl", "https://mar.masetawosha.com/");
+  localStorage.setItem("targetUrl", "http://localhost:2020/");
   let setLocalStorage = (targetItem, targetValue) => {
       localStorage.setItem(targetItem, targetValue);
     },

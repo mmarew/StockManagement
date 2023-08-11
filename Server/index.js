@@ -314,47 +314,47 @@ server.post(path + "registerTransaction/", async (req, res) => {
     Pool.query(selectToCheck, valuesOfTransactions)
       .then(([rows]) => {
         if (rows.length > 0) {
-          // previouslyRegisteredData.push(resultOfQuery) collect previously registered
-          previouslyRegisteredData.push(rows);
+          return res.json({
+            data: "allDataAreRegisteredBefore",
+            previouslyRegisteredData,
+            date: req.body.dates,
+            values,
+          });
+          // // previouslyRegisteredData.push(resultOfQuery) collect previously registered
+          // previouslyRegisteredData.push(rows);
 
-          // i == length - 1 at last status
-          if (i == length - 1) {
-            if (previouslyRegisteredData.length == length) {
-              // previouslyRegisteredData.length - 1 == length - 1 are all registered before or not
-              return res.json({
-                data: "allDataAreRegisteredBefore",
-                previouslyRegisteredData,
-                date: req.body.dates,
-                values,
-              });
-            } else {
-              console.log("values @ 1", values);
+          // // i == length - 1 at last status
+          // if (i == length - 1) {
+          //   if (previouslyRegisteredData.length == length) {
+          //     // previouslyRegisteredData.length - 1 == length - 1 are all registered before or not
+          //   } else {
+          //     console.log("values @ 1", values);
 
-              let insert = `insert into ${businessName}_Transaction(unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory) values (?)`;
-              let insertValues = [values.split(",")];
-              Pool.query(insert, insertValues)
-                .then((result) => {
-                  updateNextDateInventory(
-                    `${businessName}_Transaction`,
-                    insertedProducts,
-                    req.body.dates,
-                    InventoryList
-                  );
-                  return res.json({
-                    data: "data is registered successfully",
-                    previouslyRegisteredData,
-                  });
-                })
-                .catch((error) => {
-                  console.log("error on 9090", error);
-                  res.json({ data: error });
-                });
-            }
-          } else {
-            console.log("recall to recursive");
-            i++;
-            recurciveTorecheck();
-          }
+          //     let insert = `insert into ${businessName}_Transaction(unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory) values (?)`;
+          //     let insertValues = [values.split(",")];
+          //     Pool.query(insert, insertValues)
+          //       .then((result) => {
+          //         updateNextDateInventory(
+          //           `${businessName}_Transaction`,
+          //           insertedProducts,
+          //           req.body.dates,
+          //           InventoryList
+          //         );
+          //         return res.json({
+          //           data: "data is registered successfully",
+          //           previouslyRegisteredData,
+          //         });
+          //       })
+          //       .catch((error) => {
+          //         console.log("error on 9090", error);
+          //         res.json({ data: error });
+          //       });
+          //   }
+          // } else {
+          //   console.log("recall to recursive");
+          //   i++;
+          //   recurciveTorecheck();
+          // }
         } else {
           insertedProducts.push(ProductsList[i]);
           let prevInventory =
@@ -1874,7 +1874,7 @@ server.post(path + "getMaximumSales/", (req, res) => {
     .then(([rows]) => {
       if (rows) {
         console.log(rows);
-        return res.json({ data: rows });
+        return res.json({ data: rows, values });
       }
     })
     .catch((error) => {

@@ -10,16 +10,20 @@
   /* margin: 10px auto; */
   padding: 20px 10px;
   background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 }
 #selectTimeRange {
   width: 150px;
   padding: 16px !important;
 }
 .othersDateRange {
-  max-width: 200px;
+  /* max-width: 200px; */
   display: flex;
   flex-direction: column;
-  margin: auto;
+  justify-content: center;
+  /* margin: auto; */
 }
 .maxSelectionForm select {
   width: 100%;

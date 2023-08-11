@@ -25,7 +25,7 @@ function GetMaximumSales() {
   let businessName = localStorage.getItem("businessName");
   const [DateRange, setDateRange] = useState({});
   const today = new Date(Date.now());
-  let todatFormated = "";
+  let todayFormatted = "";
   useEffect(() => {
     if (Object.keys(DateRange).length > 0) {
       submitMaximumSelection("notEvent");
@@ -35,67 +35,69 @@ function GetMaximumSales() {
 
   useEffect(() => {
     setMaximumDataList([]);
-    todatFormated =
+    todayFormatted =
       today.getFullYear() +
       "-" +
-      (today.getMonth() + 1) +
+      (today.getMonth() + 1).toString().padStart(2, "0") +
       "-" +
-      today.getDate();
+      today.getDate().toString().padStart(2, "0");
     console.log("SelectedTime", SelectedTime);
     if (SelectedTime == "Monthly") {
       // Get the current date.
+      const today = new Date();
       // Subtract 30 days from the current date.
       const previous30thDay = new Date(today - 30 * 24 * 60 * 60 * 1000);
-      // Format the date to year-month-day format.
+      // Format the date to year-month-day format with two-digit month and day.
       const previous30thDayFormatted =
         previous30thDay.getFullYear() +
         "-" +
-        (previous30thDay.getMonth() + 1) +
+        (previous30thDay.getMonth() + 1).toString().padStart(2, "0") +
         "-" +
-        previous30thDay.getDate();
-
+        previous30thDay.getDate().toString().padStart(2, "0");
       console.log("previous30thDayFormatted", previous30thDayFormatted);
       setDateRange({
         ...DateRange,
-        fromDate: todatFormated,
-        toDate: previous30thDayFormatted,
+        fromDate: previous30thDayFormatted,
+        toDate: todayFormatted,
       });
-    }
-    if (SelectedTime == "Annualy") {
+    } else if (SelectedTime == "Annualy") {
       // Subtract 1 year from the current date.
       const previousYear = new Date(today - 364 * 24 * 60 * 60 * 1000);
-      // Format the date to year-month-day format.
+      // Format the date to year-month-day format with two-digit month and day.
       const previousYearFormatted =
         previousYear.getFullYear() +
         "-" +
-        (previousYear.getMonth() + 1) +
+        (previousYear.getMonth() + 1).toString().padStart(2, "0") +
         "-" +
-        previousYear.getDate();
+        previousYear.getDate().toString().padStart(2, "0");
+
       console.log(previousYearFormatted);
+
       setDateRange({
         ...DateRange,
-        fromDate: todatFormated,
+        fromDate: todayFormatted,
         toDate: previousYearFormatted,
       });
-    }
-    if (SelectedTime == "Others") {
+    } else if (SelectedTime == "Others") {
       setDateRange({});
-    }
-    if (SelectedTime == "weekly") {
+    } else if (SelectedTime == "weekly") {
       // Subtract 7 days from the current date.
       const previous7thDay = new Date(today - 7 * 24 * 60 * 60 * 1000);
-      // Format the date to year-month-day format.
+
+      // Format the date to year-month-day format with two-digit month and day.
       const previous7thDayFormatted =
         previous7thDay.getFullYear() +
         "-" +
-        (previous7thDay.getMonth() + 1) +
+        (previous7thDay.getMonth() + 1).toString().padStart(2, "0") +
         "-" +
-        previous7thDay.getDate();
-      console.log("previous7thDayFormatted = ", previous7thDayFormatted);
+        previous7thDay.getDate().toString().padStart(2, "0");
+
+      console.log("previous7thDayFormatted =", previous7thDayFormatted);
+
       setDateRange({
         ...DateRange,
-        fromDate: todatFormated,
-        toDate: previous7thDayFormatted,
+        fromDate: previous7thDayFormatted,
+        toDate: todayFormatted,
       });
     }
   }, [SelectedTime]);
@@ -219,8 +221,10 @@ function GetMaximumSales() {
 
   return (
     <div>
-      <h5 className={GetMaximumStyle.maximumTitle}>Maximum Transaction Data</h5>
-
+      <br /> <br /> <br />
+      <h5 className={GetMaximumStyle.maximumTitle}>
+        Maximum Transaction Data Table
+      </h5>
       <form
         className={GetMaximumStyle.maxSelectionForm}
         onSubmit={submitMaximumSelection}
@@ -243,12 +247,13 @@ function GetMaximumSales() {
         {SelectedTime == "Others" && (
           <div className={GetMaximumStyle.othersDateRange}>
             <br />
+
             <label>From Date</label>
             <br />
             <TextField
               onChange={handleChangeOnDate}
               required
-              name="toDate"
+              name="fromDate"
               type="date"
             />
             <br />
@@ -257,7 +262,7 @@ function GetMaximumSales() {
             <TextField
               onChange={handleChangeOnDate}
               required
-              name="fromDate"
+              name="toDate"
               type="date"
             />
           </div>
@@ -269,7 +274,6 @@ function GetMaximumSales() {
         From Date {DateRange.fromDate ? DateRange.fromDate : " not specified "}
         &nbsp; To Date {DateRange.toDate ? DateRange.toDate : " not Specified "}
       </h3>
-
       {MaximumDataList?.length > 0 && MaximumDataList[0] != undefined ? (
         <>
           <div className={GetMaximumStyle.tableWrapper}>

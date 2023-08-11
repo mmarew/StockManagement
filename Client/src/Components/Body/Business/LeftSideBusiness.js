@@ -28,7 +28,10 @@ function LeftSideBusiness() {
             <span>Business</span>
           </div>
         </li>
-        <li onClick={(e) => navigeteToTargetedURL(e, "/Profiles")}>
+        <li
+          className={LeftSideBusinessCss.leftsideLi}
+          onClick={(e) => navigeteToTargetedURL(e, "/Profiles")}
+        >
           <div>
             <img
               className={LeftSideBusinessCss.imgLeft + " imgLeft "}

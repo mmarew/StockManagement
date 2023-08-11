@@ -6,7 +6,7 @@
 .imgLeft:hover,
 .imgLeftBusiness:hover,
 .LeftSideWrapper ul li:hover {
-  background-color: rgb(6, 101, 27);
+  background-color: rgb(123, 123, 123);
   color: white;
 }
 .activeClass {

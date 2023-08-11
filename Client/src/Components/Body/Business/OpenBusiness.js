@@ -45,6 +45,7 @@ function OpenBusiness() {
   // localStorage.setItem("openedBusiness", "myBusiness");
   const savedContext = useContext(InitialContext);
   const [ownersName, setownersName] = savedContext;
+  setownersName(localStorage.getItem("ownersName"));
 
   let navigate = useNavigate();
   let registerItems = (e) => {
@@ -149,8 +150,7 @@ function OpenBusiness() {
           <div className={OpenBusinesscss.dates}></div>
           <LinearProgress id="LinearProgress" className={"LinearProgress"} />
           <h2 className={OpenBusinesscss.welcomeInfo}>
-            Dear {savedContext}, Welcome to{" "}
-            {localStorage.getItem("businessName")}
+            Dear {ownersName}, Welcome to {localStorage.getItem("businessName")}
           </h2>
           <div className={OpenBusinesscss.businessInfoWrapper}>
             <Outlet />

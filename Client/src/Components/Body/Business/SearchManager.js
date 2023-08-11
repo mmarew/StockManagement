@@ -179,7 +179,7 @@ function SearchManager() {
           <MenuItem value="PRODUCTS">PRODUCTS</MenuItem>
           <MenuItem value="COSTS">COSTS</MenuItem>
         </Select>
-        <br />
+
         <div className="searchInputs">
           {console.log("searchTarget", searchTarget)}
           {searchTarget == "ALLTRANSACTION" ? (
