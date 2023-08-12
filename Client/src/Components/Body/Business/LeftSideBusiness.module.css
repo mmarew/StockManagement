@@ -6,19 +6,19 @@
 .imgLeft:hover,
 .imgLeftBusiness:hover,
 .LeftSideWrapper ul li:hover {
-  background-color: rgb(123, 123, 123);
+  background-color: rgb(4, 122, 4);
   color: white;
 }
 .activeClass {
   background-color: rgb(25, 118, 210);
   color: white;
 }
-.activeClass div img {
-  filter: invert(1);
+/* .activeClass div img {
+  filter: invert(1) brightness(600%);
   color: white;
-}
+} */
 .LeftSideWrapper ul li:hover div img {
-  filter: invert(1);
+  filter: invert(1) brightness(600%);
   color: white;
 }
 .LeftSideWrapper ul {
@@ -39,7 +39,6 @@
   display: flex;
   align-items: center;
   font-family: "Manrope";
-  font-size: 1.5vw;
   font-style: normal;
   font-weight: 500;
   line-height: normal;

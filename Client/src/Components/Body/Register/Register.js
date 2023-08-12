@@ -1,11 +1,12 @@
-import { TextField, Button } from "@material-ui/core";
+// import { TextField, Button } from "";
 import axios from "axios";
 import React, { useContext, useState } from "react";
 import RegisterCss from "./Register.module.css";
 import $ from "jquery";
-import { LinearProgress } from "@mui/material";
+import { Button, LinearProgress, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { InitialContext } from "../UserContext/UserContext";
+import ImgApp from "../../../ImgSlider";
 function Register() {
   let serverUrl = localStorage.getItem("targetUrl");
   const navigate = useNavigate();
@@ -44,50 +45,73 @@ function Register() {
     $("#LinearProgress2").hide();
   };
   return (
-    <form
-      className={RegisterCss.userRegistrationForm}
-      onSubmit={handleRegistrationSubmit}
-      action=""
-    >
-      <LinearProgress id="LinearProgress2" />
-      <TextField
-        required
-        name="fullName"
-        onChange={handleRegistrationChange}
-        type="text"
-        label="Full Name"
-      />
-      <TextField
-        required
-        name="registerPhone"
-        onChange={handleRegistrationChange}
-        type="tel"
-        label="phone number"
-      />
-      <TextField
-        required
-        name="registerPassword"
-        onChange={handleRegistrationChange}
-        type="password"
-        label="Password"
-      />
-      <br />
-      <Button
-        variant="contained"
-        name="submitButton"
-        type="submit"
-        placeholder=""
-        color="primary"
-        className={RegisterCss.userRegistrationSubmitBtn}
-      >
-        Register
-      </Button>
-      <br />
-      Do you have an account?
-      <a style={{ textDecoration: "none" }} href="/login">
-        Login here
-      </a>
-    </form>
+    <div className={RegisterCss.registerationFormWrapper}>
+      <div className={RegisterCss.leftsideWrapper}>
+        <br /> <br />
+        {/* <div>Registrtion form to smart stock management system</div> */}
+        <div className={RegisterCss.titleCreateAccount}>Create an account</div>
+        <div className={RegisterCss.subTitleCreateAccount}>
+          By creating an account you can administer your shopes
+        </div>
+        <form
+          className={RegisterCss.userRegistrationForm}
+          onSubmit={handleRegistrationSubmit}
+          action=""
+        >
+          <LinearProgress id="LinearProgress2" />
+          <TextField
+            required
+            name="fullName"
+            onChange={handleRegistrationChange}
+            type="text"
+            label="Full Name"
+          />
+          <br />
+          <TextField
+            required
+            name="registerPhone"
+            onChange={handleRegistrationChange}
+            type="tel"
+            label="phone number"
+          />
+          <br />
+          <TextField
+            required
+            name="registerPassword"
+            onChange={handleRegistrationChange}
+            type="password"
+            label="Password"
+          />
+          <br />
+          <div>
+            <span>Already have an account? </span>
+            <span
+              style={{
+                textDecoration: "none",
+                color: "#6998ff",
+                cursor: "pointer",
+              }}
+              onClick={() => navigate("/login")}
+            >
+              Login here
+            </span>
+          </div>
+          <Button
+            variant="contained"
+            name="submitButton"
+            type="submit"
+            placeholder=""
+            color="primary"
+            className={RegisterCss.userRegistrationSubmitBtn}
+          >
+            Register
+          </Button>
+        </form>
+      </div>
+      <div className={RegisterCss.rightSideWrapper}>
+        <ImgApp />
+      </div>
+    </div>
   );
 }
 

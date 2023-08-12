@@ -1,3 +1,7 @@
+* {
+  padding: 0;
+  margin: 0;
+}
 .userRegistrationForm {
   background-color: white;
   padding: 0 30px 20px 30px;
@@ -18,4 +22,36 @@
 }
 #LinearProgress2 {
   display: none;
+}
+
+.registerationFormWrapper {
+  display: flex;
+  background-color: white;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.rightSideWrapper {
+  width: 50%;
+}
+.leftsideWrapper {
+  width: 49%;
+}
+.titleCreateAccount {
+  text-align: center;
+  padding: 0 10px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 45px;
+
+  /* background: #2a2a2a80; */
+}
+.subTitleCreateAccount {
+  font-family: "Plus Jakarta Sans";
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 25px;
+  letter-spacing: 0em;
+  text-align: center;
 }

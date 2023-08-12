@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
@@ -7,12 +7,19 @@ import EditProfile from "./EditProfile";
 import axios from "axios";
 import $ from "jquery";
 import LeftSideBusiness from "../Business/LeftSideBusiness";
-import { Button } from "@mui/material";
 function Profile() {
   const [targetRender, settargetRender] = useState("");
   let navigate = useNavigate();
   let serverUrl = localStorage.getItem("targetUrl");
   let storeToken = localStorage.getItem("storeToken");
+  console.log("storeToken", storeToken);
+
+  useEffect(() => {
+    if (storeToken == null || storeToken == undefined || storeToken == "") {
+      console.log("storeToken", storeToken);
+      navigate("/login");
+    }
+  }, [navigate, storeToken]);
 
   let deleteProfile = async () => {
     $("button").removeClass(ProfileCss.ActiveButton);

@@ -15,6 +15,7 @@ import SuccessOrError from "../Others/SuccessOrError";
 import LeftSideBusiness from "./LeftSideBusiness";
 let serverAddress = localStorage.getItem("targetUrl");
 function Business() {
+  let Navigate = useNavigate();
   const [BusinessLists, setBusinessLists] = useState(
     <h4>Looking for your business lists .... </h4>
   );
@@ -26,7 +27,6 @@ function Business() {
   const [createdBusiness, setcreatedBusiness] = useState([]);
   const [employeerBusiness, setemployeerBusiness] = useState([]);
   let token = localStorage.getItem("storeToken");
-  let Navigate = useNavigate();
   let openThisBusiness = (businessId, businessName) => {
     console.log(businessId);
     localStorage.setItem("businessId", businessId);
@@ -104,6 +104,12 @@ function Business() {
       $("#businessName_" + items.BusinessID).val(items.businessName);
     });
   }, [createdBusiness]);
+  useEffect(() => {
+    if (token == null || token == undefined || token == "") {
+      return Navigate("/login");
+    }
+  }, [Navigate]);
+
   useEffect(() => {
     console.log(window.location.pathname);
     getBusiness();

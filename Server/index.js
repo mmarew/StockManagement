@@ -878,84 +878,171 @@ let updateNextDateInventory = async (
   dataToSendResponceToClient
 ) => {
   let sqlToSelect, inputToSelect, res;
-  if (dataToSendResponceToClient !== "NoNeed") {
-    sqlToSelect = dataToSendResponceToClient.sqlToSelect;
-    inputToSelect = dataToSendResponceToClient.inputToSelect;
-    res = dataToSendResponceToClient.res;
+
+  function sendResponses() {
+    if (
+      typeof dataToSendResponceToClient == "object" &&
+      dataToSendResponceToClient !== "NoNeed"
+    ) {
+      sqlToSelect = dataToSendResponceToClient.sqlToSelect;
+      inputToSelect = dataToSendResponceToClient.inputToSelect;
+      res = dataToSendResponceToClient.res;
+
+      Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
+        res.json({ data: rows });
+      });
+    }
   }
-  console.log("903 = ", businessName, ProductsList, date, previousInventory);
-  // return;
-  let index = 0,
-    productId = ProductsList[index].ProductId;
-  let recurciveUpdate = () => {
-    let select = `select * from ?? where productIDTransaction=? and registeredTime > ? order by registeredTime asc`;
-    let values = [`${businessName}`, productId, date];
+
+  console.log("903 =", businessName, ProductsList, date, previousInventory);
+
+  let index = 0;
+  let productId = ProductsList[index].ProductId;
+
+  let recursiveUpdate = () => {
+    let select = `SELECT * FROM ?? WHERE productIDTransaction=? AND registeredTime > ? ORDER BY registeredTime ASC`;
+    let values = [businessName, productId, date];
+
     Pool.query(select, values)
       .then(async ([rows]) => {
-        console.log("my rows===", rows);
+        console.log("my rows ===", rows);
 
         if (rows.length > 0) {
-          let j = 0,
-            prevInventory = 0;
+          let prevInventory = 0;
+
           for (let i = 0; i < rows.length; i++) {
-            let salesqty = rows[i].salesQty,
-              purchaseQty = rows[i].purchaseQty,
-              inventory = 0,
-              wrickages = rows[i].wrickages;
-            if (i == 0) {
-              inventory =
-                purchaseQty + previousInventory[index] - salesqty - wrickages;
-            } else {
-              inventory = purchaseQty + prevInventory - salesqty - wrickages;
-            }
+            let salesQty = rows[i].salesQty;
+            let purchaseQty = rows[i].purchaseQty;
+            let wrickages = rows[i].wrickages;
+            let inventory =
+              purchaseQty +
+              (i === 0 ? previousInventory[index] : prevInventory) -
+              salesQty -
+              wrickages;
             prevInventory = inventory;
-            // set inventory
-            let update = `update ?? set inventory=? where transactionId=?`;
+
+            let update = `UPDATE ?? SET inventory=? WHERE transactionId=?`;
             let valuesToUpdate = [
-              `${businessName}`,
-              `${inventory}`,
-              `${rows[i].transactionId}`,
+              businessName,
+              inventory,
+              rows[i].transactionId,
             ];
-            // previousInventory = inventory;
-            await Pool.query(update, valuesToUpdate)
-              .then((results) => {
-                if (results) {
-                  if (dataToSendResponceToClient !== "NoNeed")
-                    if (i >= rows.length - 1) {
-                      Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
-                        res.json({ data: rows });
-                      });
-                    }
-                } else {
-                  if (dataToSendResponceToClient !== "NoNeed")
-                    Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
-                      res.json({ data: rows });
-                    });
+
+            console.log("here it is ok it is ....");
+            try {
+              await Pool.query(update, valuesToUpdate).then((results) => {
+                console.log("results", results);
+                if (i >= rows.length - 1) {
+                  sendResponses();
                 }
-              })
-              .catch((err) => {
-                console.log(err);
-                return res.json({ err });
               });
+            } catch (error) {
+              console.log(err);
+              return res.json({ err: error });
+            }
           }
         } else {
-          // if (index < ProductsList.length - 1) {
-          //   index++;
-          //   recurciveUpdate();
-          // }
-          // else {
-          Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
-            res.json({ data: rows });
-          });
-          // }
+          sendResponses();
         }
       })
       .catch((error) => {
         console.log(error);
       });
   };
-  recurciveUpdate();
+
+  recursiveUpdate();
 };
+// let updateNextDateInventory = async (
+//   businessName,
+//   ProductsList,
+//   date,
+//   previousInventory,
+//   dataToSendResponceToClient
+// ) => {
+//   let sqlToSelect, inputToSelect, res;
+
+//   function sendResponces() {
+//     if (
+//       typeof dataToSendResponceToClient != "object" &&
+//       dataToSendResponceToClient !== "NoNeed"
+//     ) {
+//       sqlToSelect = dataToSendResponceToClient.sqlToSelect;
+//       inputToSelect = dataToSendResponceToClient.inputToSelect;
+//       res = dataToSendResponceToClient.res;
+
+//       Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
+//         res.json({ data: rows });
+//       });
+//     }
+//   }
+//   console.log("903 = ", businessName, ProductsList, date, previousInventory);
+//   // return;
+//   let index = 0,
+//     productId = ProductsList[index].ProductId;
+//   let recurciveUpdate = () => {
+//     let select = `select * from ?? where productIDTransaction=? and registeredTime > ? order by registeredTime asc`;
+//     let values = [`${businessName}`, productId, date];
+//     Pool.query(select, values)
+//       .then(async ([rows]) => {
+//         console.log("my rows===", rows);
+
+//         if (rows.length > 0) {
+//           let j = 0,
+//             prevInventory = 0;
+//           for (let i = 0; i < rows.length; i++) {
+//             let salesqty = rows[i].salesQty,
+//               purchaseQty = rows[i].purchaseQty,
+//               inventory = 0,
+//               wrickages = rows[i].wrickages;
+//             if (i == 0) {
+//               inventory =
+//                 purchaseQty + previousInventory[index] - salesqty - wrickages;
+//             } else {
+//               inventory = purchaseQty + prevInventory - salesqty - wrickages;
+//             }
+//             prevInventory = inventory;
+//             // set inventory
+//             let update = `update ?? set inventory=? where transactionId=?`;
+//             let valuesToUpdate = [
+//               `${businessName}`,
+//               `${inventory}`,
+//               `${rows[i].transactionId}`,
+//             ];
+//             // previousInventory = inventory;
+//             console.log("here it is ok it is ....");
+//             await Pool.query(update, valuesToUpdate)
+//               .then((results) => {
+//                 if (results) {
+//                   if (i >= rows.length - 1) {
+//                     sendResponces();
+//                   }
+//                 } else {
+//                   sendResponces();
+//                 }
+//               })
+//               .catch((err) => {
+//                 console.log(err);
+//                 return res.json({ err });
+//               });
+//           }
+//         } else {
+//           // if (index < ProductsList.length - 1) {
+//           //   index++;
+//           //   recurciveUpdate();
+//           // }
+//           // else {
+//           Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
+//             res.json({ data: rows });
+//           });
+//           // }
+//         }
+//       })
+//       .catch((error) => {
+//         console.log(error);
+//       });
+//   };
+//   recurciveUpdate();
+// };
 function insertIntoCosts(businessName, data, res) {
   const sanitizedCostName = mysql2.escape(data.Costname);
   // Build the sanitized SQL query
@@ -2028,8 +2115,8 @@ server.post(path + "verifyPin", (req, res) => {
   Pool.query(select, [phone])
     .then(([rows]) => {
       if (rows.length > 0) {
-        let pin = result[0].passwordResetPin;
-        if (pincode === pin) {
+        let pin = rows[0].passwordResetPin;
+        if (pincode == pin) {
           res.json({ data: "correctPin" });
         } else {
           res.json({ data: "wrongPin" });

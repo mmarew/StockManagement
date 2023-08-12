@@ -18,11 +18,14 @@
   background: #6998ff;
   color: #fff;
   font-family: "Manrope";
-  font-size: 24px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
 }
+.LeftHelpContainer li:nth-child(3) div img {
+  filter: invert(100%) brightness(200%);
+}
+
 .helpMiddelContainer {
   text-align: center;
   width: fit-content;

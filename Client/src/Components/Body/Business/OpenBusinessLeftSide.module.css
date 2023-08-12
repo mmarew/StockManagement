@@ -18,11 +18,11 @@
 }
 .activeClass .TransactionIcon {
   color: white;
-  filter: invert(0);
+  filter: invert(0) brightness(200%);
 }
 .activeClass .nonTransaction {
   color: white;
-  filter: invert(1);
+  filter: invert(1) brightness(200%);
 }
 .openBusinessTabLeft {
   text-decoration: none;
@@ -50,11 +50,11 @@
   color: white;
 }
 .openBusinessTabLeft:hover img {
-  filter: invert(0);
+  filter: invert(0) brightness(200%);
 }
 
 .openBusinessTabLeft:hover .nonTransaction {
-  filter: invert(1);
+  filter: invert(1) brightness(200%);
 }
 .iconLogout {
   width: 30px;

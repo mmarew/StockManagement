@@ -9,7 +9,6 @@ const ImageSlider = () => {
     "https://cdn.pixabay.com/photo/2016/11/19/15/40/clothes-1839935_640.jpg",
     `https://cdn.pixabay.com/photo/2016/11/23/15/14/jars-1853439_640.jpg`,
   ];
-
   const settings = {
     dots: true,
     infinite: true,
@@ -27,7 +26,7 @@ const ImageSlider = () => {
           <img
             style={{
               margin: "auto",
-              height: "100vh",
+              height: "98vh",
               width: "100vw",
               borderBottomLeftRadius: "20px",
             }}
@@ -41,10 +40,7 @@ const ImageSlider = () => {
 };
 
 function ImgApp() {
-  return (
-    <div className={""}>
-      <ImageSlider />
-    </div>
-  );
+  return <ImageSlider />;
 }
+
 export default ImgApp;

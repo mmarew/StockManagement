@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import helpStyles from "./Help.module.css";
 import { Link, useNavigate } from "react-router-dom";
 import LeftSideBusiness from "../Body/Business/LeftSideBusiness";
@@ -10,6 +10,14 @@ function Help() {
     console.log("data", data);
     navigate("/");
   };
+  let storeToken = localStorage.getItem("storeToken");
+  console.log("storeToken", storeToken);
+  // useEffect(() => {
+  //   if (storeToken == null || storeToken == undefined || storeToken == "") {
+  //     console.log("storeToken", storeToken);
+  //     console.log("in navigation", navigate("/login"));
+  //   }
+  // }, [storeToken, navigate]);
 
   return (
     <div

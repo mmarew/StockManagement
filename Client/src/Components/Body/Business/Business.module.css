@@ -88,10 +88,12 @@
     color: #fff;
     background-color: #6998ff;
     font-family: "Manrope";
-    font-size: 24px;
     font-style: normal;
     font-weight: 500;
     line-height: normal;
+  }
+  .LeftSideBusinessWrapper li:nth-child(1) div img {
+    filter: invert(100%) brightness(600%);
   }
   .MainBusinessWrapper {
     justify-content: flex-start;

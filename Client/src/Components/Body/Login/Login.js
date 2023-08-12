@@ -21,7 +21,6 @@ function Login() {
     let response = await axios.post(serverAddress + "Login/", loginForm);
     // console.log("response", response.data);
     localStorage.setItem("ownersName", response.data.usersFullName);
-
     if (response.data.data == "loginSuccessFull") {
       let token = response.data.token;
       localStorage.setItem("storeToken", token);
@@ -124,16 +123,21 @@ function Login() {
               </span>
             </div>
           </Link>
-          <a
-            to="/register"
-            className={Loginmodulecss.help}
-            onClick={(e) => {
-              e.preventDefault();
-              Navigate("/help");
-            }}
-          >
-            Help ?
-          </a>
+          <div className={Loginmodulecss.helpClass}>
+            <br />
+            <span>If you need help please </span>
+
+            <span
+              to="/register"
+              className={Loginmodulecss.help}
+              onClick={(e) => {
+                e.preventDefault();
+                Navigate("/help");
+              }}
+            >
+              click here?
+            </span>
+          </div>
         </form>
       </div>
       <div className={Loginmodulecss.loginRightSide}>
