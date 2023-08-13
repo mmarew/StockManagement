@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.071ff2da.css",
-    "main.js": "/static/js/main.c1d05d05.js",
+    "main.js": "/static/js/main.96e4d8da.js",
     "static/media/MASETAWOSHAICON.svg": "/static/media/MASETAWOSHAICON.54a2fd866e0f5c7049127a306c6f27f5.svg",
     "static/media/iconEmployee.svg": "/static/media/iconEmployee.9557ca5a58a3c4a7c853ccd11236fd67.svg",
     "static/media/SupportBlack.svg": "/static/media/SupportBlack.255c7a81f9ee6676465397a000f89417.svg",
@@ -22,10 +22,10 @@
     "static/media/icons_transaction.svg": "/static/media/icons_transaction.5dc8f7bb6e3d439ebc2e419fe814b4d2.svg",
     "static/media/transactionBlack.svg": "/static/media/transactionBlack.d8c725ff7032a88e7fbbee51b36b3c6a.svg",
     "main.071ff2da.css.map": "/static/css/main.071ff2da.css.map",
-    "main.c1d05d05.js.map": "/static/js/main.c1d05d05.js.map"
+    "main.96e4d8da.js.map": "/static/js/main.96e4d8da.js.map"
   },
   "entrypoints": [
     "static/css/main.071ff2da.css",
-    "static/js/main.c1d05d05.js"
+    "static/js/main.96e4d8da.js"
   ]
 }

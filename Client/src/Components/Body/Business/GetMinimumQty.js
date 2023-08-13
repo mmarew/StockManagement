@@ -12,6 +12,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { Chip } from "@material-ui/core";
 function GetMinimumQty() {
   let token = localStorage.getItem("storeToken");
   let serverAddress = localStorage.getItem("targetUrl");
@@ -44,13 +45,7 @@ function GetMinimumQty() {
       {MinimumQty.progress == "wait" ? (
         <h4>please wait ...</h4>
       ) : MinimumQty.data.length > 0 ? (
-        <TableContainer
-          sx={{
-            maxWidth: 500 + "px",
-          }}
-          component={Paper}
-          align="center"
-        >
+        <TableContainer component={Paper} align="center">
           {console.log("MinimumQty", MinimumQty.data.length)}
           <Table sx={{ width: 100 + "%" }}>
             <TableHead>
@@ -75,9 +70,25 @@ function GetMinimumQty() {
                   <TableCell align="center">{item.minimumQty}</TableCell>
                   <TableCell align="center">
                     {item.Inventory > item.minimumQty ? (
-                      "Good"
+                      <Chip
+                        style={{
+                          backgroundColor: "green",
+                          color: "white",
+                          fontWeight: 600,
+                        }}
+                        label="GOOD"
+                        color="success"
+                        variant="contained"
+                      />
                     ) : (
-                      <Button color="error">TOO LOW</Button>
+                      <Chip
+                        label="TOO LOW"
+                        style={{
+                          backgroundColor: "red",
+                          color: "white",
+                          fontWeight: 600,
+                        }}
+                      />
                     )}
                   </TableCell>
                 </TableRow>

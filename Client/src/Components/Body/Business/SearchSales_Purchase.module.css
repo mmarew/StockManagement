@@ -1,1 +1,6 @@
- 
+.salesPurchaseLastRow {
+  background-color: #b3e5fc;
+}
+.salesPurchaseLastRow td {
+  background-color: transparent;
+}

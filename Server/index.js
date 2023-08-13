@@ -510,9 +510,8 @@ server.post(path + "updateTransactions/", async (req, res) => {
     return "This data contains string so no need of execution";
   }
   let productId = req.body.productId;
-  const selectQuery = `SELECT * FROM ?? WHERE registeredTime <=? AND productIDTransaction = ?  order by registeredTime limit 1 `;
+  const selectQuery = `SELECT * FROM ?? WHERE registeredTime <=? AND productIDTransaction = ?  order by registeredTime desc limit 1 `;
   const params = [`${businessName}_Transaction`, previousDay, productId];
-
   Pool.query(selectQuery, params)
     .then(([rows]) => {
       console.log("result on selectQuery ", rows, "previousDay", previousDay);
@@ -902,11 +901,12 @@ let updateNextDateInventory = async (
   let recursiveUpdate = () => {
     let select = `SELECT * FROM ?? WHERE productIDTransaction=? AND registeredTime > ? ORDER BY registeredTime ASC`;
     let values = [businessName, productId, date];
-
+    // console.log("values to beselected are ", values);
+    // return;
     Pool.query(select, values)
       .then(async ([rows]) => {
         console.log("my rows ===", rows);
-
+        // return;
         if (rows.length > 0) {
           let prevInventory = 0;
 

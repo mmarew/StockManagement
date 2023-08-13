@@ -85,7 +85,7 @@ function OpenBusiness() {
               </HoverableLink>
 
               <HoverableLink
-                title="Registaer Items"
+                title="Transaction"
                 onClick={(e) => {
                   registerItems(e);
 

@@ -277,12 +277,7 @@ function GetMaximumSales() {
       {MaximumDataList?.length > 0 && MaximumDataList[0] != undefined ? (
         <>
           <div className={GetMaximumStyle.tableWrapper}>
-            <TableContainer
-              sx={{
-                maxWidth: "100vw",
-              }}
-              component={Paper}
-            >
+            <TableContainer component={Paper}>
               <Table sx={{ width: "100%" }} aria-label="simple table">
                 <TableHead>
                   <TableRow>

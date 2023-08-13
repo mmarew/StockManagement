@@ -107,6 +107,11 @@ td {
 .updateProducts {
   cursor: pointer;
 }
+.productList {
+  background-color: #ffffff;
+  width: fit-content;
+  padding: 20px 30px 20px 30px;
+}
 @media screen and (min-width: 768px) {
   #searchProduct {
     margin: 10px 0;

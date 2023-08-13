@@ -21,12 +21,11 @@ function MUIConfirm({
   setConfirmDelete,
   ConfirmDelete,
 }) {
-  // console.log(open, setOpen, targetdBusiness);
-  // return;
   const handleClose = async (confirmed) => {
     setSuccessError({});
     let { businessId, businessName, getBusiness } = targetdBusiness;
     setOpen({ ...open, open: false });
+
     if (confirmed) {
       if (Action == "deleteProducts") {
         setConfirmDelete({ ...ConfirmDelete, Verify: true });
@@ -39,7 +38,6 @@ function MUIConfirm({
           businessName,
           getBusiness
         );
-        console.log("responce = ", responce);
         if (responce == "deletedWell")
           setSuccessError({
             ...ShowSuccessError,
@@ -66,23 +64,12 @@ function MUIConfirm({
       } else if (Action == "RemoveEmployerBusiness") {
         console.log("targetdBusiness", targetdBusiness);
         const { ownerId, getBusiness } = targetdBusiness;
-        console.log(ownerId, "getBusiness=", getBusiness);
-        // return;
-        // BusinessID, ownerId, BusinessName, getBusiness;
-        // return;
         let responce = await RemoveMyEmployeersBusiness(
           businessId,
           ownerId,
           businessName,
           getBusiness
         );
-        console.log(
-          "responce.data.data= ",
-          responce.data.data,
-          "getBusiness = ",
-          getBusiness
-        );
-        // return;
         if (responce.data.data == "NoDataLikeThis") {
           console.log("nodata");
           getBusiness();

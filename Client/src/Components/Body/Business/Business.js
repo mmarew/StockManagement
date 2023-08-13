@@ -115,6 +115,7 @@ function Business() {
     getBusiness();
     setownersName(localStorage.getItem("ownersName"));
   }, []);
+  // const [actionsOnConfirmation, setActionsOnConfirmation] = useState(null);
   useEffect(() => {
     if (open.open) {
       console.log("open", open);

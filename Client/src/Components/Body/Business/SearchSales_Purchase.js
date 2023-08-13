@@ -18,6 +18,8 @@ import {
 } from "@mui/material";
 import ConfirmDialog from "../Others/Confirm";
 import { DateFormatter } from "../Date/currentDate";
+import { Chip } from "@material-ui/core";
+import { red } from "@material-ui/core/colors";
 const timeZone = "Africa/Addis_Ababa";
 function SearchSales_Purchase({ response, requestFrom }) {
   // set correct data format to time because it is bringing us like registeredTime: "2023-08-05T21:00:00.000Z". The correct format is year month day
@@ -34,14 +36,14 @@ function SearchSales_Purchase({ response, requestFrom }) {
   const [UpdateSalesAndPurchase, setUpdateSalesAndPurchase] = useState({});
   const [showEachItems, setshowEachItems] = useState(false);
   const [ShowExpences, setShowExpences] = useState();
-  const [SearchedDatas, setSearchedDatas] = useState([]);
+  const [ListOfSalesAndPurchase, setListOfSalesAndPurchase] = useState([]);
+  const [SearchedDatas, setSearchedDatas] = useState(dateData);
+
   const [ShowConfirmDialog, setShowConfirmDialog] = useState(false);
   const [ConfirmDeletePurchaseAndSales, setConfirmDeletePurchaseAndSales] =
     useState({ Delete: false });
-
   const [confirmAction, setConfirmAction] = useState("");
   const [confirmMessages, setConfirmMessages] = useState("");
-
   let deleteData = async (deletableItems) => {
     let responce = await axios.post(serverAddress + "deleteSales_purchase/", {
       items: deletableItems,
@@ -59,7 +61,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
     console.log(x);
     if (responce.data.data == "deleted") {
       alert("your data is deleted successfully. thank you");
-      setListOfSalesAndPurchase(x);
+      setListOfSalesAndPurchase([...x]);
     } else if (responce.data.data == "NotAllowedByYou") {
       alert("You are not allowed to do this. thank you");
     } else {
@@ -111,16 +113,13 @@ function SearchSales_Purchase({ response, requestFrom }) {
   };
   const [TotalPurchaseCost, setTotalPurchaseCost] = useState(0);
   const [TotalSalesRevenue, setTotalSalesRevenue] = useState(0);
+  //  setSearchedDatas([...resData]);
   useEffect(() => {
+    console.log("getSingleTransAction", "response");
     let getSingleTransAction = async () => {
       let totalPurchaseCost = 0,
         totalSalesAmt = 0;
       let resData = response.data.data.map((items) => {
-        // unitCost: 2500;
-        // salesQty: 631;
-        // purchaseQty: 10472;
-        // productsUnitCost: 300;
-        // productsUnitPrice: 350;
         totalSalesAmt +=
           parseFloat(items.salesQty) * parseFloat(items.productsUnitPrice);
         totalPurchaseCost +=
@@ -128,10 +127,11 @@ function SearchSales_Purchase({ response, requestFrom }) {
         console.log("items in getSingleTransAction", items);
         return { ...items, contentEditable: false };
       });
-
+      setListOfSalesAndPurchase([]);
+      setSearchedDatas(resData);
       setTotalPurchaseCost(totalPurchaseCost);
       setTotalSalesRevenue(totalSalesAmt);
-      setSearchedDatas(resData);
+
       setShowExpences(
         <SearchExpenceTransaction
           showEachItems={showEachItems}
@@ -142,10 +142,10 @@ function SearchSales_Purchase({ response, requestFrom }) {
       $("#productTransaction").css("display", "block");
     };
     getSingleTransAction();
-  }, []);
+  }, [response]);
 
   let serverAddress = localStorage.getItem("targetUrl");
-  const [ListOfSalesAndPurchase, setListOfSalesAndPurchase] = useState([]);
+
   // const [showEachItems, setshowEachItems] = useState(false);
   useEffect(() => {
     setShowExpences(
@@ -160,14 +160,16 @@ function SearchSales_Purchase({ response, requestFrom }) {
   function showEachValuesofSalesAndPurchase() {
     let showEachUnits = $("#showEachItems").is(":checked");
     setshowEachItems(showEachUnits);
+    console.log("SearchedDatas ==== ", SearchedDatas);
+    // return;
     if (showEachUnits) {
-      SearchedDatas.map((item) => {
+      let returnedValues = SearchedDatas.map((item) => {
         if (item.description == null) {
           item.description = "";
         }
-        // return (item.isSingleItem = true);
+        return item;
       });
-      setListOfSalesAndPurchase(SearchedDatas);
+      setListOfSalesAndPurchase([...returnedValues]);
     } else {
       let collectedArray = [];
       let copyOfData = SearchedDatas.map((j) => {
@@ -214,13 +216,13 @@ function SearchSales_Purchase({ response, requestFrom }) {
         x.description = description;
         x.purchaseQty = purchaseQty;
         collectedArray.push(x);
-        setListOfSalesAndPurchase(collectedArray);
+        setListOfSalesAndPurchase([...collectedArray]);
       });
     }
   }
 
   useEffect(() => {
-    // console.log("in useEffect");
+    console.log("in useEffect SearchedDatas==", SearchedDatas);
     showEachValuesofSalesAndPurchase();
   }, [SearchedDatas]);
 
@@ -235,7 +237,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
       }
       return item;
     });
-    setListOfSalesAndPurchase(x);
+    setListOfSalesAndPurchase([...x]);
   };
   let editSalesAndPurchase = (e, index) => {
     console.log(e);
@@ -246,7 +248,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
       }
       return item;
     });
-    setListOfSalesAndPurchase(mapedList);
+    setListOfSalesAndPurchase([...mapedList]);
   };
   let cancelSalesAndPurchase = (e, index) => {
     let mapedList = ListOfSalesAndPurchase.map((item, i) => {
@@ -260,7 +262,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
       }
       return item;
     });
-    setListOfSalesAndPurchase(mapedList);
+    setListOfSalesAndPurchase([...mapedList]);
   };
   let updateTransactions = async (transactionId, index, productId) => {
     let OB = {};
@@ -316,7 +318,8 @@ function SearchSales_Purchase({ response, requestFrom }) {
           item.registeredTime = correctDateFormat;
           return item;
         });
-        setListOfSalesAndPurchase(mapedList);
+        // alert(mapedList);
+        setListOfSalesAndPurchase([...mapedList]);
       })
       .catch((error) => {
         console.log("error", error);
@@ -329,6 +332,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
 
   return (
     <div>
+      {console.log("ListOfSalesAndPurchase", ListOfSalesAndPurchase)}
       <div className="">
         <br />
         <Checkbox
@@ -341,7 +345,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
         <br />
         <br />
       </div>
-      {ListOfSalesAndPurchase.length > 0 && (
+      {ListOfSalesAndPurchase.length > 0 ? (
         <TableContainer>
           <Table id="productTransaction">
             <TableHead>
@@ -353,7 +357,9 @@ function SearchSales_Purchase({ response, requestFrom }) {
             </TableHead>
             <TableRow>
               <TableCell>Product name</TableCell>
-              <TableCell>Registration Date</TableCell>
+              <TableCell>
+                {showEachItems ? " Registration Date" : " Registration Dates"}
+              </TableCell>
               <TableCell>Unit price</TableCell>
               <TableCell>Sold Qty</TableCell>
               <TableCell>Total sales</TableCell>
@@ -394,7 +400,18 @@ function SearchSales_Purchase({ response, requestFrom }) {
                       date.toLocaleDateString("en-US");
                       console.log(formattedDate); // Output: "8/5/2023" (or any
                       other format based on your system's locale) */}
-                      {items.registeredTime}
+                      {items.registeredTime.split(",").map((day, index1) => {
+                        return (
+                          <Chip
+                            style={{
+                              marginTop: "5px",
+                              backgroundColor: "transparent",
+                            }}
+                            key={"dateOfRegistration_" + index1}
+                            label={day}
+                          />
+                        );
+                      })}
                     </TableCell>
                     <TableCell
                       className={"unitPrice" + items.transactionId}
@@ -575,7 +592,10 @@ function SearchSales_Purchase({ response, requestFrom }) {
                   </TableRow>
                 );
               })}
-              <TableRow>
+              <TableRow
+                className={SearchSales_PurchaseCss.salesPurchaseLastRow}
+                style={{ backgroundColor: "#B3E5FC" }}
+              >
                 <TableCell colSpan={2}></TableCell>
                 <TableCell colSpan={2}>Sum of Sales</TableCell>
                 <TableCell>
@@ -598,10 +618,16 @@ function SearchSales_Purchase({ response, requestFrom }) {
                     { style: "currency", currency: "ETB" }
                   )}
                 </TableCell>
+                <TableCell colSpan={3}></TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
+      ) : (
+        <Chip
+          style={{ backgroundColor: "rgba(255, 0, 0, 0.2)", color: "red" }}
+          label={<h3>On this date no sales and purchase transaction</h3>}
+        />
       )}
       {requestFrom == "showExpencesList" && ShowExpences}
       {console.log("ShowConfirmDialog == ", ShowConfirmDialog)}
