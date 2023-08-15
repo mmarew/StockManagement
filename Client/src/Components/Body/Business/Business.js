@@ -241,7 +241,7 @@ function Business() {
                         className={Businessmodulecss.createdBusiness}
                         id={"createdBusiness_" + datas.BusinessID}
                       >
-                        <div
+                        {/* <div
                           className={Businessmodulecss.Business}
                           id={"eachBusiness_" + datas.BusinessID}
                         >
@@ -376,7 +376,7 @@ function Business() {
                               </div>
                             </form>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     );
                   })}

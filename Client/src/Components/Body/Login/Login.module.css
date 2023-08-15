@@ -8,12 +8,8 @@
 .loginForm {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  margin: auto;
   background-color: white;
   justify-content: center;
-  /* padding: 5vw; */
-  /* box-shadow: 2px 2px rgb(220, 244, 245); */
   padding: 20px;
   border-radius: 10px;
   align-items: center;
@@ -44,14 +40,13 @@
 }
 
 .gladMessage {
+  text-align: center;
   display: flex;
-  width: 367px;
-  height: 45px;
   flex-direction: column;
   flex-shrink: 0;
   margin: auto;
   color: #2a2a2a;
-  font-size: 36px;
+  font-size: 20px;
   font-family: Plus Jakarta Sans;
   font-style: normal;
   font-weight: 600;
@@ -61,7 +56,6 @@
   width: 200px;
 }
 .loginForm div {
-  width: 90%;
   max-width: 400px;
 }
 .titleTohaveAccount {

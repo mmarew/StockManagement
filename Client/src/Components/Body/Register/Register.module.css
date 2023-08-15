@@ -29,14 +29,9 @@
   background-color: white;
   height: 100vh;
   overflow: hidden;
+  flex-direction: column;
 }
 
-.rightSideWrapper {
-  width: 50%;
-}
-.leftsideWrapper {
-  width: 49%;
-}
 .titleCreateAccount {
   text-align: center;
   padding: 0 10px;
@@ -54,4 +49,24 @@
   line-height: 25px;
   letter-spacing: 0em;
   text-align: center;
+}
+.rightSideWrapper {
+  display: none;
+}
+
+@media (min-width: 800px) {
+  .rightSideWrapper {
+    display: block;
+  }
+  .rightSideWrapper {
+    width: 50%;
+  }
+  .leftsideWrapper {
+    width: 49%;
+  }
+  .registerationFormWrapper {
+    flex-direction: row;
+  }
+  /* Styles to apply when the screen width is 768 pixels or wider */
+  /* Add your CSS rules here */
 }
