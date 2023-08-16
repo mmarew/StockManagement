@@ -1731,18 +1731,12 @@ server.post(path + "deleteUsers/", async (req, res) => {
 });
 server.post(path + "/updateCostData/", async (req, res) => {
   let businessName = req.body.businessName,
-    Token = req.body.Token,
     CostName_ = req.body.CostName_,
-    CostValue_ = req.body.CostValue_,
     costsId = req.body.costsId;
-  const sanitizedBusinessName = Pool.escape(businessName + "_Costs");
-  const sanitizedCostName = Pool.escape(CostName_);
-  const sanitizedUnitCost = Pool.escape(CostValue_);
-  const sanitizedCostsId = Pool.escape(costsId);
 
-  const updateQuery = `UPDATE ${sanitizedBusinessName} SET costName=${sanitizedCostName}, unitCost=${sanitizedUnitCost} WHERE costsId=${sanitizedCostsId}`;
-
-  Pool.query(updateQuery)
+  const updateQuery = `UPDATE ?? SET costName=? WHERE costsId=?`;
+  let values = [businessName + "_Costs", CostName_, costsId];
+  Pool.query(updateQuery, values)
     .then((results) => {
       res.json({ data: "updated successfully", results });
     })

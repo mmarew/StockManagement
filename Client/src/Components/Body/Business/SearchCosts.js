@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
 import $, { each } from "jquery";
 import axios from "axios";
+import CloseIcon from "@mui/icons-material/Close";
 import {
+  Box,
   Button,
+  Fade,
+  IconButton,
+  Modal,
   Table,
   TableBody,
   TableCell,
@@ -15,6 +20,15 @@ import MUIConfirm from "../Others/MUIConfirm";
 function SearchCosts({ response }) {
   const [ConfirmRequest, setConfirmRequest] = useState({});
   const [ConfirmDelete, setConfirmDelete] = useState({});
+  const [openEditingModal, setopenEditingModal] = useState({ open: false });
+  let openCostEditerModal = (cost, index) => {
+    console.log("cost");
+    setopenEditingModal({ open: true, cost, index });
+  };
+  let handleClose = () => {
+    console.log("close");
+    setopenEditingModal({ open: false });
+  };
   useEffect(() => {
     console.log("ConfirmDelete == ", ConfirmDelete);
     if (ConfirmDelete.Verify) {
@@ -57,18 +71,15 @@ function SearchCosts({ response }) {
   let Token = localStorage.getItem("storeToken");
   let updateMycostData = async (e, id, cost) => {
     let CostName_ = $("#CostName_" + id).val(),
-      CostValue_ = $("#CostValue_" + id).val(),
       costsId = cost.costsId;
-
     $(".LinearProgress").css("display", "block");
     let responce = await axios.post(serverAddress + "/updateCostData/", {
       CostName_,
-      CostValue_,
       costsId,
       Token,
       businessName,
     });
-
+    console.log("responce", responce);
     let costData = MyCostData.map((cost1, i) => {
       if (i == id) {
         cost1.updateStatus = false;
@@ -82,6 +93,7 @@ function SearchCosts({ response }) {
     }
     $(".btnUpdateCost").hide();
   };
+  ////////////////
   useEffect(() => {
     getCostLists();
   }, []);
@@ -98,8 +110,8 @@ function SearchCosts({ response }) {
   }, [MyCostData]);
 
   let costInputEdits = (e, index, id) => {
-    $(".btnUpdateCost").hide();
-    $("#CostUpdate_" + index).show();
+    // $(".btnUpdateCost").hide();
+    // $("#CostUpdate_" + index).show();
     let costData = MyCostData.map((cost, i) => {
       if (i == index) {
         cost.updateStatus = true;
@@ -148,7 +160,23 @@ function SearchCosts({ response }) {
       {console.log("MyCostData is ==", MyCostData)}
       {MyCostData?.length > 0 && (
         <div className="costWrapperDiv">
-          <TableContainer className="">
+          {MyCostData?.map((cost, index) => {
+            return (
+              <div key={"costItem_" + index} className="eachCostItem">
+                <div>{cost.costName}</div>
+                <Button
+                  onClick={() => openCostEditerModal(cost, index)}
+                  variant="contained"
+                >
+                  Edit
+                </Button>
+                <Button color="error" variant="contained">
+                  Delete
+                </Button>
+              </div>
+            );
+          })}
+          {/* <TableContainer className="">
             <Table id="costTable">
               <TableHead>
                 <TableRow>
@@ -196,8 +224,76 @@ function SearchCosts({ response }) {
                 })}
               </TableBody>
             </Table>
-          </TableContainer>
+          </TableContainer> */}
           {open.open && ConfirmRequest}
+          <Modal open={openEditingModal.open}>
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "80%",
+                maxWidth: 400,
+                bgcolor: "background.paper",
+                p: 2,
+              }}
+            >
+              <IconButton
+                aria-label="close"
+                onClick={handleClose}
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <br />
+              <br />
+              <h3>Edition form to Costs</h3>
+              <br />
+              <form
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "90%",
+                  margin: "auto",
+                }}
+                onSubmit={(e) => e.preventDefault()}
+              >
+                <TextField
+                  onInput={(e) =>
+                    costInputEdits(
+                      e,
+                      openEditingModal.index,
+                      `CostName_${openEditingModal.index}`
+                    )
+                  }
+                  type="text"
+                  id={`CostName_${openEditingModal.index}`}
+                />
+                <br />
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={(e) =>
+                    updateMycostData(
+                      e,
+                      openEditingModal.index,
+                      openEditingModal.cost
+                    )
+                  }
+                  className=""
+                  id={`CostUpdate_${openEditingModal.index}`}
+                >
+                  Update
+                </Button>
+              </form>
+            </Box>
+          </Modal>
         </div>
       )}
     </div>
