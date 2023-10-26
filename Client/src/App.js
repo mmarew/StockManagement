@@ -23,6 +23,7 @@ import GetMaximumSales from "./Components/Body/Business/GetMaximumSales";
 import NavBar from "./Components/Nav/MuiNav";
 import ImageApp from "./ImgSlider";
 import ForgetPassword from "./Components/Body/ForgetPassword/ForgetPassword";
+import GetCreditLists from "./Components/Body/Business/GetCreditLists";
 function App() {
   return (
     <div className="App">
@@ -127,19 +128,19 @@ function App() {
               path=""
               element={
                 <>
+                  <GetCreditLists />
                   <GetMinimumQty />
                   <GetMaximumSales />
                 </>
               }
             />
+
             <Route path="additems" element={<AddItems />} />
             <Route path="search" element={<SearchProducts />} />
             <Route path="view" element={<Transaction />} />
             <Route path="Employee" element={<Employee />} />
-            <Route
-              path="/OpenBusiness/addTransaction"
-              element={<AddTransaction />}
-            >
+
+            <Route path="addTransaction" element={<AddTransaction />}>
               <Route
                 path="AddSalesTranaction"
                 element={<AddSalesTransaction />}

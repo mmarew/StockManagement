@@ -1,8 +1,7 @@
 .singleSalesWrapper {
-  max-width: 600px;
-  /* margin: auto; */
+  max-width: fit-content;
+  margin: auto;
 }
-
 .singleTransactionForm {
   width: 310px;
   margin: 10px auto;

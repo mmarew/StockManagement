@@ -5,7 +5,7 @@ let Auth = require("./Auth.js").Auth;
 let dotenv = require("dotenv");
 let sqlstring = require("sqlstring");
 let mysql2 = require("mysql2");
-
+let tokenKey = "shhhhh";
 // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-let
 dotenv.config();
 let path = "/";
@@ -18,7 +18,7 @@ server.use(
   })
 );
 
-let createBasicTables = require("./Database.js");
+let Databases = require("./Database.js");
 let date = new Date();
 let fullTime,
   year = date.getFullYear(),
@@ -45,7 +45,7 @@ if (second < 10) {
 }
 fullTime = year + "-" + month + "-" + day + "" + hour + ":" + minuite;
 // console.log("fullTime is " + fullTime);
-createBasicTables.createBasicTables();
+Databases.createBasicTables();
 let jwt = require("jsonwebtoken");
 const { Pool } = require("./Database.js");
 const { DateFormatter } = require("./DateFormatter.js");
@@ -59,7 +59,7 @@ server.listen(process.env.serverPort, (err) => {
   if (err) {
     return res.json({ err });
   } else {
-    // console.log(`connected at ${process.env.serverPort}`);
+    console.log(`connected at ${process.env.serverPort}`);
   }
 });
 server.post(path, (req, res) => {
@@ -67,10 +67,57 @@ server.post(path, (req, res) => {
     "<h1><center>This is server is running well in post methodes.</center></h1>"
   );
 });
-server.get(path, (req, res) => {
-  res.end(
-    "<h1><center>This is server is running well in get methodes.</center></h1>"
+server.get(path, async (req, res) => {
+  return res.end(
+    "<h1><center>This is server is running well in post methodes.</center></h1>"
   );
+  // alter tables creditPaymentDate
+  let daily = `ALTER TABLE dailyTransaction ADD COLUMN creditPaymentDate DATE DEFAULT NULL`;
+  Pool.query(daily)
+    .then((responces) => {
+      res.json({ data: responces });
+    })
+    .catch((eror) => {
+      res.json({ data: eror });
+    });
+  return;
+
+  let select = "select * from Business ";
+  let myData = [];
+  await Pool.query(select)
+    .then(([results]) => {
+      console.log("results", results);
+      myData = results;
+      results.map(async (data) => {
+        let { BusinessName } = data;
+        let editableTable = `ALTER TABLE ${BusinessName}_Transaction ADD COLUMN creditsalesQty int AFTER salesQty`;
+        await Pool.query(editableTable)
+          .then((data1) => {
+            console.log(data1);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        editableTable = `ALTER TABLE ${BusinessName}_Transaction
+  MODIFY creditDueDate date , MODIFY salesTypeValues enum('On cash','By bank','On credit','credit paied'), MODIFY creditPayementdate date`;
+        Pool.query(editableTable)
+          .then((data1) => {
+            console.log(data1);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        // console.log("data", data);
+        // res.json({ data });
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  // res.end(
+  //   "<h1><center>This is server is running well in get methodes.</center></h1>"
+  // );
+  res.json({ data: myData });
 });
 server.post(path + "getBusiness/", (req, res) => {
   let tokens = req.body.token;
@@ -80,7 +127,7 @@ server.post(path + "getBusiness/", (req, res) => {
   }
 
   try {
-    let decoded = jwt.verify(tokens, "shhhhh");
+    let decoded = jwt.verify(tokens, tokenKey);
     let userID = decoded.userID;
 
     let getBusiness = `SELECT * FROM Business WHERE ownerId = ?`;
@@ -110,7 +157,7 @@ server.post(path + "getBusiness/", (req, res) => {
 server.post(path + "verifyLogin/", async (req, res) => {
   let token = req.body.token;
   try {
-    let decoded = jwt.verify(token, "shhhhh");
+    let decoded = jwt.verify(token, tokenKey);
     let userID = decoded.userID;
     let select = `SELECT * FROM usersTable WHERE userId = ?`;
 
@@ -148,7 +195,7 @@ server.post(path + "Login/", (req, res) => {
 
       let savedPassword = rows[0].password;
       const isMatch = bcrypt.compareSync(req.body.Password, savedPassword);
-      let token = jwt.sign({ userID: rows[0].userId }, "shhhhh");
+      let token = jwt.sign({ userID: rows[0].userId }, tokenKey);
       if (isMatch) {
         return res.json({
           data: "loginSuccessFull",
@@ -242,7 +289,7 @@ server.post(path + "addProducts/", async (req, res) => {
 // i am here
 server.post(path + "createBusiness/", (req, res) => {
   let businessName = req.body.businessName;
-  let decoded = jwt.verify(req.body.token, "shhhhh");
+  let decoded = jwt.verify(req.body.token, tokenKey);
   let userID = decoded.userID;
   let response = createBusiness(businessName, userID, fullTime, res);
 });
@@ -266,180 +313,142 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
       console.error(err);
       res.json({ error: "Unable to fetch data." });
     });
-  // let select = `select * from ${businessName}_products`;
-  // connection.query(select, (err, result) => {
-  //   if (err) return res.json({ err });
-  //   if (result) console.log(result);
-  //   res.json({ data: result });
-  // });
-  // let userId = await Auth(req.body.token);
-  // res.end("getRegisteredProducts lllllllllll");
 });
-// to be seen in mornning mind
 server.post(path + "registerTransaction/", async (req, res) => {
-  // return console.log("registerTransaction", req.body);
-  let ProductId = req.body.ProductId;
-  let rowData = req.body,
-    ProductsList = rowData.ProductsList,
-    businessName = "",
-    i = 0,
-    previouslyRegisteredData = [],
-    values = "",
-    length = ProductsList.length,
-    insertedProducts = [],
-    InventoryList = [];
+  try {
+    const rowData = req.body;
+    let businessName = rowData.businessName;
+    const validate = validateAlphabet(businessName, res);
 
-  let validate = validateAlphabet(req.body.businessName, res);
-  if (validate == "correctData") {
-    businessName = req.body.businessName;
-  } else {
-    // this is just to stop execution res is done in validateAlphabet
-    return "This data contains string so no need of execution";
-  }
-  let recurciveTorecheck = () => {
-    let productID = ProductsList[i].ProductId,
-      unitCost = ProductsList[i].productsUnitCost,
-      unitPrice = ProductsList[i].productsUnitPrice,
-      salesQuantity = "salesQuantity" + productID,
-      purchaseQty = "purchaseQty" + productID,
-      wrickageQty = "wrickageQty" + productID,
-      Inventory = 0;
-    console.log();
-    let dates = req.body.dates;
-    // return console.log("dates are ", dates);
-    let selectToCheck = `select * from  ?? where registeredTime like ? and productIDTransaction=?`;
-    let table = `${businessName}_Transaction`;
-    let valuesOfTransactions = [table, `%${dates}%`, productID],
-      values = "";
-    Pool.query(selectToCheck, valuesOfTransactions)
-      .then(([rows]) => {
-        if (rows.length > 0) {
-          return res.json({
-            data: "allDataAreRegisteredBefore",
-            previouslyRegisteredData,
-            date: req.body.dates,
-            values,
-          });
-          // // previouslyRegisteredData.push(resultOfQuery) collect previously registered
-          // previouslyRegisteredData.push(rows);
+    if (validate === "correctData") {
+      const productsList = rowData.ProductsList;
+      const length = productsList.length;
+      const insertedProducts = [];
+      const inventoryList = [];
 
-          // // i == length - 1 at last status
-          // if (i == length - 1) {
-          //   if (previouslyRegisteredData.length == length) {
-          //     // previouslyRegisteredData.length - 1 == length - 1 are all registered before or not
-          //   } else {
-          //     console.log("values @ 1", values);
-
-          //     let insert = `insert into ${businessName}_Transaction(unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory) values (?)`;
-          //     let insertValues = [values.split(",")];
-          //     Pool.query(insert, insertValues)
-          //       .then((result) => {
-          //         updateNextDateInventory(
-          //           `${businessName}_Transaction`,
-          //           insertedProducts,
-          //           req.body.dates,
-          //           InventoryList
-          //         );
-          //         return res.json({
-          //           data: "data is registered successfully",
-          //           previouslyRegisteredData,
-          //         });
-          //       })
-          //       .catch((error) => {
-          //         console.log("error on 9090", error);
-          //         res.json({ data: error });
-          //       });
-          //   }
-          // } else {
-          //   console.log("recall to recursive");
-          //   i++;
-          //   recurciveTorecheck();
-          // }
-        } else {
-          insertedProducts.push(ProductsList[i]);
-          let prevInventory =
-            "SELECT * FROM ?? WHERE productIDTransaction = ? AND registeredTime < ? ORDER BY registeredTime DESC LIMIT 1";
-          let table = `${businessName}_Transaction`;
-          let valuesOfTransaction = [table, productID, req.body.dates];
-
-          Pool.query(prevInventory, valuesOfTransaction)
-            .then(([rows]) => {
-              if (rows.length == 0) {
-                // console.log("no data found");
-                Inventory = 0;
-              } else {
-                Inventory = rows[0].Inventory;
-              }
-              Inventory =
-                parseInt(rowData[purchaseQty]) -
-                parseInt(rowData[salesQuantity]) +
-                parseInt(Inventory) -
-                parseInt(rowData[wrickageQty]);
-
-              if (typeof Inventory == "string") {
-                return res.json({ data: "error", error: "error code 678," });
-              }
-              InventoryList.push(Inventory);
-              if (values != "") {
-                values += ",";
-              }
-              values = `${unitCost} , ${unitPrice} , ${productID} , ${rowData[salesQuantity]} , ${rowData[purchaseQty]} , ${req.body.dates} , ${rowData[wrickageQty]} , ${Inventory}`;
-
-              // console.log("values are ", values.split(","));
-              // return;
-
-              if (i == length - 1) {
-                if (previouslyRegisteredData.length == length) {
-                  // previouslyRegisteredData.length - 1 == length - 1 are all registered before or not
-                  return res.json({
-                    data: "allDataAreRegisteredBefore",
-                    previouslyRegisteredData,
-                    date: req.body.dates,
-                    values,
-                  });
-                } else {
-                  let insert = `insert into ${businessName}_Transaction (unitCost,unitPrice,productIDTransaction,salesQty,purchaseQty,registeredTime,wrickages,Inventory)values(?) `;
-                  // insertvalues = values;
-                  let dataToSendResponceToClient = "NoNeed";
-                  Pool.query(insert, [values.split(",")])
-                    .then((result) => {
-                      updateNextDateInventory(
-                        `${businessName}_Transaction`,
-                        insertedProducts,
-                        req.body.dates,
-                        InventoryList
-                      );
-                      return res.json({
-                        data: "data is registered successfully",
-                        previouslyRegisteredData,
-                        values,
-                        dataToSendResponceToClient,
-                      });
-                    })
-                    .catch((error) => {
-                      console.log("err on insert == ", error);
-                      return res.json({ data: "err", error });
-                    });
-                }
-              } else {
-                // increase i by 1
-                // recal to recursive
-                console.log("recall to recursive");
-                i++;
-                recurciveTorecheck();
-              }
-            })
-            .catch((error) => {
-              console.log(error);
-            });
+      for (let i = 0; i < length; i++) {
+        let product = productsList[i],
+          productID = product.ProductId,
+          salesQuantity = rowData[`salesQuantity${productID}`],
+          salesTypeValues = rowData.salesTypeValues,
+          creditDueDate = rowData.creditDueDate,
+          purchaseQty = rowData[`purchaseQty${productID}`],
+          creditSalesQty = rowData[`creditSalesQty${productID}`],
+          wrickageQty = rowData[`wrickageQty${productID}`],
+          description = rowData[`Description${productID}`];
+        if (creditSalesQty == null || creditSalesQty == "null") {
+          creditSalesQty = 0;
         }
-      })
-      .catch((error) => {
-        console.log("error ", error);
-        res.json({ data: error });
+        //Select to check if item is registered in this day
+        const selectToCheck = `SELECT * FROM ?? WHERE registeredTime LIKE ? AND productIDTransaction = ?`;
+        const table = `${businessName}_Transaction`;
+        const valuesOfTransactions = [table, `%${rowData.dates}%`, productID];
+
+        const [rows] = await Pool.query(selectToCheck, valuesOfTransactions);
+
+        if (rows.length > 0) {
+          // If the product is already registered
+          continue;
+        } else {
+          const insertedProduct = {
+            creditSalesQty: creditSalesQty,
+            creditDueDate: creditDueDate,
+            salesTypeValues: salesTypeValues,
+            Description: description,
+            productsUnitCost: product.productsUnitCost,
+            productsUnitPrice: product.productsUnitPrice,
+            ProductId: productID,
+            salesQuantity: salesQuantity,
+            purchaseQty: purchaseQty,
+            wrickageQty: wrickageQty,
+            Inventory:
+              parseFloat(purchaseQty) -
+              parseFloat(salesQuantity) -
+              parseFloat(wrickageQty) -
+              parseFloat(creditSalesQty),
+          };
+
+          insertedProducts.push(insertedProduct);
+
+          // Get previous inventory
+          const prevInventoryQuery =
+            "SELECT * FROM ?? WHERE productIDTransaction = ? AND registeredTime < ? ORDER BY registeredTime DESC LIMIT 1";
+          const prevInventoryTable = `${businessName}_Transaction`;
+          const prevInventoryValues = [
+            prevInventoryTable,
+            productID,
+            rowData.dates,
+          ];
+          const [prevInventoryRows] = await Pool.query(
+            prevInventoryQuery,
+            prevInventoryValues
+          );
+
+          let inventory = 0;
+          if (prevInventoryRows.length > 0) {
+            inventory = prevInventoryRows[0].Inventory;
+          }
+
+          inventory +=
+            parseInt(purchaseQty) -
+            parseInt(salesQuantity) -
+            parseInt(wrickageQty);
+          inventoryList.push(inventory);
+        }
+      }
+
+      if (insertedProducts.length === 0) {
+        return res.json({
+          data: "allDataAreRegisteredBefore",
+          previouslyRegisteredData: [],
+          date: rowData.dates,
+          values: "",
+        });
+      }
+
+      const insertQuery = `INSERT INTO ${businessName}_Transaction (description, unitCost, unitPrice, productIDTransaction, salesQty, purchaseQty, registeredTime, wrickages, Inventory,creditDueDate,salesTypeValues,creditSalesQty ) VALUES ?`;
+      const values = insertedProducts.map((product) => [
+        product.Description,
+        product.productsUnitCost,
+        product.productsUnitPrice,
+        product.ProductId,
+        product.salesQuantity,
+        product.purchaseQty,
+        rowData.dates,
+        product.wrickageQty,
+        product.Inventory,
+        product.creditDueDate,
+        product.salesTypeValues,
+        product.creditSalesQty,
+      ]);
+      console.log("insertQuery", insertQuery);
+      console.log("values", values);
+      // return;
+
+      await Pool.query(insertQuery, [values]);
+      updateNextDateInventory(
+        `${businessName}_Transaction`,
+        insertedProducts,
+        rowData.dates,
+        inventoryList
+      );
+
+      return res.json({
+        data: "data is registered successfully",
+        previouslyRegisteredData: [],
+        values,
+        dataToSendResponceToClient: "NoNeed",
       });
-  };
-  recurciveTorecheck();
+    } else {
+      // Invalid business name
+      return res.json({
+        data: "This data contains a string, so no need for execution",
+      });
+    }
+  } catch (error) {
+    console.log("Error: ", error);
+    return res.json({ data: "error", error });
+  }
 });
 server.post(path + "ViewTransactions/", (req, res) => {
   let businessName = "",
@@ -610,7 +619,7 @@ async function getPreviousDay(date) {
   return formattedDate;
 }
 
-server.post(path + "searchProducts/", (req, res) => {
+server.post(path + "searchProducts/", async (req, res) => {
   let businessName = "",
     productName = req.body.InputValue.productName,
     toDate = req.body.InputValue.toDate,
@@ -635,16 +644,6 @@ server.post(path + "searchProducts/", (req, res) => {
         res.json({ Error });
       });
   } else if (selectSearches == "TRANSACTION") {
-    // let select = `select * from ${businessName}_Transaction , ${businessName}_products where productIDTransaction=ProductId and productName like '%\n${(
-    //   productName
-    // )}\n%' and registeredTime between '${fromDate}' and '${toDate}'`;
-    // connection.query(select, (err, result) => {
-    // define the SQL query using placeholders
-    // const sql = `SELECT *
-    //          FROM ${businessName}_Transaction, ${businessName}_products
-    //          WHERE productIDTransaction = ProductId
-    //          AND productName LIKE CONCAT('%', ?, '%')
-    //          AND registeredTime BETWEEN ? AND ?`;
     const query = `SELECT *
                FROM ??, ??
                WHERE productIDTransaction = ProductId
@@ -674,13 +673,22 @@ server.post(path + "searchProducts/", (req, res) => {
     ];
     let data = "";
     // execute the query with the input data
-    Pool.query(sql, input)
+    let selectAccountRecived = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.creditPayementdate BETWEEN ? AND ? order by t.creditPayementdate desc`;
+    let accountRecivableData = [];
+    await Pool.query(selectAccountRecived, input)
+      .then(([rows]) => {
+        accountRecivableData = rows;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    await Pool.query(sql, input)
       .then(([rows]) => {
         data = rows;
         console.log("data in all", rows);
         const sql = `SELECT * FROM ?? e, ?? c WHERE e.costRegisteredDate BETWEEN ? AND ? AND e.costId = c.costsId`;
         // define the input data as an array of values
-        const input = [
+        const inputExp = [
           `${businessName}_expenses`,
           `${businessName}_Costs`,
           fromDate,
@@ -688,9 +696,9 @@ server.post(path + "searchProducts/", (req, res) => {
         ];
 
         // execute the query with the input data
-        Pool.query(sql, input)
+        Pool.query(sql, inputExp)
           .then(([rows]) => {
-            res.json({ expenceTransaction: rows, data });
+            res.json({ expenceTransaction: rows, data, accountRecivableData });
           })
           .catch((error) => {
             res.json({ err: error });
@@ -808,7 +816,9 @@ server.post(`/registerCostTransaction/`, (req, res) => {
   let costId = req.body.costData[0].costsId;
   // define the input data as an array of values
   const input = [`${req.body.businessName}_expenses`, date, costId];
+  console.log("date is ", date);
   // execute the query with the input data
+  // return;
   Pool.query(sql, input)
     .then(([rows]) => {
       if (rows.length > 0) {
@@ -825,11 +835,13 @@ server.post(`/registerCostTransaction/`, (req, res) => {
         const insert = `INSERT INTO ?? (costId, costAmount, costDescription, costRegisteredDate) VALUES (?, ?, ?, ?)`;
         const values = [table, costsId, costAmount, costDescription, date];
         Pool.query(insert, values)
+          // console
+          // .log("inserted values are ", values)
           .then((results) => {
             res.json({ data: "Inserted properly" });
           })
           .catch((error) => {
-            console.log("error");
+            console.log("error", error);
             res.json({ data: "error", error: "unable to insert" });
           });
       }
@@ -869,7 +881,8 @@ server.post(path + "updateBusiness/", (req, res) => {
       res.json({ err });
     });
 });
-let updateNextDateInventory = async (
+
+const updateNextDateInventory = async (
   businessName,
   ProductsList,
   date,
@@ -888,7 +901,7 @@ let updateNextDateInventory = async (
       res = dataToSendResponceToClient.res;
 
       Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
-        res.json({ data: rows });
+        return res.json({ data: rows });
       });
     }
   }
@@ -896,17 +909,18 @@ let updateNextDateInventory = async (
   console.log("903 =", businessName, ProductsList, date, previousInventory);
 
   let index = 0;
-  let productId = ProductsList[index].ProductId;
 
-  let recursiveUpdate = () => {
-    let select = `SELECT * FROM ?? WHERE productIDTransaction=? AND registeredTime > ? ORDER BY registeredTime ASC`;
-    let values = [businessName, productId, date];
-    // console.log("values to beselected are ", values);
-    // return;
-    Pool.query(select, values)
-      .then(async ([rows]) => {
+  let recursiveUpdate = async () => {
+    if (index < ProductsList.length) {
+      let productId = ProductsList[index].ProductId;
+
+      let select = `SELECT * FROM ?? WHERE productIDTransaction=? AND registeredTime > ? ORDER BY registeredTime ASC`;
+      let values = [businessName, productId, date];
+
+      try {
+        const [rows] = await Pool.query(select, values);
         console.log("my rows ===", rows);
-        // return;
+
         if (rows.length > 0) {
           let prevInventory = 0;
 
@@ -944,105 +958,22 @@ let updateNextDateInventory = async (
         } else {
           sendResponses();
         }
-      })
-      .catch((error) => {
+
+        index++;
+        recursiveUpdate(); // Call the recursive function to process the next product
+      } catch (error) {
         console.log(error);
-      });
+      }
+    } else {
+      sendResponses(); // All products have been processed, send the responses
+    }
   };
 
   recursiveUpdate();
 };
-// let updateNextDateInventory = async (
-//   businessName,
-//   ProductsList,
-//   date,
-//   previousInventory,
-//   dataToSendResponceToClient
-// ) => {
-//   let sqlToSelect, inputToSelect, res;
 
-//   function sendResponces() {
-//     if (
-//       typeof dataToSendResponceToClient != "object" &&
-//       dataToSendResponceToClient !== "NoNeed"
-//     ) {
-//       sqlToSelect = dataToSendResponceToClient.sqlToSelect;
-//       inputToSelect = dataToSendResponceToClient.inputToSelect;
-//       res = dataToSendResponceToClient.res;
+// Usage
 
-//       Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
-//         res.json({ data: rows });
-//       });
-//     }
-//   }
-//   console.log("903 = ", businessName, ProductsList, date, previousInventory);
-//   // return;
-//   let index = 0,
-//     productId = ProductsList[index].ProductId;
-//   let recurciveUpdate = () => {
-//     let select = `select * from ?? where productIDTransaction=? and registeredTime > ? order by registeredTime asc`;
-//     let values = [`${businessName}`, productId, date];
-//     Pool.query(select, values)
-//       .then(async ([rows]) => {
-//         console.log("my rows===", rows);
-
-//         if (rows.length > 0) {
-//           let j = 0,
-//             prevInventory = 0;
-//           for (let i = 0; i < rows.length; i++) {
-//             let salesqty = rows[i].salesQty,
-//               purchaseQty = rows[i].purchaseQty,
-//               inventory = 0,
-//               wrickages = rows[i].wrickages;
-//             if (i == 0) {
-//               inventory =
-//                 purchaseQty + previousInventory[index] - salesqty - wrickages;
-//             } else {
-//               inventory = purchaseQty + prevInventory - salesqty - wrickages;
-//             }
-//             prevInventory = inventory;
-//             // set inventory
-//             let update = `update ?? set inventory=? where transactionId=?`;
-//             let valuesToUpdate = [
-//               `${businessName}`,
-//               `${inventory}`,
-//               `${rows[i].transactionId}`,
-//             ];
-//             // previousInventory = inventory;
-//             console.log("here it is ok it is ....");
-//             await Pool.query(update, valuesToUpdate)
-//               .then((results) => {
-//                 if (results) {
-//                   if (i >= rows.length - 1) {
-//                     sendResponces();
-//                   }
-//                 } else {
-//                   sendResponces();
-//                 }
-//               })
-//               .catch((err) => {
-//                 console.log(err);
-//                 return res.json({ err });
-//               });
-//           }
-//         } else {
-//           // if (index < ProductsList.length - 1) {
-//           //   index++;
-//           //   recurciveUpdate();
-//           // }
-//           // else {
-//           Pool.query(sqlToSelect, inputToSelect).then(([rows]) => {
-//             res.json({ data: rows });
-//           });
-//           // }
-//         }
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//       });
-//   };
-//   recurciveUpdate();
-// };
 function insertIntoCosts(businessName, data, res) {
   const sanitizedCostName = mysql2.escape(data.Costname);
   // Build the sanitized SQL query
@@ -1406,18 +1337,29 @@ server.post(path + "getsingleProducts/", (req, res) => {
     });
 });
 server.post(path + "registerSinglesalesTransaction/", (req, res) => {
-  let Description = req.body.Description,
-    brokenQty = req.body.brokenQty,
-    businessId = req.body.businessId,
-    purchaseQty = req.body.purchaseQty,
-    salesQty = req.body.salesQty,
-    ProductId = req.body.ProductId,
-    currentDate = req.body.currentDate;
-
-  const query = `INSERT INTO dailyTransaction (purchaseQty, salesQty, businessId, ProductId, brokenQty, Description, registrationDate) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const {
+    Description,
+    brokenQty,
+    businessId,
+    purchaseQty,
+    salesQty,
+    ProductId,
+    currentDate,
+    salesType,
+    creditPaymentDate,
+  } = req.body;
+  console.log("salesType", salesType);
+  let salesAmount = "salesQty";
+  if (salesType == "On credit") {
+    salesAmount = "creditsalesQty";
+  }
+  // salesTypeValues; creditPaymentDate
+  const query = `INSERT INTO dailyTransaction (purchaseQty, ${salesAmount},salesTypeValues,creditPaymentDate,businessId, ProductId, brokenQty, Description, registrationDate) VALUES (?,?, ?, ?, ?, ?, ?, ?,?)`;
   const values = [
     purchaseQty,
     salesQty,
+    salesType,
+    creditPaymentDate,
     businessId,
     ProductId,
     brokenQty,
@@ -1436,18 +1378,18 @@ server.post(path + "registerSinglesalesTransaction/", (req, res) => {
       res.json({ data: "err", err: error });
       // Handle the error
     });
-  return;
+  // return;
 
   let Insert = `insert into dailyTransaction(purchaseQty,salesQty,businessId,ProductId,brokenQty,Description,registrationDate)value('${purchaseQty}','${salesQty}','${businessId}','${ProductId}','${brokenQty}','${Description}','${currentDate}')`;
 
-  connection.query(Insert, (error, results) => {
-    if (error) {
-      // console.log(error);
-    }
-    if (results) {
-      res.json({ data: "successfullyRegistered" });
-    }
-  });
+  // connection.query(Insert, (error, results) => {
+  //   if (error) {
+  //     // console.log(error);
+  //   }
+  //   if (results) {
+  //     res.json({ data: "successfullyRegistered" });
+  //   }
+  // });
 });
 server.post(path + "getDailyTransaction/", (req, res) => {
   // res.json({ data: req.body });
@@ -2105,7 +2047,6 @@ server.post(path + "verifyPin", (req, res) => {
   let phone = req.body.PhoneNumber;
   let pincode = req.body.pincode;
   let select = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
-
   Pool.query(select, [phone])
     .then(([rows]) => {
       if (rows.length > 0) {
@@ -2153,34 +2094,6 @@ server.get(path + "requestPasswordReset/", (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
     });
 });
-// server.get(path + "requestPasswordReset/", (req, res) => {
-//   console.log("requestPasswordReset", req);
-//   let select = `select * from usersTable where passwordStatus='requestedToReset'`;
-//   connection.query(select, (err, result) => {
-//     if (err) {
-//       console.log(err);
-//       return res.json({ data: err });
-//     }
-//     if (result) {
-//       console.log(result);
-//       if (result.length > 0) {
-//         // wait here
-
-//         let update = `update usersTable set passwordStatus='pinSentedToUser' where userId='${result[0].userId}'`;
-//         connection.query(update, (err, result1) => {
-//           if (err) return res.json({ data: err, err });
-//           console.log("result1", result1);
-//           res.json({
-//             phoneNumber: result[0].phoneNumber,
-//             pinCode: result[0].passwordResetPin,
-//           });
-//         });
-//       } else {
-//         res.json({ phoneNumber: "notFound", pinCode: "notFound" });
-//       }
-//     }
-//   });
-// });
 function validateAlphabet(reqData, res) {
   const regex = /^[a-zA-Z0-9_]+$/;
   const str = reqData; // Assumes the string to validate is in the `str` property of the request body
@@ -2192,3 +2105,134 @@ function validateAlphabet(reqData, res) {
     });
   } else return "correctData";
 }
+server.get("/getUsersCreditList", async (req, res) => {
+  try {
+    let { token, businessName, businessId } = req.query;
+    console.log("getUsersCreditList token", token);
+    // res.json({ token });
+    let { userId } = jwt.verify(token, tokenKey);
+    let SelectFromDaily = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'On credit' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId} `,
+      dailyData = [];
+    await Pool.query(SelectFromDaily)
+      .then(([data]) => {
+        console.log("SelectFromDaily data", data);
+        dailyData = data;
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
+    let Select = `select * from ${businessName}_Transaction , ${businessName}_products where salesTypeValues = 'On credit' and ProductId = productIDTransaction`;
+    // {On cash,By bank,On credit}
+    await Pool.query(Select)
+      .then(([data]) => {
+        console.log(data);
+        res.json({ data: data, dailyData });
+      })
+      .catch((error) => {
+        console.log(error);
+        res.json({ data: "error no 890" });
+      });
+  } catch (error) {
+    console.log("error", error);
+    res.json({ data: "error no 891" });
+  }
+});
+server.put("/paymentConfirmed", async (req, res) => {
+  // res.json({ data: req.body });
+  let { data, businessName, token, CollectionDate, salesWAy } = req.body;
+  // get userId from token
+  let { userID } = jwt.verify(token, tokenKey);
+  // console.log("userId", userID, "token", token, "tokenKey ", tokenKey);
+  // return;
+  let select = `select * from Business where ownerId='${userID}' and BusinessName='${businessName}'`;
+  let verifiOwnership = "not correct owner";
+  await Pool.query(select)
+    .then(([result]) => {
+      console.log("paymentConfirmed result", result);
+      if (result.length > 0) verifiOwnership = "correct owner";
+    })
+    .catch(() => {
+      verifiOwnership = "error on confirmation";
+    });
+  if (verifiOwnership !== "correct owner") {
+    return res.json({ data: verifiOwnership });
+  }
+  if (salesWAy == "singleSales") {
+    // update single sales
+    let { dailySalesId } = data;
+    let update = `update dailyTransaction set salesTypeValues='credit paied',creditPaymentDate='${CollectionDate}' where dailySalesId='${dailySalesId}'`;
+    await Pool.query(update)
+      .then((data) => {
+        console.log("data", data);
+        res.json({ data: "udate successfull" });
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
+    return;
+  }
+  console.log("paymentConfirmed data ", data);
+  let { transactionId } = data;
+  let update = `update ${businessName}_Transaction set salesTypeValues='credit paied',creditPayementdate='${CollectionDate}' where transactionId= ${transactionId}`;
+  Pool.query(update)
+    .then((data) => {
+      console.log("data", data);
+      res.json({ data: "udate successfull" });
+    })
+    .catch((error) => {
+      console.log("error", error);
+    });
+});
+server.delete(path + "deleteDailyTransaction", (req, res) => {
+  console.log("req.body.source:");
+  let { dailySalesId } = req.body.source;
+  let deleteSql = `delete from dailyTransaction where dailySalesId='${dailySalesId}'`;
+  Pool.query(deleteSql)
+    .then((data) => {
+      console.log("data deleteDailyTransaction", data);
+      res.json({ data: "success" });
+      console.log(data);
+    })
+    .catch((error) => {
+      res.json({ data: "error", error: "error no 23" });
+      console.log(error);
+    });
+});
+server.put(path + "editDailyTransaction", (req, res) => {
+  let x = ({
+    dailySalesId,
+    Description,
+    brokenQty,
+    creditPaymentDate,
+    creditsalesQty,
+    purchaseQty,
+    registrationDate,
+    salesQty,
+    salesTypeValues,
+  } = req.body.items);
+  console.log(" req.body.items", x);
+  // return;
+  let update = `update dailyTransaction set purchaseQty=?,  salesQty=?,
+  creditsalesQty=?,salesTypeValues=?,creditPaymentDate=?,  brokenQty=?,
+  Description=? where dailySalesId=? `,
+    values = [
+      purchaseQty,
+      salesQty,
+      creditsalesQty,
+      salesTypeValues,
+      creditPaymentDate,
+      brokenQty,
+      Description,
+      dailySalesId,
+    ];
+  Pool.query(update, values)
+    .then((data) => {
+      console.log([data]);
+      res.json({ data: "update successfully" });
+    })
+    .catch((error) => {
+      res.json({ data: error });
+      console.log("error", error);
+    });
+  // res.json({ data: req.body });
+});

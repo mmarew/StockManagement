@@ -14,11 +14,20 @@ import {
   TableRow,
 } from "@mui/material";
 import ConfirmDialog from "../Others/Confirm";
+import { ConsumeableContext } from "../UserContext/UserContext";
 function SearchExpenceTransaction({
   showEachItems,
   response,
   setshowEachItems,
 }) {
+  const {
+    accountRecivableAmt,
+    setAccountRecivableAmt,
+    accountRecivableCollected,
+    setAccountRecivableCollected,
+    collectedMoney,
+    setCollectedMoney,
+  } = ConsumeableContext();
   console.log(
     "showEachItems",
     showEachItems,
@@ -262,7 +271,10 @@ function SearchExpenceTransaction({
                 {ViewCostList?.map((items, index) => {
                   console.log(items);
                   return (
-                    <TableRow id={`expenceWrapper_${items.costId}`}>
+                    <TableRow
+                      key={"expenceWrapper_" + index}
+                      id={`expenceWrapper_${items.costId}`}
+                    >
                       <TableCell id={`expName_${items.expenseId}`}>
                         {items.costName}
                       </TableCell>
@@ -401,11 +413,15 @@ function SearchExpenceTransaction({
               </TableRow>
             </Table>
           </TableContainer>
-          Net cash flow is=
+          Net cash flow is(total sales - total purchase - total cost - sold in
+          credit + collected credits)=
           {(
             TotalSalesRevenue -
             TotalPurchaseCost -
-            TotalCostAmount
+            TotalCostAmount -
+            accountRecivableAmt +
+            collectedMoney -
+            accountRecivableCollected
           ).toLocaleString("en-US", {
             style: "currency",
             currency: "ETB",
@@ -417,8 +433,13 @@ function SearchExpenceTransaction({
           <center>
             Note:- On this day you have not expencess.
             <br /> <br />
-            Net Cash Flow &nbsp;&nbsp;&nbsp;
-            {(TotalSalesRevenue - TotalPurchaseCost).toLocaleString("en-US", {
+            Net Cash Flow (Total Sales - Total Costs-sold In
+            Credit)&nbsp;&nbsp;&nbsp;
+            {(
+              TotalSalesRevenue -
+              TotalPurchaseCost -
+              accountRecivableAmt
+            ).toLocaleString("en-US", {
               style: "currency",
               currency: "ETB",
             })}

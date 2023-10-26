@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
 import CloseIcon from "@mui/icons-material/Close";
 import $ from "jquery";
+import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import { Box, Button, IconButton, Modal, TextField } from "@mui/material";
 import AddTotalSalesCss from "./AddTotalSales.module.css";
 import { useNavigate } from "react-router-dom";
@@ -52,7 +53,6 @@ function AddTotalSales({ Time }) {
   let sendFormDataToServer = async (e, ProductId) => {
     e.preventDefault();
     console.log("ProductId", ProductId);
-    // return;
     let dates = CollectedProducts.dates;
     CollectedProducts.ProductId = ProductId;
     if (dates == undefined) {
@@ -73,6 +73,7 @@ function AddTotalSales({ Time }) {
       serverAddress + "registerTransaction/",
       copyOfCollection
     );
+    // salesTypeValues;
     $(".LinearProgress").hide();
     let datas = response.data.data;
     console.log(datas, "response is = ", response);
@@ -188,6 +189,12 @@ function AddTotalSales({ Time }) {
           {RegistrableProducts.map((item) => {
             return (
               <form
+                sx={{
+                  height: "90vh",
+                  overflowY: "scroll",
+                  overflowX: "hidden",
+                }}
+                fullWidth
                 id={AddTotalSalesCss.formOnAddTransaction}
                 action=""
                 onSubmit={(e) => sendFormDataToServer(e, item.ProductId)}
@@ -244,6 +251,31 @@ function AddTotalSales({ Time }) {
                     name={"Description" + item.ProductId}
                     label="Description"
                   />
+                  <br />
+                  <label>Select sales type</label>
+                  <Select
+                    required
+                    name="salesTypeValues"
+                    labelId="sales-type-label"
+                    id="sales-type-select"
+                    // value=""
+                    onChange={collectFormData}
+                  >
+                    <MenuItem value="On cash">On cash</MenuItem>
+                    <MenuItem value="By bank">By bank</MenuItem>
+                    <MenuItem value="On credit">On credit</MenuItem>
+                  </Select>
+                  {CollectedProducts.salesTypeValues == "On credit" && (
+                    <>
+                      <label>Payment date</label>
+                      <TextField
+                        onChange={collectFormData}
+                        name="creditDueDate"
+                        required
+                        type="date"
+                      />
+                    </>
+                  )}
                   <br />
                   <Button
                     variant="contained"

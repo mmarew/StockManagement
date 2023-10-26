@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import AddCostTransaction from "./AddCostTransaction";
-import AddSalesTranaction from "./AddSalesTranaction";
 import "./addTransaction.css";
 import $ from "jquery";
 import { Button } from "@mui/material";
+import { ConsumeableContext } from "../UserContext/UserContext";
 function AddTransaction({ Time }) {
   let navigate = useNavigate();
   const [Transaction, setTransaction] = useState("");
@@ -29,23 +28,24 @@ function AddTransaction({ Time }) {
   useEffect(() => {
     $(".salesOrCosts").show();
   }, []);
+  const { ownersName, setownersName } = ConsumeableContext();
+  setownersName(localStorage.getItem("ownersName"));
   return (
     <div className="addTransactionWrapper">
-      <h5>Register Sales or Cost Transaction</h5>
       <div className="addTransaction">
         <Button
           className="salesOrCosts"
           name="Sales"
           onClick={setTargatedRegistration}
         >
-          Register Sales
+          Sales
         </Button>
         <Button
           className="salesOrCosts"
           name="Cost"
           onClick={setTargatedRegistration}
         >
-          Register Cost
+          Costs
         </Button>
       </div>
       <hr />

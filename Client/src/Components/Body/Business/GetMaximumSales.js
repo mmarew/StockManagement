@@ -30,7 +30,7 @@ function GetMaximumSales() {
     if (Object.keys(DateRange).length > 0) {
       submitMaximumSelection("notEvent");
     }
-    console.log(DateRange);
+    // console.log(DateRange);
   }, [DateRange]);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ function GetMaximumSales() {
       (today.getMonth() + 1).toString().padStart(2, "0") +
       "-" +
       today.getDate().toString().padStart(2, "0");
-    console.log("SelectedTime", SelectedTime);
+    // console.log("SelectedTime", SelectedTime);
     if (SelectedTime == "Monthly") {
       // Get the current date.
       const today = new Date();
@@ -54,7 +54,7 @@ function GetMaximumSales() {
         (previous30thDay.getMonth() + 1).toString().padStart(2, "0") +
         "-" +
         previous30thDay.getDate().toString().padStart(2, "0");
-      console.log("previous30thDayFormatted", previous30thDayFormatted);
+      // console.log("previous30thDayFormatted", previous30thDayFormatted);
       setDateRange({
         ...DateRange,
         fromDate: previous30thDayFormatted,
@@ -71,7 +71,7 @@ function GetMaximumSales() {
         "-" +
         previousYear.getDate().toString().padStart(2, "0");
 
-      console.log(previousYearFormatted);
+      // console.log(previousYearFormatted);
 
       setDateRange({
         ...DateRange,
@@ -92,7 +92,7 @@ function GetMaximumSales() {
         "-" +
         previous7thDay.getDate().toString().padStart(2, "0");
 
-      console.log("previous7thDayFormatted =", previous7thDayFormatted);
+      // console.log("previous7thDayFormatted =", previous7thDayFormatted);
 
       setDateRange({
         ...DateRange,
@@ -103,7 +103,7 @@ function GetMaximumSales() {
   }, [SelectedTime]);
   useEffect(() => {
     let selectTimeRange = $("#selectTimeRange").val();
-    console.log("selectTimeRange = ", selectTimeRange);
+    // console.log("selectTimeRange = ", selectTimeRange);
     if (
       selectTimeRange == undefined ||
       selectTimeRange == "" ||
@@ -115,13 +115,13 @@ function GetMaximumSales() {
 
   let changesOnDays = (e) => {
     setSelectedTime(e.target.value);
-    console.log(e);
+    // console.log(e);
     setSelectedValue(e.target.value);
   };
   let submitMaximumSelection = async (e) => {
     if (e !== "notEvent") e.preventDefault();
-    console.log(e);
-    console.log(DateRange);
+    // console.log(e);
+    // console.log(DateRange);
     // return;
     if (Object.keys(DateRange).length < 2) {
       return;
@@ -134,7 +134,7 @@ function GetMaximumSales() {
       DateRange,
     });
     $(".LinearProgress").css("display", "none");
-    console.log(responce);
+    // console.log(responce);
     let data = responce.data.data;
     let copyOfData = data.map((item) => {
       return item;
@@ -142,7 +142,7 @@ function GetMaximumSales() {
     let collectedData = [],
       dataFound = "";
     data.map((item) => {
-      console.log(item);
+      // console.log(item);
       dataFound = "No";
       let salesQty = 0,
         purchaseQty = 0,
@@ -157,15 +157,15 @@ function GetMaximumSales() {
         }
       }
       copyOfData.map((d, index) => {
-        console.log(d);
+        // console.log(d);
         if (d.ProductId == item.ProductId) {
           dataFound = "yes";
-          console.log(d.ProductId, item.ProductId);
+          // console.log(d.ProductId, item.ProductId);
           salesQty += d.salesQty;
           purchaseQty += d.purchaseQty;
           inventory += d.Inventory;
           broken += d.wrickages;
-          console.log(salesQty, purchaseQty, inventory, broken);
+          // console.log(salesQty, purchaseQty, inventory, broken);
         }
       });
       ob.productName = item.productName;
@@ -177,12 +177,12 @@ function GetMaximumSales() {
       ob.purchaseQty = purchaseQty;
       ob.Inventory = inventory;
       ob.wrickages = broken;
-      console.log(ob);
+      // console.log(ob);
       if (dataFound == "yes") {
         collectedData.push(ob);
       }
     });
-    console.log("collectedData", collectedData);
+    // console.log("collectedData", collectedData);
     if (collectedData.length == 0) return;
     let newCollection = [];
     newCollection.push(collectedData[0]);
@@ -193,16 +193,11 @@ function GetMaximumSales() {
         unitCost = item.unitCost,
         purchaseQty = item.purchaseQty,
         salesQty = item.salesQty;
-      console.log(newCollection);
+      // console.log(newCollection);
       let newLength = newCollection.length;
       for (let i = 0; i < newLength; i++) {
         let unit = newCollection[i];
-        console.log(unit);
-        console.log(item);
-        console.log(
-          purchaseQty * item.unitCost,
-          unit.purchaseQty * unit.unitCost
-        );
+
         if (purchaseQty * item.unitCost >= unit.purchaseQty * unit.unitCost) {
           newCollection.splice(i, 0, item);
           i = newLength;
@@ -210,12 +205,12 @@ function GetMaximumSales() {
       }
     }
 
-    console.log(newCollection);
+    // console.log(newCollection);
     setMaximumDataList(newCollection);
   };
 
   let handleChangeOnDate = (e) => {
-    console.log(e.target.name, e.target.value);
+    // console.log(e.target.name, e.target.value);
     setDateRange({ ...DateRange, [e.target.name]: e.target.value });
   };
 
@@ -269,7 +264,7 @@ function GetMaximumSales() {
         )}
         <br />
       </form>
-      {console.log("DateRange == ", DateRange)}
+      {/* {console.log("DateRange == ", DateRange)} */}
       <h3 className={GetMaximumStyle.fromDateToDate}>
         From Date {DateRange.fromDate ? DateRange.fromDate : " not specified "}
         &nbsp; To Date {DateRange.toDate ? DateRange.toDate : " not Specified "}

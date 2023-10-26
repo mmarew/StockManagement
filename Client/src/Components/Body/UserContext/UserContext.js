@@ -4,6 +4,15 @@ let InitialContext = createContext();
 
 function UserContext(props) {
   const [ShowProgressBar, setShowProgressBar] = useState(true);
+  // This is data where sold by credit and money is not collected so we need it to deduct from sold in cash
+  const [accountRecivableAmt, setAccountRecivableAmt] = useState(0);
+  // This is data where sold by credit and collected in our selection time range  so we need it to add in net cash-flow
+  const [collectedMoney, setCollectedMoney] = useState(0);
+  // This is data where sold by credit and money is collected but collected time may or may not in selected time range so we need it to deduct from sold in cash
+  const [accountRecivableCollected, setAccountRecivableCollected] = useState(
+    []
+  );
+
   const [ownersName, setownersName] = useState("");
   const [TransactionData, setTransactionData] = useState([
     {
@@ -14,7 +23,18 @@ function UserContext(props) {
   ]);
   return (
     <InitialContext.Provider
-      value={[ownersName, setownersName, ShowProgressBar, setShowProgressBar]}
+      value={{
+        ownersName,
+        setownersName,
+        ShowProgressBar,
+        setShowProgressBar,
+        accountRecivableAmt,
+        setAccountRecivableAmt,
+        accountRecivableCollected,
+        setAccountRecivableCollected,
+        collectedMoney,
+        setCollectedMoney,
+      }}
     >
       {props.children}
     </InitialContext.Provider>

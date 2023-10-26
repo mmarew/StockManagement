@@ -9,7 +9,7 @@ import OpenBusinesscss from "./OpenBusiness.module.css";
 import currentDate from "../Date/currentDate";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Button, LinearProgress } from "@mui/material";
-import { InitialContext } from "../UserContext/UserContext";
+import { ConsumeableContext, InitialContext } from "../UserContext/UserContext";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppBar, Toolbar, Typography } from "@material-ui/core";
 import OpenBusinessLeftSide from "./OpenBusinessLeftSide";
@@ -43,8 +43,8 @@ const useStyles = makeStyles((theme) => ({
 function OpenBusiness() {
   const [HoverableTitle, setHoverableTitle] = useState("");
   // localStorage.setItem("openedBusiness", "myBusiness");
-  const savedContext = useContext(InitialContext);
-  const [ownersName, setownersName] = savedContext;
+  // const savedContext = ConsumeableContext();
+  const { ownersName, setownersName } = ConsumeableContext();
   setownersName(localStorage.getItem("ownersName"));
 
   let navigate = useNavigate();
@@ -66,7 +66,6 @@ function OpenBusiness() {
     $(".LinearProgress").css("display", "none");
     window.addEventListener("resize", setScreenSize(window.innerWidth));
   }, []);
-  // let sizeOfScreen = 0;
   return (
     <div className={OpenBusinesscss.openBusinesswrapper}>
       <div className={OpenBusinesscss.navBar}>

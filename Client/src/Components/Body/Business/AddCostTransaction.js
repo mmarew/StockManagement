@@ -58,7 +58,7 @@ function AddCostTransaction() {
     console.log("copyOfForm", copyOfForm, "Formdata  ==", Formdata);
     // return;
     let response = await axios.post(
-      serverAddress + `registerCostTransaction/`,
+      `${serverAddress}registerCostTransaction/`,
       copyOfForm
     );
     console.log("response ", response);
@@ -112,7 +112,7 @@ function AddCostTransaction() {
 
       {showCostForm ? (
         <>
-          {costList.length > 0 ? (
+          {costList?.length > 0 ? (
             <div className={AddCostTransactionCss.costItems}>
               {costList?.map((items) => {
                 return (

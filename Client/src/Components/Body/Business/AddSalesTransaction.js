@@ -23,6 +23,7 @@ function AddSalesTransaction() {
   return (
     <div className="addSalesWrapper">
       <Select
+        sx={{ margin: "auto", marginLeft: "20px" }}
         value={selectedValue}
         className="selectSalesMenue"
         onChange={toggleActiveSelections}
@@ -31,7 +32,6 @@ function AddSalesTransaction() {
         <MenuItem value="totalSales">Total Sales</MenuItem>
         <MenuItem value="singleSales">Single Sales</MenuItem>
       </Select>
-
       <Outlet />
     </div>
   );

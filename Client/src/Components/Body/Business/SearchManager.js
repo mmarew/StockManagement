@@ -20,12 +20,7 @@ function SearchManager() {
     e.preventDefault();
     console.log();
     console.log("InputValue.selectSearches", InputValue);
-    if (InputValue.selectSearches == "") {
-      alert(InputValue.selectSearches);
-      new Promise((resolve, reject) => {});
-      return;
-    }
-    // console.log("InputValue", InputValue);
+
     $(".LinearProgress").css("display", "block");
     if (InputValue.selectSearches == "TRANSACTION") {
       if (InputValue.productName == "" || InputValue.productName == undefined) {

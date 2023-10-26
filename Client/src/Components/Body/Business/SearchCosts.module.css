@@ -1,0 +1,14 @@
+.costWrapperDiv {
+  display: flex;
+  flex-wrap: wrap;
+}
+.eachCostItem {
+  background-color: white;
+  padding: 20px;
+  margin: 10px;
+  border-radius: 10px;
+}
+.editAndDelete {
+  display: flex;
+  justify-content: center;
+}

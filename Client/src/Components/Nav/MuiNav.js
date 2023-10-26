@@ -8,7 +8,10 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useContext } from "react";
-import { InitialContext } from "../Body/UserContext/UserContext";
+import {
+  ConsumeableContext,
+  InitialContext,
+} from "../Body/UserContext/UserContext";
 import { useEffect } from "react";
 import axios from "axios";
 import BusinessLogo from "../../Components/ICONS/BusinessJS/businessBlack.svg";
@@ -63,8 +66,8 @@ export default function NavBar() {
     $(".Lists").removeClass("activeNav");
     $(e.currentTarget).addClass("activeNav");
   };
-  const savedContext = useContext(InitialContext);
-  const [ownersName, setownersName] = savedContext;
+  const savedContext = ConsumeableContext();
+  const { ownersName, setownersName } = savedContext;
   console.log(savedContext);
   let serverAddress = localStorage.getItem("targetUrl");
   let navigate = useNavigate();

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import $, { each } from "jquery";
 import axios from "axios";
+import SearchCostsCss from "./SearchCosts.module.css";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
@@ -20,6 +21,7 @@ import MUIConfirm from "../Others/MUIConfirm";
 function SearchCosts({ response }) {
   const [ConfirmRequest, setConfirmRequest] = useState({});
   const [ConfirmDelete, setConfirmDelete] = useState({});
+  const [costName, setcostName] = useState("");
   const [openEditingModal, setopenEditingModal] = useState({ open: false });
   let openCostEditerModal = (cost, index) => {
     console.log("cost");
@@ -83,9 +85,19 @@ function SearchCosts({ response }) {
     let costData = MyCostData.map((cost1, i) => {
       if (i == id) {
         cost1.updateStatus = false;
+        cost.costName = costName;
       }
       return cost1;
     });
+    setopenEditingModal({ open: false });
+    // let costData = MyCostData.map((cost, i) => {
+    //   if (i == index) {
+    //     cost.updateStatus = true;
+    //     cost.costName = e.target.value;
+    //   }
+    //   return cost;
+    // });
+    // setMyCostData(costData);
     setMyCostData(costData);
     $(".LinearProgress").css("display", "none");
     if (responce.data.data == "updated successfully") {
@@ -101,9 +113,7 @@ function SearchCosts({ response }) {
     // update costs
     MyCostData.map((cost) => {
       console.log(cost);
-      let CostName_ = `CostName_${MyCostData.indexOf(cost)}`,
-        CostValue_ = `CostValue_${MyCostData.indexOf(cost)}`;
-      $("#" + CostValue_).val(cost.unitCost);
+      let CostName_ = `CostName_${MyCostData.indexOf(cost)}`;
       $("#" + CostName_).val(cost.costName);
     });
     $(".btnUpdateCost").hide();
@@ -112,14 +122,7 @@ function SearchCosts({ response }) {
   let costInputEdits = (e, index, id) => {
     // $(".btnUpdateCost").hide();
     // $("#CostUpdate_" + index).show();
-    let costData = MyCostData.map((cost, i) => {
-      if (i == index) {
-        cost.updateStatus = true;
-        cost.costName = e.target.value;
-      }
-      return cost;
-    });
-    setMyCostData(costData);
+    setcostName(e.target.value);
   };
 
   const [ShowSuccessError, setSuccessError] = useState({});
@@ -159,23 +162,37 @@ function SearchCosts({ response }) {
     <div>
       {console.log("MyCostData is ==", MyCostData)}
       {MyCostData?.length > 0 && (
-        <div className="costWrapperDiv">
+        <div className={SearchCostsCss.costWrapperDiv}>
           {MyCostData?.map((cost, index) => {
             return (
-              <div key={"costItem_" + index} className="eachCostItem">
+              <div
+                key={"costItem_" + index}
+                className={SearchCostsCss.eachCostItem}
+              >
                 <div>{cost.costName}</div>
-                <Button
-                  onClick={() => openCostEditerModal(cost, index)}
-                  variant="contained"
-                >
-                  Edit
-                </Button>
-                <Button color="error" variant="contained">
-                  Delete
-                </Button>
+                <div className={SearchCostsCss.editAndDelete}>
+                  <Button
+                    onClick={() => {
+                      setcostName(cost.costName);
+                      openCostEditerModal(cost, index);
+                    }}
+                    variant="contained"
+                  >
+                    Edit
+                  </Button>
+                  &nbsp; &nbsp; &nbsp;
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={(e) => deleteCostItem(e, cost)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             );
           })}
+
           {/* <TableContainer className="">
             <Table id="costTable">
               <TableHead>
@@ -264,6 +281,7 @@ function SearchCosts({ response }) {
                 onSubmit={(e) => e.preventDefault()}
               >
                 <TextField
+                  value={costName}
                   onInput={(e) =>
                     costInputEdits(
                       e,
@@ -299,5 +317,4 @@ function SearchCosts({ response }) {
     </div>
   );
 }
-
 export default SearchCosts;

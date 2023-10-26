@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Button, LinearProgress } from "@mui/material";
 import Businessmodulecss from "./Business.module.css";
 import { useContext } from "react";
-import { InitialContext } from "../UserContext/UserContext";
+import { ConsumeableContext, InitialContext } from "../UserContext/UserContext";
 import MUIConfirm from "../Others/MUIConfirm";
 import SuccessOrError from "../Others/SuccessOrError";
 import LeftSideBusiness from "./LeftSideBusiness";
@@ -19,9 +19,8 @@ function Business() {
   const [BusinessLists, setBusinessLists] = useState(
     <h4>Looking for your business lists .... </h4>
   );
-  const savedContext = useContext(InitialContext);
-  const [ownersName, setownersName, ShowProgressBar, setShowProgressBar] =
-    savedContext;
+  const { ownersName, setownersName, ShowProgressBar, setShowProgressBar } =
+    ConsumeableContext();
   const [ShowSuccessError, setSuccessError] = useState({});
   const [newBusiness, setnewBusiness] = useState();
   const [createdBusiness, setcreatedBusiness] = useState([]);
@@ -241,7 +240,7 @@ function Business() {
                         className={Businessmodulecss.createdBusiness}
                         id={"createdBusiness_" + datas.BusinessID}
                       >
-                        {/* <div
+                        <div
                           className={Businessmodulecss.Business}
                           id={"eachBusiness_" + datas.BusinessID}
                         >
@@ -376,7 +375,7 @@ function Business() {
                               </div>
                             </form>
                           </div>
-                        </div> */}
+                        </div>
                       </div>
                     );
                   })}
