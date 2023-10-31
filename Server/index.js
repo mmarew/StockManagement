@@ -90,14 +90,8 @@ server.get(path, async (req, res) => {
       myData = results;
       results.map(async (data) => {
         let { BusinessName } = data;
-        let editableTable = `ALTER TABLE  ${BusinessName}_products
-      ADD previousProductId INT,
-    MODIFY productsUnitCost INT(11) NOT NULL, ADD prevUnitCost INT,
-    MODIFY productsUnitPrice INT(11) NOT NULL, ADD prevUnitPrice INT,
-    MODIFY productName VARCHAR(900) NOT NULL,
-    ADD prevProductName VARCHAR(1000),
-    MODIFY minimumQty INT(11) NOT NULL, ADD prevMinimumQty INT,
-    MODIFY Status ENUM('active','changed','replaced','active_but_updated')`;
+        let editableTable = `ALTER TABLE  ${BusinessName}_Transaction
+      ADD mainProductId INT after productIDTransaction`;
         await Pool.query(editableTable)
           .then((data1) => {
             console.log(data1);
@@ -376,8 +370,10 @@ server.post(path + "registerTransaction/", async (req, res) => {
 
           let Inventory = 0;
           if (prevInventoryRows.length > 0) {
-            inventory = prevInventoryRows[0].Inventory;
+            Inventory = prevInventoryRows[0].Inventory;
           }
+          // console.log("prevInventoryQuery", prevInventoryQuery);
+          // console.log("prevInventoryValues", prevInventoryValues);
 
           Inventory +=
             Number(purchaseQty) -
@@ -386,12 +382,13 @@ server.post(path + "registerTransaction/", async (req, res) => {
             Number(creditSalesQty);
           //////////////// it is fine and good /////////////////
           inventoryList.push(Inventory);
-          const insertQuery = `INSERT INTO ${businessName}_Transaction(description, unitCost, unitPrice, productIDTransaction, salesQty, purchaseQty, registeredTime, wrickages, Inventory,creditDueDate,salesTypeValues,creditSalesQty) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`;
+          const insertQuery = `INSERT INTO ${businessName}_Transaction(description, unitCost, unitPrice, productIDTransaction, mainProductId, salesQty, purchaseQty, registeredTime, wrickages, Inventory,creditDueDate,salesTypeValues,creditSalesQty) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`;
           let Values = [
             description,
             product.productsUnitCost,
             product.productsUnitPrice,
             productID,
+            previousProductId,
             salesQuantity,
             purchaseQty,
             rowData.dates,
@@ -401,10 +398,10 @@ server.post(path + "registerTransaction/", async (req, res) => {
             salesTypeValues,
             creditSalesQty,
           ];
-          console.log("insertQuery ==", insertQuery, "Values == ", Values);
-          // return;
+
           await Pool.query(insertQuery, Values);
           const insertedProduct = {
+            previousProductId,
             creditSalesQty: creditSalesQty,
             creditDueDate: creditDueDate,
             salesTypeValues: salesTypeValues,
@@ -434,39 +431,17 @@ server.post(path + "registerTransaction/", async (req, res) => {
         });
       }
 
-      const values = insertableProducts.map((product) => [
-        product.Description,
-        product.productsUnitCost,
-        product.productsUnitPrice,
-        product.ProductId,
-        product.salesQuantity,
-        product.purchaseQty,
+      updateNextDateInventory(
+        `${businessName}_Transaction`,
+        insertableProducts,
         rowData.dates,
-        product.wrickageQty,
-        product.Inventory,
-        product.creditDueDate,
-        product.salesTypeValues,
-        product.creditSalesQty,
-      ]);
-      // //console.log("insertQuery", insertQuery);
-      //console.log("values");
-      // return;
-      // return; creditSalesQty
-      // let salesTypeValues = values[0][10];
-      // let soldQty = "salesQty";
-      // if (salesTypeValues == "On credit") soldQty = "creditSalesQty";
-      // i will see it next
-      // updateNextDateInventory(
-      //   `${businessName}_Transaction`,
-      //   insertableProducts,
-      //   rowData.dates,
-      //   inventoryList
-      // );
+        inventoryList
+      );
 
       return res.json({
         data: "data is registered successfully",
         previouslyRegisteredData: [],
-        values,
+
         dataToSendResponceToClient: "NoNeed",
       });
     } else {
@@ -800,7 +775,7 @@ server.post(path + "updateProducts/", async (req, res) => {
   ];
   console.log("insertQuery", insertQuery);
   console.log("values", values);
-  return;
+  // return;
   try {
     const result = await Pool.query(insertQuery, values);
     console.log("Data", result.rows);
@@ -947,6 +922,19 @@ const updateNextDateInventory = async (
   previousInventory,
   dataToSendResponceToClient
 ) => {
+  // console.log(
+  //   "businessName",
+  //   businessName,
+  //   "ProductsList",
+  //   ProductsList,
+  //   "date",
+  //   date,
+  //   "previousInventory",
+  //   previousInventory,
+  //   "dataToSendResponceToClient",
+  //   dataToSendResponceToClient
+  // );
+  // return;
   let sqlToSelect, inputToSelect, res;
 
   function sendResponses() {
@@ -970,11 +958,14 @@ const updateNextDateInventory = async (
 
   let recursiveUpdate = async () => {
     if (index < ProductsList.length) {
-      let productId = ProductsList[index].ProductId;
+      let { productId, previousProductId } = ProductsList[index];
+      console.log("first");
 
-      let select = `SELECT * FROM ?? WHERE productIDTransaction=? AND registeredTime > ? ORDER BY registeredTime ASC`;
-      let values = [businessName, productId, date];
-
+      if (previousProductId == null || previousProductId == "null")
+        previousProductId = productId;
+      //////11111111
+      let select = `SELECT * FROM ?? WHERE mainProductId=? AND registeredTime > ? ORDER BY registeredTime ASC`;
+      let values = [businessName, previousProductId, date];
       try {
         const [rows] = await Pool.query(select, values);
         //console.log("my rows ===", rows);
@@ -983,14 +974,16 @@ const updateNextDateInventory = async (
           let prevInventory = 0;
 
           for (let i = 0; i < rows.length; i++) {
-            let salesQty = rows[i].salesQty;
-            let purchaseQty = rows[i].purchaseQty;
-            let wrickages = rows[i].wrickages;
-            let inventory =
-              purchaseQty +
-              (i === 0 ? previousInventory[index] : prevInventory) -
-              salesQty -
-              wrickages;
+            let salesQty = rows[i].salesQty,
+              purchaseQty = rows[i].purchaseQty,
+              wrickages = rows[i].wrickages,
+              creditsalesQty = rows[i].creditsalesQty,
+              inventory =
+                purchaseQty +
+                (i === 0 ? previousInventory[index] : prevInventory) -
+                salesQty -
+                creditsalesQty -
+                wrickages;
             prevInventory = inventory;
 
             let update = `UPDATE ?? SET inventory=? WHERE transactionId=?`;

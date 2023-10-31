@@ -388,7 +388,9 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
               <TableCell>Total Purchase</TableCell>
               <TableCell>Broken</TableCell>
               <TableCell>Inventory</TableCell>
-              <TableCell>Description</TableCell>
+              <TableCell sx={{ minWidth: "fit-content" }}>
+                Description
+              </TableCell>
               <TableCell colSpan={2}>Action</TableCell>
               <TableCell>Status</TableCell>
             </TableRow>
@@ -542,6 +544,7 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
                       {items.Inventory}
                     </TableCell>
                     <TableCell
+                      sx={{ minWidth: "300px" }}
                       onInput={() =>
                         changesOnInputsOfTransaction("updateId_" + index, index)
                       }
