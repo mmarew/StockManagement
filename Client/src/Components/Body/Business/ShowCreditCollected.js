@@ -1,28 +1,34 @@
 import React from "react";
 import { ConsumeableContext } from "../UserContext/UserContext";
 
-function ShowCreditCollected({ CreditCollected, accountRecivableData }) {
-  const { setAccountRecivableCollected, setCollectedMoney } =
+function ShowCreditCollected({
+  uselessCreditCollected,
+  CollectedMoneyFromTotalSales,
+}) {
+  const { setunTimeRecivableCollected, setCollectedMoney } =
     ConsumeableContext();
   let collectedAmount = 0;
-  accountRecivableData.map((item) => {
-    collectedAmount += item.salesQty * item.unitPrice;
+  CollectedMoneyFromTotalSales?.map((item) => {
+    collectedAmount += item.creditsalesQty * item.unitPrice;
   });
-  setCollectedMoney(collectedAmount);
+  setCollectedMoney((prev) => prev + collectedAmount);
   console.log("collectedAmount");
   let reciveableAmount = 0;
-  CreditCollected.map((item) => {
-    reciveableAmount += item.salesQty * item.unitPrice;
+  uselessCreditCollected.map((item) => {
+    reciveableAmount += item.creditsalesQty * item.unitPrice;
   });
-  //   alert(reciveableAmount);
-  setAccountRecivableCollected(reciveableAmount);
+  setunTimeRecivableCollected((prev) => prev + reciveableAmount);
   return (
     <div>
-      Total Collected Credits{" "}
-      {reciveableAmount.toLocaleString("en-US", {
-        style: "currency",
-        currency: "ETB",
-      })}
+      {reciveableAmount > 0 && (
+        <>
+          Total Collected Credits{" "}
+          {reciveableAmount.toLocaleString("en-US", {
+            style: "currency",
+            currency: "ETB",
+          })}
+        </>
+      )}
     </div>
   );
 }

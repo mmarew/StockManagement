@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./SearchProducts.css";
 import $ from "jquery";
 import SearchProducts from "./SearchProducts";
@@ -53,7 +53,7 @@ function SearchManager() {
     }
 
     $(".LinearProgress").css("display", "block");
-    console.log("InputValue", InputValue);
+    console.log("InputValue", InputValue.fromDate, InputValue.toDate);
     // return;
     let response = await axios.post(serverAddress + "searchProducts/", {
       InputValue,
@@ -87,6 +87,9 @@ function SearchManager() {
     } else if (searchTarget == "ALLTRANSACTION") {
       setRequestedSearch(
         <SearchSales_Purchase
+          // InputValue.fromDate, InputValue.toDate
+          toDate={InputValue.toDate}
+          fromDate={InputValue.fromDate}
           response={response}
           requestFrom="showExpencesList"
         />

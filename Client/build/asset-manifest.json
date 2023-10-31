@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.7a14e656.css",
-    "main.js": "/static/js/main.99b44a64.js",
+    "main.css": "/static/css/main.93a5e4ef.css",
+    "main.js": "/static/js/main.6b5421df.js",
     "static/media/MASETAWOSHAICON.svg": "/static/media/MASETAWOSHAICON.54a2fd866e0f5c7049127a306c6f27f5.svg",
     "static/media/iconEmployee.svg": "/static/media/iconEmployee.9557ca5a58a3c4a7c853ccd11236fd67.svg",
     "static/media/SupportBlack.svg": "/static/media/SupportBlack.255c7a81f9ee6676465397a000f89417.svg",
@@ -21,11 +21,11 @@
     "static/media/iconHomeBlack.svg": "/static/media/iconHomeBlack.35d540e138b4a8c56e2e83323d479aff.svg",
     "static/media/icons_transaction.svg": "/static/media/icons_transaction.5dc8f7bb6e3d439ebc2e419fe814b4d2.svg",
     "static/media/transactionBlack.svg": "/static/media/transactionBlack.d8c725ff7032a88e7fbbee51b36b3c6a.svg",
-    "main.7a14e656.css.map": "/static/css/main.7a14e656.css.map",
-    "main.99b44a64.js.map": "/static/js/main.99b44a64.js.map"
+    "main.93a5e4ef.css.map": "/static/css/main.93a5e4ef.css.map",
+    "main.6b5421df.js.map": "/static/js/main.6b5421df.js.map"
   },
   "entrypoints": [
-    "static/css/main.7a14e656.css",
-    "static/js/main.99b44a64.js"
+    "static/css/main.93a5e4ef.css",
+    "static/js/main.6b5421df.js"
   ]
 }

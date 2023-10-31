@@ -1,0 +1,2 @@
+1) searchSales_Purchase brings 2 data ; 1) is CollectedMoneyFromTotalSales
+and 2) is data. Where data is sales and purchase. In sales and purchase we filter salesTypeValues == "credit paied" because  our selection is by registration date and   credit paied may or may not commited in registrationdate.

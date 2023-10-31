@@ -5,15 +5,14 @@ import $ from "jquery";
 import { Button, LinearProgress, TextField } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import ImgApp from "../../../ImgSlider";
-import { InitialContext } from "../UserContext/UserContext";
+import { ConsumeableContext } from "../UserContext/UserContext";
 import Localstorage from "../LocalStorage/Localstorage";
 
 function Login() {
   let serverAddress = localStorage.getItem("targetUrl");
   let Navigate = useNavigate();
   const [loginForm, setloginForm] = useState({});
-  const savedContext = useContext(InitialContext);
-  const [ownersName, setownersName] = savedContext;
+  const { ownersName, setownersName } = ConsumeableContext();
   let submitForm = async (e) => {
     e.preventDefault();
     $("#LinearProgress").css("display", "block");

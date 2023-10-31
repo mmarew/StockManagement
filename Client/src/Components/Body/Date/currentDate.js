@@ -3,7 +3,7 @@ export default function currentDates() {
   let year = date.getFullYear(),
     month = date.getMonth() + 1,
     day = date.getDate();
-  console.log(month.length);
+  //console.log(month.length);
   if (month < 10) {
     month = "0" + month;
   }
@@ -12,16 +12,16 @@ export default function currentDates() {
   }
   let currentDate = year + "-" + month + "-" + day;
   // let satedDate = $("#dateId").val();
-  // console.log("satedDate is = " + satedDate);
+  // //console.log("satedDate is = " + satedDate);
   // if (satedDate == "") {
   //   $("#dateId").val(currentDate);
   //   satedDate = currentDate;
   // }
-  console.log(currentDate);
+  //console.log(currentDate);
   return currentDate;
 }
 export function DateFormatter(dateTimeString, timeZone) {
-  console.log("dateTimeString==", new Date(dateTimeString));
+  //console.log("dateTimeString==", new Date(dateTimeString));
   let date = new Date(dateTimeString);
   let Year = date.getFullYear();
   let Month = date.getMonth();
@@ -34,7 +34,7 @@ export function DateFormatter(dateTimeString, timeZone) {
     "-" +
     Day.toString().padStart(2, "0");
 
-  console.log("formattedDate", formattedDate);
+  //console.log("formattedDate", formattedDate);
   if (formattedDate == "1970-01-01") {
     formattedDate = " - - - ";
   }

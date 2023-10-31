@@ -111,6 +111,11 @@ td {
   background-color: #ffffff;
   width: fit-content;
   padding: 20px 30px 20px 30px;
+  margin: 5px;
+}
+.productListWrapper {
+  display: flex;
+  flex-wrap: wrap;
 }
 @media screen and (min-width: 768px) {
   #searchProduct {

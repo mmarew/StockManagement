@@ -30,12 +30,18 @@ import EditIcon from "@mui/icons-material/Edit";
 
 function AddSingleSales() {
   // setShowHiddenProducts;
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => {
-    setOpen(true);
-  };
+  const [Proccess, setProccess] = useState(false);
+
+  const [RegisterableItems, steRegisterableItems] = useState({
+    items: {},
+    Open: false,
+  });
+
   const handleClose = () => {
-    setOpen(false);
+    steRegisterableItems({
+      items: {},
+      Open: false,
+    });
   };
   const [showHiddenProducts, setShowHiddenProducts] = useState(false);
   // is used to store daily sales
@@ -79,19 +85,23 @@ function AddSingleSales() {
     console.log(event.target.value);
     setInputValues({ ...inputValues, [event.target.name]: event.target.value });
   };
-  let registerSinglesalesTransaction = async (e) => {
+  let registerSinglesalesTransaction = async (e, items) => {
     e.preventDefault();
-    // return console.log("formInputValues", formInputValues);
+    console.log("formInputValues", formInputValues, " items", items);
+    // return;
+    setProccess(true);
     $(".LinearProgress").css("display", "block");
     let responce = await axios.post(
       serverAddress + "registerSinglesalesTransaction/",
       {
         // registerTransaction
+        items,
         ...formInputValues,
         businessId: localStorage.getItem("businessId"),
         currentDate: $("#singleSalesDate").val(),
       }
     );
+    setProccess(false);
     console.log(responce.data.data);
     if (responce.data.data == "successfullyRegistered") {
       alert("Successfully Registered");
@@ -99,29 +109,7 @@ function AddSingleSales() {
     }
     $(".LinearProgress").hide();
   };
-  let showHiddenProducts1 = (itemsId, itemsClass) => {
-    let singleTransactionForm = document.querySelectorAll(
-      ".singleTransactionForm input"
-    );
-    // hide all forms input
-    for (let i = 0; i < singleTransactionForm.length; i++) {
-      singleTransactionForm[i].style.display = "none";
-    }
-    console.log(itemsId);
-    let items = document.getElementsByClassName(itemsId);
-    setformInputValues({});
-    for (let i = 0; i < items.length; i++) {
-      // show targeted classe only
-      items[i].style.display = "block";
-      console.log(items[i].name);
-      if (items[i].name != "") {
-        setformInputValues({
-          ...formInputValues,
-          [items[i].name]: items[i].value,
-        });
-      }
-    }
-  };
+
   let getTotalRegiters = async (targetproductId) => {
     // clear datas of product detailes
     // console.log('$("#singleSalesDate").val()', $("#singleSalesDate").val());
@@ -136,7 +124,7 @@ function AddSingleSales() {
       businessName,
     });
     let mydata = responce.data.data;
-    console.log("getDailyTransaction== ", responce.data);
+    // console.log("getDailyTransaction== ", responce.data);
 
     if (mydata.length == 0) {
       alert("There is no registered data on this date.");
@@ -159,38 +147,70 @@ function AddSingleSales() {
     let prevProductId = 0,
       dailySales = {},
       productDetail = [],
+      creditDueDate = "",
       creditPaymentDate = "",
       salesTypeValues = "",
       mydataLength = mydata.length;
     // collect same products to add qty
     for (; i < mydataLength; i++) {
       ProductId = mydata[i].ProductId;
-      //reset summing process to 0 or ''
-      if (prevProductId != ProductId) {
-        brokenQty = 0;
-        purchaseQty = 0;
-        Description = "";
-        salesQty = 0;
-      }
 
-      creditPaymentDate = mydata[i].creditPaymentDate;
-
+      creditDueDate = dailySales[`creditDueDate` + ProductId];
+      salesTypeValues = dailySales[`salesTypeValues` + ProductId];
+      creditSalesQty = Number(dailySales["creditSalesQty" + ProductId]);
+      salesQty = Number(dailySales["salesQuantity" + ProductId]);
+      purchaseQty = Number(dailySales["purchaseQty" + ProductId]);
+      brokenQty = Number(dailySales["wrickageQty" + ProductId]);
+      Description = dailySales["Description" + ProductId];
+      creditPaymentDate = dailySales["Description" + creditPaymentDate];
+      // return
+      if (creditPaymentDate == undefined || creditPaymentDate == "null")
+        creditPaymentDate = "";
+      if (creditDueDate == null || creditDueDate == undefined)
+        creditDueDate = "";
+      if (salesTypeValues == undefined) salesTypeValues = "";
+      if (isNaN(creditSalesQty)) creditSalesQty = 0;
+      if (isNaN(salesQty)) salesQty = 0;
+      if (isNaN(purchaseQty)) purchaseQty = 0;
+      if (isNaN(brokenQty)) brokenQty = 0;
+      if (isNaN(salesQty)) salesQty = 0;
+      if (Description == undefined) Description = "";
+      console.log(
+        "ProductId",
+        ProductId,
+        "i",
+        i,
+        "Description",
+        Description,
+        "brokenQty",
+        brokenQty,
+        "purchaseQty",
+        purchaseQty,
+        "salesQty",
+        salesQty,
+        "creditSalesQty",
+        creditSalesQty,
+        "salesTypeValues",
+        salesTypeValues,
+        "creditPaymentDate",
+        creditPaymentDate
+      );
+      // return;
+      ////////////////////////////
+      creditPaymentDate += mydata[i].creditPaymentDate;
       salesTypeValues += mydata[i].salesTypeValues + ", ";
-
       creditSalesQty += mydata[i].creditsalesQty;
-
       productName = mydata[i].productName;
       Description += mydata[i].Description + " ";
-
-      dailySales.creditDueDate = creditPaymentDate;
-      dailySales.salesTypeValues = salesTypeValues;
       brokenQty += mydata[i].brokenQty;
       dailySalesId = mydata[i].dailySalesId;
       purchaseQty += mydata[i].purchaseQty;
       registrationDate = mydata[i].registrationDate;
       salesQty += mydata[i].salesQty;
       // console.log("productId is ", ProductId);
-
+      dailySales["creditPaymentDate" + ProductId] = creditPaymentDate;
+      dailySales[`creditDueDate` + ProductId] = creditDueDate;
+      dailySales[`salesTypeValues` + ProductId] = salesTypeValues;
       dailySales["creditSalesQty" + ProductId] = creditSalesQty;
       dailySales["salesQuantity" + ProductId] = salesQty;
       dailySales["purchaseQty" + ProductId] = purchaseQty;
@@ -220,27 +240,29 @@ function AddSingleSales() {
     setproductDetailes(mydata);
     setDailyTransaction(mydata);
   };
+  ///////////////////////////////
   let RegiterCollectedDailyTransaction = async (e) => {
     e.preventDefault();
-    let serverAddress = localStorage.getItem("targetUrl");
-    let businessName = localStorage.getItem("businessName"),
-      BusinessId = localStorage.getItem("businessId");
-    // console.log("allDailySales == ", allDailySales);
-    // console.log("DailyTransaction[0]", DailyTransaction);
-    let ProductsList = [];
-    // filter each products list to register in db. DailyTransaction is a collection of many transaction. so one product may be sold many times but to make registration we need it only once and that is why we make filteration to this product
+    let serverAddress = localStorage.getItem("targetUrl"),
+      businessName = localStorage.getItem("businessName"),
+      BusinessId = localStorage.getItem("businessId"),
+      ProductsList = [];
+    // Filter each products list to register in db. DailyTransaction is a collection of many transaction. so one product may be sold many times but to make registration we need it only once and that is why we make filteration to this product
     DailyTransaction.map((item) => {
       let existsInProductsList = false;
       // to check existance of item in ProductsList
       ProductsList.map((products) => {
         // Check existance of item in ProductsList and if exist please change existsInProductsList to true
-        if (products.ProductId == item.ProductId) existsInProductsList = true;
+        if (products.ProductId == item.ProductId) {
+          existsInProductsList = true;
+        }
       });
       // if not exist in ProductsList add to ProductsList
       if (existsInProductsList == false) {
         ProductsList.push(item);
       }
     });
+
     let productsInfo = {
       ...allDailySales,
       businessName: businessName,
@@ -249,10 +271,8 @@ function AddSingleSales() {
       ProductsList,
       dates: $("#singleSalesDate").val(),
     };
-    // console.log("productsInfo =");
-    // console.log(productsInfo);
-    // // return;
     $(".LinearProgress").css("display", "block");
+    console.log("ProductsInfo == ", productsInfo);
     // return;
     let Response = await axios.post(
       serverAddress + "registerTransaction/",
@@ -260,7 +280,7 @@ function AddSingleSales() {
     );
     // console.log("Response", Response);
     let datas = Response.data.data;
-    // console.log(Response.data.data);
+    console.log("Response.data.data,", Response.data);
     if (datas == "This is already registered") {
       alert(
         "Your data is not registered because, on this date data is already registered"
@@ -276,6 +296,7 @@ function AddSingleSales() {
     }
     $(".LinearProgress").hide();
   };
+  /////////////////////////////////
   let token = localStorage.getItem("token");
   useEffect(() => {
     $("#singleSalesDate").val(currentDates());
@@ -308,6 +329,7 @@ function AddSingleSales() {
     editDailyTransaction = (e) => {
       e.preventDefault();
       console.log("formInputValues", formInputValues);
+
       axios
         .put(serverAddress + "editDailyTransaction", { items: formInputValues })
         .then((Responces) => {
@@ -346,19 +368,21 @@ function AddSingleSales() {
         <br />
         <TextField name="singleSalesDate" id="singleSalesDate" type="date" />
         <br />
-        <TextField
-          required
-          name="searchInput"
-          onInput={handleSearchableProductInput}
-          label="Type Product Name"
-          id=""
-          className=""
-          type={"search"}
-        />
-        <br />
-        <Button color="primary" variant="contained" type="Submit">
-          Search
-        </Button>
+        <div style={{ display: "flex" }}>
+          <TextField
+            required
+            name="searchInput"
+            onInput={handleSearchableProductInput}
+            label="Type Product Name"
+            id=""
+            className=""
+            type={"search"}
+          />
+
+          <Button sx={{ marginLeft: "3px" }} type="submit" variant="contained">
+            Search
+          </Button>
+        </div>
         <br />
         <Button
           variant="contained"
@@ -370,205 +394,237 @@ function AddSingleSales() {
       </form>
 
       {searchedProducts.length > 0 && (
-        <div className={singleSalesCss.searchedProductsLists}>
-          {searchedProducts?.map((items) => {
-            return (
-              <div key={items.ProductId}>
-                <>
-                  <h4>product Name: {items.productName}</h4>
-                  <div className={singleSalesCss.getOrRegisterProducts}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      className={
-                        "class_" +
-                        items.ProductId +
-                        " " +
-                        singleSalesCss.getProducts
-                      }
-                      onClick={() => {
-                        setShowHiddenProducts(true);
-                        handleOpen();
-                      }}
-                    >
-                      Register
-                    </Button>
-                    <Button
-                      color="primary"
-                      variant="contained"
-                      onClick={() => getTotalRegiters(items.ProductId)}
-                      className={singleSalesCss.getProducts}
-                    >
-                      Get
-                    </Button>
-                  </div>
-                  <br />
-                  {showHiddenProducts && (
-                    <Modal open={open} onClose={handleClose}>
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          maxWidth: 400,
-                          bgcolor: "background.paper",
-                          boxShadow: 24,
-                          p: 4,
+        <TableContainer className={singleSalesCss.TableContainer}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Product Name</TableCell>
+                <TableCell>Register</TableCell>
+                <TableCell>Get</TableCell>
+              </TableRow>
+            </TableHead>
+
+            {searchedProducts?.map((items) => {
+              return (
+                <TableBody key={items.ProductId}>
+                  <TableRow>
+                    <TableCell>{items.productName}</TableCell>
+                    <TableCell>
+                      <Button
+                        className={
+                          "class_" +
+                          items.ProductId +
+                          " " +
+                          singleSalesCss.getProducts
+                        }
+                        onClick={() => {
+                          steRegisterableItems({ items: items, Open: true });
                         }}
                       >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            mb: 2,
-                          }}
-                        >
-                          <Typography variant="h6" component="h2">
-                            Single registration to {items.productName}
-                          </Typography>
-                          <IconButton onClick={handleClose}>
-                            <CloseIcon />
-                          </IconButton>
-                        </Box>
-                        <Typography variant="body1" component="p">
-                          <form
-                            className={singleSalesCss.singleTransactionForm}
-                            onSubmit={registerSinglesalesTransaction}
-                          >
-                            <TextField
-                              fullWidth
-                              type="number"
-                              required
-                              value={formInputValues.purchaseQty}
-                              className={"dailyRegistrationInputs"}
-                              onInput={(e) =>
-                                handleSalesTransactionInput(e, items.ProductId)
-                              }
-                              name="purchaseQty"
-                              label="purchase quantity"
-                            />
-                            <br />
-                            <TextField
-                              fullWidth
-                              type="number"
-                              required
-                              className={"dailyRegistrationInputs"}
-                              onInput={(e) =>
-                                handleSalesTransactionInput(e, items.ProductId)
-                              }
-                              name="salesQty"
-                              label="Sales quantity"
-                              value={formInputValues.salesQty}
-                            />
-                            <br />
-                            <TextField
-                              fullWidth
-                              type="number"
-                              className={"dailyRegistrationInputs"}
-                              onInput={(e) =>
-                                handleSalesTransactionInput(e, items.ProductId)
-                              }
-                              name="brokenQty"
-                              label="Broken quantity"
-                              value={formInputValues.brokenQty}
-                            />
-                            <br />
-                            <TextField
-                              fullWidth
-                              required
-                              className={"dailyRegistrationInputs"}
-                              onInput={(e) =>
-                                handleSalesTransactionInput(e, items.ProductId)
-                              }
-                              value={formInputValues.Description}
-                              name="Description"
-                              label="Description"
-                            />
-                            <br />
-                            <label>payment type</label>
-                            <Select
-                              value={formInputValues.salesType}
-                              name="salesType"
-                              onChange={(e) =>
-                                handleSalesTransactionInput(e, items.ProductId)
-                              }
-                              sx={{ margin: "20px auto" }}
-                              fullWidth
-                            >
-                              <MenuItem value={"On cash"}>On cash</MenuItem>
-                              <MenuItem value={"By bank"}>By bank</MenuItem>
-                              <MenuItem value={"On credit"}>On credit</MenuItem>
-                            </Select>
-                            {formInputValues.salesType == "On credit" && (
-                              <Box sx={{ width: "100%" }}>
-                                <lab>Payment date</lab>
-                                <TextField
-                                  id=""
-                                  onChange={(e) =>
-                                    handleSalesTransactionInput(
-                                      e,
-                                      items.ProductId
-                                    )
-                                  }
-                                  value={formInputValues.creditPaymentDate}
-                                  name="creditPaymentDate"
-                                  className=""
-                                  required
-                                  fullWidth
-                                  type="date"
-                                />
-                                <br /> <br />
-                              </Box>
-                            )}
-                            <Box>
-                              <Button
-                                color="primary"
-                                variant="contained"
-                                type="submit"
-                              >
-                                ADD
-                              </Button>
-                              &nbsp; &nbsp; &nbsp;
-                              <Button
-                                onClick={() => setShowHiddenProducts(false)}
-                                color="warning"
-                                variant="contained"
-                                type="submit"
-                              >
-                                CANCEL
-                              </Button>
-                            </Box>
-                          </form>
-                        </Typography>
-                      </Box>
-                    </Modal>
-                  )}
-                  <br />
-                </>
-              </div>
-            );
-          })}
-        </div>
+                        Register
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => getTotalRegiters(items.ProductId)}
+                        className={singleSalesCss.getProducts}
+                      >
+                        Get
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              );
+            })}
+          </Table>
+        </TableContainer>
       )}
-      {DailyTransaction.length > 0 && (
+      <Modal open={RegisterableItems.Open} onClose={handleClose}>
         <Box
           sx={{
-            width: "100%",
-            "@media (max-width: 880px)": {
-              width: "85vw",
-            },
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            maxWidth: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
           }}
         >
-          <TableContainer>
-            <Table>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <Typography variant="h6" component="h2">
+              Single registration to {RegisterableItems.items.productName}
+            </Typography>
+            <IconButton onClick={handleClose}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <Typography variant="body1" component="p">
+            <form
+              className={singleSalesCss.singleTransactionForm}
+              onSubmit={(e) => {
+                setformInputValues([]);
+                registerSinglesalesTransaction(e, RegisterableItems.items);
+              }}
+            >
+              <TextField
+                fullWidth
+                type="number"
+                required
+                value={formInputValues.purchaseQty}
+                className={"dailyRegistrationInputs"}
+                onInput={(e) =>
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  )
+                }
+                name="purchaseQty"
+                label="purchase quantity"
+              />
+              <br />
+              <TextField
+                fullWidth
+                type="number"
+                required
+                className={"dailyRegistrationInputs"}
+                onInput={(e) =>
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  )
+                }
+                name="salesQty"
+                label="Sales quantity"
+                value={formInputValues.salesQty}
+              />
+              <br />
+              <TextField
+                fullWidth
+                type="number"
+                className={"dailyRegistrationInputs"}
+                onInput={(e) =>
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  )
+                }
+                name="brokenQty"
+                label="Broken quantity"
+                value={formInputValues.brokenQty}
+              />
+              <br />
+
+              <label>payment type</label>
+              <Select
+                value={formInputValues.salesType}
+                name="salesType"
+                onChange={(e) =>
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  )
+                }
+                sx={{ margin: "20px auto" }}
+                fullWidth
+                required
+              >
+                <MenuItem value={"On cash"}>On cash</MenuItem>
+                <MenuItem value={"By bank"}>By bank</MenuItem>
+                <MenuItem value={"On credit"}>On credit</MenuItem>
+              </Select>
+              {formInputValues.salesType == "On credit" && (
+                <Box sx={{ width: "100%" }}>
+                  <label>Payment date</label>
+                  <TextField
+                    id=""
+                    onChange={(e) =>
+                      handleSalesTransactionInput(
+                        e,
+                        RegisterableItems.items.ProductId
+                      )
+                    }
+                    value={formInputValues.creditPaymentDate}
+                    name="creditPaymentDate"
+                    className=""
+                    required
+                    fullWidth
+                    type="date"
+                  />
+                  <br /> <br />
+                </Box>
+              )}
+              <TextField
+                fullWidth
+                required
+                className={"dailyRegistrationInputs"}
+                onInput={(e) =>
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  )
+                }
+                value={formInputValues.Description}
+                name="Description"
+                label="Description"
+              />
+              <br />
+              <Box>
+                {!Proccess ? (
+                  <Button color="primary" variant="contained" type="submit">
+                    ADD
+                  </Button>
+                ) : (
+                  <Button disabled variant="contained">
+                    Proccessing...
+                  </Button>
+                )}
+                &nbsp; &nbsp; &nbsp;
+                <Button
+                  onClick={(e) => {
+                    steRegisterableItems((prevItems) => {
+                      return {
+                        ...prevItems,
+                        Open: false,
+                      };
+                    });
+                    setProccess(false);
+                    setShowHiddenProducts(false);
+                  }}
+                  color="warning"
+                  variant="contained"
+                >
+                  CANCEL
+                </Button>
+              </Box>
+            </form>
+          </Typography>
+        </Box>
+      </Modal>
+      {DailyTransaction.length > 0 && (
+        <div>
+          <TableContainer
+            style={{
+              maxWidth: "80vw",
+              overflowX: "auto !important",
+            }}
+          >
+            <Table sx={{ width: "fit-content" }}>
               <TableHead>
                 <TableRow>
                   <TableCell>Product Name</TableCell>
                   <TableCell>Purchase Qty </TableCell>
                   <TableCell>Sales Qty</TableCell>
                   <TableCell>Sales Qty Credit</TableCell>
+                  <TableCell>unit Price</TableCell>
                   <TableCell>Sales Date</TableCell>
                   <TableCell>Credit Payment Date</TableCell>
                   <TableCell> Sales Type</TableCell>
@@ -579,14 +635,21 @@ function AddSingleSales() {
               </TableHead>
               <TableBody>
                 {DailyTransaction?.map((items, index) => {
-                  console.log(items);
+                  console.log(items.itemDetailInfo);
 
                   return (
                     <TableRow key={"detailes_" + index}>
-                      <TableCell> {items.productName} </TableCell>
+                      <TableCell>
+                        {items.itemDetailInfo
+                          ? JSON.parse(items.itemDetailInfo).productName
+                          : ""}
+                      </TableCell>
                       <TableCell>{items.purchaseQty}</TableCell>
                       <TableCell>{items.salesQty}</TableCell>
                       <TableCell>{items.creditsalesQty}</TableCell>
+                      <TableCell>
+                        {JSON.parse(items.itemDetailInfo).productsUnitPrice}
+                      </TableCell>
                       <TableCell>
                         {DateFormatter(items.registrationDate)}
                       </TableCell>
@@ -629,24 +692,24 @@ function AddSingleSales() {
                   );
                 })}
                 <TableRow>
-                  <TableCell colSpan={6}>
-                    <Button
-                      sx={{ margin: "auto" }}
-                      variant="contained"
-                      color="primary"
-                      className={singleSalesCss.btnAddTotalSales}
-                      onClick={RegiterCollectedDailyTransaction}
-                    >
-                      Add As Total Sales
-                    </Button>
-                  </TableCell>
+                  <TableCell colSpan={6}></TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </TableContainer>
-        </Box>
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <Button
+              sx={{ margin: "auto" }}
+              variant="contained"
+              color="primary"
+              className={singleSalesCss.btnAddTotalSales}
+              onClick={RegiterCollectedDailyTransaction}
+            >
+              Add As Total Sales
+            </Button>
+          </Box>
+        </div>
       )}
-
       <Modal
         open={EditSingleItem.open}
         onClose={() => {
@@ -767,6 +830,7 @@ function AddSingleSales() {
                 }
                 sx={{ margin: "20px auto" }}
                 fullWidth
+                required
               >
                 <MenuItem value={"On cash"}>On cash</MenuItem>
                 <MenuItem value={"By bank"}>By bank</MenuItem>

@@ -5,8 +5,7 @@ function Localstorage() {
     getLocalStorage = (targetItem) => {
       localStorage.getItem(targetItem);
     };
-  // setLocalStorage("targetUrl", "https://mar.masetawosha.com/");
-  setLocalStorage("targetUrl", "http://localhost:2020/");
+  setLocalStorage("targetUrl", process.env.REACT_APP_targetUrl);
   return [setLocalStorage, getLocalStorage];
 }
 export default Localstorage;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import $, { error } from "jquery";
+import $ from "jquery";
 import axios from "axios";
 import SearchExpenceTransaction from "./SearchExpenceTransaction";
 import SearchSales_PurchaseCss from "./SearchSales_Purchase.module.css";
@@ -19,16 +19,17 @@ import {
 import ConfirmDialog from "../Others/Confirm";
 import { DateFormatter } from "../Date/currentDate";
 import { Chip } from "@material-ui/core";
-import ShowcreditLists from "./ShowcreditLists";
 import { ConsumeableContext } from "../UserContext/UserContext";
 import ShowCreditCollected from "./ShowCreditCollected";
 import GetCreditLists from "./GetCreditLists";
 const timeZone = "Africa/Addis_Ababa";
-function SearchSales_Purchase({ response, requestFrom }) {
+function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
   // set correct data format to time because it is bringing us like registeredTime: "2023-08-05T21:00:00.000Z". The correct format is year month day
+
   let dateData = [...response?.data?.data];
-  let accountRecivableData = response.data.accountRecivableData;
+  let CollectedMoneyFromTotalSales = response.data.CollectedMoneyFromTotalSales;
   dateData.map((item) => {
+    console.log("@SearchSales_Purchase item is ", item);
     item.registeredTime = DateFormatter(item.registeredTime, timeZone);
   });
   const { accountRecivableAmt, setAccountRecivableAmt } = ConsumeableContext();
@@ -109,8 +110,13 @@ function SearchSales_Purchase({ response, requestFrom }) {
       let totalPurchaseCost = 0,
         totalSalesAmt = 0;
       let resData = response.data.data.map((items) => {
+        console.log("items.creditsalesQty", items.creditsalesQty);
+        console.log("items.salesQty", items.salesQty);
+        if (items.creditsalesQty == null || items.creditsalesQty == null)
+          items.creditsalesQty = 0;
         totalSalesAmt +=
-          parseFloat(items.salesQty) * parseFloat(items.productsUnitPrice);
+          (parseFloat(items.salesQty) + parseFloat(items.creditsalesQty)) *
+          parseFloat(items.productsUnitPrice);
         totalPurchaseCost +=
           parseFloat(items.purchaseQty) * parseFloat(items.productsUnitCost);
         return { ...items, contentEditable: false };
@@ -124,7 +130,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
           showEachItems={showEachItems}
           response={response}
           setshowEachItems={setshowEachItems}
-          accountRecivableAmt={accountRecivableAmt}
+          CollectedMoneyFromTotalSales={CollectedMoneyFromTotalSales}
         />
       );
       $("#productTransaction").css("display", "block");
@@ -176,6 +182,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
         }
         let purchaseQty = 0,
           salesQty = 0,
+          creditsalesQty = 0,
           wrickages = 0,
           registeredTime = "",
           description = "";
@@ -191,6 +198,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
         copyOfData?.map((transaction) => {
           if (item.ProductId == transaction.ProductId) {
             purchaseQty += transaction.purchaseQty;
+            creditsalesQty += transaction.creditsalesQty;
             salesQty += transaction.salesQty;
             wrickages += transaction.wrickages;
             registeredTime += transaction.registeredTime + ", ";
@@ -201,6 +209,7 @@ function SearchSales_Purchase({ response, requestFrom }) {
         registeredTime = registeredTime.slice(0, -2);
         description = description.slice(0, -2);
         // return;
+        x.creditsalesQty = creditsalesQty;
         x.registeredTime = registeredTime;
         x.salesQty = salesQty;
         x.wrickages = wrickages;
@@ -270,8 +279,8 @@ function SearchSales_Purchase({ response, requestFrom }) {
       return;
     }
     let date = $("#RegistrationDate_" + transactionId).text();
-    let fromDate = $("#fromDate").val();
-    let toDate = $("#toDate").val();
+    // let fromDate = $("#fromDate").val();
+    // let toDate = $("#toDate").val();
     OB = {
       fromDate,
       toDate,
@@ -303,25 +312,28 @@ function SearchSales_Purchase({ response, requestFrom }) {
     $(".LinearProgress").css("display", "none");
   };
 
-  const [CreditList, setCreditList] = useState([]);
+  // CreditCollected this usestate variable is used to store data of database where items are sold in credit but it is collected from customer . this data is not nececery for cash because it may be collected in onother day e.g if it is collected i 30 and i fetch in 25-27  cash can be added in 25-27 which is wrong output setting way; so it must be removed. so we need it to deduct from our sales
   const [CreditCollected, setCreditCollected] = useState([]);
-
+  // collect data which are sold by credit based on salesTypeValues where salesTypeValues is 'credit paied' or 'On credit'
   useEffect(() => {
-    let itemsSoldByCredit = [],
-      collectedCreditItems = [];
-    ListOfSalesAndPurchase.map((item, index) => {
+    let collectedCreditItems = [];
+    console.log("SearchedDatas", SearchedDatas);
+    SearchedDatas.map((item, index) => {
       let salesTypeValues = item.salesTypeValues;
+      console.log("salesTypeValues", salesTypeValues);
       if (salesTypeValues == "credit paied") {
         collectedCreditItems.push(item);
-      } else if (salesTypeValues == "On credit") {
-        itemsSoldByCredit.push(item);
-      } else {
       }
     });
     // return;
+
+    //items sold by credit but money is collected and collection time may or may not be seen
     setCreditCollected(collectedCreditItems);
-    setCreditList(itemsSoldByCredit);
-  }, [ListOfSalesAndPurchase]);
+    // items sold by credit
+  }, [SearchedDatas]);
+
+  console.log("response of purchase and saless", response.data);
+  // return "yyyyyyyyyyy";
 
   return (
     <div>
@@ -337,16 +349,19 @@ function SearchSales_Purchase({ response, requestFrom }) {
         <br />
         <br />
       </div>
-      <GetCreditLists />
+      <GetCreditLists dateRange={{ fromDate: fromDate, toDate: toDate }} />
       {/* {CreditList.length > 0 ? (
         <ShowcreditLists CreditList={CreditList} />
       ) : (
         "No item sold in credit"
       )} */}
-      {CreditCollected.length > 0 && (
+      {console.log("CreditCollected=", CreditCollected)}
+      {(CreditCollected.length > 0 || CollectedMoneyFromTotalSales) && (
         <ShowCreditCollected
-          CreditCollected={CreditCollected}
-          accountRecivableData={accountRecivableData}
+          // uselessCreditCollected is a collected money but it is  may or may not be collected in time range . to be sure in cash calculation we have to remove it by deducting it
+          uselessCreditCollected={CreditCollected}
+          // it is sold by credit but now collected in required time table
+          CollectedMoneyFromTotalSales={CollectedMoneyFromTotalSales}
         />
       )}
       {ListOfSalesAndPurchase.length > 0 ? (

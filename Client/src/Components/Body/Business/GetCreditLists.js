@@ -17,19 +17,25 @@ import {
 } from "@mui/material";
 import { DateFormatter } from "../Date/currentDate";
 import { ConsumeableContext } from "../UserContext/UserContext";
-function GetCreditLists() {
-  let token = localStorage.getItem("storeToken");
-  let serverAddress = localStorage.getItem("targetUrl");
-  let businessName = localStorage.getItem("businessName");
-  const [creditData, setCreditData] = useState({ data: [], dailyData: [] });
+function GetCreditLists({ dateRange }) {
   let {
     accountRecivableAmt,
     setAccountRecivableAmt,
+    unTimeRecivableCollected,
+    setunTimeRecivableCollected,
     collectedMoney,
     setCollectedMoney,
-    accountRecivableCollected,
-    setAccountRecivableCollected,
   } = ConsumeableContext();
+  let token = localStorage.getItem("storeToken");
+  let serverAddress = localStorage.getItem("targetUrl");
+  let businessName = localStorage.getItem("businessName");
+  const [creditData, setCreditData] = useState({
+    soldOnTotal_Oncredit: [],
+    soldInDaily_SoldOncredits: [],
+    soldInDaily_CreditPaied_maynotInTime: [],
+    soldInDaily_CreditPaied: [],
+  });
+
   let getUsersCreditList = () => {
     let BusinessId = localStorage.getItem("businessId");
     axios
@@ -40,12 +46,30 @@ function GetCreditLists() {
           "&&businessName=" +
           businessName +
           "&&businessId=" +
-          BusinessId
+          BusinessId +
+          "&&fromDate=" +
+          dateRange.fromDate +
+          "&&toDate=" +
+          dateRange.toDate
       )
       .then((Responces) => {
-        let { dailyData, data } = Responces.data;
-        console.log("dailyData", dailyData, "data ", data);
-        setCreditData({ data, dailyData });
+        let {
+          soldInDaily_CreditPaied_maynotInTime,
+          soldOnTotal_Oncredit,
+          soldInDaily_SoldOncredits,
+          soldInDaily_CreditPaied,
+        } = Responces.data;
+        console.log("Responces.data = ", Responces.data);
+        // 1 sold on credit we call it account recivable status on credit,,
+        // 2 sold on credit and we have collected money in date range or not credit paied but selected in registrationtime range,
+        // 3 sold on credit and we have collected money in time and selection is by credit payment date
+        // console.log("dailyData", dailyData, "data ", data);
+        setCreditData({
+          soldInDaily_CreditPaied_maynotInTime,
+          soldOnTotal_Oncredit,
+          soldInDaily_SoldOncredits,
+          soldInDaily_CreditPaied,
+        });
       })
       .catch((error) => {
         console.log("error", error);
@@ -81,26 +105,43 @@ function GetCreditLists() {
   const [openConfirmationModal, setOpenConfirmationModal] = useState({
     Open: false,
   });
+
   useEffect(() => {
+    let {
+      soldInDaily_SoldOncredits,
+      soldOnTotal_Oncredit,
+      soldInDaily_CreditPaied_maynotInTime,
+      soldInDaily_CreditPaied,
+    } = creditData;
     let totalMoney = 0;
-    creditData.data?.map((data) => {
-      console.log("creditData.data", data);
+    soldOnTotal_Oncredit?.map((data) => {
       totalMoney +=
         Number(data.creditsalesQty) * Number(data.productsUnitPrice);
     });
-    creditData.dailyData?.map((data) => {
-      console.log("creditData.dailyData", creditData.dailyData);
-
+    soldInDaily_SoldOncredits?.map((data) => {
       totalMoney +=
         Number(data.creditsalesQty) * Number(data.productsUnitPrice);
     });
     setAccountRecivableAmt(totalMoney);
+    let monyeCollectedInUnKnownTime = 0;
+    soldInDaily_CreditPaied_maynotInTime?.map((data) => {
+      monyeCollectedInUnKnownTime +=
+        Number(data.creditsalesQty) * Number(data.productsUnitPrice);
+    });
+    console.log("monyeCollectedInUnKnownTime", monyeCollectedInUnKnownTime);
+    setunTimeRecivableCollected(monyeCollectedInUnKnownTime);
+    let accountRecivedMoney = 0;
+    soldInDaily_CreditPaied?.map((data, index) => {
+      accountRecivedMoney +=
+        Number(data.creditsalesQty) * Number(data.productsUnitPrice);
+    });
+    setCollectedMoney(accountRecivedMoney);
   }, [creditData]);
-
-  // .length > 0 || creditData.dailyData?.length > 0 ?
   return (
     <div>
-      {creditData.data?.length > 0 || creditData.dailyData?.length > 0 ? (
+      <br />
+      {creditData.soldOnTotal_Oncredit?.length > 0 ||
+      creditData.soldInDaily_SoldOncredits?.length > 0 ? (
         <TableContainer>
           <Table sx={{ overflow: "scroll", width: "100%" }}>
             <TableHead sx={{ backgroundColor: "white" }}>
@@ -118,9 +159,9 @@ function GetCreditLists() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {creditData.dailyData.map((data, index) => {
+              {creditData.soldInDaily_SoldOncredits?.map((data, index) => {
                 return (
-                  <TableRow>
+                  <TableRow key={"indexOfGetData" + index}>
                     <TableCell>{index}</TableCell>
                     <TableCell>{data.productName}</TableCell>
                     <TableCell>{data.creditsalesQty}</TableCell>
@@ -160,14 +201,16 @@ function GetCreditLists() {
                   From Total sales
                 </TableCell>
               </TableRow>
-              {creditData.data.map((data, index) => {
+              {creditData.soldOnTotal_Oncredit?.map((data, index) => {
                 return (
                   <TableRow>
                     <TableCell>{index}</TableCell>
                     <TableCell>{data.productName}</TableCell>
-                    <TableCell>{data.salesQty}</TableCell>
+                    <TableCell>{data.creditsalesQty}</TableCell>
                     <TableCell>{data.unitPrice}</TableCell>
-                    <TableCell>{data.unitPrice * data.salesQty}</TableCell>
+                    <TableCell>
+                      {data.unitPrice * (data.salesQty + data.creditsalesQty)}
+                    </TableCell>
                     <TableCell>{data.description}</TableCell>
                     <TableCell>{data.creditPayementdate}</TableCell>
                     <TableCell>{DateFormatter(data.registeredTime)}</TableCell>
@@ -197,7 +240,7 @@ function GetCreditLists() {
           </Table>
         </TableContainer>
       ) : (
-        <h1>No credit data</h1>
+        <h1 style={{ margin: "10px" }}>No credit data</h1>
       )}
       <Dialog
         open={openConfirmationModal.Open}

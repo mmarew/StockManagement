@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import axios from "axios";
-
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
@@ -20,14 +19,8 @@ function SearchExpenceTransaction({
   response,
   setshowEachItems,
 }) {
-  const {
-    accountRecivableAmt,
-    setAccountRecivableAmt,
-    accountRecivableCollected,
-    setAccountRecivableCollected,
-    collectedMoney,
-    setCollectedMoney,
-  } = ConsumeableContext();
+  const { accountRecivableAmt, unTimeRecivableCollected, collectedMoney } =
+    ConsumeableContext();
   console.log(
     "showEachItems",
     showEachItems,
@@ -43,7 +36,9 @@ function SearchExpenceTransaction({
     console.log(item.unitCost, item.purchaseQty);
     console.log(item.unitPrice, item.salesQty);
     TotalPurchaseCost += parseInt(item.unitCost) * parseInt(item.purchaseQty);
-    TotalSalesRevenue += parseInt(item.unitPrice) * parseInt(item.salesQty);
+    TotalSalesRevenue +=
+      parseInt(item.unitPrice) *
+      (parseInt(item.salesQty) + parseInt(item.creditsalesQty));
   });
   console.log(
     "TotalSalesRevenue==",
@@ -421,7 +416,7 @@ function SearchExpenceTransaction({
             TotalCostAmount -
             accountRecivableAmt +
             collectedMoney -
-            accountRecivableCollected
+            unTimeRecivableCollected
           ).toLocaleString("en-US", {
             style: "currency",
             currency: "ETB",
@@ -430,20 +425,27 @@ function SearchExpenceTransaction({
       ) : (
         <>
           <br />
-          <center>
+          <div>
             Note:- On this day you have not expencess.
-            <br /> <br />
+            <br />
+            <div>
+              <br />
+            </div>
             Net Cash Flow (Total Sales - Total Costs-sold In
             Credit)&nbsp;&nbsp;&nbsp;
             {(
-              TotalSalesRevenue -
+              TotalSalesRevenue +
+              collectedMoney -
               TotalPurchaseCost -
-              accountRecivableAmt
-            ).toLocaleString("en-US", {
-              style: "currency",
-              currency: "ETB",
-            })}
-          </center>
+              accountRecivableAmt -
+              unTimeRecivableCollected
+            )
+              // - setAccountRecivableCollected
+              .toLocaleString("en-US", {
+                style: "currency",
+                currency: "ETB",
+              })}
+          </div>
         </>
         // ""
       )}

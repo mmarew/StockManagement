@@ -128,7 +128,12 @@ function App() {
               path=""
               element={
                 <>
-                  <GetCreditLists />
+                  <GetCreditLists
+                    dateRange={{
+                      fromDate: "notInDateRange",
+                      toDate: "notInDateRange",
+                    }}
+                  />
                   <GetMinimumQty />
                   <GetMaximumSales />
                 </>

@@ -44,7 +44,7 @@ if (second < 10) {
   second = "0" + second;
 }
 fullTime = year + "-" + month + "-" + day + "" + hour + ":" + minuite;
-// console.log("fullTime is " + fullTime);
+// //console.log("fullTime is " + fullTime);
 Databases.createBasicTables();
 let jwt = require("jsonwebtoken");
 const { Pool } = require("./Database.js");
@@ -68,29 +68,36 @@ server.post(path, (req, res) => {
   );
 });
 server.get(path, async (req, res) => {
-  return res.end(
-    "<h1><center>This is server is running well in post methodes.</center></h1>"
-  );
+  // return res.end(
+  //   "<h1><center>This is server is running well in post methodes.</center></h1>"
+  // );
   // alter tables creditPaymentDate
-  let daily = `ALTER TABLE dailyTransaction ADD COLUMN creditPaymentDate DATE DEFAULT NULL`;
-  Pool.query(daily)
-    .then((responces) => {
-      res.json({ data: responces });
-    })
-    .catch((eror) => {
-      res.json({ data: eror });
-    });
-  return;
+  // let daily = `ALTER TABLE dailyTransaction ADD COLUMN creditPaymentDate DATE DEFAULT NULL`;
+  // Pool.query(daily)
+  //   .then((responces) => {
+  //     res.json({ data: responces });
+  //   })
+  //   .catch((eror) => {
+  //     res.json({ data: eror });
+  //   });
+  // return;
 
   let select = "select * from Business ";
   let myData = [];
   await Pool.query(select)
     .then(([results]) => {
-      console.log("results", results);
+      //console.log("results", results);
       myData = results;
       results.map(async (data) => {
         let { BusinessName } = data;
-        let editableTable = `ALTER TABLE ${BusinessName}_Transaction ADD COLUMN creditsalesQty int AFTER salesQty`;
+        let editableTable = `ALTER TABLE  ${BusinessName}_products
+      ADD previousProductId INT,
+    MODIFY productsUnitCost INT(11) NOT NULL, ADD prevUnitCost INT,
+    MODIFY productsUnitPrice INT(11) NOT NULL, ADD prevUnitPrice INT,
+    MODIFY productName VARCHAR(900) NOT NULL,
+    ADD prevProductName VARCHAR(1000),
+    MODIFY minimumQty INT(11) NOT NULL, ADD prevMinimumQty INT,
+    MODIFY Status ENUM('active','changed','replaced','active_but_updated')`;
         await Pool.query(editableTable)
           .then((data1) => {
             console.log(data1);
@@ -99,20 +106,20 @@ server.get(path, async (req, res) => {
             console.log(error);
           });
         editableTable = `ALTER TABLE ${BusinessName}_Transaction
-  MODIFY creditDueDate date , MODIFY salesTypeValues enum('On cash','By bank','On credit','credit paied'), MODIFY creditPayementdate date`;
+  MODIFY creditDueDate date , MODIFY salesTypeValues enum('On cash','By bank','On credit','Credit paied'), MODIFY creditPayementdate date`;
         Pool.query(editableTable)
           .then((data1) => {
-            console.log(data1);
+            //console.log(data1);
           })
           .catch((error) => {
-            console.log(error);
+            //console.log(error);
           });
-        // console.log("data", data);
+        // //console.log("data", data);
         // res.json({ data });
       });
     })
     .catch((error) => {
-      console.log(error);
+      //console.log(error);
     });
   // res.end(
   //   "<h1><center>This is server is running well in get methodes.</center></h1>"
@@ -146,11 +153,11 @@ server.post(path + "getBusiness/", (req, res) => {
         res.json({ myBusiness, employeerBusiness });
       })
       .catch((err) => {
-        console.error(err);
+        //console.error(err);
         res.status(500).json({ error: "Internal Server Error" });
       });
   } catch (err) {
-    console.error(err);
+    //console.error(err);
     res.status(400).json({ error: "Invalid token" });
   }
 });
@@ -170,20 +177,20 @@ server.post(path + "verifyLogin/", async (req, res) => {
         }
       })
       .catch((err) => {
-        console.error(err);
+        //console.error(err);
         res.status(500).json({ error: "Internal Server Error" });
       });
   } catch (err) {
-    console.error(err);
+    //console.error(err);
     res.status(400).json({ error: "Invalid token" });
   }
 });
 server.post(path + "Login/", (req, res) => {
-  console.log(req.body);
-  console.log("req.body.phoneNumber", req.body.phoneNumber);
+  //console.log(req.body);
+  //console.log("req.body.phoneNumber", req.body.phoneNumber);
 
   let phoneNumber = req.body.phoneNumber;
-  console.log("phoneNumber", phoneNumber);
+  //console.log("phoneNumber", phoneNumber);
 
   let select = `SELECT * FROM usersTable WHERE phoneNumber = ? LIMIT 1`;
 
@@ -207,7 +214,7 @@ server.post(path + "Login/", (req, res) => {
       }
     })
     .catch((err) => {
-      console.error(err);
+      //console.error(err);
       res.status(500).json({ error: "Internal Server Error" });
     });
 });
@@ -222,7 +229,7 @@ server.post(path + "RegisterUsers/", async (req, res) => {
     res
   );
 
-  // console.log("results is " + results);
+  // //console.log("results is " + results);
 });
 server.post(path + "addProducts/", async (req, res) => {
   let rowData = req.body;
@@ -264,7 +271,7 @@ server.post(path + "addProducts/", async (req, res) => {
                 return res.json({ data: "productIsAdded" });
               })
               .catch((err) => {
-                console.error(err);
+                //console.error(err);
                 return res.status(500).json({ error: "Internal Server Error" });
               });
           } else {
@@ -272,9 +279,9 @@ server.post(path + "addProducts/", async (req, res) => {
           }
         })
         .catch((err) => {
-          console.error(err);
+          //console.error(err);
           if (err.sqlState == `42S02`) {
-            console.log("please recreate tables again");
+            //console.log("please recreate tables again");
             createBusiness(businessName, userId, fullTime, res, "recreate");
           } else {
             return res.status(500).json({ error: "Internal Server Error" });
@@ -282,7 +289,7 @@ server.post(path + "addProducts/", async (req, res) => {
         });
     })
     .catch((err) => {
-      console.error(err);
+      //console.error(err);
       return res.status(500).json({ error: "Internal Server Error" });
     });
 });
@@ -294,7 +301,7 @@ server.post(path + "createBusiness/", (req, res) => {
   let response = createBusiness(businessName, userID, fullTime, res);
 });
 server.post(path + "getRegisteredProducts/", async (req, res) => {
-  // console.log(req.body.BusinessId, req.body.token, req.body.businessName);
+  // //console.log(req.body.BusinessId, req.body.token, req.body.businessName);
   let validate = validateAlphabet(req.body.businessName, res);
   if (validate == "correctData") {
     businessName = req.body.businessName;
@@ -306,36 +313,40 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
   let table = `${businessName}_products`;
   Pool.query(select, [table])
     .then(([rows]) => {
-      console.log("in getRegisteredProducts", rows);
+      //console.log("in getRegisteredProducts", rows);
       res.json({ data: rows });
     })
     .catch((err) => {
-      console.error(err);
+      //console.error(err);
       res.json({ error: "Unable to fetch data." });
     });
 });
 server.post(path + "registerTransaction/", async (req, res) => {
   try {
     const rowData = req.body;
+    // console.log("rowData", rowData.ProductsList);
     let businessName = rowData.businessName;
     const validate = validateAlphabet(businessName, res);
 
     if (validate === "correctData") {
       const productsList = rowData.ProductsList;
       const length = productsList.length;
-      const insertedProducts = [];
+      const insertableProducts = [];
       const inventoryList = [];
-
       for (let i = 0; i < length; i++) {
         let product = productsList[i],
           productID = product.ProductId,
+          previousProductId = productsList[i].previousProductId,
           salesQuantity = rowData[`salesQuantity${productID}`],
-          salesTypeValues = rowData.salesTypeValues,
+          salesTypeValues = rowData[`salesTypeValues${productID}`],
           creditDueDate = rowData.creditDueDate,
           purchaseQty = rowData[`purchaseQty${productID}`],
           creditSalesQty = rowData[`creditSalesQty${productID}`],
           wrickageQty = rowData[`wrickageQty${productID}`],
           description = rowData[`Description${productID}`];
+        if (previousProductId == null || previousProductId == "null") {
+          previousProductId = productID;
+        }
         if (creditSalesQty == null || creditSalesQty == "null") {
           creditSalesQty = 0;
         }
@@ -343,13 +354,56 @@ server.post(path + "registerTransaction/", async (req, res) => {
         const selectToCheck = `SELECT * FROM ?? WHERE registeredTime LIKE ? AND productIDTransaction = ?`;
         const table = `${businessName}_Transaction`;
         const valuesOfTransactions = [table, `%${rowData.dates}%`, productID];
-
         const [rows] = await Pool.query(selectToCheck, valuesOfTransactions);
-
         if (rows.length > 0) {
           // If the product is already registered
           continue;
         } else {
+          // Get previous inventory
+          const prevInventoryQuery =
+            "SELECT * FROM ?? WHERE productIDTransaction = ? AND registeredTime <= ? ORDER BY registeredTime DESC LIMIT 1";
+          const prevInventoryTable = `${businessName}_Transaction`;
+          const prevInventoryValues = [
+            prevInventoryTable,
+            previousProductId,
+            rowData.dates,
+          ];
+
+          const [prevInventoryRows] = await Pool.query(
+            prevInventoryQuery,
+            prevInventoryValues
+          );
+
+          let Inventory = 0;
+          if (prevInventoryRows.length > 0) {
+            inventory = prevInventoryRows[0].Inventory;
+          }
+
+          Inventory +=
+            Number(purchaseQty) -
+            Number(salesQuantity) -
+            Number(wrickageQty) -
+            Number(creditSalesQty);
+          //////////////// it is fine and good /////////////////
+          inventoryList.push(Inventory);
+          const insertQuery = `INSERT INTO ${businessName}_Transaction(description, unitCost, unitPrice, productIDTransaction, salesQty, purchaseQty, registeredTime, wrickages, Inventory,creditDueDate,salesTypeValues,creditSalesQty) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`;
+          let Values = [
+            description,
+            product.productsUnitCost,
+            product.productsUnitPrice,
+            productID,
+            salesQuantity,
+            purchaseQty,
+            rowData.dates,
+            wrickageQty,
+            Inventory,
+            creditDueDate,
+            salesTypeValues,
+            creditSalesQty,
+          ];
+          console.log("insertQuery ==", insertQuery, "Values == ", Values);
+          // return;
+          await Pool.query(insertQuery, Values);
           const insertedProduct = {
             creditSalesQty: creditSalesQty,
             creditDueDate: creditDueDate,
@@ -367,37 +421,11 @@ server.post(path + "registerTransaction/", async (req, res) => {
               parseFloat(wrickageQty) -
               parseFloat(creditSalesQty),
           };
-
-          insertedProducts.push(insertedProduct);
-
-          // Get previous inventory
-          const prevInventoryQuery =
-            "SELECT * FROM ?? WHERE productIDTransaction = ? AND registeredTime < ? ORDER BY registeredTime DESC LIMIT 1";
-          const prevInventoryTable = `${businessName}_Transaction`;
-          const prevInventoryValues = [
-            prevInventoryTable,
-            productID,
-            rowData.dates,
-          ];
-          const [prevInventoryRows] = await Pool.query(
-            prevInventoryQuery,
-            prevInventoryValues
-          );
-
-          let inventory = 0;
-          if (prevInventoryRows.length > 0) {
-            inventory = prevInventoryRows[0].Inventory;
-          }
-
-          inventory +=
-            parseInt(purchaseQty) -
-            parseInt(salesQuantity) -
-            parseInt(wrickageQty);
-          inventoryList.push(inventory);
+          insertableProducts.push(insertedProduct);
         }
       }
 
-      if (insertedProducts.length === 0) {
+      if (insertableProducts.length === 0) {
         return res.json({
           data: "allDataAreRegisteredBefore",
           previouslyRegisteredData: [],
@@ -406,8 +434,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
         });
       }
 
-      const insertQuery = `INSERT INTO ${businessName}_Transaction (description, unitCost, unitPrice, productIDTransaction, salesQty, purchaseQty, registeredTime, wrickages, Inventory,creditDueDate,salesTypeValues,creditSalesQty ) VALUES ?`;
-      const values = insertedProducts.map((product) => [
+      const values = insertableProducts.map((product) => [
         product.Description,
         product.productsUnitCost,
         product.productsUnitPrice,
@@ -421,17 +448,20 @@ server.post(path + "registerTransaction/", async (req, res) => {
         product.salesTypeValues,
         product.creditSalesQty,
       ]);
-      console.log("insertQuery", insertQuery);
-      console.log("values", values);
+      // //console.log("insertQuery", insertQuery);
+      //console.log("values");
       // return;
-
-      await Pool.query(insertQuery, [values]);
-      updateNextDateInventory(
-        `${businessName}_Transaction`,
-        insertedProducts,
-        rowData.dates,
-        inventoryList
-      );
+      // return; creditSalesQty
+      // let salesTypeValues = values[0][10];
+      // let soldQty = "salesQty";
+      // if (salesTypeValues == "On credit") soldQty = "creditSalesQty";
+      // i will see it next
+      // updateNextDateInventory(
+      //   `${businessName}_Transaction`,
+      //   insertableProducts,
+      //   rowData.dates,
+      //   inventoryList
+      // );
 
       return res.json({
         data: "data is registered successfully",
@@ -442,7 +472,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
     } else {
       // Invalid business name
       return res.json({
-        data: "This data contains a string, so no need for execution",
+        data: "This data contains a string, please use a-z and numbers only",
       });
     }
   } catch (error) {
@@ -466,7 +496,7 @@ server.post(path + "ViewTransactions/", (req, res) => {
   const timeDate = `%${time}%`;
   const values = [transactionTable, productsTable, time];
 
-  // console.log("select is select", select);
+  // //console.log("select is select", select);
   // return;
   let salesTransaction = [],
     expenseTransaction = "";
@@ -504,14 +534,14 @@ server.post(path + "ViewTransactions/", (req, res) => {
     });
 });
 server.post(path + "updateTransactions/", async (req, res) => {
-  // console.log("@updateTransactions", req.body);
+  // //console.log("@updateTransactions", req.body);
   // return;
   let currentInventory = "",
     prevInventory = "";
   let previousDay = await getPreviousDay(new Date(req.body.date));
   let validate = validateAlphabet(req.body.businessName, res),
     businessName = "";
-  // console.log("validate", validate);
+  // //console.log("validate", validate);
   if (validate == "correctData") {
     businessName = req.body.businessName;
   } else {
@@ -523,7 +553,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
   const params = [`${businessName}_Transaction`, previousDay, productId];
   Pool.query(selectQuery, params)
     .then(([rows]) => {
-      console.log("result on selectQuery ", rows, "previousDay", previousDay);
+      //console.log("result on selectQuery ", rows, "previousDay", previousDay);
       return rows;
     })
     .then((data) => {
@@ -536,12 +566,12 @@ server.post(path + "updateTransactions/", async (req, res) => {
         prevInventory = parseInt(data[0].Inventory);
         currentInventory += prevInventory;
       }
-      console.log(
-        "prevInventory",
-        prevInventory,
-        "currentInventory",
-        currentInventory
-      );
+      //console.log(
+      //   "prevInventory",
+      //   prevInventory,
+      //   "currentInventory",
+      //   currentInventory
+      // );
       // return;
       const updateQuery = `UPDATE ?? SET wrickages=?, purchaseQty=?, salesQty=?, Inventory=?, description=? WHERE transactionId=?`;
       const params = [
@@ -556,7 +586,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
 
       Pool.query(updateQuery, params)
         .then((results) => {
-          console.log("results on updateQuery======", results);
+          //console.log("results on updateQuery======", results);
 
           const sqlToSelect = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? and ? order by  t.registeredTime desc`;
           // define the input data as an array of values
@@ -572,7 +602,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
             .then(([rows]) => {
               rows.map(async (item) => {
                 if (req.body.transactionId == item.transactionId) {
-                  // console.log("item.registeredTime", item.registeredTime);
+                  // //console.log("item.registeredTime", item.registeredTime);
                   await updateNextDateInventory(
                     `${businessName}_Transaction`,
                     [item],
@@ -585,7 +615,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
               });
             })
             .catch((error) => {
-              console.log("error in alltransaction", error);
+              //console.log("error in alltransaction", error);
               res.json({ data: error, error: "621" });
             });
         })
@@ -594,7 +624,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
         });
     })
     .catch((error) => {
-      console.log("error", error);
+      //console.log("error", error);
       res.json({ data: error, error });
     });
 });
@@ -615,7 +645,7 @@ async function getPreviousDay(date) {
     .toString()
     .padStart(2, "0")}`;
 
-  console.log("Previous day:", formattedDate);
+  //console.log("Previous day:", formattedDate);
   return formattedDate;
 }
 
@@ -625,7 +655,7 @@ server.post(path + "searchProducts/", async (req, res) => {
     toDate = req.body.InputValue.toDate,
     fromDate = req.body.InputValue.fromDate,
     selectSearches = req.body.InputValue.selectSearches;
-  // console.log( businessName,toDate, fromDate, " = selectSearches = " + selectSearches  );
+  // //console.log( businessName,toDate, fromDate, " = selectSearches = " + selectSearches  );
   let validate = validateAlphabet(req.body.businessName, res);
   if (validate == "correctData") {
     businessName = req.body.InputValue.businessName;
@@ -634,13 +664,15 @@ server.post(path + "searchProducts/", async (req, res) => {
     return "This data contains string so no need of execution";
   }
   if (selectSearches == "PRODUCTS") {
-    let selectProducts = `select * from ??`;
+    let selectProducts = `select * from ?? where Status='active'`;
     let tableName = `${businessName}_products`;
     Pool.query(selectProducts, [tableName])
       .then(([rows]) => {
+        console.log("Selected PRODUCTS=", rows);
         res.json({ data: "no results", products: rows });
       })
       .catch((Error) => {
+        console.log("Error", Error);
         res.json({ Error });
       });
   } else if (selectSearches == "TRANSACTION") {
@@ -662,7 +694,7 @@ server.post(path + "searchProducts/", async (req, res) => {
         res.json({ error });
       });
   } else if (selectSearches == "ALLTRANSACTION") {
-    console.log("in ALLTRANSACTION req.body == ", req.body);
+    //console.log("in ALLTRANSACTION req.body == ", req.body);
     const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? AND ? order by t.registeredTime desc`;
     // define the input data as an array of values
     const input = [
@@ -673,19 +705,21 @@ server.post(path + "searchProducts/", async (req, res) => {
     ];
     let data = "";
     // execute the query with the input data
+    // collected money in some date range from total sales
+    // this sql is used to collect data where money is collected in some date range. This is from total sales but not from single sales
     let selectAccountRecived = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.creditPayementdate BETWEEN ? AND ? order by t.creditPayementdate desc`;
-    let accountRecivableData = [];
+    let CollectedMoneyFromTotalSales = [];
     await Pool.query(selectAccountRecived, input)
       .then(([rows]) => {
-        accountRecivableData = rows;
+        CollectedMoneyFromTotalSales = rows;
       })
       .catch((error) => {
-        console.log(error);
+        //console.log(error);
       });
     await Pool.query(sql, input)
       .then(([rows]) => {
         data = rows;
-        console.log("data in all", rows);
+        //console.log("data in all", rows);
         const sql = `SELECT * FROM ?? e, ?? c WHERE e.costRegisteredDate BETWEEN ? AND ? AND e.costId = c.costsId`;
         // define the input data as an array of values
         const inputExp = [
@@ -698,20 +732,22 @@ server.post(path + "searchProducts/", async (req, res) => {
         // execute the query with the input data
         Pool.query(sql, inputExp)
           .then(([rows]) => {
-            res.json({ expenceTransaction: rows, data, accountRecivableData });
+            res.json({
+              expenceTransaction: rows,
+              data,
+              CollectedMoneyFromTotalSales,
+            });
           })
           .catch((error) => {
             res.json({ err: error });
           });
-
-        // res.json({ data });
       })
       .catch((error) => {
-        console.log("error in alltransaction", error);
+        //console.log("error in alltransaction", error);
         res.json({ data: error, error: "9090" });
       });
   } else if (selectSearches == "COSTS") {
-    console.log("in cost req.body==", req.body);
+    //console.log("in cost req.body==", req.body);
     let selectCost = `select * from??`;
     let costValues = `${businessName}_Costs`;
     Pool.query(selectCost, costValues)
@@ -719,48 +755,70 @@ server.post(path + "searchProducts/", async (req, res) => {
         return res.json({ data: rows });
       })
       .catch((error) => {
-        console.log("err is", error);
+        //console.log("err is", error);
         return res.json({ data: "error 678" });
       });
   } else {
     res.json({ data: "Bad request.", products: "Bad request", selectSearches });
   }
 });
-
-server.post(path + "updateProducts/", (req, res) => {
-  // console.log(req.body);
-  let productPrice = req.body.productPrice,
-    productName = req.body.productName,
-    productCost = req.body.productCost,
+/////////////////// Good and Good items //////////////////////////
+server.post(path + "updateProducts/", async (req, res) => {
+  console.log(req.body);
+  //in updating process we don't need to delete previous products data instade we keep history
+  let productPriceCurrent = req.body.productPrice,
+    productNameCurrent = req.body.productName,
+    productCostCurrent = req.body.productCost,
     businessName = req.body.businessName,
-    id = req.body.id,
-    minimumQty = req.body.minimumQty;
-  // let update = `update ${businessName}_products set productsUnitCost='${productCost}', productsUnitPrice='${productPrice}', productName='${productName}', minimumQty='${minimumQty}' where  ProductId='${id}'`;
-
+    idCurrent = req.body.id,
+    minimumQtyCurrent = req.body.minimumQty;
   // define the SQL query using placeholders
-  const sql = `UPDATE ?? SET productsUnitCost = ?,  productsUnitPrice = ?,   productName = ?,  minimumQty = ?  WHERE ProductId = ?`;
-
-  // define the input data as an array of values
-  const input = [
-    `${businessName}_products`,
-    productCost,
-    productPrice,
+  let select = `select * from  ${businessName}_products where  ProductId = ${idCurrent}`;
+  let [selectResult] = await Pool.query(select);
+  console.log("selectResult", selectResult);
+  let { productsUnitCost, productsUnitPrice, productName, minimumQty } =
+    selectResult[0];
+  let selectFirstId = `select * from  ${businessName}_products where  ProductId = ${idCurrent}`;
+  let [Responces] = await Pool.query(selectFirstId);
+  let { initialProductId, ProductId } = Responces[0];
+  if (initialProductId == null) initialProductId = ProductId;
+  console.log("initialProductId", initialProductId);
+  // return;
+  const sql = `UPDATE ${businessName}_products SET status='changed'  WHERE ProductId = ${idCurrent}`;
+  const insertQuery = `INSERT INTO ${businessName}_products (productsUnitCost, productsUnitPrice, productName, minimumQty, previousProductId, prevUnitCost,prevUnitPrice, prevProductName, prevMinimumQty, Status)VALUES (?,?,?,?,?,?,?,?,?,?)`;
+  const values = [
+    productCostCurrent,
+    productPriceCurrent,
+    productNameCurrent,
+    minimumQtyCurrent,
+    initialProductId,
+    productsUnitCost,
+    productsUnitPrice,
     productName,
     minimumQty,
-    id,
+    "active",
   ];
-
+  console.log("insertQuery", insertQuery);
+  console.log("values", values);
+  return;
+  try {
+    const result = await Pool.query(insertQuery, values);
+    console.log("Data", result.rows);
+  } catch (error) {
+    console.log("Error", error);
+  }
+  // define the input data as an array of values
   // execute the query with the input data
-  Pool.query(sql, input)
-    .then((results) => {
-      res.json({ data: "updated well" });
+  let x = await Pool.query(sql)
+    .then(([results]) => {
+      res.json({ data: "updated well", results, sql });
     })
     .catch((error) => {
       res.json({ err: error });
     });
 });
 server.post(path + "AddCostItems/", async (req, res) => {
-  // console.log(req.body);
+  // //console.log(req.body);
   let myId = await Auth(req.body.token);
   const sql = "SELECT * FROM Business WHERE BusinessName = ? AND ownerId = ?";
   // define the input data as an array of values
@@ -770,7 +828,7 @@ server.post(path + "AddCostItems/", async (req, res) => {
     .then(([rows]) => {
       // connection.query(select, (err, result) => {
 
-      console.log("result is ===", rows);
+      //console.log("result is ===", rows);
       if (rows.length > 0) {
         insertIntoCosts(`${req.body.businessName}_Costs`, req.body, res);
         return;
@@ -778,12 +836,12 @@ server.post(path + "AddCostItems/", async (req, res) => {
       res.json({ data: "notallowedToU" });
     })
     .catch((error) => {
-      console.log(err);
+      //console.log(err);
       return res.json({ data: "err", error });
     });
 });
 server.post(path + "getCostLists/", (req, res) => {
-  // console.log(req.body);
+  // //console.log(req.body);
   let validate = validateAlphabet(req.body.businessName, res),
     businessName = "";
   if (validate == "correctData") {
@@ -795,18 +853,18 @@ server.post(path + "getCostLists/", (req, res) => {
   let select = `select * from ??`;
   Pool.query(select, [`${businessName}_Costs`])
     .then(([rows]) => {
-      console.log("line 458", rows);
+      //console.log("line 458", rows);
       res.json({
         data: rows,
       });
-      //// console.log(businessName);
+      //// //console.log(businessName);
     })
     .catch((error) => {
       res.json({ data: "err", err: error });
     });
 });
 server.post(`/registerCostTransaction/`, (req, res) => {
-  // console.log("in registerCostTransaction = ", req.body.costData[0].costsId);
+  // //console.log("in registerCostTransaction = ", req.body.costData[0].costsId);
   // return;
   let costData = req.body.costData,
     date = req.body.costDate,
@@ -816,7 +874,7 @@ server.post(`/registerCostTransaction/`, (req, res) => {
   let costId = req.body.costData[0].costsId;
   // define the input data as an array of values
   const input = [`${req.body.businessName}_expenses`, date, costId];
-  console.log("date is ", date);
+  //console.log("date is ", date);
   // execute the query with the input data
   // return;
   Pool.query(sql, input)
@@ -835,13 +893,13 @@ server.post(`/registerCostTransaction/`, (req, res) => {
         const insert = `INSERT INTO ?? (costId, costAmount, costDescription, costRegisteredDate) VALUES (?, ?, ?, ?)`;
         const values = [table, costsId, costAmount, costDescription, date];
         Pool.query(insert, values)
-          // console
+          // //console
           // .log("inserted values are ", values)
           .then((results) => {
             res.json({ data: "Inserted properly" });
           })
           .catch((error) => {
-            console.log("error", error);
+            //console.log("error", error);
             res.json({ data: "error", error: "unable to insert" });
           });
       }
@@ -869,7 +927,7 @@ server.post(path + "updateBusiness/", (req, res) => {
   Pool.execute(updateQuery)
     .then(([result]) => {
       // Log the result
-      console.log(result);
+      //console.log(result);
       // Return a success message in the response JSON
       res.json({
         data: "updated well",
@@ -877,7 +935,7 @@ server.post(path + "updateBusiness/", (req, res) => {
     })
     .catch((err) => {
       // Handle any errors
-      console.error("MySQL error:", err);
+      //console.error("MySQL error:", err);
       res.json({ err });
     });
 });
@@ -906,7 +964,7 @@ const updateNextDateInventory = async (
     }
   }
 
-  console.log("903 =", businessName, ProductsList, date, previousInventory);
+  //console.log("903 =", businessName, ProductsList, date, previousInventory);
 
   let index = 0;
 
@@ -919,7 +977,7 @@ const updateNextDateInventory = async (
 
       try {
         const [rows] = await Pool.query(select, values);
-        console.log("my rows ===", rows);
+        //console.log("my rows ===", rows);
 
         if (rows.length > 0) {
           let prevInventory = 0;
@@ -942,16 +1000,16 @@ const updateNextDateInventory = async (
               rows[i].transactionId,
             ];
 
-            console.log("here it is ok it is ....");
+            //console.log("here it is ok it is ....");
             try {
               await Pool.query(update, valuesToUpdate).then((results) => {
-                console.log("results", results);
+                //console.log("results", results);
                 if (i >= rows.length - 1) {
                   sendResponses();
                 }
               });
             } catch (error) {
-              console.log(err);
+              //console.log(err);
               return res.json({ err: error });
             }
           }
@@ -962,7 +1020,7 @@ const updateNextDateInventory = async (
         index++;
         recursiveUpdate(); // Call the recursive function to process the next product
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     } else {
       sendResponses(); // All products have been processed, send the responses
@@ -1015,7 +1073,7 @@ server.post(path + "updateBusinessName/", async (req, res) => {
         Pool.query(getOldtableName, [v])
           .then(([rows]) => {
             if (rows) {
-              // console.log(results);
+              // //console.log(results);
               oldBusinessName = rows[0].BusinessName;
               // res.json({ data: `${oldBusinessName}_products`, results });
               // return;
@@ -1032,11 +1090,11 @@ server.post(path + "updateBusinessName/", async (req, res) => {
 
               Pool.query(query_updateBusinessName, values_updateBusinessName)
                 .then(([results]) => {
-                  console.log("Update successful:", results);
+                  //console.log("Update successful:", results);
                   // Do something else
                 })
                 .catch((error) => {
-                  console.error("An error occurred:", error);
+                  //console.error("An error occurred:", error);
                   // Handle the error
                 });
 
@@ -1057,18 +1115,18 @@ server.post(path + "updateBusinessName/", async (req, res) => {
 
               Pool.query(query_expenses, values_expenses)
                 .then(() => {
-                  console.log("Table _expenses renamed successfully");
+                  //console.log("Table _expenses renamed successfully");
                   // Do something else
                 })
                 .catch((error) => {
-                  console.error("An error occurred:", error);
+                  //console.error("An error occurred:", error);
                   // Handle the error
                 });
 
               // let alter_transaction = `ALTER TABLE ${oldBusinessName}_Transaction RENAME TO ${businessName}_Transaction`;
               // connection.query(alter_transaction, (err, result) => {
               //   if (err) return res.json({ err });
-              //   if (result) console.log(result);
+              //   if (result) //console.log(result);
               // });
               const query_Transaction = "ALTER TABLE ?? RENAME TO ??";
               const values_Transaction = [
@@ -1078,11 +1136,11 @@ server.post(path + "updateBusinessName/", async (req, res) => {
 
               Pool.query(query_Transaction, values_Transaction)
                 .then(() => {
-                  console.log("Table query_Transaction renamed successfully");
+                  //console.log("Table query_Transaction renamed successfully");
                   // Do something else
                 })
                 .catch((error) => {
-                  console.error("An error occurred:", error);
+                  //console.error("An error occurred:", error);
                   // Handle the error
                 });
               // let alter_Costs = `ALTER TABLE ${oldBusinessName}_Costs RENAME TO ${businessName}_Costs`;
@@ -1094,21 +1152,21 @@ server.post(path + "updateBusinessName/", async (req, res) => {
 
               Pool.query(query_Costs, values_Costs)
                 .then(() => {
-                  console.log("Table query_Costs renamed successfully");
+                  //console.log("Table query_Costs renamed successfully");
                   // Do something else
                   res.json({ data: "update is successfull" });
                 })
                 .catch((error) => {
-                  console.error("An error occurred:", error);
+                  //console.error("An error occurred:", error);
                   // Handle the error
                 });
               // connection.query(alter_Costs, (err, result) => {
               //   if (err) {
-              //     console.log(err);
+              //     //console.log(err);
               //     return res.json({ err });
               //   }
               //   if (result) {
-              //     console.log(result);
+              //     //console.log(result);
               //   }
 
               //   let update = `update Business set businessName='${businessName}' where businessId='${targetBusinessId}'`;
@@ -1116,11 +1174,11 @@ server.post(path + "updateBusinessName/", async (req, res) => {
 
               //   connection.query(update, (err, result) => {
               //     if (err) {
-              //       console.log(err);
+              //       //console.log(err);
               //       return res.json({ err });
               //     }
               //     if (result) {
-              //       // console.log(result);
+              //       // //console.log(result);
               //     }
               //   });
               // });
@@ -1132,15 +1190,15 @@ server.post(path + "updateBusinessName/", async (req, res) => {
       }
     })
     .catch((error) => {
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
       // Handle the error
     });
   // return;
   // let veifyName = `select * from Business where businessName='${businessName}' and  businessId!='${targetBusinessId}'`;
-  // console.log("Pool is == ", Pool);
+  // //console.log("Pool is == ", Pool);
   // Pool.execute(veifyName)
   //   .then((results) => {
-  //     console.log("results ===", results);
+  //     //console.log("results ===", results);
   //     return;
   //     if (results) {
   //       if (results.length > 0) {
@@ -1180,11 +1238,11 @@ server.post(path + "searchEmployee/", (req, res) => {
           res.json({ data: { result, result1 } });
         })
         .catch((error) => {
-          console.error("An error occurred:", error);
+          //console.error("An error occurred:", error);
         });
     })
     .catch((error) => {
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
       // Handle the error
     });
 });
@@ -1194,8 +1252,8 @@ server.post(path + "addEmployee/", async (req, res) => {
     phone = rowData.phone,
     businessId = rowData.businessId,
     userId = rowData.userId;
-  // console.log("rowData is ");
-  // console.log(rowData);
+  // //console.log("rowData is ");
+  // //console.log(rowData);
   let employerId = await Auth(req.body.storeToken);
   // return;
   // let check = `select * from employeeTable,Business where userIdInEmployee=${userId} and BusinessID=${businessId} and BusinessIDEmployee=BusinessID`;
@@ -1204,7 +1262,7 @@ server.post(path + "addEmployee/", async (req, res) => {
   const values = [userId, businessId];
   Pool.query(query, values)
     .then(([rows]) => {
-      console.log(rows);
+      //console.log(rows);
       // Do something else
       if (rows.length > 0) {
         res.json({ data: "data is already registered bofore" });
@@ -1215,12 +1273,12 @@ server.post(path + "addEmployee/", async (req, res) => {
 
         Pool.query(query1, values1)
           .then(([result]) => {
-            console.log("Insert successful:", result);
+            //console.log("Insert successful:", result);
             // Do something else
             res.json({ data: "data is inserted correctly." });
           })
           .catch((error) => {
-            console.error("An error occurred:", error);
+            //console.error("An error occurred:", error);
             // Handle the error
           });
         return;
@@ -1229,20 +1287,20 @@ server.post(path + "addEmployee/", async (req, res) => {
           if (err) return res.json({ data: err, err });
           if (result) {
             //
-            // console.log(result);
+            // //console.log(result);
           }
         });
       }
     })
     .catch((error) => {
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
       return res.json({ err });
       // Handle the error
     });
 });
 server.post(path + "getBusinessEmployee/", (req, res) => {
-  // console.log(req.body);
-  console.log("req.body.businessId " + req.body.businessId);
+  // //console.log(req.body);
+  //console.log("req.body.businessId " + req.body.businessId);
   // let select = `select
   //   employeeId,
   //   userIdInEmployee,
@@ -1264,29 +1322,29 @@ server.post(path + "getBusinessEmployee/", (req, res) => {
 
   Pool.query(query, values)
     .then(([rows]) => {
-      console.log(rows);
+      //console.log(rows);
       // Do something else
       res.json({ data: rows });
     })
     .catch((error) => {
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
       // Handle the error
       res.json({ data: "Error", error: "error to get employees" });
     });
 });
 server.post(path + "removeEmployees/", (req, res) => {
-  // console.log(req.body);
+  // //console.log(req.body);
   const query = "DELETE FROM employeeTable WHERE employeeId = ?";
   const values = [req.body.employeeId];
 
   Pool.query(query, values)
     .then(([result]) => {
-      console.log("Delete successful:", result);
+      //console.log("Delete successful:", result);
       // Do something else
       res.json({ Status: "deleted", EmployeeId: req.body.employeeId });
     })
     .catch((error) => {
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
       // Handle the error
       res.json({ err: error });
     });
@@ -1298,40 +1356,44 @@ server.post(path + "removeEmployees/", (req, res) => {
       return;
     }
 
-    // console.log(results);
+    // //console.log(results);
   });
 });
 server.post(path + "registerEmployeersProducts/", (req, res) => {
   let TranactionProducts = req.body.tranactionProducts,
     EmployeersProduct = req.body.EmployeersProduct;
-  // console.log("TranactionProducts = ", TranactionProducts,    "EmployeersProduct = ",  EmployeersProduct );
+  // //console.log("TranactionProducts = ", TranactionProducts,    "EmployeersProduct = ",  EmployeersProduct );
   let ProductId = EmployeersProduct[0].ProductId;
   //  { purchase_1: '456', sales_1: '400', Wrickage_1: '6' }
   let purchase_ = "purchase_" + ProductId,
     sales_ = "sales_" + ProductId,
     Wrickage_ = "Wrickage_" + ProductId;
-  // console.log("EmployeersProduct[0]", EmployeersProduct[0]);
-  // console.log();
+  // //console.log("EmployeersProduct[0]", EmployeersProduct[0]);
+  // //console.log();
   let purchaseQty = TranactionProducts[purchase_],
     salesQty = TranactionProducts[sales_],
     wrickageQty = TranactionProducts[Wrickage_];
-  // console.log(purchaseQty, salesQty, wrickageQty);
+  // //console.log(purchaseQty, salesQty, wrickageQty);
   res.json({ data: req.body });
 });
 server.post(path + "getsingleProducts/", (req, res) => {
   let businessName = req.body.businessName,
     productName = req.body.searchInput;
-  const query = `SELECT * FROM ?? WHERE productName LIKE ?`;
-  const values = [`${businessName}_products`, "%" + productName + "%"];
-  console.log("values==", values, "query==", query);
+  const query = `SELECT * FROM ?? WHERE productName LIKE ? and Status=?`;
+  const values = [
+    `${businessName}_products`,
+    "%" + productName + "%",
+    "active",
+  ];
+  //console.log("values==", values, "query==", query);
   Pool.query(query, values)
     .then(([rows]) => {
-      console.log(rows);
+      //console.log(rows);
       // Do something else
       res.json({ data: rows });
     })
     .catch((error) => {
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
       res.json({ data: "error 400" });
       // Handle the error
     });
@@ -1347,14 +1409,15 @@ server.post(path + "registerSinglesalesTransaction/", (req, res) => {
     currentDate,
     salesType,
     creditPaymentDate,
+    items,
   } = req.body;
-  console.log("salesType", salesType);
+  //console.log("salesType", salesType);
   let salesAmount = "salesQty";
   if (salesType == "On credit") {
     salesAmount = "creditsalesQty";
   }
   // salesTypeValues; creditPaymentDate
-  const query = `INSERT INTO dailyTransaction (purchaseQty, ${salesAmount},salesTypeValues,creditPaymentDate,businessId, ProductId, brokenQty, Description, registrationDate) VALUES (?,?, ?, ?, ?, ?, ?, ?,?)`;
+  const query = `INSERT INTO dailyTransaction (purchaseQty, ${salesAmount},salesTypeValues,creditPaymentDate,businessId, ProductId, brokenQty, Description, registrationDate,itemDetailInfo) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?)`;
   const values = [
     purchaseQty,
     salesQty,
@@ -1365,16 +1428,17 @@ server.post(path + "registerSinglesalesTransaction/", (req, res) => {
     brokenQty,
     Description,
     currentDate,
+    JSON.stringify(items),
   ];
 
   Pool.query(query, values)
     .then(([result]) => {
-      console.log(`Inserted ${result.affectedRows} row(s)`);
+      //console.log(`Inserted ${result.affectedRows} row(s)`);
       // Do something else
       res.json({ data: "successfullyRegistered" });
     })
     .catch((error) => {
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
       res.json({ data: "err", err: error });
       // Handle the error
     });
@@ -1384,7 +1448,7 @@ server.post(path + "registerSinglesalesTransaction/", (req, res) => {
 
   // connection.query(Insert, (error, results) => {
   //   if (error) {
-  //     // console.log(error);
+  //     // //console.log(error);
   //   }
   //   if (results) {
   //     res.json({ data: "successfullyRegistered" });
@@ -1408,8 +1472,7 @@ server.post(path + "getDailyTransaction/", (req, res) => {
     JOIN ?? AS bp
     ON bp.ProductId = dt.ProductId
     WHERE dt.businessId = ?
-    AND dt.registrationDate = ?
-  `;
+    AND dt.registrationDate = ?  `;
     values = [
       "dailyTransaction",
       `${businessName}_products`,
@@ -1424,8 +1487,7 @@ server.post(path + "getDailyTransaction/", (req, res) => {
     ON bp.ProductId = dt.ProductId
     WHERE dt.businessId = ?
     AND dt.ProductId = ?
-    AND dt.registrationDate = ?
-  `;
+    AND dt.registrationDate = ? `;
     values = [
       "dailyTransaction",
       `${businessName}_products`,
@@ -1438,12 +1500,12 @@ server.post(path + "getDailyTransaction/", (req, res) => {
 
   Pool.query(query, values)
     .then(([rows]) => {
-      console.log(rows);
+      //console.log(rows);
       // Do something else
       res.json({ data: rows, getTransaction });
     })
     .catch((error) => {
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
       // Handle the error
     });
 });
@@ -1452,17 +1514,17 @@ server.post(path + "deleteBusines/", async (req, res) => {
 });
 server.post(path + "getMyProfile/", async (req, res) => {
   let userId = await Auth(req.body.myToken);
-  console.log("userId", userId);
+  //console.log("userId", userId);
   const query = `SELECT * FROM usersTable WHERE userId = ?`;
   const values = [userId];
   Pool.query(query, values)
     .then(([rows]) => {
-      console.log(rows);
+      //console.log(rows);
       res.json({ data: rows });
     })
     .catch((error) => {
       res.json({ data: "error No 5" });
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
     });
 });
 server.post(path + "updateUsers", async (req, res) => {
@@ -1475,14 +1537,14 @@ server.post(path + "updateUsers", async (req, res) => {
   const salt = bcrypt.genSaltSync();
   //changing the value of password from req.body with the encrypted password
   const Encripted = bcrypt.hashSync(newPassword, salt);
-  // console.log("Encripted", Encripted);
+  // //console.log("Encripted", Encripted);
   let userID = await Auth(myToken);
   const query = `SELECT * FROM usersTable WHERE userId = ?`;
   const values = [userID];
 
   Pool.query(query, values)
     .then(([rows]) => {
-      console.log(rows);
+      //console.log(rows);
       // Do something else
       if (rows.length > 0) {
         let savedPassword = rows[0].password;
@@ -1515,7 +1577,7 @@ server.post(path + "updateUsers", async (req, res) => {
             res.json({ data: "your data is updated" });
           })
           .catch((error) => {
-            console.error(error);
+            //console.error(error);
             res.json({ data: "error 06.1" });
           });
         // if (isMatch) {
@@ -1527,7 +1589,7 @@ server.post(path + "updateUsers", async (req, res) => {
         //   }
         //   connection.query(Update, (err, result) => {
         //     if (err) {
-        //       console.log(err);
+        //       //console.log(err);
         //       return res.json({ data: "error 06.1" });
         //     } else {
         //       res.json({ data: "your data is updated" });
@@ -1539,7 +1601,7 @@ server.post(path + "updateUsers", async (req, res) => {
       } else res.json({ data: "no data found" });
     })
     .catch((error) => {
-      console.error("An error occurred:", error);
+      //console.error("An error occurred:", error);
       // Handle the error
       res.json({ data: "error 06" });
     });
@@ -1547,7 +1609,7 @@ server.post(path + "updateUsers", async (req, res) => {
   let Select = `select * from usersTable where userId='${userID}'`;
   connection.query(Select, (err, results) => {
     if (err) {
-      console.log(err);
+      //console.log(err);
       return;
     }
     if (results) {
@@ -1561,7 +1623,7 @@ server.post(path + "updateUsers", async (req, res) => {
           }
           connection.query(Update, (err, result) => {
             if (err) {
-              console.log(err);
+              //console.log(err);
               return res.json({ data: "error 06.1" });
             } else {
               res.json({ data: "your data is updated" });
@@ -1577,8 +1639,8 @@ server.post(path + "updateUsers", async (req, res) => {
 
 server.post(path + "deleteUsers/", async (req, res) => {
   let userID = await Auth(req.body.storeToken);
-  console.log("myId", userID);
-  // console.log(res.json({ data: myId }));
+  //console.log("myId", userID);
+  // //console.log(res.json({ data: myId }));
 
   let SelectAll = `SELECT * FROM usersTable WHERE userId = ?`;
   let selectBusiness = `SELECT * FROM Business WHERE ownerId = ?`;
@@ -1615,7 +1677,7 @@ server.post(path + "deleteUsers/", async (req, res) => {
               res.json({ data: "deleted data" });
             })
             .catch((error) => {
-              console.error(error);
+              //console.error(error);
               res.json({ data: "error 90" });
             });
         } else {
@@ -1624,7 +1686,7 @@ server.post(path + "deleteUsers/", async (req, res) => {
       }
     })
     .catch((error) => {
-      console.error(error);
+      //console.error(error);
       res.json({ data: "err 5.908" });
     });
   return;
@@ -1656,7 +1718,7 @@ server.post(path + "deleteUsers/", async (req, res) => {
                 let deleteBusiness = `Delete   Business,userstable   FROM Business  INNER JOIN userstable   where ownerId=${userID} and userId=ownerId`;
                 connection.query(deleteBusiness, (err, response) => {
                   if (err) {
-                    console.log(err);
+                    //console.log(err);
                     res.json({ data: "error 456" });
                   }
                   if (response) {
@@ -1702,11 +1764,11 @@ server.post(path + "updateMyexpencesList/", async (req, res) => {
 
   Pool.query(query, values)
     .then(([rows]) => {
-      console.log(`Updated ${rows.affectedRows} row(s)`);
+      //console.log(`Updated ${rows.affectedRows} row(s)`);
       res.json({ data: "updated" });
     })
     .catch((error) => {
-      console.error(error);
+      //console.error(error);
       res.json({ data: "err 501.1" });
     });
   // return;
@@ -1717,11 +1779,11 @@ server.post(path + "updateMyexpencesList/", async (req, res) => {
   //   exp = `update ${businessName}_expenses set costDescription='${description}',costAmount='${amount}' where expenseId='${ExpId}'`;
   // connection.query(exp, (err, results) => {
   //   if (err) {
-  //     console.log(err);
+  //     //console.log(err);
   //     res.json({ data: "err 501.1" });
   //   }
   //   if (results) {
-  //     console.log(results);
+  //     //console.log(results);
   //     res.json({ data: "updated" });
   //   }
   // });
@@ -1730,7 +1792,7 @@ server.post(path + "updateMyexpencesList/", async (req, res) => {
 server.post(path + "deleteSales_purchase/", async (req, res) => {
   const transactionId = req.body.items.transactionId;
   const businessName = req.body.items.businessName;
-  // console.log(req.body.items);
+  // //console.log(req.body.items);
   // businessName:
   // return;
   const x = await Auth(req.body.items.token);
@@ -1738,7 +1800,7 @@ server.post(path + "deleteSales_purchase/", async (req, res) => {
   const table = `${businessName}_Transaction`;
   const DeletValues = [table, transactionId];
   // ownerId;BusinessName;
-  console.log("x is ", x);
+  //console.log("x is ", x);
   // return;
   const verify =
     "SELECT * FROM Business WHERE BusinessName = ? AND ownerId = ?";
@@ -1755,24 +1817,24 @@ server.post(path + "deleteSales_purchase/", async (req, res) => {
       }
     })
     .catch((error) => {
-      console.error(error);
+      //console.error(error);
       res.json({ data: "err 501.1" });
     });
   return;
   // let transactionId = req.body.items.transactionId;
   // let businessName = req.body.items.businessName;
-  // console.log(req.body.items);
+  // //console.log(req.body.items);
   // // businessName:
   // // return;
   // let x = await Auth(req.body.items.token);
   // let Delet = `delete from ${businessName}_Transaction where transactionId=${transactionId}`;
   // // ownerId;BusinessName;
-  // console.log("x is ", x);
+  // //console.log("x is ", x);
   // // return;
   // let verify = `select * from Business where BusinessName='${businessName}' and ownerId='${x}' `;
   // connection.query(verify, (err, responce) => {
   //   if (err) {
-  //     console.log(err);
+  //     //console.log(err);
   //     return res.json({ data: err, err });
   //   } else {
   //     if (responce.length > 0)
@@ -1780,7 +1842,7 @@ server.post(path + "deleteSales_purchase/", async (req, res) => {
   //         // res.json({ data: responce });
   //         connection.query(Delet, (err, results) => {
   //           if (err) {
-  //             console.log(err);
+  //             //console.log(err);
   //             return res.json({ data: err, err });
   //           } else {
   //             return res.json({ data: "deleted", results });
@@ -1820,7 +1882,7 @@ server.post(path + "deleteCostData", async (req, res) => {
       }
     })
     .catch((error) => {
-      console.error(error);
+      //console.error(error);
       res.json({ data: "err 501.1" });
     });
   // let businessName = req.body.businessName,
@@ -1829,15 +1891,15 @@ server.post(path + "deleteCostData", async (req, res) => {
   // let userId = await Auth(Token);
   // let select = `select * from Business where BusinessName= '${businessName}' and ownerId ='${userId}'`;
   // connection.query(select, (err, responce) => {
-  //   if (err) console.log(err);
+  //   if (err) //console.log(err);
   //   if (responce.length > 0) {
   //     let deleteCostItem = `delete from ${businessName}_Costs where costsId='${costsId}'`;
   //     connection.query(deleteCostItem, (err, results) => {
-  //       if (err) console.log(err);
+  //       if (err) //console.log(err);
   //       if (results) {
   //         res.json({ data: "deleted" });
   //       }
-  //       console.log(results);
+  //       //console.log(results);
   //     });
   //   } else {
   //     res.json({ data: "youAreNotAllowed" });
@@ -1853,10 +1915,10 @@ server.post(path + "GetMinimumQty/", (req, res) => {
   Pool.query(select, [table + "Transaction", table + "products"])
     .then(([rows]) => {
       return res.json({ data: rows });
-      console.log("@GetMinimumQty ", rows);
+      //console.log("@GetMinimumQty ", rows);
     })
     .catch((error) => {
-      console.log(error);
+      //console.log(error);
       res.json({ data: "err", error });
     });
   // let token = req.body.token,
@@ -1865,13 +1927,13 @@ server.post(path + "GetMinimumQty/", (req, res) => {
 
   // connection.query(select, (err, results) => {
   //   if (err) {
-  //     console.log(err);
+  //     //console.log(err);
 
   //     res.json({ data: "err", err });
   //   }
   //   if (results) {
   //     res.json({ data: results });
-  //     console.log("@GetMinimumQty ", results);
+  //     //console.log("@GetMinimumQty ", results);
   //   }
   // });
   // res.json({ data: req.body });
@@ -1896,7 +1958,7 @@ server.post(path + "getMaximumSales/", (req, res) => {
   Pool.query(select, values)
     .then(([rows]) => {
       if (rows) {
-        console.log(rows);
+        //console.log(rows);
         return res.json({ data: rows, values });
       }
     })
@@ -1923,7 +1985,7 @@ server.post(path + "removeEmployeersBusiness/", async (req, res) => {
             }
           })
           .catch((error) => {
-            console.log(error);
+            //console.log(error);
             return res.json({ data: error });
           });
       } else {
@@ -1931,7 +1993,7 @@ server.post(path + "removeEmployeersBusiness/", async (req, res) => {
       }
     })
     .catch((error) => {
-      console.log(error);
+      //console.log(error);
       return res.json({ data: error });
     });
   return;
@@ -1939,13 +2001,13 @@ server.post(path + "removeEmployeersBusiness/", async (req, res) => {
   // let userID = await Auth(req.body.token);
   // let getEmployeerBusiness = `select * from employeeTable where userIdInEmployee='${userID}' and BusinessIDEmployee='${req.body.BusinessID}'`;
   // connection.query(getEmployeerBusiness, (err, results) => {
-  //   if (err) console.log(err);
+  //   if (err) //console.log(err);
   //   // res.json({ data: results });
   //   if (results.length > 0) {
   //     let deleteData = `delete from employeeTable where userIdInEmployee='${userID}' and BusinessIDEmployee='${req.body.BusinessID}'`;
   //     connection.query(deleteData, (error, resultsOfSelect) => {
   //       if (error) {
-  //         console.log(error);
+  //         //console.log(error);
   //         return res.json({ data: error, error });
   //       }
   //       if (resultsOfSelect) {
@@ -1968,12 +2030,12 @@ server.post(path + "deleteProducts/", async (req, res) => {
       res.status(200).json({ data: rows });
     })
     .catch((err) => {
-      console.error(err);
+      //console.error(err);
       res.status(500).json({ error: "Internal Server Error" });
     });
 });
 server.post(path + "deleteExpencesItem", (req, res) => {
-  // console.log('deleteExpencesItem')
+  // //console.log('deleteExpencesItem')
   // return
   let sql = `DELETE FROM ?? WHERE expenseId = ?`;
   let params = [`${req.body.businessName}_expenses`, req.body.expenseId];
@@ -1983,7 +2045,7 @@ server.post(path + "deleteExpencesItem", (req, res) => {
       res.status(200).json({ data: "deleteSuccess" });
     })
     .catch((err) => {
-      console.error(err);
+      //console.error(err);
       res.status(500).json({ error: "Internal Server Error" });
     });
 });
@@ -2003,7 +2065,7 @@ server.post(path + "forgetRequest", (req, res) => {
             res.status(200).json({ data: "requestedToChangePassword" });
           })
           .catch((err) => {
-            console.error(err);
+            //console.error(err);
             res.status(500).json({ error: "Internal Server Error" });
           });
       } else {
@@ -2011,7 +2073,7 @@ server.post(path + "forgetRequest", (req, res) => {
       }
     })
     .catch((err) => {
-      console.error(err);
+      //console.error(err);
       res.status(500).json({ error: "Internal Server Error" });
     });
 });
@@ -2038,7 +2100,7 @@ server.post(path + "updateChangeInpassword/", (req, res) => {
       }
     })
     .catch((err) => {
-      console.error(err);
+      //console.error(err);
       res.status(500).json({ error: "Internal Server Error" });
     });
 });
@@ -2061,7 +2123,7 @@ server.post(path + "verifyPin", (req, res) => {
       }
     })
     .catch((err) => {
-      console.error(err);
+      //console.error(err);
       res.status(500).json({ error: "Internal Server Error" });
     });
 });
@@ -2082,7 +2144,7 @@ server.get(path + "requestPasswordReset/", (req, res) => {
             res.json({ phoneNumber, pinCode });
           })
           .catch((err) => {
-            console.error(err);
+            //console.error(err);
             res.status(500).json({ error: "Internal Server Error" });
           });
       } else {
@@ -2090,7 +2152,7 @@ server.get(path + "requestPasswordReset/", (req, res) => {
       }
     })
     .catch((err) => {
-      console.error(err);
+      //console.error(err);
       res.status(500).json({ error: "Internal Server Error" });
     });
 });
@@ -2107,29 +2169,73 @@ function validateAlphabet(reqData, res) {
 }
 server.get("/getUsersCreditList", async (req, res) => {
   try {
-    let { token, businessName, businessId } = req.query;
-    console.log("getUsersCreditList token", token);
+    let { token, businessName, businessId, fromDate, toDate } = req.query;
+    //console.log("getUsersCreditList token", token);
     // res.json({ token });
     let { userId } = jwt.verify(token, tokenKey);
-    let SelectFromDaily = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'On credit' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId} `,
-      dailyData = [];
+    // sold on credit only
+    let SelectFromDaily = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'On credit' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId} and registrationDate between '${fromDate}' and '${toDate}'`,
+      sqlToCreditPaied = "",
+      soldInDaily_SoldOncredits = [],
+      soldInDaily_CreditPaied = [],
+      soldInDaily_CreditPaied_maynotInTime = [];
+    let SelectOnCreditFromTotal = "";
+    if (fromDate == "notInDateRange" || toDate == "notInDateRange") {
+      SelectFromDaily = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'On credit' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId}`;
+      SelectOnCreditFromTotal = `select * from ${businessName}_Transaction , ${businessName}_products where salesTypeValues = 'On credit' and ProductId = productIDTransaction`;
+    } else {
+      //Credit collecteds only from dailyTransaction in specific date
+      sqlToCreditPaied = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'Credit paied' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId} and creditPaymentDate between '${fromDate}' and '${toDate}'`;
+      await Pool.query(sqlToCreditPaied)
+        .then(([data]) => {
+          //console.log(data);
+          soldInDaily_CreditPaied = data;
+        })
+        .catch((error) => {
+          //console.log(error);
+        });
+
+      let sqlToCreditPaied_MayNotInTime = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'Credit paied' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId} and registrationDate between '${fromDate}' and '${toDate}'`;
+      await Pool.query(sqlToCreditPaied_MayNotInTime)
+        .then(([data]) => {
+          console.log(
+            "sqlToCreditPaied_MayNotInTime",
+            sqlToCreditPaied_MayNotInTime
+          );
+          console.log("soldInDaily_CreditPaied_maynotInTime, data , ", data);
+          soldInDaily_CreditPaied_maynotInTime = data;
+        })
+        .catch((error) => {
+          //console.log(error);
+        });
+      // salesTypeValues = 'On credit' get oncredit sales from total by date ranges
+      SelectOnCreditFromTotal = `select * from ${businessName}_Transaction , ${businessName}_products where salesTypeValues = 'On credit' and ProductId = productIDTransaction and registeredTime between '${fromDate}' and '${toDate}'`;
+    }
+
+    // soldInDaily_CreditPaied_maynotInTime
     await Pool.query(SelectFromDaily)
       .then(([data]) => {
-        console.log("SelectFromDaily data", data);
-        dailyData = data;
+        // //console.log("SelectFromDaily data", data);
+        soldInDaily_SoldOncredits = data;
       })
       .catch((error) => {
-        console.log("error", error);
+        //console.log("error", error);
       });
-    let Select = `select * from ${businessName}_Transaction , ${businessName}_products where salesTypeValues = 'On credit' and ProductId = productIDTransaction`;
+    // items sold in credit from total transactions
+
     // {On cash,By bank,On credit}
-    await Pool.query(Select)
+    await Pool.query(SelectOnCreditFromTotal)
       .then(([data]) => {
-        console.log(data);
-        res.json({ data: data, dailyData });
+        //console.log(data);
+        res.json({
+          soldInDaily_CreditPaied_maynotInTime,
+          soldOnTotal_Oncredit: data,
+          soldInDaily_SoldOncredits,
+          soldInDaily_CreditPaied,
+        });
       })
       .catch((error) => {
-        console.log(error);
+        //console.log(error);
         res.json({ data: "error no 890" });
       });
   } catch (error) {
@@ -2142,13 +2248,13 @@ server.put("/paymentConfirmed", async (req, res) => {
   let { data, businessName, token, CollectionDate, salesWAy } = req.body;
   // get userId from token
   let { userID } = jwt.verify(token, tokenKey);
-  // console.log("userId", userID, "token", token, "tokenKey ", tokenKey);
+  // //console.log("userId", userID, "token", token, "tokenKey ", tokenKey);
   // return;
   let select = `select * from Business where ownerId='${userID}' and BusinessName='${businessName}'`;
   let verifiOwnership = "not correct owner";
   await Pool.query(select)
     .then(([result]) => {
-      console.log("paymentConfirmed result", result);
+      //console.log("paymentConfirmed result", result);
       if (result.length > 0) verifiOwnership = "correct owner";
     })
     .catch(() => {
@@ -2160,42 +2266,42 @@ server.put("/paymentConfirmed", async (req, res) => {
   if (salesWAy == "singleSales") {
     // update single sales
     let { dailySalesId } = data;
-    let update = `update dailyTransaction set salesTypeValues='credit paied',creditPaymentDate='${CollectionDate}' where dailySalesId='${dailySalesId}'`;
+    let update = `update dailyTransaction set salesTypeValues='Credit paied',creditPaymentDate='${CollectionDate}' where dailySalesId='${dailySalesId}'`;
     await Pool.query(update)
       .then((data) => {
-        console.log("data", data);
+        //console.log("data", data);
         res.json({ data: "udate successfull" });
       })
       .catch((error) => {
-        console.log("error", error);
+        //console.log("error", error);
       });
     return;
   }
-  console.log("paymentConfirmed data ", data);
+  //console.log("paymentConfirmed data ", data);
   let { transactionId } = data;
-  let update = `update ${businessName}_Transaction set salesTypeValues='credit paied',creditPayementdate='${CollectionDate}' where transactionId= ${transactionId}`;
+  let update = `update ${businessName}_Transaction set salesTypeValues='Credit paied',creditPayementdate='${CollectionDate}' where transactionId= ${transactionId}`;
   Pool.query(update)
     .then((data) => {
-      console.log("data", data);
+      //console.log("data", data);
       res.json({ data: "udate successfull" });
     })
     .catch((error) => {
-      console.log("error", error);
+      //console.log("error", error);
     });
 });
 server.delete(path + "deleteDailyTransaction", (req, res) => {
-  console.log("req.body.source:");
+  //console.log("req.body.source:");
   let { dailySalesId } = req.body.source;
   let deleteSql = `delete from dailyTransaction where dailySalesId='${dailySalesId}'`;
   Pool.query(deleteSql)
     .then((data) => {
-      console.log("data deleteDailyTransaction", data);
+      //console.log("data deleteDailyTransaction", data);
       res.json({ data: "success" });
-      console.log(data);
+      //console.log(data);
     })
     .catch((error) => {
       res.json({ data: "error", error: "error no 23" });
-      console.log(error);
+      //console.log(error);
     });
 });
 server.put(path + "editDailyTransaction", (req, res) => {
@@ -2210,7 +2316,7 @@ server.put(path + "editDailyTransaction", (req, res) => {
     salesQty,
     salesTypeValues,
   } = req.body.items);
-  console.log(" req.body.items", x);
+  //console.log(" req.body.items", x);
   // return;
   let update = `update dailyTransaction set purchaseQty=?,  salesQty=?,
   creditsalesQty=?,salesTypeValues=?,creditPaymentDate=?,  brokenQty=?,
@@ -2227,12 +2333,12 @@ server.put(path + "editDailyTransaction", (req, res) => {
     ];
   Pool.query(update, values)
     .then((data) => {
-      console.log([data]);
+      //console.log([data]);
       res.json({ data: "update successfully" });
     })
     .catch((error) => {
       res.json({ data: error });
-      console.log("error", error);
+      //console.log("error", error);
     });
   // res.json({ data: req.body });
 });

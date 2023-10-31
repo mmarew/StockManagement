@@ -5,7 +5,7 @@ import RegisterCss from "./Register.module.css";
 import $ from "jquery";
 import { Button, LinearProgress, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { InitialContext } from "../UserContext/UserContext";
+import { ConsumeableContext, InitialContext } from "../UserContext/UserContext";
 import ImgApp from "../../../ImgSlider";
 function Register() {
   let serverUrl = localStorage.getItem("targetUrl");
@@ -18,7 +18,7 @@ function Register() {
     setRegisterForm({ ...RegisterForm, [names]: value });
   };
   const savedContext = useContext(InitialContext);
-  const [ownersName, setownersName] = savedContext;
+  const { ownersName, setownersName } = ConsumeableContext();
   let handleRegistrationSubmit = async (e) => {
     e.preventDefault();
     $("#LinearProgress2").show();

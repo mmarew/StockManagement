@@ -46,7 +46,7 @@ function GetMinimumQty() {
         <h4>please wait ...</h4>
       ) : MinimumQty.data.length > 0 ? (
         <TableContainer component={Paper} align="center">
-          {console.log("MinimumQty", MinimumQty.data.length)}
+          {console.log("MinimumQty", MinimumQty?.data?.length)}
           <Table sx={{ width: 100 + "%" }}>
             <TableHead>
               <TableRow>
@@ -61,7 +61,7 @@ function GetMinimumQty() {
                 <TableCell align="center"> Status</TableCell>
               </TableRow>
             </TableHead>
-            {MinimumQty.data?.map((item, index) => {
+            {MinimumQty?.data?.map((item, index) => {
               console.log(item);
               return (
                 <TableRow key={"minimum_" + index}>

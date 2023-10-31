@@ -5,7 +5,6 @@ import "./SearchProducts.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import { Button, IconButton, Box, TextField, Modal } from "@mui/material";
-
 import MUIConfirm from "../Others/MUIConfirm";
 function SearchProducts({ response }) {
   const [openEditerModal, setOpenEditerModal] = useState({ open: false });
@@ -35,6 +34,7 @@ function SearchProducts({ response }) {
   const [productUnitPrice, setProductUnitPrice] = useState(
     openEditerModal?.item?.productsUnitPrice
   );
+
   const [productUnitCost, setProductUnitCost] = useState(
     openEditerModal?.item?.productsUnitCost
   );
@@ -74,62 +74,22 @@ function SearchProducts({ response }) {
       $("#minimumQty_" + items.ProductId).val(items.minimumQty);
     });
   }, [searchedProducts]);
-  let handleProductsInput = (e, items) => {
-    let copy = [];
-    console.log("items", items);
-    // return;
-    let changedValue = e.target.value,
-      targetId = e.target.id;
-    console.log(changedValue, e.target);
-
-    searchedProducts.map((product) => {
-      console.log(product);
-      if (product.ProductId == items.ProductId) {
-        items.updateMode = true;
-        if (targetId.includes("minimumQty_")) {
-          items.minimumQty = changedValue;
-        }
-        if (targetId.includes("productCost_")) {
-          items.productsUnitCost = changedValue;
-        }
-
-        if (targetId.includes("productPrice_")) {
-          items.productsUnitPrice = changedValue;
-        }
-        if (targetId.includes("productName_")) {
-          items.productName = changedValue;
-        }
-      }
-      copy.push(product);
-    });
-    copy.push();
-    setSearchedProducts(copy);
-  };
-  let updateProductsData = async (e) => {
-    console.log(e.target);
+  //////////////////////////////////////////////
+  let updateProductsData = async (productID) => {
     businessName = localStorage.getItem("businessName");
-    let id = e.target.id,
-      ob = {},
-      productCost_ = "productCost_" + id,
-      productPrice_ = "productPrice_" + id,
-      productName_ = "productName_" + id,
-      btnId = "updateProducts_" + id,
-      minimumQty = "minimumQty_" + id;
-    ob.minimumQty = $("#" + minimumQty).val();
-    ob.productPrice = $("#" + productPrice_).val();
-    ob.productName = $("#" + productName_).val();
-    ob.productCost = $("#" + productCost_).val();
-    ob.id = id;
+    let ob = {};
+    ob.minimumQty = minimumQty;
+    ob.productPrice = productUnitPrice;
+    ob.productName = productName;
+    ob.productCost = productUnitCost;
+    ob.id = productID;
     ob.businessName = businessName;
     $(".LinearProgress").css("display", "block");
-    let response = await axios
-      .post(serverAddress + "updateProducts/", ob)
-      .then((datas) => {
-        $("." + btnId).hide();
-        if ((datas.data.data = "updated well")) {
-          alert("updated well");
-        }
-      });
+    await axios.post(serverAddress + "updateProducts/", ob).then((datas) => {
+      if ((datas.data.data = "updated well")) {
+        alert("updated well");
+      }
+    });
     handleClose();
     $(".LinearProgress").css("display", "none");
     let Copy = [];
@@ -139,6 +99,7 @@ function SearchProducts({ response }) {
     });
     setSearchedProducts(Copy);
   };
+  ////////////////////////////////////////////
   const [confirmRequest, setconfirmRequest] = useState();
   const [ConfirmDelete, setConfirmDelete] = useState({ Verify: false });
   const [ShowSuccessError, setSuccessError] = useState({});
@@ -195,7 +156,7 @@ function SearchProducts({ response }) {
     setOpen({ open: true });
   };
   return (
-    <div>
+    <div className={"productListWrapper"}>
       {searchedProducts?.length > 0 &&
         searchedProducts.map((product) => {
           return (
@@ -297,10 +258,12 @@ function SearchProducts({ response }) {
             <br />
 
             <Button
-              style={{ width: "100%" }}
+              fullWidth
               variant="contained"
               color="primary"
-              onClick={updateProductsData}
+              onClick={() =>
+                updateProductsData(openEditerModal?.item?.ProductId)
+              }
               className={`updateProducts updateProducts_${openEditerModal?.item?.ProductId}`}
             >
               UPDATE

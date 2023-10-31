@@ -1,7 +1,3 @@
-.singleSalesWrapper {
-  max-width: fit-content;
-  margin: auto;
-}
 .singleTransactionForm {
   width: 310px;
   margin: 10px auto;
@@ -15,7 +11,7 @@
   background-color: green;
   color: white;
   padding: 5px;
-  width: 70px;
+
   margin: 5px;
   border-radius: 10px;
   cursor: pointer;
@@ -39,7 +35,7 @@
 .searchedProductsLists {
   background-color: white;
   width: 300px;
-  margin: 10px auto;
+  /* margin: 10px auto; */
   padding: 20px;
 }
 .btnAddTotalSales {
