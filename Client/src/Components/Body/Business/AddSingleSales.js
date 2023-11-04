@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import singleSalesCss from "./AddSingleSales.module.css";
-import $ from "jquery";
+import $, { error } from "jquery";
 import currentDates, { DateFormatter } from "../Date/currentDate";
 import CloseIcon from "@material-ui/icons/Close";
 import {
@@ -16,12 +16,14 @@ import {
   MenuItem,
   Modal,
   Select,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -50,7 +52,10 @@ function AddSingleSales() {
   const [productDetailes, setproductDetailes] = useState([]);
   const [inputValues, setInputValues] = useState({});
   // formInputValues is uesd to tollect data of form to update and registere
-  const [formInputValues, setformInputValues] = useState([]);
+
+  const [formInputValues, setformInputValues] = useState({
+    salesType: "Default",
+  });
   const [searchedProducts, setSearchedProducts] = useState([]);
   const [allDailySales, setAllDailySales] = useState({});
   // get single products
@@ -80,6 +85,7 @@ function AddSingleSales() {
       ProductId,
     });
   };
+  const [singleSalesError, setsingleSalesError] = useState({});
   // collect input values of search form
   let handleSearchableProductInput = (event) => {
     console.log(event.target.value);
@@ -87,7 +93,25 @@ function AddSingleSales() {
   };
   let registerSinglesalesTransaction = async (e, items) => {
     e.preventDefault();
-    console.log("formInputValues", formInputValues, " items", items);
+    let { brokenQty, salesType } = formInputValues;
+    console.log(
+      "formInputValues",
+      formInputValues,
+      " items",
+      items,
+      "brokenQty",
+      brokenQty
+    );
+
+    if (salesType == "Default") {
+      setsingleSalesError((reviousErrors) => ({
+        ...reviousErrors,
+        salesType: "Sales type values has to be selected",
+      }));
+      return;
+    }
+    // Default;
+    console.log("formInputValues", formInputValues);
     // return;
     setProccess(true);
     $(".LinearProgress").css("display", "block");
@@ -101,8 +125,11 @@ function AddSingleSales() {
         currentDate: $("#singleSalesDate").val(),
       }
     );
+    setformInputValues({ salesType: "Default" }); // Reset the form values to default
     setProccess(false);
+    ////////////////
     console.log(responce.data.data);
+    /////////////////
     if (responce.data.data == "successfullyRegistered") {
       alert("Successfully Registered");
       $(".dailyRegistrationInputs input").val("");
@@ -111,8 +138,7 @@ function AddSingleSales() {
   };
 
   let getTotalRegiters = async (targetproductId) => {
-    // clear datas of product detailes
-    // console.log('$("#singleSalesDate").val()', $("#singleSalesDate").val());
+    console.log("targetproductId", targetproductId);
     setSearchedProducts([]);
     let businessId = localStorage.getItem("businessId");
     let businessName = localStorage.getItem("businessName");
@@ -154,7 +180,6 @@ function AddSingleSales() {
     // collect same products to add qty
     for (; i < mydataLength; i++) {
       ProductId = mydata[i].ProductId;
-
       creditDueDate = dailySales[`creditDueDate` + ProductId];
       salesTypeValues = dailySales[`salesTypeValues` + ProductId];
       creditSalesQty = Number(dailySales["creditSalesQty" + ProductId]);
@@ -356,19 +381,46 @@ function AddSingleSales() {
       open: false,
       Items: {},
     });
-
+  const [tabValue, setTabValue] = useState(0);
   return (
     <div className={singleSalesCss.singleSalesWrapper}>
-      <form
-        className={singleSalesCss.formToSearchItems}
-        form
-        onSubmit={handleSearchSubmit}
-      >
-        <label>Select Date</label>
-        <br />
-        <TextField name="singleSalesDate" id="singleSalesDate" type="date" />
-        <br />
-        <div style={{ display: "flex" }}>
+      <Tabs value={tabValue} onChange={(event, newTab) => setTabValue(newTab)}>
+        <Tab label="Search item" value={0} />
+        <Tab label="View all daily sales" value={1} />
+      </Tabs>
+      <Box
+        sx={{
+          paddingLeft: "10px",
+
+          display: "flex",
+          flexDirection: "column",
+        }}
+      ></Box>
+      {tabValue == 0 && (
+        <form
+          className={singleSalesCss.formToSearchItems}
+          form
+          onSubmit={handleSearchSubmit}
+        >
+          <label
+            style={{
+              textAlign: "center",
+              paddingLeft: "100px",
+              width: "fit-content ",
+            }}
+          >
+            Select Date
+          </label>
+          <br />
+          <TextField
+            required
+            fullWidth
+            name="singleSalesDate"
+            id="singleSalesDate"
+            type="date"
+          />
+          <br />
+
           <TextField
             required
             name="searchInput"
@@ -378,21 +430,52 @@ function AddSingleSales() {
             className=""
             type={"search"}
           />
-
-          <Button sx={{ marginLeft: "3px" }} type="submit" variant="contained">
+          <br />
+          <Button fullWidth type="submit" variant="contained">
             Search
           </Button>
-        </div>
-        <br />
-        <Button
-          variant="contained"
-          color="success"
-          onClick={() => getTotalRegiters("getAllTransaction")}
-        >
-          View All Daily Transactions
-        </Button>
-      </form>
 
+          <br />
+        </form>
+      )}
+      {tabValue == 1 && (
+        <>
+          <form
+            style={{ maxWidth: "300px" }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              getTotalRegiters("getAllTransaction");
+            }}
+          >
+            <label
+              style={{
+                textAlign: "center",
+                paddingLeft: "100px",
+                width: "fit-content ",
+                marginTop: "30px",
+              }}
+            >
+              Select Date
+            </label>
+            <br />
+            <TextField
+              required
+              fullWidth
+              name="singleSalesDate"
+              id="singleSalesDate"
+              type="date"
+            />
+            <Button
+              fullWidth
+              sx={{ marginTop: "10px" }}
+              variant="contained"
+              type="submit"
+            >
+              View
+            </Button>
+          </form>
+        </>
+      )}
       {searchedProducts.length > 0 && (
         <TableContainer className={singleSalesCss.TableContainer}>
           <Table>
@@ -429,7 +512,7 @@ function AddSingleSales() {
                         onClick={() => getTotalRegiters(items.ProductId)}
                         className={singleSalesCss.getProducts}
                       >
-                        Get
+                        view
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -439,6 +522,7 @@ function AddSingleSales() {
           </Table>
         </TableContainer>
       )}
+      {console.log("formInputValues", formInputValues)}
       <Modal open={RegisterableItems.Open} onClose={handleClose}>
         <Box
           sx={{
@@ -471,7 +555,6 @@ function AddSingleSales() {
             <form
               className={singleSalesCss.singleTransactionForm}
               onSubmit={(e) => {
-                setformInputValues([]);
                 registerSinglesalesTransaction(e, RegisterableItems.items);
               }}
             >
@@ -508,6 +591,7 @@ function AddSingleSales() {
               />
               <br />
               <TextField
+                required
                 fullWidth
                 type="number"
                 className={"dailyRegistrationInputs"}
@@ -524,23 +608,33 @@ function AddSingleSales() {
               <br />
 
               <label>payment type</label>
+              {console.log(
+                "formInputValues.salesType",
+                formInputValues.salesType
+              )}
               <Select
                 value={formInputValues.salesType}
                 name="salesType"
-                onChange={(e) =>
+                onChange={(e) => {
+                  setsingleSalesError({});
                   handleSalesTransactionInput(
                     e,
                     RegisterableItems.items.ProductId
-                  )
-                }
+                  );
+                }}
                 sx={{ margin: "20px auto" }}
                 fullWidth
                 required
               >
+                <MenuItem defaultValue={"Default"}>Choose values </MenuItem>
                 <MenuItem value={"On cash"}>On cash</MenuItem>
                 <MenuItem value={"By bank"}>By bank</MenuItem>
                 <MenuItem value={"On credit"}>On credit</MenuItem>
               </Select>
+              <Box sx={{ color: "red", marginBottom: "20px" }}>
+                {" "}
+                {singleSalesError.salesType}
+              </Box>
               {formInputValues.salesType == "On credit" && (
                 <Box sx={{ width: "100%" }}>
                   <label>Payment date</label>
@@ -699,7 +793,6 @@ function AddSingleSales() {
           </TableContainer>
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
-              sx={{ margin: "auto" }}
               variant="contained"
               color="primary"
               className={singleSalesCss.btnAddTotalSales}
@@ -793,12 +886,13 @@ function AddSingleSales() {
                 }
               />
               {console.log(
-                "formInputValues.salesTypeValues",
-                formInputValues.salesTypeValues
+                "formInputValues.salesType",
+                formInputValues.salesType
               )}
               <br />
               <TextField
                 fullWidth
+                required
                 type="number"
                 className={"dailyRegistrationInputs"}
                 onInput={(e) =>

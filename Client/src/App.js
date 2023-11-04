@@ -24,6 +24,7 @@ import NavBar from "./Components/Nav/MuiNav";
 import ImageApp from "./ImgSlider";
 import ForgetPassword from "./Components/Body/ForgetPassword/ForgetPassword";
 import GetCreditLists from "./Components/Body/Business/GetCreditLists";
+import CheckIfUnreportedData from "./Components/Body/Business/CheckIfUnreportedData";
 function App() {
   return (
     <div className="App">
@@ -128,6 +129,7 @@ function App() {
               path=""
               element={
                 <>
+                  <CheckIfUnreportedData />
                   <GetCreditLists
                     dateRange={{
                       fromDate: "notInDateRange",

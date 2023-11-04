@@ -1,29 +1,47 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ConsumeableContext } from "../UserContext/UserContext";
+function ShowCreditCollected({ Results }) {
+  const { setCollectedMoney, setAccountRecivableAmt } = ConsumeableContext();
+  useEffect(() => {
+    let { data } = Results.data,
+      totalCollectedAmount = 0,
+      unCollectedMoney = 0,
+      partiallySold = 0;
+    data.map((d, dindex) => {
+      console.log("my data", d);
+      let {
+          partiallyPaiedInfo,
+          salesTypeValues,
+          creditsalesQty,
+          productsUnitPrice,
+        } = d,
+        paiedInfo = JSON.parse(partiallyPaiedInfo);
 
-function ShowCreditCollected({
-  uselessCreditCollected,
-  CollectedMoneyFromTotalSales,
-}) {
-  const { setunTimeRecivableCollected, setCollectedMoney } =
-    ConsumeableContext();
-  let collectedAmount = 0;
-  CollectedMoneyFromTotalSales?.map((item) => {
-    collectedAmount += item.creditsalesQty * item.unitPrice;
-  });
-  setCollectedMoney((prev) => prev + collectedAmount);
-  console.log("collectedAmount");
-  let reciveableAmount = 0;
-  uselessCreditCollected.map((item) => {
-    reciveableAmount += item.creditsalesQty * item.unitPrice;
-  });
-  setunTimeRecivableCollected((prev) => prev + reciveableAmount);
+      if (salesTypeValues == "Partially paied") {
+        partiallySold += Number(creditsalesQty) * Number(productsUnitPrice);
+      }
+      paiedInfo?.map((info, infoIndex) => {
+        let { collectedAmount, creditPaymentDate } = info;
+        totalCollectedAmount += collectedAmount;
+      });
+    });
+    unCollectedMoney = partiallySold - totalCollectedAmount;
+    console.log(
+      "unCollectedMoney",
+      unCollectedMoney,
+      "totalCollectedAmount",
+      totalCollectedAmount
+    );
+    setAccountRecivableAmt(() => unCollectedMoney);
+    setCollectedMoney((prev) => prev + totalCollectedAmount);
+  }, []);
+  let recivableAmount = 0;
   return (
     <div>
-      {reciveableAmount > 0 && (
+      {recivableAmount > 0 && (
         <>
           Total Collected Credits{" "}
-          {reciveableAmount.toLocaleString("en-US", {
+          {recivableAmount.toLocaleString("en-US", {
             style: "currency",
             currency: "ETB",
           })}
@@ -32,5 +50,4 @@ function ShowCreditCollected({
     </div>
   );
 }
-
 export default ShowCreditCollected;

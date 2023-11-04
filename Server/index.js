@@ -68,57 +68,31 @@ server.post(path, (req, res) => {
   );
 });
 server.get(path, async (req, res) => {
-  // return res.end(
-  //   "<h1><center>This is server is running well in post methodes.</center></h1>"
-  // );
-  // alter tables creditPaymentDate
-  // let daily = `ALTER TABLE dailyTransaction ADD COLUMN creditPaymentDate DATE DEFAULT NULL`;
-  // Pool.query(daily)
-  //   .then((responces) => {
-  //     res.json({ data: responces });
-  //   })
-  //   .catch((eror) => {
-  //     res.json({ data: eror });
-  //   });
-  // return;
-
   let select = "select * from Business ";
   let myData = [];
   await Pool.query(select)
     .then(([results]) => {
-      //console.log("results", results);
       myData = results;
       results.map(async (data) => {
         let { BusinessName } = data;
-        let editableTable = `ALTER TABLE  ${BusinessName}_Transaction
-      ADD mainProductId INT after productIDTransaction`;
+        // ALTER TABLE table_name RENAME COLUMN old_column_name TO new_column_name;
+        let editableTable = `ALTER TABLE ${BusinessName}_Transaction
+     RENAME COLUMN  registrationDate  TO registrationDate;`;
         await Pool.query(editableTable)
           .then((data1) => {
-            console.log(data1);
+            console.log(`${BusinessName}_Transaction`);
           })
           .catch((error) => {
             console.log(error);
           });
-        editableTable = `ALTER TABLE ${BusinessName}_Transaction
-  MODIFY creditDueDate date , MODIFY salesTypeValues enum('On cash','By bank','On credit','Credit paied'), MODIFY creditPayementdate date`;
-        Pool.query(editableTable)
-          .then((data1) => {
-            //console.log(data1);
-          })
-          .catch((error) => {
-            //console.log(error);
-          });
-        // //console.log("data", data);
         // res.json({ data });
       });
     })
     .catch((error) => {
       //console.log(error);
     });
-  // res.end(
-  //   "<h1><center>This is server is running well in get methodes.</center></h1>"
-  // );
-  res.json({ data: myData });
+
+  res.json({ data: "myData" });
 });
 server.post(path + "getBusiness/", (req, res) => {
   let tokens = req.body.token;
@@ -303,7 +277,7 @@ server.post(path + "getRegisteredProducts/", async (req, res) => {
     // this is just to stop execution res is done in validateAlphabet
     return "This data contains string so no need of execution";
   }
-  let select = "SELECT * FROM ??";
+  let select = "SELECT * FROM ?? where Status='active'";
   let table = `${businessName}_products`;
   Pool.query(select, [table])
     .then(([rows]) => {
@@ -345,7 +319,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
           creditSalesQty = 0;
         }
         //Select to check if item is registered in this day
-        const selectToCheck = `SELECT * FROM ?? WHERE registeredTime LIKE ? AND productIDTransaction = ?`;
+        const selectToCheck = `SELECT * FROM ?? WHERE  registrationDate  LIKE ? AND productIDTransaction = ?`;
         const table = `${businessName}_Transaction`;
         const valuesOfTransactions = [table, `%${rowData.dates}%`, productID];
         const [rows] = await Pool.query(selectToCheck, valuesOfTransactions);
@@ -355,7 +329,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
         } else {
           // Get previous inventory
           const prevInventoryQuery =
-            "SELECT * FROM ?? WHERE productIDTransaction = ? AND registeredTime <= ? ORDER BY registeredTime DESC LIMIT 1";
+            "SELECT * FROM ?? WHERE productIDTransaction = ? AND  registrationDate  <= ? ORDER BY  registrationDate  DESC LIMIT 1";
           const prevInventoryTable = `${businessName}_Transaction`;
           const prevInventoryValues = [
             prevInventoryTable,
@@ -382,7 +356,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
             Number(creditSalesQty);
           //////////////// it is fine and good /////////////////
           inventoryList.push(Inventory);
-          const insertQuery = `INSERT INTO ${businessName}_Transaction(description, unitCost, unitPrice, productIDTransaction, mainProductId, salesQty, purchaseQty, registeredTime, wrickages, Inventory,creditDueDate,salesTypeValues,creditSalesQty) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+          const insertQuery = `INSERT INTO ${businessName}_Transaction(description, unitCost, unitPrice, productIDTransaction, mainProductId, salesQty, purchaseQty, registrationDate, wrickages, Inventory,creditDueDate,salesTypeValues,creditSalesQty) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`;
           let Values = [
             description,
             product.productsUnitCost,
@@ -467,7 +441,7 @@ server.post(path + "ViewTransactions/", (req, res) => {
   }
   const transactionTable = `${businessName}_Transaction`;
   const productsTable = `${businessName}_products`;
-  const select = `SELECT * FROM ?? t INNER JOIN ?? p ON p.productId = t.productIDTransaction WHERE t.registeredTime LIKE ?`;
+  const select = `SELECT * FROM ?? t INNER JOIN ?? p ON p.productId = t.productIDTransaction WHERE t.registrationDate LIKE ?`;
   const timeDate = `%${time}%`;
   const values = [transactionTable, productsTable, time];
 
@@ -479,9 +453,6 @@ server.post(path + "ViewTransactions/", (req, res) => {
     .then(([rows]) => {
       {
         salesTransaction = rows;
-        //       let selectCost = `select * from ${businessName}_expenses, ${businessName}_Costs where
-        // ${businessName}_expenses.costId=${businessName}_Costs.costsId and costRegisteredDate=${time}`;
-
         const selectCostQuery =
           "SELECT * FROM ??_expenses, ??_Costs WHERE ??_expenses.costId = ??_Costs.costsId AND costRegisteredDate = ?";
         const params = [
@@ -524,7 +495,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
     return "This data contains string so no need of execution";
   }
   let productId = req.body.productId;
-  const selectQuery = `SELECT * FROM ?? WHERE registeredTime <=? AND productIDTransaction = ?  order by registeredTime desc limit 1 `;
+  const selectQuery = `SELECT * FROM ?? WHERE  registrationDate  <=? AND productIDTransaction = ?  order by  registrationDate  desc limit 1 `;
   const params = [`${businessName}_Transaction`, previousDay, productId];
   Pool.query(selectQuery, params)
     .then(([rows]) => {
@@ -541,13 +512,6 @@ server.post(path + "updateTransactions/", async (req, res) => {
         prevInventory = parseInt(data[0].Inventory);
         currentInventory += prevInventory;
       }
-      //console.log(
-      //   "prevInventory",
-      //   prevInventory,
-      //   "currentInventory",
-      //   currentInventory
-      // );
-      // return;
       const updateQuery = `UPDATE ?? SET wrickages=?, purchaseQty=?, salesQty=?, Inventory=?, description=? WHERE transactionId=?`;
       const params = [
         `${businessName}_Transaction`,
@@ -563,7 +527,7 @@ server.post(path + "updateTransactions/", async (req, res) => {
         .then((results) => {
           //console.log("results on updateQuery======", results);
 
-          const sqlToSelect = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? and ? order by  t.registeredTime desc`;
+          const sqlToSelect = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registrationDate BETWEEN ? and ? order by  t.registrationDate desc`;
           // define the input data as an array of values
           const inputToSelect = [
             `${businessName}_Transaction`,
@@ -577,11 +541,10 @@ server.post(path + "updateTransactions/", async (req, res) => {
             .then(([rows]) => {
               rows.map(async (item) => {
                 if (req.body.transactionId == item.transactionId) {
-                  // //console.log("item.registeredTime", item.registeredTime);
                   await updateNextDateInventory(
                     `${businessName}_Transaction`,
                     [item],
-                    DateFormatter(item.registeredTime),
+                    DateFormatter(item.registrationDate),
                     [currentInventory],
                     dataToSendResponceToClient
                   );
@@ -655,7 +618,7 @@ server.post(path + "searchProducts/", async (req, res) => {
                FROM ??, ??
                WHERE productIDTransaction = ProductId
                AND productName LIKE CONCAT('%', ?, '%')
-               AND registeredTime BETWEEN ? AND ?`;
+               AND  registrationDate  BETWEEN ? AND ?`;
 
     const table1 = `${businessName}_Transaction`;
     const table2 = `${businessName}_products`;
@@ -670,7 +633,7 @@ server.post(path + "searchProducts/", async (req, res) => {
       });
   } else if (selectSearches == "ALLTRANSACTION") {
     //console.log("in ALLTRANSACTION req.body == ", req.body);
-    const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? AND ? order by t.registeredTime desc`;
+    const sql = `SELECT * FROM ?? t, ?? p  WHERE t.productIDTransaction = p.ProductId AND t.registrationDate BETWEEN ? AND ? order by t.registrationDate desc`;
     // define the input data as an array of values
     const input = [
       `${businessName}_Transaction`,
@@ -964,7 +927,7 @@ const updateNextDateInventory = async (
       if (previousProductId == null || previousProductId == "null")
         previousProductId = productId;
       //////11111111
-      let select = `SELECT * FROM ?? WHERE mainProductId=? AND registeredTime > ? ORDER BY registeredTime ASC`;
+      let select = `SELECT * FROM ?? WHERE mainProductId=? AND  registrationDate  > ? ORDER BY  registrationDate  ASC`;
       let values = [businessName, previousProductId, date];
       try {
         const [rows] = await Pool.query(select, values);
@@ -1902,7 +1865,7 @@ server.post(path + "deleteCostData", async (req, res) => {
 server.post(path + "GetMinimumQty/", (req, res) => {
   const token = req.body.token;
   const businessName = req.body.businessName;
-  const select = `SELECT * FROM ??, ?? WHERE productIDTransaction = ProductId ORDER BY registeredTime DESC LIMIT 1`;
+  const select = `SELECT * FROM ??, ?? WHERE productIDTransaction = ProductId ORDER BY  registrationDate  DESC LIMIT 1`;
   const table = `${businessName}_`;
 
   Pool.query(select, [table + "Transaction", table + "products"])
@@ -1916,7 +1879,7 @@ server.post(path + "GetMinimumQty/", (req, res) => {
     });
   // let token = req.body.token,
   //   businessName = req.body.businessName,
-  //   select = `select * from ${businessName}_Transaction,${businessName}_products where productIDTransaction=ProductId order by registeredTime desc limit 1`;
+  //   select = `select * from ${businessName}_Transaction,${businessName}_products where productIDTransaction=ProductId order by  registrationDate  desc limit 1`;
 
   // connection.query(select, (err, results) => {
   //   if (err) {
@@ -1937,14 +1900,14 @@ server.post(path + "getMaximumSales/", (req, res) => {
     toDate = DateRange.toDate,
     businessName = req.body.businessName,
     token = req.body.token;
-  // let select = `select * from ${businessName}_products, ${businessName}_Transaction where  ProductId = productIDTransaction and registeredTime between '${toDate}' and '${fromDate}'`;
+  // let select = `select * from ${businessName}_products, ${businessName}_Transaction where  ProductId = productIDTransaction and  registrationDate  between '${toDate}' and '${fromDate}'`;
   const table1 = `${businessName}_products`;
   const table2 = `${businessName}_Transaction`;
 
   const select = `SELECT *
                 FROM ??, ??
                 WHERE ProductId = productIDTransaction
-                AND registeredTime BETWEEN ? AND ?`;
+                AND  registrationDate  BETWEEN ? AND ?`;
 
   const values = [table1, table2, fromDate, toDate];
 
@@ -2163,50 +2126,40 @@ function validateAlphabet(reqData, res) {
 server.get("/getUsersCreditList", async (req, res) => {
   try {
     let { token, businessName, businessId, fromDate, toDate } = req.query;
-    //console.log("getUsersCreditList token", token);
-    // res.json({ token });
     let { userId } = jwt.verify(token, tokenKey);
-    // sold on credit only
-    let SelectFromDaily = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'On credit' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId} and registrationDate between '${fromDate}' and '${toDate}'`,
-      sqlToCreditPaied = "",
+    let collectedMoneyIndailyNotInRegistration = "",
+      soldInDailyCreditPaied = "",
+      SelectOnCreditFromDaily = "",
       soldInDaily_SoldOncredits = [],
       soldInDaily_CreditPaied = [],
       soldInDaily_CreditPaied_maynotInTime = [];
     let SelectOnCreditFromTotal = "";
-    if (fromDate == "notInDateRange" || toDate == "notInDateRange") {
-      SelectFromDaily = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'On credit' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId}`;
-      SelectOnCreditFromTotal = `select * from ${businessName}_Transaction , ${businessName}_products where salesTypeValues = 'On credit' and ProductId = productIDTransaction`;
-    } else {
+    ///////////////////////////
+    SelectOnCreditFromDaily = `select * from dailyTransaction , ${businessName}_products where (salesTypeValues = 'On credit' or  salesTypeValues = 'Partially paied') and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId}`;
+    SelectOnCreditFromTotal = `select * from ${businessName}_Transaction , ${businessName}_products where (salesTypeValues = 'On credit' or  salesTypeValues = 'Partially paied') and ProductId = productIDTransaction`;
+    /////////////////////////////////
+
+    if (fromDate !== "notInDateRange" && toDate !== "notInDateRange") {
       //Credit collecteds only from dailyTransaction in specific date
-      sqlToCreditPaied = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'Credit paied' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId} and creditPaymentDate between '${fromDate}' and '${toDate}'`;
-      await Pool.query(sqlToCreditPaied)
-        .then(([data]) => {
-          //console.log(data);
-          soldInDaily_CreditPaied = data;
-        })
-        .catch((error) => {
-          //console.log(error);
-        });
-
-      let sqlToCreditPaied_MayNotInTime = `select * from dailyTransaction , ${businessName}_products where salesTypeValues = 'Credit paied' and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId} and registrationDate between '${fromDate}' and '${toDate}'`;
-      await Pool.query(sqlToCreditPaied_MayNotInTime)
-        .then(([data]) => {
-          console.log(
-            "sqlToCreditPaied_MayNotInTime",
-            sqlToCreditPaied_MayNotInTime
-          );
-          console.log("soldInDaily_CreditPaied_maynotInTime, data , ", data);
-          soldInDaily_CreditPaied_maynotInTime = data;
-        })
-        .catch((error) => {
-          //console.log(error);
-        });
-      // salesTypeValues = 'On credit' get oncredit sales from total by date ranges
-      SelectOnCreditFromTotal = `select * from ${businessName}_Transaction , ${businessName}_products where salesTypeValues = 'On credit' and ProductId = productIDTransaction and registeredTime between '${fromDate}' and '${toDate}'`;
+      let collectedMoneyIndailyNotInRegistration = `SELECT * FROM dailyTransaction AS dt
+JOIN ${businessName}_products AS p ON p.ProductId = dt.ProductId
+JOIN JSON_TABLE( dt.partiallyPaiedInfo, '$[*]'
+    COLUMNS (
+      creditPaymentDate DATE PATH '$.creditPaymentDate',
+      collectedAmount INT PATH '$.collectedAmount' )
+  ) AS payment ON payment.creditPaymentDate BETWEEN  '${fromDate}' AND  '${toDate}' `;
+      SelectOnCreditFromDaily = `select * from dailyTransaction , ${businessName}_products where (salesTypeValues = 'On credit' or  salesTypeValues = 'Partially paied' or salesTypeValues='Credit paied') and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId} `;
+      SelectOnCreditFromTotal = `select * from ${businessName}_Transaction , ${businessName}_products where (salesTypeValues = 'On credit' or  salesTypeValues = 'Partially paied' or salesTypeValues='Credit paied') and ProductId = productIDTransaction `;
+      let dateRanges = ` and registrationDate between '${fromDate}' and '${toDate}'`;
+      SelectOnCreditFromDaily += dateRanges;
+      SelectOnCreditFromTotal += dateRanges;
+      collectedMoneyIndailyNotInRegistration += ` and registrationDate not between '${fromDate}' and '${toDate}'`;
     }
+    let [partiallyPaidInDailyNotInRegisteredDate] = await Pool.query(
+      collectedMoneyIndailyNotInRegistration
+    );
 
-    // soldInDaily_CreditPaied_maynotInTime
-    await Pool.query(SelectFromDaily)
+    await Pool.query(SelectOnCreditFromDaily)
       .then(([data]) => {
         // //console.log("SelectFromDaily data", data);
         soldInDaily_SoldOncredits = data;
@@ -2221,14 +2174,13 @@ server.get("/getUsersCreditList", async (req, res) => {
       .then(([data]) => {
         //console.log(data);
         res.json({
-          soldInDaily_CreditPaied_maynotInTime,
+          partiallyPaidInDailyNotInRegisteredDate,
           soldOnTotal_Oncredit: data,
           soldInDaily_SoldOncredits,
-          soldInDaily_CreditPaied,
         });
       })
       .catch((error) => {
-        //console.log(error);
+        console.log(error);
         res.json({ data: "error no 890" });
       });
   } catch (error) {
@@ -2238,41 +2190,140 @@ server.get("/getUsersCreditList", async (req, res) => {
 });
 server.put("/paymentConfirmed", async (req, res) => {
   // res.json({ data: req.body });
-  let { data, businessName, token, CollectionDate, salesWAy } = req.body;
-  // get userId from token
-  let { userID } = jwt.verify(token, tokenKey);
-  // //console.log("userId", userID, "token", token, "tokenKey ", tokenKey);
+  // console.log("req.body", req.body);
   // return;
+  let {
+    data,
+    businessName,
+    token,
+    salesWAy,
+    collectedAmount,
+    creditPaymentDate,
+    partialOrFull,
+  } = req.body;
+  collectedAmount = Number(collectedAmount);
+  let { userID } = jwt.verify(token, tokenKey);
+  // verify ownership
   let select = `select * from Business where ownerId='${userID}' and BusinessName='${businessName}'`;
   let verifiOwnership = "not correct owner";
-  await Pool.query(select)
-    .then(([result]) => {
-      //console.log("paymentConfirmed result", result);
-      if (result.length > 0) verifiOwnership = "correct owner";
-    })
-    .catch(() => {
-      verifiOwnership = "error on confirmation";
-    });
-  if (verifiOwnership !== "correct owner") {
+  let [result] = await Pool.query(select);
+  if (result.length <= 0) {
     return res.json({ data: verifiOwnership });
   }
+
+  let previousPaiedInfo = [];
+  let salesTypeValues = "Credit paied",
+    { dailySalesId } = data,
+    previouslyCollectedMoney = 0;
+
   if (salesWAy == "singleSales") {
     // update single sales
-    let { dailySalesId } = data;
-    let update = `update dailyTransaction set salesTypeValues='Credit paied',creditPaymentDate='${CollectionDate}' where dailySalesId='${dailySalesId}'`;
+    if (partialOrFull == "Partial") {
+      salesTypeValues = "Partially paied";
+      let sqlToSelectPartial = `select * from dailyTransaction where dailySalesId='${dailySalesId}'`;
+      totalRecivalbe = 0;
+      let [resultOfPartialSelect] = await Pool.query(sqlToSelectPartial);
+
+      // console.log("resultOfPartialSelect==== ", resultOfPartialSelect);
+      // return res.json({ data: resultOfPartialSelect });
+      let { partiallyPaiedInfo, creditsalesQty, itemDetailInfo } =
+        resultOfPartialSelect[0];
+      // console.log(partiallyPaiedInfo, creditsalesQty, itemDetailInfo);
+      console.log("partiallyPaiedInfo", partiallyPaiedInfo);
+      // return;
+      itemDetailInfo = JSON.parse(itemDetailInfo);
+      let { productsUnitPrice } = itemDetailInfo;
+      totalRecivalbe = Number(productsUnitPrice) * Number(creditsalesQty);
+      if (partiallyPaiedInfo !== null && partiallyPaiedInfo !== "null") {
+        previousPaiedInfo = partiallyPaiedInfo;
+        previousPaiedInfo.map((info) => {
+          // previouslyCollectedAR is previously collected money
+          let { collectedAmount } = info;
+          previouslyCollectedMoney += Number(collectedAmount);
+        });
+      }
+    }
+
+    // console.log("previouslyCollectedMoney", previouslyCollectedMoney);
+    let currentRecivable =
+      Number(totalRecivalbe) - Number(previouslyCollectedMoney);
+    if (collectedAmount > currentRecivable)
+      return res.json({
+        data: "You can not collect money more than what you have.",
+      });
+    else if (collectedAmount == currentRecivable) {
+      salesTypeValues = "Credit paied";
+    }
+
+    previousPaiedInfo.push({
+      collectedAmount,
+      creditPaymentDate,
+    });
+    let partiallyPaiedInfo = previousPaiedInfo;
+    partiallyPaiedInfo = JSON.stringify(partiallyPaiedInfo);
+
+    let update = `update dailyTransaction set salesTypeValues='${salesTypeValues}',creditPaymentDate='${creditPaymentDate}', partiallyPaiedInfo='${partiallyPaiedInfo}' where dailySalesId='${dailySalesId}'`;
     await Pool.query(update)
       .then((data) => {
         //console.log("data", data);
         res.json({ data: "udate successfull" });
       })
       .catch((error) => {
-        //console.log("error", error);
+        console.log("error", error);
+        res.json({ data: "error", error });
       });
     return;
   }
-  //console.log("paymentConfirmed data ", data);
+  console.log("salesWAy", salesWAy, "salesTypeValues", salesTypeValues);
   let { transactionId } = data;
-  let update = `update ${businessName}_Transaction set salesTypeValues='Credit paied',creditPayementdate='${CollectionDate}' where transactionId= ${transactionId}`;
+
+  if (partialOrFull == "Partial") {
+    salesTypeValues = "Partially paied";
+    let sqlToSelectPartial = `select * from ${businessName}_Transaction   where transactionId='${transactionId}'`;
+    totalRecivalbe = 0;
+    let [resultOfPartialSelect] = await Pool.query(sqlToSelectPartial);
+
+    console.log(resultOfPartialSelect);
+    let {
+      partiallyPaiedInfo,
+      creditsalesQty,
+      itemDetailInfo,
+      unitCost,
+      unitPrice,
+    } = resultOfPartialSelect[0];
+    console.log(partiallyPaiedInfo, creditsalesQty, itemDetailInfo);
+
+    // itemDetailInfo = JSON.parse(itemDetailInfo);
+    // let { productsUnitPrice } = itemDetailInfo;
+    totalRecivalbe = Number(unitPrice) * creditsalesQty;
+    if (partiallyPaiedInfo !== null && partiallyPaiedInfo !== "null") {
+      previousPaiedInfo = JSON.parse(partiallyPaiedInfo);
+      previousPaiedInfo.map((info) => {
+        // previouslyCollectedAR is previously collected money
+        let previouslyCollectedAR = info.collectedAmount;
+        previouslyCollectedMoney += Number(previouslyCollectedAR);
+      });
+    }
+  }
+
+  let currentRecivable =
+    Number(totalRecivalbe) - Number(previouslyCollectedMoney);
+  if (collectedAmount > currentRecivable)
+    return res.json({
+      data: "You can not collect money more than what you have.",
+    });
+  else if (collectedAmount == currentRecivable) {
+    salesTypeValues = "Credit paied";
+  }
+
+  previousPaiedInfo.push({
+    collectedAmount,
+    creditPaymentDate,
+  });
+  let partiallyPaiedInfo = previousPaiedInfo;
+  partiallyPaiedInfo = JSON.stringify(partiallyPaiedInfo);
+  transactionId = data.transactionId;
+  let update = `update ${businessName}_Transaction set salesTypeValues='${salesTypeValues}',creditPayementdate='${creditPaymentDate}',partiallyPaiedInfo='${partiallyPaiedInfo}' where transactionId= ${transactionId}`;
   Pool.query(update)
     .then((data) => {
       //console.log("data", data);

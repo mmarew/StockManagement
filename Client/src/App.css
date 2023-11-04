@@ -18,6 +18,9 @@ button {
 .leftSideDiv {
   display: none;
 }
+td {
+  min-width: 100px;
+}
 @media screen and (min-width: 768px) {
   .leftSideDiv {
     display: block;

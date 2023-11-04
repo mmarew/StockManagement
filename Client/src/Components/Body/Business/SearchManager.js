@@ -5,11 +5,13 @@ import $ from "jquery";
 import SearchProducts from "./SearchProducts";
 import SearchCosts from "./SearchCosts";
 import SearchSales_Purchase from "./SearchSales_Purchase";
-import { Button, Select, TextField } from "@mui/material";
+import { Box, Button, Select, TextField } from "@mui/material";
 import { MenuItem } from "@material-ui/core";
+import { ConsumeableContext } from "../UserContext/UserContext";
 
 function SearchManager() {
-  const [selectedValue, setSelectedValue] = useState("default");
+  let { setAccountRecivableAmt, setCollectedMoney } = ConsumeableContext();
+  const [selectedValue, setSelectedValue] = useState("Default");
   let serverAddress = localStorage.getItem("targetUrl");
   const [InputValue, setInputValue] = useState({});
   const [searchTarget, setsearchTarget] = useState();
@@ -17,10 +19,13 @@ function SearchManager() {
   // when we type products name
   const [RequestedSearch, setRequestedSearch] = useState();
   let submitSearch = async (e) => {
-    e.preventDefault();
-    console.log();
-    console.log("InputValue.selectSearches", InputValue);
-
+    if (e) e.preventDefault();
+    if (selectedValue == "Default") {
+      setSearchTypeValueError(
+        <Box sx={{ color: "red" }}>select values first</Box>
+      );
+      return;
+    }
     $(".LinearProgress").css("display", "block");
     if (InputValue.selectSearches == "TRANSACTION") {
       if (InputValue.productName == "" || InputValue.productName == undefined) {
@@ -55,6 +60,9 @@ function SearchManager() {
     $(".LinearProgress").css("display", "block");
     console.log("InputValue", InputValue.fromDate, InputValue.toDate);
     // return;
+    setRequestedSearch("waitting ....");
+    setAccountRecivableAmt(0);
+    setCollectedMoney(0);
     let response = await axios.post(serverAddress + "searchProducts/", {
       InputValue,
     });
@@ -74,12 +82,14 @@ function SearchManager() {
         response?.data?.expenceTransaction?.length == 0 &&
         response?.data?.data?.length == 0
       ) {
-        alert("No data on this date");
+        // alert("No data on this date");
       }
     }
     $(".LinearProgress").css("display", "none");
     if (searchTarget == "PRODUCTS") {
-      setRequestedSearch(<SearchProducts response={response} />);
+      setRequestedSearch(
+        <SearchProducts response={response} submitSearch={submitSearch} />
+      );
       return;
     } else if (searchTarget == "COSTS") {
       setRequestedSearch(<SearchCosts response={response} />);
@@ -157,7 +167,7 @@ function SearchManager() {
   useEffect(() => {
     setRequestedSearch();
   }, [searchTarget]);
-
+  const [SearchTypeValueError, setSearchTypeValueError] = useState("");
   return (
     <>
       <br />
@@ -171,13 +181,13 @@ function SearchManager() {
           name=""
           id="selectSearches"
         >
-          <MenuItem value={"default"}>Choose your search</MenuItem>
+          <MenuItem value="Default">Choose your search</MenuItem>
           <MenuItem value="TRANSACTION">SINGLE TRANSACTION</MenuItem>
           <MenuItem value="ALLTRANSACTION">ALL TRANSACTION</MenuItem>
           <MenuItem value="PRODUCTS">PRODUCTS</MenuItem>
           <MenuItem value="COSTS">COSTS</MenuItem>
         </Select>
-
+        {SearchTypeValueError}
         <div className="searchInputs">
           {console.log("searchTarget", searchTarget)}
           {searchTarget == "ALLTRANSACTION" ? (

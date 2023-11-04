@@ -6,7 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import { Button, IconButton, Box, TextField, Modal } from "@mui/material";
 import MUIConfirm from "../Others/MUIConfirm";
-function SearchProducts({ response }) {
+function SearchProducts({ response, submitSearch }) {
   const [openEditerModal, setOpenEditerModal] = useState({ open: false });
   const [showEditingModalDialog, setshowEditingModalDialog] = useState();
   let businessName = localStorage.getItem("businessName");
@@ -90,6 +90,7 @@ function SearchProducts({ response }) {
         alert("updated well");
       }
     });
+    submitSearch();
     handleClose();
     $(".LinearProgress").css("display", "none");
     let Copy = [];

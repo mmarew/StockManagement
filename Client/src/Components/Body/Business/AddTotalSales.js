@@ -67,8 +67,14 @@ function AddTotalSales({ Time }) {
     let copyOfCollection = { ...CollectedProducts };
     copyOfCollection.ProductsList = copy;
     $(".LinearProgress").show();
-    console.log("copyOfCollection==", copyOfCollection);
-    // return;
+
+    let salesTypeValues = copyOfCollection["salesTypeValues" + ProductId];
+    // If Sales is on credit, salesQuantity must be 0 and creditSalesQty must take value of  salesQuantity it is done in the following code
+    if (salesTypeValues == "On credit") {
+      copyOfCollection["creditSalesQty" + ProductId] =
+        copyOfCollection["salesQuantity" + ProductId];
+      copyOfCollection["salesQuantity" + ProductId] = 0;
+    }
     let response = await axios.post(
       serverAddress + "registerTransaction/",
       copyOfCollection
@@ -130,9 +136,9 @@ function AddTotalSales({ Time }) {
                     <p> {item.productName}</p>
                     <Button
                       onClick={() => {
+                        setCollectedProducts({});
                         setRegistrableProducts([item]);
                         setOpen(true);
-                        return "llllll";
                       }}
                       size="small"
                       variant="contained"
@@ -218,7 +224,7 @@ function AddTotalSales({ Time }) {
                   <TextField
                     required
                     target={item.ProductId}
-                    onChange={collectFormData}
+                    onChange={(e) => collectFormData(e, item.ProductId)}
                     className={AddTotalSalesCss.productInput}
                     type="number"
                     name={"purchaseQty" + item.ProductId}
@@ -255,7 +261,7 @@ function AddTotalSales({ Time }) {
                   <label>Select sales type</label>
                   <Select
                     required
-                    name="salesTypeValues"
+                    name={"salesTypeValues" + item.ProductId}
                     labelId="sales-type-label"
                     id="sales-type-select"
                     // value=""
@@ -265,12 +271,13 @@ function AddTotalSales({ Time }) {
                     <MenuItem value="By bank">By bank</MenuItem>
                     <MenuItem value="On credit">On credit</MenuItem>
                   </Select>
-                  {CollectedProducts.salesTypeValues == "On credit" && (
+                  {CollectedProducts["salesTypeValues" + item.ProductId] ==
+                    "On credit" && (
                     <>
                       <label>Payment date</label>
                       <TextField
                         onChange={collectFormData}
-                        name="creditDueDate"
+                        name={"creditDueDate" + item.ProductId}
                         required
                         type="date"
                       />

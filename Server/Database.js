@@ -16,7 +16,7 @@ try {
 }
 pool.getConnection();
 let createBasicTables = () => {
-  let createTableDailyTransaction = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int not null default 0 , salesQty int not null default 0 , creditsalesQty int not null default 0 , salesTypeValues enum('On cash','By bank','On credit','Credit paied'),creditPaymentDate date , businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date,itemDetailInfo varchar(9000), primary key(dailySalesId))`;
+  let createTableDailyTransaction = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int not null default 0 , salesQty int not null default 0 , creditsalesQty int not null default 0 , salesTypeValues enum('On cash','By bank','On credit','Credit paied'),creditPaymentDate date , partiallyPaiedInfo json, businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date,itemDetailInfo varchar(9000), primary key(dailySalesId))`;
   pool
     .query(createTableDailyTransaction)
     .then((data) => {
@@ -54,7 +54,7 @@ let createBusiness = (businessName, ownerId, createdDate, res, source) => {
   let createProductsTable =
     "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, previousProductId int, productsUnitCost INT(11) NOT NULL, prevUnitCost int, productsUnitPrice INT(11) NOT NULL, prevUnitPrice int, productName VARCHAR(900) NOT NULL, prevProductName varchar(1000), minimumQty INT(11) NOT NULL, prevMinimumQty int, Status enum('active','changed','replaced','active_but_updated') PRIMARY KEY (ProductId)) ";
   let createTransaction =
-    "CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL,mainProductId int, salesQty INT(11) NOT NULL default 0, creditsalesQty int(11) NOT NULL  default 0,  purchaseQty INT(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory INT(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, creditDueDate date ,salesTypeValues enum('On cash','By bank','On credit','Credit paied'),creditPayementdate date , PRIMARY KEY (transactionId)) ";
+    "CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL,mainProductId int, salesQty INT(11) NOT NULL default 0, creditsalesQty int(11) NOT NULL  default 0,  purchaseQty INT(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory INT(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registrationDate DATE NOT NULL, creditDueDate date ,salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'), partiallyPaiedInfo varchar(5000),,creditPayementdate date , PRIMARY KEY (transactionId)) ";
 
   let queries = [],
     tableCollections = {};

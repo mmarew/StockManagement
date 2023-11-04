@@ -1,0 +1,2 @@
+=>GetCreditLists.js
+1) This file is used to get credit sold items via  url of getUsersCreditList. here we select sold on credit , partially collected, and fully paied for credit sold

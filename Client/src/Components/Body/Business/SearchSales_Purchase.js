@@ -19,11 +19,12 @@ import {
 import ConfirmDialog from "../Others/Confirm";
 import { DateFormatter } from "../Date/currentDate";
 import { Chip } from "@material-ui/core";
-import { ConsumeableContext } from "../UserContext/UserContext";
 import ShowCreditCollected from "./ShowCreditCollected";
 import GetCreditLists from "./GetCreditLists";
 const timeZone = "Africa/Addis_Ababa";
 function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
+  console.log("response", response.data.data);
+  // return;
   // set correct data format to time because it is bringing us like registeredTime: "2023-08-05T21:00:00.000Z". The correct format is year month day
 
   let dateData = [...response?.data?.data];
@@ -32,7 +33,6 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
     console.log("@SearchSales_Purchase item is ", item);
     item.registeredTime = DateFormatter(item.registeredTime, timeZone);
   });
-  const { accountRecivableAmt, setAccountRecivableAmt } = ConsumeableContext();
   let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
   const [UpdateSalesAndPurchase, setUpdateSalesAndPurchase] = useState({});
@@ -327,7 +327,7 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
     });
     // return;
 
-    //items sold by credit but money is collected and collection time may or may not be seen
+    //items sold by credit and money is collected but collection time may or may not be in search time range
     setCreditCollected(collectedCreditItems);
     // items sold by credit
   }, [SearchedDatas]);
@@ -337,6 +337,8 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
 
   return (
     <div>
+      <GetCreditLists dateRange={{ fromDate: fromDate, toDate: toDate }} />
+
       <div className="">
         <br />
         <Checkbox
@@ -349,21 +351,7 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
         <br />
         <br />
       </div>
-      <GetCreditLists dateRange={{ fromDate: fromDate, toDate: toDate }} />
-      {/* {CreditList.length > 0 ? (
-        <ShowcreditLists CreditList={CreditList} />
-      ) : (
-        "No item sold in credit"
-      )} */}
-      {console.log("CreditCollected=", CreditCollected)}
-      {(CreditCollected.length > 0 || CollectedMoneyFromTotalSales) && (
-        <ShowCreditCollected
-          // uselessCreditCollected is a collected money but it is  may or may not be collected in time range . to be sure in cash calculation we have to remove it by deducting it
-          uselessCreditCollected={CreditCollected}
-          // it is sold by credit but now collected in required time table
-          CollectedMoneyFromTotalSales={CollectedMoneyFromTotalSales}
-        />
-      )}
+
       {ListOfSalesAndPurchase.length > 0 ? (
         <TableContainer>
           <Table id="productTransaction">
@@ -417,18 +405,16 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
                         items.contentEditable && "date" + items.transactionId
                       }
                     >
-                      {items.registeredTime.split(",").map((day, index1) => {
-                        return (
-                          <Chip
-                            style={{
-                              marginTop: "5px",
-                              backgroundColor: "transparent",
-                            }}
-                            key={"dateOfRegistration_" + index1}
-                            label={day}
-                          />
-                        );
-                      })}
+                      {
+                        <Chip
+                          style={{
+                            marginTop: "5px",
+                            backgroundColor: "transparent",
+                          }}
+                          key={"dateOfRegistration_"}
+                          label={DateFormatter(items.registrationDate)}
+                        />
+                      }
                     </TableCell>
                     <TableCell
                       className={"unitPrice" + items.transactionId}

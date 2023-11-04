@@ -431,6 +431,17 @@ function SearchExpenceTransaction({
             <div>
               <br />
             </div>
+            TotalSalesRevenue={TotalSalesRevenue}
+            <br />
+            collectedMoney = {collectedMoney}
+            <br />
+            TotalPurchaseCost = {TotalPurchaseCost}
+            <br />
+            accountRecivableAmt = {accountRecivableAmt}
+            <br />
+            unTimeRecivableCollected = {unTimeRecivableCollected}
+            <br />
+            {/* ///////////////// */}
             Net Cash Flow (Total Sales - Total Costs-sold In
             Credit)&nbsp;&nbsp;&nbsp;
             {(
