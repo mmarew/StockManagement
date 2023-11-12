@@ -40,6 +40,8 @@ function CreateBusiness({ getBusiness, setnewBusiness, setShowProgressBar }) {
     );
     console.log("createBusiness response is =", response);
     setShowProgressBar(false);
+    getBusiness();
+    window.location.reload();
     console.log(response.data);
     let data = response.data.data;
     if (data == "created well") {
@@ -62,7 +64,6 @@ _products: 0 }  */
       } else {
         setnewBusiness("");
         alert("Your business is created well. Thankyou.");
-        getBusiness();
       }
     } else if (data == "alreadyRegistered") {
       alert("Error. Because this business name is already registered before.");

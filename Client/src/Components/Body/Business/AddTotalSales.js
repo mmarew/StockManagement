@@ -3,12 +3,15 @@ import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
 import CloseIcon from "@mui/icons-material/Close";
 import $ from "jquery";
-import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import TextareaAutosize from "@mui/material/TextareaAutosize";
+import { Select, MenuItem } from "@mui/material";
 import { Box, Button, IconButton, Modal, TextField } from "@mui/material";
 import AddTotalSalesCss from "./AddTotalSales.module.css";
 import { useNavigate } from "react-router-dom";
+import { ButtonProcessing } from "../../utility/Utility";
 function AddTotalSales({ Time }) {
   let navigate = useNavigate();
+  const [Processing, setProcessing] = useState(false);
   const [open, setOpen] = useState(false);
   const [RegistrableProducts, setRegistrableProducts] = useState([{}]);
   const handleOpen = () => {
@@ -52,6 +55,7 @@ function AddTotalSales({ Time }) {
   };
   let sendFormDataToServer = async (e, ProductId) => {
     e.preventDefault();
+    setProcessing(true);
     console.log("ProductId", ProductId);
     let dates = CollectedProducts.dates;
     CollectedProducts.ProductId = ProductId;
@@ -75,17 +79,23 @@ function AddTotalSales({ Time }) {
         copyOfCollection["salesQuantity" + ProductId];
       copyOfCollection["salesQuantity" + ProductId] = 0;
     }
+    // registrationSource
+    copyOfCollection["registrationSource" + ProductId] = "Total";
+    console.log("copyOfCollection", copyOfCollection);
+    // return;
     let response = await axios.post(
       serverAddress + "registerTransaction/",
       copyOfCollection
     );
+    // setProcessing(false);
+    setProcessing(false);
     // salesTypeValues;
     $(".LinearProgress").hide();
     let datas = response.data.data;
     console.log(datas, "response is = ", response);
     if (datas == "This is already registered") {
       alert(
-        "Your data is not registered because, on this date data is already registered"
+        "Your data is not registered, because on this date data is already registered"
       );
     } else if (datas == "data is registered successfully") {
       if (response.data.previouslyRegisteredData.length > 0) {
@@ -98,7 +108,7 @@ function AddTotalSales({ Time }) {
       setOpen(false);
     } else if (datas == "allDataAreRegisteredBefore") {
       alert(
-        "Tese data are not registered now. Because these are registered before. Thank you. "
+        "These data are not registered now. Because these are registered before. Thank you. "
       );
     }
   };
@@ -168,7 +178,7 @@ function AddTotalSales({ Time }) {
         "please wait while fetching datas"
       )}
 
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={open}>
         <Box
           sx={{
             position: "absolute",
@@ -189,15 +199,15 @@ function AddTotalSales({ Time }) {
               right: 0,
             }}
           >
-            <CloseIcon />
+            <CloseIcon sx={{ color: "red" }} />
           </IconButton>
 
           {RegistrableProducts.map((item) => {
             return (
               <form
-                sx={{
+                style={{
                   height: "90vh",
-                  overflowY: "scroll",
+                  overflow: "auto",
                   overflowX: "hidden",
                 }}
                 fullWidth
@@ -205,7 +215,9 @@ function AddTotalSales({ Time }) {
                 action=""
                 onSubmit={(e) => sendFormDataToServer(e, item.ProductId)}
               >
-                <div>Registration of product.</div>
+                <div style={{ marginTop: "100px" }}>
+                  Registration of product.
+                </div>
                 <div key={"itemTransAction_" + item.ProductId}>
                   <div className={AddTotalSalesCss.productNameTransaction}>
                     <h4>{item.productName}</h4>
@@ -213,11 +225,12 @@ function AddTotalSales({ Time }) {
                   </div>
                   <TextField
                     onChange={(e) => {
+                      collectFormData(e, item.ProductId);
                       setselectedTime(e.target.value);
                     }}
                     required
                     type="date"
-                    name="dateInTotalSales"
+                    name="dates"
                     id={AddTotalSalesCss.dateIdInTotalSales}
                   />
                   <br />
@@ -249,15 +262,7 @@ function AddTotalSales({ Time }) {
                     label="Broken quantity"
                   />
                   <br />
-                  <TextField
-                    required
-                    onChange={collectFormData}
-                    className={AddTotalSalesCss.productInput}
-                    type="text"
-                    name={"Description" + item.ProductId}
-                    label="Description"
-                  />
-                  <br />
+
                   <label>Select sales type</label>
                   <Select
                     required
@@ -271,6 +276,8 @@ function AddTotalSales({ Time }) {
                     <MenuItem value="By bank">By bank</MenuItem>
                     <MenuItem value="On credit">On credit</MenuItem>
                   </Select>
+                  <br />
+
                   {CollectedProducts["salesTypeValues" + item.ProductId] ==
                     "On credit" && (
                     <>
@@ -284,14 +291,32 @@ function AddTotalSales({ Time }) {
                     </>
                   )}
                   <br />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    className={AddTotalSalesCss.RegisterSales}
-                  >
-                    Register
-                  </Button>
+                  <TextareaAutosize
+                    rowsMin={3} // Specify the minimum number of rows
+                    placeholder="Enter Description Text Here" // Placeholder text
+                    style={{ width: "95%", minHeight: "90px", padding: "5px" }} // Specify the width of the textarea
+                    required
+                    onChange={collectFormData}
+                    className={AddTotalSalesCss.productInput}
+                    type="text"
+                    name={"Description" + item.ProductId}
+                    label="Description"
+                  />
+                  <br />
+                  {!Processing ? (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      className={AddTotalSalesCss.RegisterSales}
+                    >
+                      Register
+                    </Button>
+                  ) : (
+                    <ButtonProcessing />
+                  )}
+                  <br />
+                  <br />
                 </div>{" "}
               </form>
             );

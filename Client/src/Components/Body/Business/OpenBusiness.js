@@ -7,14 +7,12 @@ import viewIcon from "../../ICONS/BusinessJS/iconView.svg";
 import ItemsIcon from "../../ICONS/BusinessJS/iconItems.svg";
 import OpenBusinesscss from "./OpenBusiness.module.css";
 import currentDate from "../Date/currentDate";
-import { Link, Outlet, useNavigate } from "react-router-dom";
-import { Button, LinearProgress } from "@mui/material";
-import { ConsumeableContext, InitialContext } from "../UserContext/UserContext";
+import { Outlet, useNavigate } from "react-router-dom";
+import { LinearProgress } from "@mui/material";
+import { ConsumeableContext } from "../UserContext/UserContext";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppBar, Toolbar, Typography } from "@material-ui/core";
+import { AppBar, Toolbar } from "@material-ui/core";
 import OpenBusinessLeftSide from "./OpenBusinessLeftSide";
-import Tooltip from "@material-ui/core/Tooltip";
-import HoverableTooltip from "./HoverableLink";
 import HoverableLink from "./HoverableLink";
 const useStyles = makeStyles((theme) => ({
   root: {

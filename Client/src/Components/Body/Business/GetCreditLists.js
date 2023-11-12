@@ -17,7 +17,10 @@ import {
 } from "@mui/material";
 import { DateFormatter } from "../Date/currentDate";
 import { ConsumeableContext } from "../UserContext/UserContext";
+import CurrencyFormatter, { ButtonProcessing } from "../../utility/Utility";
+import GetCreditListEdit from "./GetCreditListEdit";
 function GetCreditLists({ dateRange }) {
+  const [Processing, setProcessing] = useState(false);
   let { fromDate, toDate } = dateRange;
   let {
     setAccountRecivableAmt,
@@ -33,6 +36,7 @@ function GetCreditLists({ dateRange }) {
     soldInDaily_SoldOncredits: [],
     soldInDaily_CreditPaied_maynotInTime: [],
     soldInDaily_CreditPaied: [],
+    partiallyPaidInTotal: [],
   });
 
   let getUsersCreditList = () => {
@@ -54,13 +58,14 @@ function GetCreditLists({ dateRange }) {
       )
       .then((Responces) => {
         let {
+          partiallyPaidInTotal,
           partiallyPaidInDailyNotInRegisteredDate,
           soldInDaily_CreditPaied_maynotInTime,
           soldOnTotal_Oncredit,
           soldInDaily_SoldOncredits,
           soldInDaily_CreditPaied,
         } = Responces.data;
-        console.log("Responces.data = ", Responces.data);
+        console.log("@getUsersCreditList Responces.data = ", Responces.data);
         // return;
         // 1 sold on credit we call it account recivable status on credit,,
         // 2 sold on credit and we have collected money in date range or not credit paied but selected in registrationtime range,
@@ -72,6 +77,7 @@ function GetCreditLists({ dateRange }) {
           soldInDaily_SoldOncredits,
           soldInDaily_CreditPaied,
           partiallyPaidInDailyNotInRegisteredDate,
+          partiallyPaidInTotal,
         });
       })
       .catch((error) => {
@@ -85,11 +91,26 @@ function GetCreditLists({ dateRange }) {
     creditPaymentDate: null,
     partialOrFull: "Partial",
   });
-  let paymentConfirmed = (data, salesWAy) => {
-    console.log("Collection ==== ", Collection);
+  let confirmPayments = async (data, salesWAy, e) => {
+    e.preventDefault();
+    let { collectedAmount, creditPaymentDate } = Collection;
+
     // return;
-    axios
-      .put(serverAddress + "paymentConfirmed", {
+    if (
+      isNaN(collectedAmount) ||
+      collectedAmount == "" ||
+      collectedAmount == null ||
+      Number(collectedAmount) == 0
+    ) {
+      alert("paid amount should be > 0 value");
+      return;
+    }
+    setOpenConfirmationModal((prevstate) => {
+      return { ...prevstate, Open: false };
+    });
+    setProcessing(true);
+    await axios
+      .put(serverAddress + "confirmPayments", {
         data,
         salesWAy,
         businessName,
@@ -107,6 +128,9 @@ function GetCreditLists({ dateRange }) {
         alert("error no 13");
         console.log(error);
       });
+    setCollection({ creditPaymentDate: null, partialOrFull: "Partial" });
+    setOpenConfirmationModal({ Open: false });
+    setProcessing(false);
   };
   const [openConfirmationModal, setOpenConfirmationModal] = useState({
     Open: false,
@@ -123,6 +147,7 @@ function GetCreditLists({ dateRange }) {
   useEffect(() => {
     // console.log("dateRange", dateRange);
     let {
+      partiallyPaidInTotal,
       soldInDaily_SoldOncredits,
       soldOnTotal_Oncredit,
       partiallyPaidInDailyNotInRegisteredDate,
@@ -130,88 +155,46 @@ function GetCreditLists({ dateRange }) {
     let accountRecivableTotalMoney = 0,
       totalCollectedAmount = 0;
     // sold on total sales way and on credit
-    soldOnTotal_Oncredit?.map((data) => {
-      let {
-        partiallyPaiedInfo,
-        salesTypeValues,
-        creditsalesQty,
-        productsUnitPrice,
-      } = data;
-      console.log("first");
-      // partiallyPaiedInfo = partiallyPaiedInfo;
-      if (!Array.isArray(partiallyPaiedInfo))
-        partiallyPaiedInfo = JSON.parse(partiallyPaiedInfo);
-
-      partiallyPaiedInfo?.map((data) => {
-        let { collectedAmount, creditPaymentDate } = data;
-        if (
-          isDateBetween(fromDate, creditPaymentDate, toDate) ||
-          (fromDate == "notInDateRange" && toDate == "notInDateRange")
-        ) {
-          totalCollectedAmount += Number(collectedAmount);
-        }
-      });
-
-      accountRecivableTotalMoney +=
-        Number(creditsalesQty) * Number(productsUnitPrice);
-      console.log(
-        "totalCollectedAmount",
-        totalCollectedAmount,
-        "accountRecivableTotalMoney",
-        accountRecivableTotalMoney
-      );
-    });
-    // this data contains information about daily sales where items are sold by credit and money may or may not collected.
-    soldInDaily_SoldOncredits?.map((data) => {
-      let { partiallyPaiedInfo, creditsalesQty, productsUnitPrice } = data;
-      // console.log("partiallyPaiedInfo === ", partiallyPaiedInfo);
+    let calculateCollectedMoney = (collectedMoneyData) => {
+      console.log("collectedMoneyData", collectedMoneyData);
       // return;
-      partiallyPaiedInfo = partiallyPaiedInfo;
-
-      partiallyPaiedInfo?.map((data) => {
-        let { collectedAmount, creditPaymentDate } = data;
-        if (
-          isDateBetween(fromDate, creditPaymentDate, toDate) ||
-          (fromDate == "notInDateRange" && toDate == "notInDateRange")
-        ) {
-          totalCollectedAmount += Number(collectedAmount);
-        }
+      collectedMoneyData?.map((data) => {
+        let {
+          businessId,
+          collectionAmount,
+          collectionDate,
+          collectionId,
+          registrationSource,
+          targtedProductId,
+          transactionId,
+          userId,
+        } = data;
+        totalCollectedAmount += Number(collectionAmount);
+        // console.log("calculatePartiallyCollectedMoney,first", data);
       });
-
-      accountRecivableTotalMoney +=
-        Number(creditsalesQty) * Number(productsUnitPrice);
-    });
-    let ob = {};
-    partiallyPaidInDailyNotInRegisteredDate?.map((data) => {
-      console.log("data not in register", data);
-      let { partiallyPaiedInfo, dailySalesId } = data;
-      // remove redundancy
-      ob["dailySalesId__" + dailySalesId] = partiallyPaiedInfo;
-    });
-    console.log("ob is", ob);
-    const keys = Object.getOwnPropertyNames(ob);
-    keys.map((key) => {
-      let value = ob[key];
-      console.log(value);
-      value.map((paymentInfo) => {
-        // paymentInfo;
-        let { collectedAmount, creditPaymentDate } = paymentInfo;
-        console.log(
-          "value collectedAmount",
-          collectedAmount,
-          " value creditPaymentDate",
-          creditPaymentDate
-        );
-        if (
-          isDateBetween(fromDate, creditPaymentDate, toDate) ||
-          (fromDate == "notInDateRange" && toDate == "notInDateRange")
-        ) {
-          totalCollectedAmount += Number(collectedAmount);
-        }
+    };
+    let calculateAccountRecivable = (datas) => {
+      // console.log("calculateAccountRecivable", datas);
+      datas?.map((data) => {
+        let { creditsalesQty, productsUnitPrice } = data;
+        accountRecivableTotalMoney +=
+          Number(creditsalesQty) * Number(productsUnitPrice);
       });
-    });
+    };
+
+    calculateAccountRecivable(soldOnTotal_Oncredit);
+    calculateAccountRecivable(soldInDaily_SoldOncredits);
+
+    // calculateCollectedMoney(partiallyPaidInDailyNotInRegisteredDate);
+    calculateCollectedMoney(partiallyPaidInTotal);
+
+    ////////////////////////////
     setAccountRecivableAmt(accountRecivableTotalMoney);
-    setCollectedMoney(totalCollectedAmount);
+    setCollectedMoney({
+      Money: totalCollectedAmount,
+      Detail: partiallyPaidInTotal,
+    });
+    ////////////////////////////
   }, [creditData]);
 
   /////////////////////////////////////////////
@@ -221,13 +204,15 @@ function GetCreditLists({ dateRange }) {
     });
   };
   let calculatePartiallyCollectedMoney = (data) => {
-    console.log("calculatePartiallyCollectedMoney data", data);
-    let partiallyPaiedInfo = data;
-    if (!Array.isArray(data)) partiallyPaiedInfo = JSON.parse(data);
+    if (data == undefined) return 0;
 
-    if (partiallyPaiedInfo?.length == 0) return 0;
+    // console.log("calculatePartiallyCollectedMoney data", data);
+    let partiallyPaidInfo = data;
+    if (!Array.isArray(data)) partiallyPaidInfo = JSON.parse(data);
+
+    if (partiallyPaidInfo?.length == 0) return 0;
     let totalCollectedMoney = 0;
-    partiallyPaiedInfo?.map((Info) => {
+    partiallyPaidInfo?.map((Info) => {
       let { collectedAmount, creditPaymentDate } = Info;
       if (fromDate == "notInDateRange" || toDate == "notInDateRange") {
         totalCollectedMoney += Number(collectedAmount);
@@ -238,15 +223,40 @@ function GetCreditLists({ dateRange }) {
     });
     return totalCollectedMoney;
   };
+  const [showCreditListDetails, setshowCreditListDetails] = useState({
+    open: false,
+    data: {},
+    salesWay: "",
+  });
+  let getCollectedMoney = (data, salesRegistrationWay) => {
+    if (data == undefined || data == null) return 0;
+    let { transactionId, dailySalesId } = data;
+    if (salesRegistrationWay == "Single") {
+      transactionId = dailySalesId;
+    }
+    let Money = 0;
+    let infos = creditData.partiallyPaidInTotal;
+    infos.map((info) => {
+      if (info.transactionId == transactionId) {
+        let { collectionAmount } = info;
+        Money += Number(collectionAmount);
+      }
+    });
+
+    return Money;
+  };
   return (
     <div>
       <br />
-      <Box sx={{ display: "flex", justifyContent: "center", padding: "10px" }}>
-        Transaction made by credits
-      </Box>
+
       {creditData.soldOnTotal_Oncredit?.length > 0 ||
       creditData.soldInDaily_SoldOncredits?.length > 0 ? (
         <TableContainer>
+          <Box
+            sx={{ display: "flex", justifyContent: "center", padding: "10px" }}
+          >
+            Transaction made by credits
+          </Box>
           <Table sx={{ overflow: "scroll", width: "100%" }}>
             <TableHead sx={{ backgroundColor: "white" }}>
               <TableRow>
@@ -271,27 +281,42 @@ function GetCreditLists({ dateRange }) {
                     <TableCell>{index}</TableCell>
                     <TableCell>{data.productName}</TableCell>
                     <TableCell>{data.creditsalesQty}</TableCell>
-                    <TableCell>{data.productsUnitPrice}</TableCell>
                     <TableCell>
-                      {data.creditsalesQty * data.productsUnitPrice}
+                      {CurrencyFormatter(data.productsUnitPrice)}
                     </TableCell>
                     <TableCell>
-                      {calculatePartiallyCollectedMoney(
-                        data.partiallyPaiedInfo
+                      {CurrencyFormatter(
+                        data.creditsalesQty * data.productsUnitPrice
                       )}
                     </TableCell>
+
                     <TableCell>
-                      {data.creditsalesQty * data.productsUnitPrice -
-                        calculatePartiallyCollectedMoney(
-                          data.partiallyPaiedInfo
-                        )}
+                      <Button
+                        onClick={() => {
+                          setshowCreditListDetails({
+                            transactionId: data.dailySalesId,
+                            open: true,
+                            data: creditData.partiallyPaidInTotal,
+                            salesWay: "totalSales",
+                          });
+                        }}
+                      >
+                        {CurrencyFormatter(getCollectedMoney(data, "Single"))}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      {CurrencyFormatter(
+                        Number(data.creditsalesQty) *
+                          Number(data.productsUnitPrice) -
+                          getCollectedMoney(data, "Single")
+                      )}
                     </TableCell>
                     <TableCell>{data.Description}</TableCell>
                     <TableCell>
                       {DateFormatter(data.creditPaymentDate)}
                     </TableCell>
                     <TableCell>
-                      {DateFormatter(data.registrationDate)}
+                      {DateFormatter(data.registeredTimeDaily)}
                     </TableCell>
                     <TableCell>Pending</TableCell>
                     <TableCell>
@@ -324,29 +349,39 @@ function GetCreditLists({ dateRange }) {
                     <TableCell>{index}</TableCell>
                     <TableCell>{data.productName}</TableCell>
                     <TableCell>{data.creditsalesQty}</TableCell>
-                    <TableCell>{data.unitPrice}</TableCell>
+                    <TableCell>{CurrencyFormatter(data.unitPrice)}</TableCell>
                     <TableCell>
-                      {data.unitPrice * (data.salesQty + data.creditsalesQty)}
+                      {CurrencyFormatter(
+                        data.unitPrice * (data.salesQty + data.creditsalesQty)
+                      )}
                     </TableCell>
 
                     <TableCell>
-                      {calculatePartiallyCollectedMoney(
-                        data.partiallyPaiedInfo
+                      <Button
+                        onClick={() => {
+                          setshowCreditListDetails({
+                            transactionId: data.transactionId,
+                            open: true,
+                            data: creditData.partiallyPaidInTotal,
+                            salesWay: "totalSales",
+                          });
+                        }}
+                      >
+                        {console.log("data collected", data)}
+
+                        {CurrencyFormatter(getCollectedMoney(data))}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      {console.log("data to be collected", data)}
+                      {CurrencyFormatter(
+                        Number(data.creditsalesQty) * Number(data.unitPrice) -
+                          getCollectedMoney(data)
                       )}
                     </TableCell>
-                    <TableCell>
-                      {data.creditsalesQty * data.productsUnitPrice -
-                        calculatePartiallyCollectedMoney(
-                          data.partiallyPaiedInfo
-                        )}
-                    </TableCell>
                     <TableCell>{data.description}</TableCell>
-                    <TableCell>
-                      {DateFormatter(data.creditPayementdate)}
-                    </TableCell>
-                    <TableCell>
-                      {DateFormatter(data.registrationDate)}
-                    </TableCell>
+                    <TableCell>{DateFormatter(data.creditDueDate)}</TableCell>
+                    <TableCell>{DateFormatter(data.registeredTime)}</TableCell>
                     <TableCell>Pending</TableCell>
                     <TableCell>
                       <Button
@@ -365,18 +400,23 @@ function GetCreditLists({ dateRange }) {
                 );
               })}
               <TableRow>
-                <TableCell sx={{ textAlign: "center" }} colSpan={10}>
-                  Account recivable money = {accountRecivableAmt}
+                <TableCell sx={{ textAlign: "center" }} colSpan={2}>
+                  Account recivable{" "}
+                  {accountRecivableAmt.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "ETB",
+                  })}
                 </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell sx={{ textAlign: "center" }} colSpan={10}>
-                  Collected Money {collectedMoney}
+
+                <TableCell sx={{ textAlign: "center" }} colSpan={2}>
+                  Collected Money {CurrencyFormatter(collectedMoney.Money)}
                 </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell sx={{ textAlign: "center" }} colSpan={10}>
-                  Money to be collected {accountRecivableAmt - collectedMoney}
+
+                <TableCell sx={{ textAlign: "center" }} colSpan={4}>
+                  Money to be collected{" "}
+                  {CurrencyFormatter(
+                    accountRecivableAmt - collectedMoney.Money
+                  )}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -392,42 +432,40 @@ function GetCreditLists({ dateRange }) {
         }}
       >
         <DialogTitle>Confirm Payment</DialogTitle>
-        <DialogContent>When do you have recived your money?</DialogContent>
+        <DialogContent>
+          {" "}
+          {/* <Box>Account recivable=</Box>
+          <Box>collected Money=</Box>
+        */}
+          <Box>
+            Remain Amount={" "}
+            {CurrencyFormatter(
+              openConfirmationModal.data?.creditsalesQty *
+                openConfirmationModal.data?.productsUnitPrice -
+                getCollectedMoney(openConfirmationModal.data)
+            )}
+          </Box>
+          <Box>When do you have recived your money?</Box>
+        </DialogContent>
         <DialogActions>
           <form
             style={{ width: "90%", margin: "auto" }}
             onSubmit={(e) => {
-              e.preventDefault();
-              paymentConfirmed(
+              confirmPayments(
                 openConfirmationModal.data,
-                openConfirmationModal.salesWAy
+                openConfirmationModal.salesWAy,
+                e
               );
-              setOpenConfirmationModal((prevstate) => {
-                return { ...prevstate, Open: false };
-              });
             }}
           >
             <TextField
+              value={Collection.creditPaymentDate}
               fullWidth
               required
               name="creditPaymentDate"
               onChange={handleCollectionInfo}
               type="date"
             />
-            {/* <Box sx={{ marginTop: "20px" }}>
-              <label>Please Select payment type</label>
-              <Select
-                label={"Please Select payment type"}
-                style={{ margin: "20px 0" }}
-                fullWidth
-                required
-                name="partialOrFull"
-                onChange={handleCollectionInfo}
-              >
-                <MenuItem value="Partial">Partial</MenuItem>
-                <MenuItem value="Full">Full</MenuItem>
-              </Select>
-            </Box> */}
 
             <TextField
               sx={{ margin: "20px 0" }}
@@ -436,6 +474,7 @@ function GetCreditLists({ dateRange }) {
               onChange={handleCollectionInfo}
               fullWidth
               label="paied Amount"
+              value={Collection.collectedAmount}
             />
 
             <Box sx={{ margin: "10px auto", textAlign: "center" }}>
@@ -449,13 +488,24 @@ function GetCreditLists({ dateRange }) {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" color="primary">
-                Confirm
-              </Button>
+              {!Processing ? (
+                <Button type="submit" variant="contained" color="primary">
+                  Confirm
+                </Button>
+              ) : (
+                <ButtonProcessing />
+              )}
             </Box>
           </form>
         </DialogActions>
       </Dialog>
+      {showCreditListDetails.open && (
+        <GetCreditListEdit
+          getUsersCreditList={getUsersCreditList}
+          showCreditListDetails={showCreditListDetails}
+          setshowCreditListDetails={setshowCreditListDetails}
+        />
+      )}
     </div>
   );
 }

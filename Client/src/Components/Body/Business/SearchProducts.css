@@ -1,7 +1,7 @@
 #searchProduct {
   display: flex;
   max-width: 300px;
-  margin: 10px auto;
+  margin: 10px 0;
   background-color: #ffffff;
   padding: 10px;
   border-radius: 10px;
@@ -12,7 +12,7 @@
   /* margin: auto; */
 }
 .searchTitle {
-  text-align: center;
+  /* text-align: center; */
 }
 .searchBtn {
   background-color: blue;

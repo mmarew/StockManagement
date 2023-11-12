@@ -14,6 +14,9 @@ import {
 } from "@mui/material";
 import ConfirmDialog from "../Others/Confirm";
 import { ConsumeableContext } from "../UserContext/UserContext";
+import CurrencyFormatter from "../../utility/Utility";
+import { Box } from "@material-ui/core";
+import ModalToshowCollectedMoneyDetails from "./ModalToshowCollectedMoneyDetails";
 function SearchExpenceTransaction({
   showEachItems,
   response,
@@ -21,6 +24,7 @@ function SearchExpenceTransaction({
 }) {
   const { accountRecivableAmt, unTimeRecivableCollected, collectedMoney } =
     ConsumeableContext();
+  const [ShowMoneyDetailModal, setShowMoneyDetailModal] = useState(false);
   console.log(
     "showEachItems",
     showEachItems,
@@ -408,19 +412,33 @@ function SearchExpenceTransaction({
               </TableRow>
             </Table>
           </TableContainer>
+          <Box>
+            Total sales{""} {CurrencyFormatter(TotalSalesRevenue)}
+          </Box>
+          <Box>
+            Total Purchase cost {""} {CurrencyFormatter(TotalPurchaseCost)}
+          </Box>
+          <Box>
+            expences {""}
+            {CurrencyFormatter(TotalCostAmount)}
+          </Box>
+          <Box>
+            Account Recivable Money{""} {CurrencyFormatter(accountRecivableAmt)}
+          </Box>
+          <Box>
+            Total collected Money {""}
+            {CurrencyFormatter(collectedMoney.Money)}
+          </Box>
           Net cash flow is(total sales - total purchase - total cost - sold in
           credit + collected credits)=
-          {(
+          {CurrencyFormatter(
             TotalSalesRevenue -
-            TotalPurchaseCost -
-            TotalCostAmount -
-            accountRecivableAmt +
-            collectedMoney -
-            unTimeRecivableCollected
-          ).toLocaleString("en-US", {
-            style: "currency",
-            currency: "ETB",
-          })}
+              TotalPurchaseCost -
+              TotalCostAmount -
+              accountRecivableAmt +
+              collectedMoney.Money -
+              unTimeRecivableCollected
+          )}
         </>
       ) : (
         <>
@@ -428,37 +446,52 @@ function SearchExpenceTransaction({
           <div>
             Note:- On this day you have not expencess.
             <br />
-            <div>
-              <br />
-            </div>
-            TotalSalesRevenue={TotalSalesRevenue}
+            <Button sx={{ color: "black", cursor: "default" }}>
+              Total Sales Revenue={TotalSalesRevenue}
+            </Button>
+            {/* {JSON.stringify(collectedMoney.Detail)} */}
             <br />
-            collectedMoney = {collectedMoney}
+            <Button
+              onClick={(e) => {
+                setShowMoneyDetailModal(true);
+              }}
+            >
+              Collected Money = {CurrencyFormatter(collectedMoney.Money)}
+            </Button>{" "}
             <br />
-            TotalPurchaseCost = {TotalPurchaseCost}
+            <Button sx={{ color: "black", cursor: "default" }}>
+              Total Purchase Cost = {CurrencyFormatter(TotalPurchaseCost)}
+            </Button>{" "}
             <br />
-            accountRecivableAmt = {accountRecivableAmt}
-            <br />
-            unTimeRecivableCollected = {unTimeRecivableCollected}
+            <Button sx={{ color: "black", cursor: "default" }}>
+              Account Recivable = {CurrencyFormatter(accountRecivableAmt)}
+            </Button>
             <br />
             {/* ///////////////// */}
-            Net Cash Flow (Total Sales - Total Costs-sold In
-            Credit)&nbsp;&nbsp;&nbsp;
-            {(
-              TotalSalesRevenue +
-              collectedMoney -
-              TotalPurchaseCost -
-              accountRecivableAmt -
-              unTimeRecivableCollected
-            )
-              // - setAccountRecivableCollected
-              .toLocaleString("en-US", {
-                style: "currency",
-                currency: "ETB",
-              })}
+            <Button sx={{ color: "black", cursor: "default" }}>
+              Net Cash Flow (Total Sales - Total Costs-sold In
+              Credit)&nbsp;&nbsp;&nbsp;
+              {
+                CurrencyFormatter(
+                  TotalSalesRevenue -
+                    TotalPurchaseCost -
+                    TotalCostAmount -
+                    accountRecivableAmt +
+                    collectedMoney.Money -
+                    unTimeRecivableCollected
+                )
+                // - setAccountRecivableCollected
+              }
+            </Button>
           </div>
         </>
         // ""
+      )}
+      {ShowMoneyDetailModal && (
+        <ModalToshowCollectedMoneyDetails
+          setShowMoneyDetailModal={setShowMoneyDetailModal}
+          ShowMoneyDetailModal={ShowMoneyDetailModal}
+        />
       )}
 
       {showConfirmDialog && (

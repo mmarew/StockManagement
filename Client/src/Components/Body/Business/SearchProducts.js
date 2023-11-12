@@ -6,7 +6,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import { Button, IconButton, Box, TextField, Modal } from "@mui/material";
 import MUIConfirm from "../Others/MUIConfirm";
+import { ButtonProcessing } from "../../utility/Utility";
 function SearchProducts({ response, submitSearch }) {
+  const [Processing, setProcessing] = useState(false);
   const [openEditerModal, setOpenEditerModal] = useState({ open: false });
   const [showEditingModalDialog, setshowEditingModalDialog] = useState();
   let businessName = localStorage.getItem("businessName");
@@ -78,6 +80,23 @@ function SearchProducts({ response, submitSearch }) {
   let updateProductsData = async (productID) => {
     businessName = localStorage.getItem("businessName");
     let ob = {};
+    console.log("openEditerModal===", openEditerModal.item);
+
+    let previousData = openEditerModal.item;
+    let prevPrice = previousData.productsUnitPrice,
+      prevCost = previousData.productsUnitCost,
+      prevName = previousData.productName,
+      prevMinimumQty = previousData.minimumQty;
+    setProcessing(true);
+    if (
+      minimumQty == prevMinimumQty &&
+      productUnitPrice == prevPrice &&
+      productName == prevName &&
+      productUnitCost == prevCost
+    ) {
+      setProcessing(false);
+      return alert("you can't make update bacause no change in your data");
+    }
     ob.minimumQty = minimumQty;
     ob.productPrice = productUnitPrice;
     ob.productName = productName;
@@ -85,11 +104,13 @@ function SearchProducts({ response, submitSearch }) {
     ob.id = productID;
     ob.businessName = businessName;
     $(".LinearProgress").css("display", "block");
+
     await axios.post(serverAddress + "updateProducts/", ob).then((datas) => {
       if ((datas.data.data = "updated well")) {
         alert("updated well");
       }
     });
+    setProcessing(false);
     submitSearch();
     handleClose();
     $(".LinearProgress").css("display", "none");
@@ -112,6 +133,8 @@ function SearchProducts({ response, submitSearch }) {
       let item = ConfirmDelete.item;
       item.businessName = businessName;
       let deleteMyProducts = async () => {
+        console.log("item", item);
+        // return;
         let deletResponce = await axios.post(
           serverAddress + "deleteProducts/",
           item
@@ -257,18 +280,21 @@ function SearchProducts({ response, submitSearch }) {
             />
             <br />
             <br />
-
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={() =>
-                updateProductsData(openEditerModal?.item?.ProductId)
-              }
-              className={`updateProducts updateProducts_${openEditerModal?.item?.ProductId}`}
-            >
-              UPDATE
-            </Button>
+            {!Processing ? (
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={() =>
+                  updateProductsData(openEditerModal?.item?.ProductId)
+                }
+                className={`updateProducts updateProducts_${openEditerModal?.item?.ProductId}`}
+              >
+                UPDATE
+              </Button>
+            ) : (
+              <ButtonProcessing />
+            )}
           </form>
         </Box>
       </Modal>

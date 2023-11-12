@@ -4,11 +4,13 @@ import $ from "jquery";
 import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
 import { Button, TextField } from "@mui/material";
+import { ButtonProcessing } from "../../utility/Utility";
 const AddProducts = () => {
   let serverAddress = localStorage.getItem("targetUrl");
   let token = localStorage.getItem("storeToken");
   let businessId = localStorage.getItem("businessId");
   const [FormData, setFormData] = useState({});
+  const [Processing, setProcessing] = useState(false);
   let CollectData = (e) => {
     console.log(e.target.name);
     setFormData({
@@ -20,9 +22,12 @@ const AddProducts = () => {
   };
   let registerProducts = async (e) => {
     e.preventDefault();
+    setProcessing(true);
+    // return;
     $(".LinearProgress").css("display", "block");
     let response = await axios.post(serverAddress + "addProducts/", FormData);
     let data = response.data.data;
+    setProcessing(false);
     console.log("response", response);
     let registerProducts = document.getElementsByClassName("registerProducts");
     if (data == "notAllowedFroYou") {
@@ -98,9 +103,13 @@ const AddProducts = () => {
           label="Minimum qty"
         />
         <br />
-        <Button variant="contained" type="submit">
-          Register
-        </Button>
+        {!Processing ? (
+          <Button variant="contained" type="submit">
+            Register
+          </Button>
+        ) : (
+          <ButtonProcessing />
+        )}
       </form>
     </div>
   );

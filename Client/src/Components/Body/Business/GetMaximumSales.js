@@ -136,7 +136,7 @@ function GetMaximumSales() {
     $(".LinearProgress").css("display", "none");
     // console.log(responce);
     let data = responce.data.data;
-    let copyOfData = data.map((item) => {
+    let copyOfData = data?.map((item) => {
       return item;
     });
     let collectedData = [],

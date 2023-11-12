@@ -9,39 +9,58 @@ try {
     user: process.env.user,
     password: process.env.password,
     database: process.env.database,
-    connectTimeout: 30000, // 30 seconds
+    connectTimeout: 300000, // 30 seconds
   });
 } catch (error) {
   //console.log("connection to data base error", error);
 }
 pool.getConnection();
-let createBasicTables = () => {
-  let createTableDailyTransaction = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int not null default 0 , salesQty int not null default 0 , creditsalesQty int not null default 0 , salesTypeValues enum('On cash','By bank','On credit','Credit paied'),creditPaymentDate date , partiallyPaiedInfo json, businessId int, ProductId int,brokenQty int, Description varchar(2000), registrationDate Date,itemDetailInfo varchar(9000), primary key(dailySalesId))`;
-  pool
-    .query(createTableDailyTransaction)
-    .then((data) => {
-      //console.log(data);
-    })
-    .catch((error) => {
-      //console.log(error);
-    });
+let createBasicTables = async () => {
+  try {
+    let createCreditCollection = `CREATE TABLE IF NOT EXISTS creditCollection (
+    collectionId INT NOT NULL auto_increment,
+    collectionDate DATE,
+    userId int,
+    collectionAmount int,
+    registrationSource enum('total','Single'),
+    businessId INT,
+    targtedProductId INT,
+    transactionId INT,
+    PRIMARY KEY (collectionId)
+)`;
 
-  let create = `create table if not exists employeeTable(employeeId int auto_increment, userIdInEmployee int,BusinessIDEmployee int, employerId int, primary key(employeeId))`;
-  pool
-    .query(create)
-    .then(() => {})
-    .catch(() => {});
-  let creeateBusiness = `create table if not exists Business (BusinessID int auto_increment, BusinessName varchar(500), createdDate Date,ownerId int, status varchar(300), primary key(businessId))`;
-  pool.query(creeateBusiness).then().catch();
-  let queryTocreate = `create table if not exists usersTable(userId int auto_increment, phoneNumber varchar(200),employeeName varchar(600), passwordStatus varchar(40), passwordResetPin int, password varchar(200),primary key(userId))`;
-  pool
-    .query(queryTocreate)
-    .then((data) => {
-      //console.log(data);
-    })
-    .catch((error) => {
-      //console.log(error);
-    });
+    let [responses] = await pool.query(createCreditCollection);
+    console.log(responses);
+
+    let createTableDailyTransaction = `create table if not exists dailyTransaction(dailySalesId int auto_increment, purchaseQty int not null default 0, salesQty int not null default 0 , creditsalesQty int not null default 0, salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'),creditPaymentDate date, partiallyPaidInfo JSON, businessId int, ProductId int,brokenQty int, Description varchar(2000), registeredTimeDaily Date,itemDetailInfo varchar(9000), reportStatus ENUM('unreported to total sales', 'reported to total sales'), primary key(dailySalesId))`;
+    pool
+      .query(createTableDailyTransaction)
+      .then((data) => {
+        //console.log(data);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
+
+    let create = `create table if not exists employeeTable(employeeId int auto_increment, userIdInEmployee int,BusinessIDEmployee int, employerId int, primary key(employeeId))`;
+    pool
+      .query(create)
+      .then(() => {})
+      .catch(() => {});
+    let creeateBusiness = `create table if not exists Business (BusinessID int auto_increment, BusinessName varchar(500), createdDate Date,ownerId int, status varchar(300), primary key(businessId))`;
+    pool.query(creeateBusiness).then().catch();
+    let queryTocreate = `create table if not exists usersTable(userId int auto_increment, phoneNumber varchar(200),employeeName varchar(600), passwordStatus varchar(40), passwordResetPin int, password varchar(200),primary key(userId))`;
+    pool
+      .query(queryTocreate)
+      .then((data) => {
+        //console.log(data);
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
+  } catch (error) {
+    console.log(error);
+  }
 };
 let createBusiness = (businessName, ownerId, createdDate, res, source) => {
   let select = "SELECT * FROM Business WHERE businessName = ?";
@@ -52,9 +71,9 @@ let createBusiness = (businessName, ownerId, createdDate, res, source) => {
   let costTable =
     "CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, unitCost INT(11) NOT NULL, PRIMARY KEY (costsId)) ";
   let createProductsTable =
-    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, previousProductId int, productsUnitCost INT(11) NOT NULL, prevUnitCost int, productsUnitPrice INT(11) NOT NULL, prevUnitPrice int, productName VARCHAR(900) NOT NULL, prevProductName varchar(1000), minimumQty INT(11) NOT NULL, prevMinimumQty int, Status enum('active','changed','replaced','active_but_updated') PRIMARY KEY (ProductId)) ";
+    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, productRegistrationDate date, mainProductId int, productsUnitCost INT(11) NOT NULL, prevUnitCost int, productsUnitPrice INT(11) NOT NULL, prevUnitPrice int, productName VARCHAR(900) NOT NULL, prevProductName varchar(1000), minimumQty INT(11) NOT NULL, prevMinimumQty int, Status enum('active','changed','replaced','active_but_updated'), PRIMARY KEY (ProductId)) ";
   let createTransaction =
-    "CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL,mainProductId int, salesQty INT(11) NOT NULL default 0, creditsalesQty int(11) NOT NULL  default 0,  purchaseQty INT(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory INT(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registrationDate DATE NOT NULL, creditDueDate date ,salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'), partiallyPaiedInfo varchar(5000),,creditPayementdate date , PRIMARY KEY (transactionId)) ";
+    "CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL, mainProductId int, salesQty INT(11) NOT NULL default 0, creditsalesQty int(11) NOT NULL  default 0,  purchaseQty INT(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory INT(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, creditDueDate date ,salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'),registrationSource enum('Total','Single'), partiallyPaidInfo JSON, creditPayementdate date, PRIMARY KEY (transactionId)) ";
 
   let queries = [],
     tableCollections = {};

@@ -45,7 +45,7 @@ function AddTransaction({ Time }) {
           name="Cost"
           onClick={setTargatedRegistration}
         >
-          Costs
+          Expences
         </Button>
       </div>
       <hr />

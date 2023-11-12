@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
-import $ from "jquery";
+import $, { error } from "jquery";
 import axios from "axios";
 import SearchExpenceTransaction from "./SearchExpenceTransaction";
-import SearchSales_PurchaseCss from "./SearchSales_Purchase.module.css";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 import {
   Button,
@@ -18,22 +15,24 @@ import {
 } from "@mui/material";
 import ConfirmDialog from "../Others/Confirm";
 import { DateFormatter } from "../Date/currentDate";
-import { Chip } from "@material-ui/core";
-import ShowCreditCollected from "./ShowCreditCollected";
 import GetCreditLists from "./GetCreditLists";
+import OpenTransactionEditorModal from "./OpenTransactionEditorModal";
+import SalesAndPurchaseTable from "./SalesAndPurchaseTable";
 const timeZone = "Africa/Addis_Ababa";
 function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
   console.log("response", response.data.data);
   // return;
   // set correct data format to time because it is bringing us like registeredTime: "2023-08-05T21:00:00.000Z". The correct format is year month day
-
+  const [editTransactions, seteditTransactions] = useState({
+    Open: false,
+    item: {},
+  });
   let dateData = [...response?.data?.data];
   let CollectedMoneyFromTotalSales = response.data.CollectedMoneyFromTotalSales;
   dateData.map((item) => {
     console.log("@SearchSales_Purchase item is ", item);
-    item.registeredTime = DateFormatter(item.registeredTime, timeZone);
+    item.registrationDate = DateFormatter(item.registrationDate, timeZone);
   });
-  let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
   const [UpdateSalesAndPurchase, setUpdateSalesAndPurchase] = useState({});
   const [showEachItems, setshowEachItems] = useState(false);
@@ -78,14 +77,6 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
       deleteData(deletableItems);
     }
   }, [ConfirmDeletePurchaseAndSales]);
-  useEffect(() => {
-    let status = UpdateSalesAndPurchase.status,
-      items = UpdateSalesAndPurchase.items,
-      index = UpdateSalesAndPurchase.index;
-    if (status == "Verified") {
-      updateTransactions(items.transactionId, index, items.ProductId);
-    }
-  }, [UpdateSalesAndPurchase]);
 
   let token = localStorage.getItem("storeToken");
   let deleteSales_purchase = async (items) => {
@@ -201,7 +192,7 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
             creditsalesQty += transaction.creditsalesQty;
             salesQty += transaction.salesQty;
             wrickages += transaction.wrickages;
-            registeredTime += transaction.registeredTime + ", ";
+            registeredTime += transaction.registrationDate + ", ";
             description += transaction.description + ", ";
             x = transaction;
           }
@@ -210,7 +201,7 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
         description = description.slice(0, -2);
         // return;
         x.creditsalesQty = creditsalesQty;
-        x.registeredTime = registeredTime;
+        x.registrationDate = registeredTime;
         x.salesQty = salesQty;
         x.wrickages = wrickages;
         x.description = description;
@@ -236,15 +227,7 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
     });
     setListOfSalesAndPurchase([...x]);
   };
-  let editSalesAndPurchase = (e, index) => {
-    let mapedList = ListOfSalesAndPurchase.map((item, i) => {
-      if (i == index) {
-        return { ...item, contentEditable: true };
-      }
-      return item;
-    });
-    setListOfSalesAndPurchase([...mapedList]);
-  };
+
   let cancelSalesAndPurchase = (e, index) => {
     let mapedList = ListOfSalesAndPurchase.map((item, i) => {
       if (i == index) {
@@ -258,61 +241,6 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
     });
     setListOfSalesAndPurchase([...mapedList]);
   };
-  let updateTransactions = async (transactionId, index, productId) => {
-    let OB = {};
-    const tdElements = document.querySelectorAll(`.Transaction_${index} td`);
-    let id = "";
-    let salesQty = $("#salesQty_" + transactionId).text();
-    let purchaseQty = $("#purchaseQty_" + transactionId).text();
-    let wrickages = $("#wrickages_" + transactionId).text();
-    let Description = $("#Description_" + transactionId).text();
-    if (isNaN(salesQty)) {
-      alert(" sales quantity should be number");
-      return;
-    }
-    if (isNaN(wrickages)) {
-      alert("Broken quantity should be number");
-      return;
-    }
-    if (isNaN(purchaseQty)) {
-      alert("Purchase quantity should be number");
-      return;
-    }
-    let date = $("#RegistrationDate_" + transactionId).text();
-    // let fromDate = $("#fromDate").val();
-    // let toDate = $("#toDate").val();
-    OB = {
-      fromDate,
-      toDate,
-      ...OB,
-      date,
-      businessName,
-      salesQty,
-      purchaseQty,
-      wrickages,
-      Description,
-      transactionId,
-      productId,
-    };
-
-    $(".LinearProgress").css("display", "block");
-    // return;
-    let updates = await axios
-      .post(serverAddress + "updateTransactions/", OB)
-      .then((data) => {
-        let mapedList = data.data.data.map((item, i) => {
-          let correctDateFormat = DateFormatter(item.registeredTime);
-          item.registeredTime = correctDateFormat;
-          return item;
-        });
-        // alert(mapedList);
-        setListOfSalesAndPurchase([...mapedList]);
-      })
-      .catch((error) => {});
-    $(".LinearProgress").css("display", "none");
-  };
-
-  // CreditCollected this usestate variable is used to store data of database where items are sold in credit but it is collected from customer . this data is not nececery for cash because it may be collected in onother day e.g if it is collected i 30 and i fetch in 25-27  cash can be added in 25-27 which is wrong output setting way; so it must be removed. so we need it to deduct from our sales
   const [CreditCollected, setCreditCollected] = useState([]);
   // collect data which are sold by credit based on salesTypeValues where salesTypeValues is 'credit paied' or 'On credit'
   useEffect(() => {
@@ -338,7 +266,6 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
   return (
     <div>
       <GetCreditLists dateRange={{ fromDate: fromDate, toDate: toDate }} />
-
       <div className="">
         <br />
         <Checkbox
@@ -351,302 +278,27 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
         <br />
         <br />
       </div>
+      {console.log("ListOfSalesAndPurchase", ListOfSalesAndPurchase)}
+      {
+        <SalesAndPurchaseTable
+          changesOnInputsOfTransaction={changesOnInputsOfTransaction}
+          showEachItems={showEachItems}
+          setshowEachItems={setshowEachItems}
+          ListOfSalesAndPurchase={ListOfSalesAndPurchase}
+          setListOfSalesAndPurchase={setListOfSalesAndPurchase}
+          cancelSalesAndPurchase={cancelSalesAndPurchase}
+          setConfirmMessages={setConfirmMessages}
+          deleteSales_purchase={deleteSales_purchase}
+          setConfirmAction={setConfirmAction}
+          setUpdateSalesAndPurchase={setUpdateSalesAndPurchase}
+          setShowConfirmDialog={setShowConfirmDialog}
+          TotalSalesRevenue={TotalSalesRevenue}
+          TotalPurchaseCost={TotalPurchaseCost}
+          editTransactions={editTransactions}
+          seteditTransactions={seteditTransactions}
+        />
+      }
 
-      {ListOfSalesAndPurchase.length > 0 ? (
-        <TableContainer>
-          <Table id="productTransaction">
-            <TableHead>
-              <TableRow>
-                <TableCell colSpan={15}>
-                  <h3>purchase , sales, inventory and description table</h3>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableRow>
-              <TableCell>Product name</TableCell>
-              <TableCell>
-                {showEachItems ? " Registration Date" : " Registration Dates"}
-              </TableCell>
-              <TableCell>Unit price</TableCell>
-              <TableCell>Sold Qty</TableCell>
-              <TableCell>Sold Qty incredit</TableCell>
-              <TableCell>Total sales</TableCell>
-              <TableCell>Unit Cost</TableCell>
-              <TableCell>purchase Qty</TableCell>
-              <TableCell>Total Purchase</TableCell>
-              <TableCell>Broken</TableCell>
-              <TableCell>Inventory</TableCell>
-              <TableCell sx={{ minWidth: "fit-content" }}>
-                Description
-              </TableCell>
-              <TableCell colSpan={2}>Action</TableCell>
-              <TableCell>Status</TableCell>
-            </TableRow>
-            <TableBody>
-              {ListOfSalesAndPurchase?.map((items, index) => {
-                return (
-                  <TableRow
-                    className={
-                      SearchSales_PurchaseCss.searchedDatas +
-                      " Transaction_" +
-                      index
-                    }
-                  >
-                    <TableCell
-                      id={"productName_" + items.transactionId}
-                      type="text"
-                    >
-                      {items.productName}
-                    </TableCell>
-                    <TableCell
-                      type="text"
-                      id={"RegistrationDate_" + items.transactionId}
-                      className={
-                        items.contentEditable && "date" + items.transactionId
-                      }
-                    >
-                      {
-                        <Chip
-                          style={{
-                            marginTop: "5px",
-                            backgroundColor: "transparent",
-                          }}
-                          key={"dateOfRegistration_"}
-                          label={DateFormatter(items.registrationDate)}
-                        />
-                      }
-                    </TableCell>
-                    <TableCell
-                      className={"unitPrice" + items.transactionId}
-                      id={"unitPrice_" + items.transactionId}
-                      type="text"
-                    >
-                      {items.productsUnitPrice.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "ETB",
-                      })}
-                    </TableCell>
-                    <TableCell
-                      onInput={() =>
-                        changesOnInputsOfTransaction("updateId_" + index, index)
-                      }
-                      className={
-                        items.contentEditable &&
-                        `salesQty${items.transactionId} editableTD`
-                      }
-                      contentEditable={items.contentEditable}
-                      id={"salesQty_" + items.transactionId}
-                      type="text"
-                    >
-                      {items.salesQty}
-                    </TableCell>
-                    <TableCell
-                      onInput={() =>
-                        changesOnInputsOfTransaction("updateId_" + index, index)
-                      }
-                      className={
-                        items.contentEditable &&
-                        `salesQtyInCredit${items.transactionId} editableTD`
-                      }
-                      contentEditable={items.contentEditable}
-                      id={"salesQtyInCredit_" + items.transactionId}
-                      type="text"
-                    >
-                      {items.creditsalesQty}
-                    </TableCell>
-                    <TableCell
-                      className={`totalSales${items.transactionId}`}
-                      id={"totalSales_" + items.transactionId}
-                      type="text"
-                    >
-                      {(
-                        (items.salesQty + items.creditsalesQty) *
-                        items.productsUnitPrice
-                      ).toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "ETB",
-                      })}
-                    </TableCell>
-                    <TableCell
-                      className={`unitCost${items.transactionId}`}
-                      name="unitCost"
-                      id={"unitCost_" + items.transactionId}
-                      type="text"
-                    >
-                      {items.unitCost.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "ETB",
-                      })}
-                    </TableCell>
-                    <TableCell
-                      onInput={() =>
-                        changesOnInputsOfTransaction("updateId_" + index, index)
-                      }
-                      className={
-                        items.contentEditable &&
-                        `purchaseQty${items.transactionId} editableTD`
-                      }
-                      contentEditable={items.contentEditable}
-                      id={"purchaseQty_" + items.transactionId}
-                      type="text"
-                      name="purchaseQty"
-                    >
-                      {items.purchaseQty}
-                    </TableCell>
-                    <TableCell
-                      className={`totalCost${items.transactionId}`}
-                      name="totalCost"
-                      id={"totalPurchase_" + items.transactionId}
-                      type="text"
-                    >
-                      {(items.unitCost * items.purchaseQty).toLocaleString(
-                        "en-US",
-                        {
-                          style: "currency",
-                          currency: "ETB",
-                        }
-                      )}
-                    </TableCell>
-                    <TableCell
-                      onInput={() =>
-                        changesOnInputsOfTransaction("updateId_" + index, index)
-                      }
-                      className={
-                        items.contentEditable &&
-                        `broken${items.transactionId} editableTD`
-                      }
-                      contentEditable={items.contentEditable}
-                      id={"wrickages_" + items.transactionId}
-                      type="text"
-                      name="broken"
-                    >
-                      {items.wrickages}
-                    </TableCell>
-                    <TableCell
-                      className={`inventory${items.transactionId}`}
-                      id={"Inventory_" + items.transactionId}
-                      type="text"
-                    >
-                      {items.Inventory}
-                    </TableCell>
-                    <TableCell
-                      sx={{ minWidth: "300px" }}
-                      onInput={() =>
-                        changesOnInputsOfTransaction("updateId_" + index, index)
-                      }
-                      className={
-                        items.contentEditable
-                          ? `description${items.transactionId} editableTD`
-                          : ""
-                      }
-                      contentEditable={items.contentEditable}
-                      id={"Description_" + items.transactionId}
-                      type="text"
-                      name="description"
-                    >
-                      {items.description}
-                    </TableCell>
-                    {showEachItems ? (
-                      !items.contentEditable ? (
-                        openedBusiness == "myBusiness" && (
-                          <>
-                            <TableCell
-                              className="cancelOrEditTransaction"
-                              onClick={(e) => editSalesAndPurchase(e, index)}
-                            >
-                              {openedBusiness == "myBusiness" && (
-                                <EditIcon sx={{ color: "blue" }} />
-                              )}
-                            </TableCell>
-                            <TableCell
-                              onClick={() => deleteSales_purchase(items)}
-                            >
-                              {openedBusiness == "myBusiness" && (
-                                <DeleteIcon sx={{ color: "red" }} />
-                              )}
-                            </TableCell>
-                          </>
-                        )
-                      ) : (
-                        <TableCell
-                          className="cancelOrEditTransaction"
-                          onClick={(e) => cancelSalesAndPurchase(e, index)}
-                        >
-                          <Button>cancel</Button>
-                        </TableCell>
-                      )
-                    ) : (
-                      <TableCell></TableCell>
-                    )}
-                    {items.updateEditedContent ? (
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          color="info"
-                          className="updateTransaction"
-                          id={"updateId_" + index}
-                          onClick={(e) => {
-                            setConfirmMessages(
-                              "Are you sure to update this data?"
-                            );
-                            setConfirmAction("updateSalesAndPurchaseData");
-                            setUpdateSalesAndPurchase({
-                              items,
-                              index,
-                              status: "notVerified",
-                            });
-                            setShowConfirmDialog(true);
-                          }}
-                        >
-                          Update
-                        </Button>
-                      </TableCell>
-                    ) : (
-                      <TableCell>&nbsp;</TableCell>
-                    )}
-                  </TableRow>
-                );
-              })}
-              <TableRow
-                className={SearchSales_PurchaseCss.salesPurchaseLastRow}
-                style={{ backgroundColor: "#B3E5FC" }}
-              >
-                <TableCell colSpan={2}></TableCell>
-                <TableCell colSpan={2}>Sum of Sales</TableCell>
-                <TableCell>
-                  {TotalSalesRevenue.toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "ETB",
-                  })}
-                </TableCell>
-                <TableCell colSpan={2}>Sum of Purchase</TableCell>
-                <TableCell>
-                  {TotalPurchaseCost.toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "ETB",
-                  })}
-                </TableCell>
-                <TableCell colSpan={2}>Sales - Purchases</TableCell>
-                <TableCell>
-                  {(TotalSalesRevenue - TotalPurchaseCost).toLocaleString(
-                    "en-US",
-                    { style: "currency", currency: "ETB" }
-                  )}
-                </TableCell>
-                <TableCell colSpan={3}></TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
-      ) : (
-        <>
-          <Chip
-            style={{ backgroundColor: "rgba(255, 0, 0, 0.2)", color: "red" }}
-            label={<h3>On this date no sales and purchase transaction</h3>}
-          />
-          {}
-        </>
-      )}
       {requestFrom == "showExpencesList" && ShowExpences}
       {ShowConfirmDialog && (
         <ConfirmDialog
@@ -659,6 +311,15 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
               ? setConfirmDeletePurchaseAndSales
               : setUpdateSalesAndPurchase
           }
+        />
+      )}
+      {editTransactions.Open && (
+        <OpenTransactionEditorModal
+          setListOfSalesAndPurchase={setListOfSalesAndPurchase}
+          toDate={toDate}
+          fromDate={fromDate}
+          editTransactions={editTransactions}
+          seteditTransactions={seteditTransactions}
         />
       )}
     </div>

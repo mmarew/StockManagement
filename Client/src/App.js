@@ -21,7 +21,6 @@ import AddSalesTransaction from "./Components/Body/Business/AddSalesTransaction"
 import GetMinimumQty from "./Components/Body/Business/GetMinimumQty";
 import GetMaximumSales from "./Components/Body/Business/GetMaximumSales";
 import NavBar from "./Components/Nav/MuiNav";
-import ImageApp from "./ImgSlider";
 import ForgetPassword from "./Components/Body/ForgetPassword/ForgetPassword";
 import GetCreditLists from "./Components/Body/Business/GetCreditLists";
 import CheckIfUnreportedData from "./Components/Body/Business/CheckIfUnreportedData";

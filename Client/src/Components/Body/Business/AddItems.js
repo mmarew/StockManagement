@@ -25,13 +25,13 @@ function AddItems() {
           className="salesButton salesAndCostItems"
           onClick={(e) => selectTarget(e, "SALES")}
         >
-          Product Items
+          Add Product Items
         </div>
         <div
           className="costButton salesAndCostItems"
           onClick={(e) => selectTarget(e, "COST")}
         >
-          Expences
+          Add Expences
         </div>
       </div>
       {activeComponent}

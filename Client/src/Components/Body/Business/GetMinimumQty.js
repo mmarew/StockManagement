@@ -42,9 +42,10 @@ function GetMinimumQty() {
     <div>
       <br />
       <h5>Current Minimum Qty</h5>
+      {console.log("MinimumQty111", MinimumQty)}
       {MinimumQty.progress == "wait" ? (
         <h4>please wait ...</h4>
-      ) : MinimumQty.data.length > 0 ? (
+      ) : MinimumQty?.data?.length > 0 ? (
         <TableContainer component={Paper} align="center">
           {console.log("MinimumQty", MinimumQty?.data?.length)}
           <Table sx={{ width: 100 + "%" }}>

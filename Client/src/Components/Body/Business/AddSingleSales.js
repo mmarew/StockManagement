@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import singleSalesCss from "./AddSingleSales.module.css";
-import $, { error } from "jquery";
+import $ from "jquery";
 import currentDates, { DateFormatter } from "../Date/currentDate";
 import CloseIcon from "@material-ui/icons/Close";
 import {
@@ -29,6 +29,8 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import { ConsumeableContext } from "../UserContext/UserContext";
+import { ButtonProcessing } from "../../utility/Utility";
 
 function AddSingleSales() {
   // setShowHiddenProducts;
@@ -38,7 +40,7 @@ function AddSingleSales() {
     items: {},
     Open: false,
   });
-
+  const [tabValue, setTabValue] = useState(0);
   const handleClose = () => {
     steRegisterableItems({
       items: {},
@@ -50,7 +52,8 @@ function AddSingleSales() {
   const [DailyTransaction, setDailyTransaction] = useState([]);
   let serverAddress = localStorage.getItem("targetUrl");
   const [productDetailes, setproductDetailes] = useState([]);
-  const [inputValues, setInputValues] = useState({});
+  const { singleSalesInputValues, setSinlgeSalesInputValues } =
+    ConsumeableContext();
   // formInputValues is uesd to tollect data of form to update and registere
 
   const [formInputValues, setformInputValues] = useState({
@@ -59,15 +62,22 @@ function AddSingleSales() {
   const [searchedProducts, setSearchedProducts] = useState([]);
   const [allDailySales, setAllDailySales] = useState({});
   // get single products
+  {
+    /*submit search starts here*/
+  }
   let handleSearchSubmit = async (e) => {
     e.preventDefault();
     // clear all detailes of product
+
     setproductDetailes([]);
     $(".LinearProgress").css("display", "block");
     let singleSalesDate = $("#singleSalesDate").val();
+    setSearchedProducts([]);
+    setDailyTransaction([]);
+    // return;
     let responce = await axios.post(serverAddress + "getsingleProducts/", {
       ...singleSalesDate,
-      ...inputValues,
+      ...singleSalesInputValues,
       ...{ BusinessId: localStorage.getItem("businessId") },
       ...{ businessName: localStorage.getItem("businessName") },
     });
@@ -77,6 +87,7 @@ function AddSingleSales() {
     else setSearchedProducts(responce.data.data);
     $(".LinearProgress").hide();
   };
+  // submit search ends here
   let handleSalesTransactionInput = (e, ProductId) => {
     console.log(e.target.value);
     setformInputValues({
@@ -89,8 +100,12 @@ function AddSingleSales() {
   // collect input values of search form
   let handleSearchableProductInput = (event) => {
     console.log(event.target.value);
-    setInputValues({ ...inputValues, [event.target.name]: event.target.value });
+    setSinlgeSalesInputValues({
+      ...singleSalesInputValues,
+      [event.target.name]: event.target.value,
+    });
   };
+  //
   let registerSinglesalesTransaction = async (e, items) => {
     e.preventDefault();
     let { brokenQty, salesType } = formInputValues;
@@ -176,7 +191,8 @@ function AddSingleSales() {
       creditDueDate = "",
       creditPaymentDate = "",
       salesTypeValues = "",
-      mydataLength = mydata.length;
+      mydataLength = mydata.length,
+      registrationSource = "Single";
     // collect same products to add qty
     for (; i < mydataLength; i++) {
       ProductId = mydata[i].ProductId;
@@ -232,7 +248,8 @@ function AddSingleSales() {
       purchaseQty += mydata[i].purchaseQty;
       registrationDate = mydata[i].registrationDate;
       salesQty += mydata[i].salesQty;
-      // console.log("productId is ", ProductId);
+
+      dailySales["registrationSource" + ProductId] = registrationSource;
       dailySales["creditPaymentDate" + ProductId] = creditPaymentDate;
       dailySales[`creditDueDate` + ProductId] = creditDueDate;
       dailySales[`salesTypeValues` + ProductId] = salesTypeValues;
@@ -260,7 +277,8 @@ function AddSingleSales() {
     }
     // To make collections on multiple single item sales
     // console.log("dailySales", dailySales);
-
+    console.log("mydata", mydata);
+    // return;
     setAllDailySales(dailySales);
     setproductDetailes(mydata);
     setDailyTransaction(mydata);
@@ -268,6 +286,8 @@ function AddSingleSales() {
   ///////////////////////////////
   let RegiterCollectedDailyTransaction = async (e) => {
     e.preventDefault();
+    setProccess(true);
+    // return;
     let serverAddress = localStorage.getItem("targetUrl"),
       businessName = localStorage.getItem("businessName"),
       BusinessId = localStorage.getItem("businessId"),
@@ -303,6 +323,7 @@ function AddSingleSales() {
       serverAddress + "registerTransaction/",
       productsInfo
     );
+    setProccess(false);
     // console.log("Response", Response);
     let datas = Response.data.data;
     console.log("Response.data.data,", Response.data);
@@ -381,7 +402,14 @@ function AddSingleSales() {
       open: false,
       Items: {},
     });
-  const [tabValue, setTabValue] = useState(0);
+
+  let updateUnreportedData = async () => {
+    let Results = await axios.put(
+      serverAddress + "updateUnreportedDataAsReported",
+      { token }
+    );
+    console.log(Results.data);
+  };
   return (
     <div className={singleSalesCss.singleSalesWrapper}>
       <Tabs value={tabValue} onChange={(event, newTab) => setTabValue(newTab)}>
@@ -413,6 +441,8 @@ function AddSingleSales() {
           </label>
           <br />
           <TextField
+            onChange={handleSearchableProductInput}
+            value={singleSalesInputValues.singleSalesDate}
             required
             fullWidth
             name="singleSalesDate"
@@ -424,17 +454,22 @@ function AddSingleSales() {
           <TextField
             required
             name="searchInput"
-            onInput={handleSearchableProductInput}
+            value={singleSalesInputValues.searchInput}
+            onChange={handleSearchableProductInput}
             label="Type Product Name"
-            id=""
             className=""
             type={"search"}
+            id="searchInputToSingleProducts"
           />
           <br />
-          <Button fullWidth type="submit" variant="contained">
+          <Button
+            id="btnsearchSingleProduct"
+            fullWidth
+            type="submit"
+            variant="contained"
+          >
             Search
           </Button>
-
           <br />
         </form>
       )}
@@ -630,6 +665,7 @@ function AddSingleSales() {
                 <MenuItem value={"On cash"}>On cash</MenuItem>
                 <MenuItem value={"By bank"}>By bank</MenuItem>
                 <MenuItem value={"On credit"}>On credit</MenuItem>
+                {/* <MenuItem value={"On credit"}>On credit</MenuItem> */}
               </Select>
               <Box sx={{ color: "red", marginBottom: "20px" }}>
                 {" "}
@@ -742,10 +778,10 @@ function AddSingleSales() {
                       <TableCell>{items.salesQty}</TableCell>
                       <TableCell>{items.creditsalesQty}</TableCell>
                       <TableCell>
-                        {JSON.parse(items.itemDetailInfo).productsUnitPrice}
+                        {JSON.parse(items.itemDetailInfo)?.productsUnitPrice}
                       </TableCell>
                       <TableCell>
-                        {DateFormatter(items.registrationDate)}
+                        {DateFormatter(items.registeredTimeDaily)}
                       </TableCell>
                       <TableCell>
                         {DateFormatter(items.creditPaymentDate)}
@@ -792,14 +828,18 @@ function AddSingleSales() {
             </Table>
           </TableContainer>
           <Box sx={{ display: "flex", justifyContent: "center" }}>
-            <Button
-              variant="contained"
-              color="primary"
-              className={singleSalesCss.btnAddTotalSales}
-              onClick={RegiterCollectedDailyTransaction}
-            >
-              Add As Total Sales
-            </Button>
+            {!Proccess ? (
+              <Button
+                variant="contained"
+                color="primary"
+                className={singleSalesCss.btnAddTotalSales}
+                onClick={RegiterCollectedDailyTransaction}
+              >
+                Add As Total Sales
+              </Button>
+            ) : (
+              <ButtonProcessing />
+            )}
           </Box>
         </div>
       )}
@@ -916,6 +956,10 @@ function AddSingleSales() {
               />
               <br />
               <label>payment type</label>
+              {console.log(
+                "inselect formInputValues",
+                formInputValues.salesTypeValues
+              )}
               <Select
                 value={formInputValues.salesTypeValues}
                 name="salesTypeValues"
@@ -926,10 +970,16 @@ function AddSingleSales() {
                 fullWidth
                 required
               >
-                <MenuItem value={"On cash"}>On cash</MenuItem>
-                <MenuItem value={"By bank"}>By bank</MenuItem>
-                <MenuItem value={"On credit"}>On credit</MenuItem>
-                <MenuItem value={"credit paied"}>credit paied</MenuItem>
+                {formInputValues.salesTypeValues == "Partially paied" ? (
+                  <MenuItem value={"Partially paied"}>Partially paied</MenuItem>
+                ) : (
+                  <>
+                    <MenuItem value={"On cash"}>On cash</MenuItem>
+                    <MenuItem value={"By bank"}>By bank</MenuItem>
+                    <MenuItem value={"On credit"}>On credit</MenuItem>
+                    <MenuItem value={"credit paied"}>credit paied</MenuItem>
+                  </>
+                )}
               </Select>
               {formInputValues.salesTypeValues == "On credit" && (
                 <Box sx={{ width: "100%" }}>
