@@ -17,7 +17,7 @@ function AddTransaction({ Time }) {
     let currentBtn = e.target;
     currentBtn.classList.toggle("activeClass");
     if (e.target.name == "Sales") {
-      navigate("AddSalesTranaction");
+      navigate("AddSalesTranaction/addSingleSales");
     }
     //  setTransaction(<AddSalesTranaction />);
     if (e.target.name == "Cost") {
@@ -37,18 +37,23 @@ function AddTransaction({ Time }) {
           className="salesOrCosts"
           name="Sales"
           onClick={setTargatedRegistration}
+          variant="contained"
+          color="success"
+          sx={{ marginRight: "10px" }}
         >
-          Sales
+          Purchase and Sales
         </Button>
         <Button
           className="salesOrCosts"
           name="Cost"
           onClick={setTargatedRegistration}
+          variant="contained"
+          color="warning"
         >
-          Expences
+          Expenses
         </Button>
       </div>
-      <hr />
+      <hr style={{ borderTop: "1px solid #ccc", margin: "20px 0" }} />
       <br />
       <div>{Transaction}</div>
       <Outlet />

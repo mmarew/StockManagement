@@ -3,10 +3,9 @@ import React, { useEffect, useState } from "react";
 import EditProfileCss from "./EditProfile.module.css";
 
 import $ from "jquery";
-import { Button, LinearProgress, TextField } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Box, Button, LinearProgress, Modal, TextField } from "@mui/material";
 let serverUrl = localStorage.getItem("targetUrl");
-function EditProfile() {
+function EditProfile({ EditProfileOpen, setEditProfileOpen }) {
   const [changePassword, setchangePassword] = useState(false);
   const [profileInfo, setprofileInfo] = useState({});
   // const navigate = useNavigate();
@@ -80,88 +79,102 @@ function EditProfile() {
 
   return (
     <>
-      {Object.keys(profileInfo).length > 0 ? (
-        <form
-          className={EditProfileCss.userRegistrationForm}
-          onSubmit={handleUpdateSubmit}
-          action=""
-        >
-          <LinearProgress id={EditProfileCss.LinearProgress2} />
-          <TextField
-            className={EditProfileCss.TextFieldClass}
-            required
-            name="fullName"
-            onChange={handleRegistrationChange}
-            type="text"
-            label="Full Name"
-          />
-          <br />
-          <TextField
-            className={EditProfileCss.TextFieldClass}
-            required
-            name="registerPhone"
-            onChange={handleRegistrationChange}
-            type="tel"
-            label="phone number"
-          />
-          <br />
-          <TextField
-            className={EditProfileCss.TextFieldClass}
-            required
-            name="registerPassword"
-            onChange={handleRegistrationChange}
-            type="password"
-            label="Old Password"
-          />
-          <br />
-          {/* ////////////////// */}
-          {changePassword ? (
-            <>
-              <TextField
-                className={EditProfileCss.TextFieldClass}
-                required
-                name="password"
-                type="password"
-                label="Type new password"
-              />
-              <br />
-              <TextField
-                className={EditProfileCss.TextFieldClass}
-                required
-                type="password"
-                name="retypePassword"
-                label="Re type password"
-              />
-              <br />
-              <h4
-                className={EditProfileCss.changeOrNotPasswors}
-                onClick={() => setchangePassword(false)}
-              >
-                Don't Edit My Password
-              </h4>
-            </>
-          ) : (
-            <h4
-              className={EditProfileCss.changeOrNotPasswors}
-              onClick={() => setchangePassword(true)}
+      <Modal open={EditProfileOpen}>
+        <Box>
+          {Object.keys(profileInfo).length > 0 ? (
+            <form
+              className={EditProfileCss.userRegistrationForm}
+              onSubmit={handleUpdateSubmit}
+              action=""
             >
-              Edit My Password
-            </h4>
+              <LinearProgress id={EditProfileCss.LinearProgress2} />
+              <TextField
+                className={EditProfileCss.TextFieldClass}
+                required
+                name="fullName"
+                onChange={handleRegistrationChange}
+                type="text"
+                label="Full Name"
+              />
+              <br />
+              <TextField
+                className={EditProfileCss.TextFieldClass}
+                required
+                name="registerPhone"
+                onChange={handleRegistrationChange}
+                type="tel"
+                label="Phone Number"
+              />
+              <br />
+              <TextField
+                className={EditProfileCss.TextFieldClass}
+                required
+                name="registerPassword"
+                onChange={handleRegistrationChange}
+                type="password"
+                label="Old Password"
+              />
+              <br />
+              {/* ////////////////// */}
+              {changePassword ? (
+                <>
+                  <TextField
+                    className={EditProfileCss.TextFieldClass}
+                    required
+                    name="password"
+                    type="password"
+                    label="New Password"
+                  />
+                  <br />
+                  <TextField
+                    className={EditProfileCss.TextFieldClass}
+                    required
+                    type="password"
+                    name="retypePassword"
+                    label="Retype Password"
+                  />
+                  <br />
+                  <h4
+                    className={EditProfileCss.changeOrNotPasswors}
+                    onClick={() => setchangePassword(false)}
+                  >
+                    Don't Edit My Password
+                  </h4>
+                </>
+              ) : (
+                <h4
+                  className={EditProfileCss.changeOrNotPasswors}
+                  onClick={() => setchangePassword(true)}
+                >
+                  Edit My Password
+                </h4>
+              )}
+              <br />
+              <Box>
+                <Button
+                  className={EditProfileCss.TextFieldClass}
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                >
+                  Update
+                </Button>{" "}
+                <Button
+                  color="error"
+                  onClick={() => {
+                    setEditProfileOpen(false);
+                  }}
+                  variant="contained"
+                >
+                  Close
+                </Button>
+              </Box>
+            </form>
+          ) : (
+            ""
           )}
-          <br />
-          <Button
-            className={EditProfileCss.TextFieldClass}
-            name="submitButton"
-            type="submit"
-            variant="contained"
-            color="primary"
-          >
-            Update
-          </Button>
-        </form>
-      ) : (
-        ""
-      )}
+        </Box>
+      </Modal>
     </>
   );
 }

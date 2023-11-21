@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AddCost from "./AddCostTransaction";
+// import AddCost from "./AddExpencesTransaction";
 import AddCostItems from "./AddCostItems";
 import "./AddItems.css";
 import AddProducts from "./AddProducts";
@@ -13,13 +13,13 @@ function AddItems() {
     }
 
     e.target.classList.add("activeClass");
-    if (target == "SALES") setActiveComponent(<AddProducts />);
-    else if (e.target.className) {
+    if (target == "SALES") return setActiveComponent(<AddProducts />);
+    {
       setActiveComponent(<AddCostItems />);
     }
   };
   return (
-    <>
+    <div>
       <div className="salesAndCostItemsWrapper">
         <div
           className="salesButton salesAndCostItems"
@@ -35,7 +35,7 @@ function AddItems() {
         </div>
       </div>
       {activeComponent}
-    </>
+    </div>
   );
 }
 

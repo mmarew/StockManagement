@@ -19,6 +19,10 @@ import {
 } from "@mui/material";
 import MUIConfirm from "../Others/MUIConfirm";
 function SearchCosts({ response }) {
+  let Token = localStorage.getItem("storeToken");
+  let businessId = localStorage.getItem("businessId");
+  let businessName = localStorage.getItem("businessName");
+  let serverAddress = localStorage.getItem("targetUrl");
   const [ConfirmRequest, setConfirmRequest] = useState({});
   const [ConfirmDelete, setConfirmDelete] = useState({});
   const [costName, setcostName] = useState("");
@@ -36,6 +40,8 @@ function SearchCosts({ response }) {
     if (ConfirmDelete.Verify) {
       let deleteMyCost = async () => {
         let { item } = ConfirmDelete;
+        item.businessId = businessId;
+        item.token = Token;
         console.log("response = ", response.data.data);
         // return;
         let data = MyCostData.map((d) => d);
@@ -63,14 +69,11 @@ function SearchCosts({ response }) {
     }
   }, [ConfirmDelete]);
 
-  let businessId = localStorage.getItem("businessId");
-  let businessName = localStorage.getItem("businessName");
-  let serverAddress = localStorage.getItem("targetUrl");
   const [MyCostData, setMyCostData] = useState([]);
   let getCostLists = async () => {
     setMyCostData(response.data.data);
   };
-  let Token = localStorage.getItem("storeToken");
+
   let updateMycostData = async (e, id, cost) => {
     let CostName_ = $("#CostName_" + id).val(),
       costsId = cost.costsId;
@@ -78,8 +81,9 @@ function SearchCosts({ response }) {
     let responce = await axios.post(serverAddress + "/updateCostData/", {
       CostName_,
       costsId,
-      Token,
+      token: Token,
       businessName,
+      businessId,
     });
     console.log("responce", responce);
     let costData = MyCostData.map((cost1, i) => {
@@ -151,7 +155,7 @@ function SearchCosts({ response }) {
 
   let deleteCostItem = async (e, item) => {
     if (item) item.businessName = businessName;
-    item.Token = Token;
+    item.token = Token;
     setConfirmDelete({ ...ConfirmDelete, item, Verify: false });
     setTimeout(() => {
       setOpen({ open: true });

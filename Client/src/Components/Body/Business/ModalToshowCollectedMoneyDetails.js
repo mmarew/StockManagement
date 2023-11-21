@@ -60,9 +60,9 @@ function ModalToshowCollectedMoneyDetails({
             // flexDirection: "column",
             // alignItems: "center",
             // justifyContent: "center",
-            // maxWidth: "90%",
-            // maxHeight: "80vh", // Set a maximum height for the modal content
-            // overflow: "auto", // Enable scrolling when content overflows
+            maxWidth: "90%",
+            maxHeight: "80vh", // Set a maximum height for the modal content
+            overflow: "auto", // Enable scrolling when content overflows
           }}
         >
           <h2 id="modal-title">Details of collected money</h2>
@@ -70,29 +70,28 @@ function ModalToshowCollectedMoneyDetails({
             {console.log(collectedMoney.Detail)}
             <TableContainer component={Paper}>
               <Table>
-                <TableHead>
+                <TableHead sx={{ position: "sticky", top: 0, zIndex: 1 }}>
                   <TableRow>
                     <TableCell>Product Name</TableCell>
-                    <TableCell align="right">Unit Price</TableCell>
-                    <TableCell align="right">Sales Qty</TableCell>
-                    <TableCell align="right">Collected amount</TableCell>{" "}
-                    <TableCell align="right">Sales date</TableCell>
-                    <TableCell align="right">Collection date</TableCell>
-                    <TableCell align="right">Sales Way</TableCell>{" "}
-                    <TableCell align="right">Description</TableCell>
+                    <TableCell align="left">Unit Price</TableCell>
+                    <TableCell align="left">Sales Qty</TableCell>
+                    <TableCell align="left">Collected amount</TableCell>{" "}
+                    <TableCell align="left">Sales date</TableCell>
+                    <TableCell align="left">Collection date</TableCell>
+                    <TableCell align="left">Description</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {Detail.map((product, index) => (
                     <TableRow key={"DetailesOfModal_" + index}>
                       <TableCell>{product.productName}</TableCell>
-                      <TableCell align="right">
+                      <TableCell align="left">
                         {CurrencyFormatter(product.productsUnitPrice)}
                       </TableCell>
-                      <TableCell align="right">
+                      <TableCell align="left">
                         {product.creditsalesQty}
                       </TableCell>
-                      <TableCell align="right">
+                      <TableCell align="left">
                         {CurrencyFormatter(product.collectionAmount)}
                       </TableCell>
                       {product.registrationSource == "Total" ? (
@@ -108,9 +107,7 @@ function ModalToshowCollectedMoneyDetails({
                       <TableCell>
                         {DateFormatter(product.collectionDate)}
                       </TableCell>
-                      <TableCell align="right">
-                        {product.registrationSource}
-                      </TableCell>
+
                       <TableCell>{product.Description}</TableCell>
                     </TableRow>
                   ))}

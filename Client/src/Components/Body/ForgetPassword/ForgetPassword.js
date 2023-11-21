@@ -4,7 +4,7 @@ import forgetCss from "./Forget.module.css";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 function ForgetPassword() {
-  const [PhoneNumber, setPhoneNumber] = useState("");
+  // const [PhoneNumber, setPhoneNumber] = useState("");
   let serverUrl = localStorage.getItem("targetUrl");
   const [showPasswordField, setshowPasswordField] = useState(false);
   let colllectPhoneNumber = (e) => {
@@ -12,15 +12,36 @@ function ForgetPassword() {
     setPhoneNumber(e.target.value);
     e.preventDefault();
   };
+  const [PhoneNumber, setPhoneNumber] = useState("");
+  let requestBySms = async () => {
+    const encodedPhoneNumber = encodeURIComponent(PhoneNumber);
+    // alert("PhoneNumber " + PhoneNumber);
+    try {
+      let Responces = await axios.get(
+        `https://sms.masetawosha.com?Phonenumber=${encodedPhoneNumber}`
+      );
+      console.log("Responces requestBySms === ", Responces);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
   let submitRegistrationRequest = async (e) => {
     e.preventDefault();
-    console.log("setPhoneNumber", PhoneNumber);
-    let Responces = await axios.post(serverUrl + "forgetRequest/", {
-      PhoneNumber,
-    });
-    console.log("Responces", Responces.data);
-    if (Responces.data.data == "requestedToChangePassword") {
-      setshowPincodeField(true);
+    try {
+      console.log("setPhoneNumber", PhoneNumber);
+      let Responces = await axios.post(serverUrl + "forgetRequest/", {
+        PhoneNumber,
+      });
+      console.log("Responces", Responces.data);
+      if (Responces.data.data == "requestedToChangePassword") {
+        setshowPincodeField(true);
+        requestBySms();
+      }
+    } catch (error) {
+      console.log("error", error.response.data.error);
+      if (error.response.data.error == "Phone number not found") {
+        alert("This Phone number is not found");
+      }
     }
   };
 
@@ -38,7 +59,7 @@ function ForgetPassword() {
       PhoneNumber,
       Password,
     });
-    console.log(Responces);
+    console.log("updateChangeInpassword Responces= ", Responces);
     if ((Responces.data.data = "passwordChanged")) {
       setshowPasswordField(false);
       navigate("/login");
@@ -72,73 +93,90 @@ function ForgetPassword() {
   };
 
   return (
-    <div>
+    <div className={forgetCss.forgetFormWrapper}>
       {console.log("Password", Password)}
       <form
         onSubmit={submitRegistrationRequest}
         className={forgetCss.forgetForm}
       >
-        {" "}
-        <h5 className={forgetCss.ForgefForMTitle}>
-          password Forget Request form in smart stock management
+        <h5 className={forgetCss.forgetFormTitle}>
+          Password Forget Request Form in Smart Stock Management
         </h5>
         <TextField
+          className={forgetCss.phoneNumberInput}
           required
           type="tel"
           onChange={colllectPhoneNumber}
-          label="Enter phone number"
+          label="Enter Phone Number"
         />
-        <Button type="submit" variant="contained">
-          Request forget
+        <Button
+          className={forgetCss.requestButton}
+          type="submit"
+          variant="contained"
+        >
+          Request Forget
         </Button>
         <Link className={forgetCss.linkToOthers} to={"/login"}>
-          If you have an account Login here.
+          If you have an account, Login here.
         </Link>
         <Link className={forgetCss.linkToOthers} to={"/register"}>
-          If you are new register here.
+          If you are new, register here.
         </Link>
       </form>
       {showPincodeField && (
         <form className={forgetCss.pincodeWrapper} onSubmit={verifyPincode}>
-          Your forget pin is sent to your phone. so please see your phone and
-          enter it in the following input field.
+          <p className={forgetCss.pincodeMessage}>
+            Your forget pin has been sent to your phone. Please check your phone
+            and enter it in the following input field.
+          </p>
           <TextField
+            className={forgetCss.pincodeInput}
             required
             onChange={collectPincode}
             type="number"
-            label="type pin code"
+            label="Enter Pin Code"
           />
           {PincodeStatus}
-          <Button variant="contained" color="primary" type="submit">
-            verify
+          <Button
+            className={forgetCss.verifyButton}
+            variant="contained"
+            color="primary"
+            type="submit"
+          >
+            Verify
           </Button>
         </form>
       )}
       {showPasswordField && (
-        <>
-          <br />
-
-          <form className={forgetCss.retypePassword} onSubmit={updatePassword}>
-            <h3>Please enter your password</h3>
-            <TextField
-              required
-              name="password"
-              onChange={handlPassword}
-              type="password"
-              label="Type password"
-            />
-            <TextField
-              required
-              name="retypedPassword"
-              onChange={handlPassword}
-              type="password"
-              label="Re Type password"
-            />
-            <Button type="submit" color="primary" variant="contained">
-              Update
-            </Button>
-          </form>
-        </>
+        <form className={forgetCss.passwordForm} onSubmit={updatePassword}>
+          <h3 className={forgetCss.passwordFormTitle}>
+            Please Enter Your New Password
+          </h3>
+          <TextField
+            className={forgetCss.passwordInput}
+            required
+            name="password"
+            onChange={handlPassword}
+            type="password"
+            label="Enter Password"
+          />
+          <TextField
+            className={forgetCss.passwordInput}
+            required
+            name="retypedPassword"
+            onChange={handlPassword}
+            type="password"
+            label="Re-enter Password"
+          />
+          <Button
+            className={forgetCss.updateButton}
+            type="submit"
+            color="primary"
+            variant="contained"
+          >
+            Update
+          </Button>
+        </form>
       )}
     </div>
   );

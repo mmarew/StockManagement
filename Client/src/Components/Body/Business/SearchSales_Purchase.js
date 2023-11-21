@@ -3,24 +3,21 @@ import $, { error } from "jquery";
 import axios from "axios";
 import SearchExpenceTransaction from "./SearchExpenceTransaction";
 
-import {
-  Button,
-  Checkbox,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+import { Checkbox } from "@mui/material";
 import ConfirmDialog from "../Others/Confirm";
 import { DateFormatter } from "../Date/currentDate";
 import GetCreditLists from "./GetCreditLists";
 import OpenTransactionEditorModal from "./OpenTransactionEditorModal";
 import SalesAndPurchaseTable from "./SalesAndPurchaseTable";
 const timeZone = "Africa/Addis_Ababa";
-function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
-  console.log("response", response.data.data);
+function SearchSales_Purchase({
+  response,
+  requestFrom,
+  toDate,
+  fromDate,
+  searchTarget,
+}) {
+  console.log("response", response.data.data, " requestFrom === ", requestFrom);
   // return;
   // set correct data format to time because it is bringing us like registeredTime: "2023-08-05T21:00:00.000Z". The correct format is year month day
   const [editTransactions, seteditTransactions] = useState({
@@ -39,13 +36,18 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
   const [ShowExpences, setShowExpences] = useState();
   const [ListOfSalesAndPurchase, setListOfSalesAndPurchase] = useState([]);
   const [SearchedDatas, setSearchedDatas] = useState(dateData);
-
+  let businessId = localStorage.getItem("businessId");
   const [ShowConfirmDialog, setShowConfirmDialog] = useState(false);
   const [ConfirmDeletePurchaseAndSales, setConfirmDeletePurchaseAndSales] =
     useState({ Delete: false });
   const [confirmAction, setConfirmAction] = useState("");
   const [confirmMessages, setConfirmMessages] = useState("");
   let deleteData = async (deletableItems) => {
+    deletableItems.businessId = businessId;
+    console.log("deletableItems", deletableItems);
+
+    // return;
+
     let responce = await axios.post(serverAddress + "deleteSales_purchase/", {
       items: deletableItems,
     });
@@ -65,6 +67,7 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
       alert("You are not allowed to do this. thank you");
     } else {
       alert("clientErr1010:");
+      console.log("clientErr1010: responce.data.data", responce.data.data);
     }
   };
   useEffect(() => {
@@ -192,21 +195,20 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
             creditsalesQty += transaction.creditsalesQty;
             salesQty += transaction.salesQty;
             wrickages += transaction.wrickages;
-            registeredTime += transaction.registrationDate + ", ";
+            registeredTime += DateFormatter(transaction.registeredTime) + ", ";
             description += transaction.description + ", ";
             x = transaction;
           }
         });
-        registeredTime = registeredTime.slice(0, -2);
-        description = description.slice(0, -2);
-        // return;
+
         x.creditsalesQty = creditsalesQty;
-        x.registrationDate = registeredTime;
+        x.registeredTime = registeredTime;
         x.salesQty = salesQty;
         x.wrickages = wrickages;
         x.description = description;
         x.purchaseQty = purchaseQty;
         collectedArray.push(x);
+        // alert(JSON.stringify(x.registeredTime));
         setListOfSalesAndPurchase([...collectedArray]);
       });
     }
@@ -265,18 +267,24 @@ function SearchSales_Purchase({ response, requestFrom, toDate, fromDate }) {
 
   return (
     <div>
-      <GetCreditLists dateRange={{ fromDate: fromDate, toDate: toDate }} />
+      {searchTarget == "ALLTRANSACTION" && (
+        <GetCreditLists dateRange={{ fromDate: fromDate, toDate: toDate }} />
+      )}
       <div className="">
-        <br />
-        <Checkbox
-          id="showEachItems"
-          onChange={showEachValuesofSalesAndPurchase}
-          type="checkbox"
-        />
-        &nbsp;
-        {"Show Each transaction"}
-        <br />
-        <br />
+        {response.data.data.length > 0 && (
+          <>
+            <br />
+            <Checkbox
+              id="showEachItems"
+              onChange={showEachValuesofSalesAndPurchase}
+              type="checkbox"
+            />
+
+            <span>Show Each transaction</span>
+            <br />
+            <br />
+          </>
+        )}
       </div>
       {console.log("ListOfSalesAndPurchase", ListOfSalesAndPurchase)}
       {

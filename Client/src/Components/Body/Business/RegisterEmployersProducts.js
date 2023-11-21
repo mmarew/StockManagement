@@ -1,5 +1,5 @@
 import React from "react";
-import AddCostTransaction from "./AddCostTransaction";
+import AddExpencesTransaction from "./AddExpencesTransaction";
 import AddTotalSales from "./AddTotalSales";
 function RegisterEmployersProducts() {
   return (
@@ -8,7 +8,7 @@ function RegisterEmployersProducts() {
       <br /> <br />
       <h3>Cost Transaction</h3>
       <br />
-      <AddCostTransaction />
+      <AddExpencesTransaction />
     </>
   );
   // const [tranactionProducts, setTranactionProducts] = useState({});

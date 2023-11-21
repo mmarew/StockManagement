@@ -8,11 +8,11 @@ import CreateBusiness from "./CreateBusiness";
 import { useNavigate } from "react-router-dom";
 import { Button, LinearProgress } from "@mui/material";
 import Businessmodulecss from "./Business.module.css";
-import { useContext } from "react";
-import { ConsumeableContext, InitialContext } from "../UserContext/UserContext";
+import { ConsumeableContext } from "../UserContext/UserContext";
 import MUIConfirm from "../Others/MUIConfirm";
 import SuccessOrError from "../Others/SuccessOrError";
 import LeftSideBusiness from "./LeftSideBusiness";
+import ModalToEditBusinessName from "./ModalToEditBusinessName";
 let serverAddress = localStorage.getItem("targetUrl");
 function Business() {
   let Navigate = useNavigate();
@@ -22,7 +22,7 @@ function Business() {
   const { ownersName, setownersName, ShowProgressBar, setShowProgressBar } =
     ConsumeableContext();
   const [ShowSuccessError, setSuccessError] = useState({});
-  const [newBusiness, setnewBusiness] = useState();
+  const [newBusiness, setnewBusiness] = useState({ Open: false });
   const [createdBusiness, setcreatedBusiness] = useState([]);
   const [employeerBusiness, setemployeerBusiness] = useState([]);
   let token = localStorage.getItem("storeToken");
@@ -44,19 +44,11 @@ function Business() {
     localStorage.setItem("openedBusiness", "employersBusiness");
     Navigate("/OpenBusiness");
   };
+  const [openBusinessEditingModal, setopenBusinessEditingModal] = useState({
+    Open: false,
+    datas: {},
+  });
 
-  let editThisBusiness = (businessId, businessName) => {
-    console.log(businessId);
-    console.log("BusinessName", businessName);
-    $("#businessWrapper_" + businessId).show();
-    $("#openEditWrapper" + businessId).hide();
-    $("#businessName_" + businessId).val(businessName);
-  };
-  console.log(token);
-  let AddBusiness = () => {
-    console.log("AddBusiness");
-    setnewBusiness("allow");
-  };
   let getBusiness = async () => {
     setShowProgressBar(true);
     setcreatedBusiness([]);
@@ -181,17 +173,10 @@ function Business() {
       }
     }
   }, [open]);
-  useEffect(() => {
-    $(".LinearProgress").css("display", "block");
-  }, [ShowProgressBar]);
+
   return (
     <>
-      {ShowProgressBar && (
-        <LinearProgress
-          className={Businessmodulecss.LinearProgress}
-          id={Businessmodulecss.LinearProgress}
-        />
-      )}
+      {ShowProgressBar && <LinearProgress />}
 
       <div className={Businessmodulecss.MainBusinessWrapper}>
         {console.log("screenSize " + window.innerWidth)}
@@ -215,58 +200,198 @@ function Business() {
             )}
             <Button
               variant="contained"
-              onClick={AddBusiness}
+              onClick={() => {
+                setnewBusiness({ Open: true });
+              }}
               className={Businessmodulecss.createBusiness}
             >
               Add
             </Button>
             <br />
-            {newBusiness == "allow" ? (
+            {newBusiness.Open && (
               <CreateBusiness
                 ShowProgressBar={ShowProgressBar}
                 setShowProgressBar={setShowProgressBar}
                 getBusiness={getBusiness}
                 setnewBusiness={setnewBusiness}
+                newBusiness={newBusiness}
               />
-            ) : (
-              <div>
-                {BusinessLists}
-                <div className={Businessmodulecss.createdBusinessWrapper}>
-                  {createdBusiness?.map((datas) => {
-                    console.log(datas);
-                    return (
+            )}
+            <div>
+              {BusinessLists}
+              <div className={Businessmodulecss.createdBusinessWrapper}>
+                {createdBusiness?.map((datas) => {
+                  console.log(datas);
+                  return (
+                    <div
+                      key={datas.BusinessID}
+                      className={Businessmodulecss.createdBusiness}
+                      id={"createdBusiness_" + datas.BusinessID}
+                    >
                       <div
-                        key={datas.BusinessID}
-                        className={Businessmodulecss.createdBusiness}
-                        id={"createdBusiness_" + datas.BusinessID}
+                        className={Businessmodulecss.Business}
+                        id={"eachBusiness_" + datas.BusinessID}
                       >
-                        <div
-                          className={Businessmodulecss.Business}
-                          id={"eachBusiness_" + datas.BusinessID}
+                        <h2
+                          id={"businessNameH2_" + datas.BusinessID}
+                          className={Businessmodulecss.businessName}
                         >
-                          <h2
-                            id={"businessNameH2_" + datas.BusinessID}
-                            className={Businessmodulecss.businessName}
+                          {datas.BusinessName}
+                        </h2>
+                        <div
+                          className={Businessmodulecss.businessButton}
+                          id={"openEditWrapper" + datas.BusinessID}
+                        >
+                          <Button
+                            variant="contained"
+                            onClick={() =>
+                              openThisBusiness(
+                                datas.BusinessID,
+                                datas.BusinessName
+                              )
+                            }
                           >
-                            {datas.BusinessName}
-                          </h2>
-                          <div
-                            className={Businessmodulecss.businessButton}
-                            id={"openEditWrapper" + datas.BusinessID}
+                            open
+                          </Button>
+                          <Button
+                            size="small"
+                            sx={{
+                              "&:hover": {
+                                borderColor: "rgb(25, 118, 210)", // set your desired border color here
+                                borderWidth: 2,
+                                borderStyle: "solid",
+                              },
+                            }}
+                            onClick={() =>
+                              setopenBusinessEditingModal({
+                                Open: true,
+                                datas,
+                              })
+                            }
+                            variant="outlined"
+                            startIcon={<EditIcon />}
                           >
-                            <Button
-                              variant="contained"
-                              onClick={() =>
-                                openThisBusiness(
-                                  datas.BusinessID,
-                                  datas.BusinessName
-                                )
+                            Edit
+                          </Button>
+
+                          <Button
+                            variant="outlined"
+                            startIcon={<DeleteIcon />}
+                            color="error"
+                            size="small"
+                            id=""
+                            onClick={(event) => {
+                              event.preventDefault();
+                              setOpen({
+                                Action: "deleteBusiness",
+                                open: true,
+                                targetdBusiness: {
+                                  businessId: datas.BusinessID,
+                                  businessName: datas.BusinessName,
+                                  getBusiness: getBusiness,
+                                  setBusinessLists: setBusinessLists,
+                                },
+                              });
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                        <div
+                          id={"businessWrapper_" + datas.BusinessID}
+                          className={Businessmodulecss.updateWrapper}
+                        >
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              let id = "businessName_" + datas.BusinessID;
+                              let EditedBusinessName = $("#" + id).val();
+                              // alert(EditedBusinessName);
+                              // return;
+                              var pattern = /[^a-zA-Z0-9_]/;
+                              if (pattern.test(EditedBusinessName)) {
+                                alert(
+                                  "Business name should not contain special character or space ."
+                                );
+                                return;
+                              } else if (
+                                EditedBusinessName == datas.BusinessName
+                              ) {
+                                alert("No Change On Business Name ");
+                                return;
                               }
+
+                              setOpen({
+                                Action: "updateBusinesssName",
+                                open: true,
+                                targetdBusiness: {
+                                  getBusiness,
+                                  createdBusiness,
+                                  setcreatedBusiness,
+                                  setShowProgressBar,
+                                  businessId: datas.BusinessID,
+                                  businessName: datas.BusinessName,
+                                  getBusiness: getBusiness,
+                                  setBusinessLists: setBusinessLists,
+                                },
+                              });
+                            }}
+                          >
+                            <input
+                              id={"businessName_" + datas.BusinessID}
+                              placeholder="Business name"
+                              type="text"
+                            />
+                            <div
+                              className={Businessmodulecss.updateCancelWrapper}
+                              id={"updateCancelWrapper_" + datas.BusinessID}
                             >
-                              open
-                            </Button>
+                              <Button type="submit" variant="contained">
+                                Update
+                              </Button>
+                              <Button
+                                variant="contained"
+                                color="warning"
+                                onClick={() =>
+                                  cancelBusinessUpdate(datas.BusinessID)
+                                }
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {
+                  <>
+                    {employeerBusiness?.map((items) => {
+                      console.log(items);
+                      return (
+                        <div
+                          key={"EmployyersBusiness_" + items.employeeId}
+                          className={Businessmodulecss.Business}
+                        >
+                          <h1>{items.BusinessName}</h1>
+                          <div className={Businessmodulecss.businessButton}>
                             <Button
                               size="small"
+                              variant="contained"
+                              onClick={() => {
+                                openEmployeerBusiness(
+                                  items.BusinessID,
+                                  items.ownerId,
+                                  items.BusinessName
+                                );
+                              }}
+                              className=""
+                            >
+                              OPEN
+                            </Button>
+                            <Button
+                              disabled
                               sx={{
                                 "&:hover": {
                                   borderColor: "rgb(25, 118, 210)", // set your desired border color here
@@ -274,182 +399,42 @@ function Business() {
                                   borderStyle: "solid",
                                 },
                               }}
-                              onClick={() =>
-                                editThisBusiness(
-                                  datas.BusinessID,
-                                  datas.BusinessName
-                                )
-                              }
                               variant="outlined"
                               startIcon={<EditIcon />}
                             >
                               Edit
                             </Button>
-
                             <Button
+                              onClick={() => {
+                                // <MUIConfirm/
+                                setOpen({
+                                  Action: "RemoveEmployerBusiness",
+                                  open: true,
+                                  targetdBusiness: {
+                                    ownerId: items.ownerId,
+                                    businessId: items.BusinessID,
+                                    businessName: items.BusinessName,
+                                    getBusiness: getBusiness,
+                                    setBusinessLists: setBusinessLists,
+                                  },
+                                });
+                              }}
+                              // open.targetdBusiness.getBusiness
+                              size="small"
                               variant="outlined"
                               startIcon={<DeleteIcon />}
                               color="error"
-                              size="small"
-                              id=""
-                              onClick={(event) => {
-                                event.preventDefault();
-                                setOpen({
-                                  Action: "deleteBusiness",
-                                  open: true,
-                                  targetdBusiness: {
-                                    businessId: datas.BusinessID,
-                                    businessName: datas.BusinessName,
-                                    getBusiness: getBusiness,
-                                    setBusinessLists: setBusinessLists,
-                                  },
-                                });
-                              }}
                             >
-                              Delete
+                              Remove
                             </Button>
                           </div>
-                          <div
-                            id={"businessWrapper_" + datas.BusinessID}
-                            className={Businessmodulecss.updateWrapper}
-                          >
-                            <form
-                              onSubmit={(e) => {
-                                e.preventDefault();
-                                let id = "businessName_" + datas.BusinessID;
-                                let EditedBusinessName = $("#" + id).val();
-                                // alert(EditedBusinessName);
-                                // return;
-                                var pattern = /[^a-zA-Z0-9_]/;
-                                if (pattern.test(EditedBusinessName)) {
-                                  alert(
-                                    "Business name should not contain special character or space ."
-                                  );
-                                  return;
-                                } else if (
-                                  EditedBusinessName == datas.BusinessName
-                                ) {
-                                  alert("No Change On Business Name ");
-                                  return;
-                                }
-
-                                setOpen({
-                                  Action: "updateBusinesssName",
-                                  open: true,
-                                  targetdBusiness: {
-                                    getBusiness,
-                                    createdBusiness,
-                                    setcreatedBusiness,
-                                    setShowProgressBar,
-                                    businessId: datas.BusinessID,
-                                    businessName: datas.BusinessName,
-                                    getBusiness: getBusiness,
-                                    setBusinessLists: setBusinessLists,
-                                  },
-                                });
-                              }}
-                            >
-                              <input
-                                id={"businessName_" + datas.BusinessID}
-                                placeholder="Business name"
-                                type="text"
-                              />
-                              <div
-                                className={
-                                  Businessmodulecss.updateCancelWrapper
-                                }
-                                id={"updateCancelWrapper_" + datas.BusinessID}
-                              >
-                                <Button type="submit" variant="contained">
-                                  Update
-                                </Button>
-                                <Button
-                                  variant="contained"
-                                  color="warning"
-                                  onClick={() =>
-                                    cancelBusinessUpdate(datas.BusinessID)
-                                  }
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </form>
-                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                  {
-                    <>
-                      {employeerBusiness?.map((items) => {
-                        console.log(items);
-                        return (
-                          <div
-                            key={"EmployyersBusiness_" + items.employeeId}
-                            className={Businessmodulecss.Business}
-                          >
-                            <h1>{items.BusinessName}</h1>
-                            <div className={Businessmodulecss.businessButton}>
-                              <Button
-                                size="small"
-                                variant="contained"
-                                onClick={() => {
-                                  openEmployeerBusiness(
-                                    items.BusinessID,
-                                    items.ownerId,
-                                    items.BusinessName
-                                  );
-                                }}
-                                className=""
-                              >
-                                OPEN
-                              </Button>
-                              <Button
-                                disabled
-                                sx={{
-                                  "&:hover": {
-                                    borderColor: "rgb(25, 118, 210)", // set your desired border color here
-                                    borderWidth: 2,
-                                    borderStyle: "solid",
-                                  },
-                                }}
-                                variant="outlined"
-                                startIcon={<EditIcon />}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                onClick={() => {
-                                  // <MUIConfirm/
-                                  setOpen({
-                                    Action: "RemoveEmployerBusiness",
-                                    open: true,
-                                    targetdBusiness: {
-                                      ownerId: items.ownerId,
-                                      businessId: items.BusinessID,
-                                      businessName: items.BusinessName,
-                                      getBusiness: getBusiness,
-                                      setBusinessLists: setBusinessLists,
-                                    },
-                                  });
-                                }}
-                                // open.targetdBusiness.getBusiness
-                                size="small"
-                                variant="outlined"
-                                startIcon={<DeleteIcon />}
-                                color="error"
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </>
-                  }
-                </div>
+                      );
+                    })}
+                  </>
+                }
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -458,6 +443,13 @@ function Business() {
       {console.log("ShowSuccessError == ", ShowSuccessError)}
       {ShowSuccessError?.show && (
         <SuccessOrError request={ShowSuccessError.message} />
+      )}
+      {openBusinessEditingModal.Open && (
+        <ModalToEditBusinessName
+          getBusiness={getBusiness}
+          setopenBusinessEditingModal={setopenBusinessEditingModal}
+          openBusinessEditingModal={openBusinessEditingModal}
+        />
       )}
     </>
   );

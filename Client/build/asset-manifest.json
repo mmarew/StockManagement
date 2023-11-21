@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.d2abd54d.css",
-    "main.js": "/static/js/main.8e31b978.js",
+    "main.css": "/static/css/main.405883f6.css",
+    "main.js": "/static/js/main.11c0c080.js",
     "static/media/MASETAWOSHAICON.svg": "/static/media/MASETAWOSHAICON.54a2fd866e0f5c7049127a306c6f27f5.svg",
     "static/media/iconEmployee.svg": "/static/media/iconEmployee.9557ca5a58a3c4a7c853ccd11236fd67.svg",
     "static/media/SupportBlack.svg": "/static/media/SupportBlack.255c7a81f9ee6676465397a000f89417.svg",
@@ -14,18 +14,18 @@
     "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
     "static/media/logout-svgrepo-com.svg": "/static/media/logout-svgrepo-com.6ed8e0b8d5f8b18c37ef36f1c5ad6651.svg",
     "index.html": "/index.html",
-    "static/media/iconSearch.svg": "/static/media/iconSearch.1114e16c4aac3f925fe690d28f03a282.svg",
+    "static/media/BusinessWhite.svg": "/static/media/BusinessWhite.01b66c26e81faad2e41dab90d5fdcc9f.svg",
     "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
     "static/media/clarity_home-line.svg": "/static/media/clarity_home-line.b08dc7e47bf7fa7ce7101648341dcf3f.svg",
     "static/media/businessBlack.svg": "/static/media/businessBlack.c10ea18849b14918f42a74c312362f38.svg",
     "static/media/iconHomeBlack.svg": "/static/media/iconHomeBlack.35d540e138b4a8c56e2e83323d479aff.svg",
     "static/media/icons_transaction.svg": "/static/media/icons_transaction.5dc8f7bb6e3d439ebc2e419fe814b4d2.svg",
     "static/media/transactionBlack.svg": "/static/media/transactionBlack.d8c725ff7032a88e7fbbee51b36b3c6a.svg",
-    "main.d2abd54d.css.map": "/static/css/main.d2abd54d.css.map",
-    "main.8e31b978.js.map": "/static/js/main.8e31b978.js.map"
+    "main.405883f6.css.map": "/static/css/main.405883f6.css.map",
+    "main.11c0c080.js.map": "/static/js/main.11c0c080.js.map"
   },
   "entrypoints": [
-    "static/css/main.d2abd54d.css",
-    "static/js/main.8e31b978.js"
+    "static/css/main.405883f6.css",
+    "static/js/main.11c0c080.js"
   ]
 }

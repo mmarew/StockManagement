@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  TextField,
 } from "@mui/material";
 import DeleteBusiness from "../Business/DeleteBusiness";
 import UpdateBusinesssName from "../Business/UpdateBusinesssName";
@@ -21,6 +22,7 @@ function MUIConfirm({
   setConfirmDelete,
   ConfirmDelete,
 }) {
+  let [userPassword, setUserPassword] = useState();
   const handleClose = async (confirmed) => {
     setSuccessError({});
     let { businessId, businessName, getBusiness } = targetdBusiness;
@@ -36,7 +38,8 @@ function MUIConfirm({
         let responce = await DeleteBusiness(
           businessId,
           businessName,
-          getBusiness
+          getBusiness,
+          userPassword
         );
         if (responce == "deletedWell")
           setSuccessError({
@@ -48,7 +51,7 @@ function MUIConfirm({
           setSuccessError({
             ...ShowSuccessError,
             show: true,
-            message: "Fail",
+            message: responce,
           });
       } else if (Action == "updateBusinesssName") {
         const { setShowProgressBar, setcreatedBusiness, createdBusiness } =
@@ -94,7 +97,7 @@ function MUIConfirm({
 
   return (
     <div>
-      <Dialog open={open?.open} onClose={() => handleClose(false)}>
+      <Dialog open={open?.open}>
         <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -102,8 +105,43 @@ function MUIConfirm({
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleClose(false)}>Cancel</Button>
-          <Button onClick={() => handleClose(true)}>Confirm</Button>
+          <form
+            style={{
+              width: "80%",
+              margin: "auto",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleClose(true);
+            }}
+          >
+            <TextField
+              value={userPassword}
+              onChange={(e) => setUserPassword(e.target.value)}
+              fullWidth
+              required
+              label={"Enter Password to verify"}
+            />
+            <br />
+            <div>
+              <Button
+                color="error"
+                variant="contained"
+                onClick={() => handleClose(false)}
+              >
+                Cancel
+              </Button>
+              &nbsp; &nbsp; &nbsp;
+              <Button variant="contained" type="submit">
+                Confirm
+              </Button>
+            </div>
+            <br />
+          </form>
         </DialogActions>
       </Dialog>
     </div>

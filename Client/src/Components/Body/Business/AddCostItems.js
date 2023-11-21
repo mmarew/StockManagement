@@ -6,6 +6,7 @@ import $ from "jquery";
 import { Button, TextField } from "@mui/material";
 function AddCostItems() {
   let serverAddress = localStorage.getItem("targetUrl");
+  const businessId = localStorage.getItem("businessId");
   const [data, setdata] = useState({});
   let collectInputInformation = (e) => {
     console.log(e.target.value);
@@ -36,6 +37,7 @@ function AddCostItems() {
     $(".LinearProgress").css("display", "block");
     console.log("data", data);
     data.token = token;
+    data.businessId = businessId;
     let response = await axios.post(serverAddress + "AddCostItems/", data);
     console.log("response", response);
     if (response.data.data == "Registered successfully") {

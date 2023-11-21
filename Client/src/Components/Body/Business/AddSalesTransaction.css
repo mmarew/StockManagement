@@ -7,6 +7,6 @@
 }
 .addSalesWrapper {
   background-color: white;
-  width: fit-content;
-  padding: 30px;
+  /* width: fit-content; */
+  padding: 30px 0;
 }

@@ -50,26 +50,14 @@ const AddProducts = () => {
     $(".LinearProgress").hide();
   };
 
-  useEffect(() => {
-    let gateDate = async () => {
-      let date = document.getElementById("productDate").value;
-      console.log("date == ", date);
-      if (date == "") {
-        date = await currentDates();
-      }
-      console.log(date);
-      document.getElementById("productDate").value = date;
-    };
-    gateDate();
-  }, []);
   return (
     <div>
       <h4 className="registrationFormToproducts">Forms To Register Products</h4>
 
       <form id="registerProductsForm" onSubmit={registerProducts} method="post">
         <div>Date</div>
-        <br />
-        <TextField required id="productDate" type="date" label="Date" />
+
+        <TextField required id="productDate" type="date" />
         <br />
         <TextField
           className="registerProducts"

@@ -6,6 +6,7 @@ function AddSalesTransaction() {
   const [selectedValue, setSelectedValue] = useState("default");
   let myNavigate = useNavigate();
   useEffect(() => {
+    myNavigate("addSingleSales");
     // $(".salesOrCosts").hide();
   }, []);
 
@@ -22,7 +23,7 @@ function AddSalesTransaction() {
 
   return (
     <div className="addSalesWrapper">
-      <Select
+      {/* <Select
         sx={{ margin: "auto", marginLeft: "20px" }}
         value={selectedValue}
         className="selectSalesMenue"
@@ -31,7 +32,7 @@ function AddSalesTransaction() {
         <MenuItem value="default">Choose Sales type</MenuItem>
         <MenuItem value="totalSales">Total Sales</MenuItem>
         <MenuItem value="singleSales">Single Sales</MenuItem>
-      </Select>
+      </Select> */}
       <Outlet />
     </div>
   );

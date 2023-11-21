@@ -43,6 +43,7 @@ const GetCreditListEdit = ({
   setshowCreditListDetails,
   getUsersCreditList,
 }) => {
+  let openedBusiness = localStorage.getItem("openedBusiness");
   let { salesWay } = showCreditListDetails;
   console.log("salesWay", salesWay);
   console.log("showCreditListDetails.data", showCreditListDetails.data);
@@ -142,6 +143,9 @@ const GetCreditListEdit = ({
                       </TableCell>
                       <TableCell>
                         <Button
+                          disabled={
+                            openedBusiness == "employersBusiness" ? true : false
+                          }
                           onClick={() => deleteCreditPaymentInfo(info, id)}
                         >
                           Delete

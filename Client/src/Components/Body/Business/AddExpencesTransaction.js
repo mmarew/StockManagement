@@ -3,11 +3,16 @@ import React, { useEffect, useState } from "react";
 import currentDates from "../Date/currentDate";
 import AddCostTransactionCss from "./AddCostTransaction.module.css";
 import $ from "jquery";
-
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, IconButton, Modal, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-function AddCostTransaction() {
+import { ButtonProcessing } from "../../utility/Utility";
+import { ConsumeableContext } from "../UserContext/UserContext";
+function AddExpencesTransaction() {
+  const { setShowProgressBar } = ConsumeableContext();
+  const [Procecssing, setProcecssing] = useState(false);
+  const businessId = localStorage.getItem("businessId");
+  const token = localStorage.getItem("storeToken");
   let Navigate = useNavigate();
   const [RegisterableCots, setRegisterableCots] = useState([{}]);
   // open={open} onClose={handleClose}
@@ -22,9 +27,16 @@ function AddCostTransaction() {
   let businessName = localStorage.getItem("businessName");
   let getListOfCosts = async () => {
     $(".LinearProgress").show();
+    setProcecssing(true);
+    // return;
+    setShowProgressBar(true);
     let response = await axios.post(serverAddress + "getCostLists/", {
       businessName,
+      businessId,
+      token,
     });
+    setShowProgressBar(false);
+    setProcecssing(false);
     console.log("response", response);
     if (response.data == "err") {
       alert(response.data.err);
@@ -55,12 +67,17 @@ function AddCostTransaction() {
     $(".LinearProgress").show();
     let copyOfForm = { ...Formdata };
     copyOfForm.costData = target;
+    copyOfForm.token = token;
+    copyOfForm.businessId = businessId;
     console.log("copyOfForm", copyOfForm, "Formdata  ==", Formdata);
     // return;
+    setProcecssing(true);
+    // return;
     let response = await axios.post(
-      `${serverAddress}registerCostTransaction/`,
+      `${serverAddress}registerExpenceTransaction/`,
       copyOfForm
     );
+    setProcecssing(false);
     console.log("response ", response);
     let data = response.data.data;
     if (data == "registered before") {
@@ -190,7 +207,7 @@ function AddCostTransaction() {
                   <br />
                   <h3>Cost Transaction Registration Form</h3>
                   <br />
-                  <div>Choose Date</div>
+                  <div> Select Date</div>
 
                   <TextField
                     className={AddCostTransactionCss.formInputToTransaction}
@@ -224,9 +241,13 @@ function AddCostTransaction() {
                     type="text"
                   />
                   <br />
-                  <Button variant="contained" color="primary" type="submit">
-                    Submit
-                  </Button>
+                  {!Procecssing ? (
+                    <Button variant="contained" color="primary" type="submit">
+                      Submit
+                    </Button>
+                  ) : (
+                    <ButtonProcessing />
+                  )}
                 </form>
               );
             })}
@@ -235,4 +256,4 @@ function AddCostTransaction() {
     </div>
   );
 }
-export default AddCostTransaction;
+export default AddExpencesTransaction;

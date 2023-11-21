@@ -1,0 +1,11 @@
+1)   icon name to mobile size 
+2)   decimal acceptance of inputs
+3)   date of default should be seted
+4)   Number should start from 1 not from 0
+5)   confirm payment => collect credit(recived payment)
+6)   single sales suggestion should be applied
+7)   unit price should be saling price
+8)   sales =>purchase and sales
+9)   separet sales and purchase 
+10)  show price and cost 
+11)  edit unit cost,unit price;

@@ -7,6 +7,7 @@ import EditProfile from "./EditProfile";
 import axios from "axios";
 import $ from "jquery";
 import LeftSideBusiness from "../Business/LeftSideBusiness";
+import { Box, Button, Modal, TextField } from "@mui/material";
 function Profile() {
   const [targetRender, settargetRender] = useState("");
   let navigate = useNavigate();
@@ -20,43 +21,30 @@ function Profile() {
       navigate("/login");
     }
   }, [navigate, storeToken]);
-
+  const [deleteProfileModal, setdeleteProfileModal] = useState(false);
+  const [Password, setPassword] = useState(null);
   let deleteProfile = async () => {
     $("button").removeClass(ProfileCss.ActiveButton);
     settargetRender("DeleteProfile");
-    confirmAlert({
-      title: "Confirm to delete",
-      message: "Are you sure to do this?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: async () => {
-            let Password = prompt("Please enter your Password");
-            if (Password != null)
-              if (Password.length > 0) {
-                let responces = await axios.post(serverUrl + "deleteUsers/", {
-                  storeToken,
-                  Password,
-                });
-                console.log("responces", responces);
-                if (responces.data.data == "deleted data") {
-                  alert("you are deleted from stock management system");
-                  localStorage.removeItem("storeToken");
-                  navigate("/login");
-                } else if (responces.data.data == "wrong password") {
-                  alert("wrong password confirmation");
-                }
-              }
-          },
-        },
-        {
-          label: "No",
-          onClick: () => "",
-        },
-      ],
-    });
+
+    if (Password != null)
+      if (Password.length > 0) {
+        let responces = await axios.post(serverUrl + "deleteUsers/", {
+          storeToken,
+          Password,
+        });
+        console.log("responces", responces);
+        if (responces.data.data == "deleted data") {
+          alert("you are deleted from stock management system");
+          localStorage.removeItem("storeToken");
+          navigate("/login");
+        } else if (responces.data.data == "wrong password") {
+          alert("wrong password confirmation");
+        }
+      }
   };
   let handleEditeProfile = (e) => {
+    setEditProfileOpen(true);
     $(".ActiveButton").removeClass(ProfileCss.ActiveButton);
     $(e.target).addClass(ProfileCss.ActiveButton);
     settargetRender("EditProfile");
@@ -69,6 +57,7 @@ function Profile() {
       navigate("/login");
     }
   };
+  const [EditProfileOpen, setEditProfileOpen] = useState(true);
   return (
     <div className={ProfileCss.ProfileWrapper}>
       {window.innerWidth > 768 && (
@@ -78,19 +67,81 @@ function Profile() {
       )}
       <div>
         {/* <Button sx={{ margin: "auto" }} variant="contained" color="primary">
-          Home
-        </Button> */}
-        <div className={ProfileCss.EditDeleteProfileWrapper}>
-          <button onClick={handleEditeProfile}>Edit My Profile</button>
-          <button onClick={deleteProfile}>Delete My profile</button>
-          <button onClick={Logout} className={ProfileCss.LogoutButton}>
-            Logout My profile
-          </button>
+        Home
+      </Button> */}
+        <div className={ProfileCss.buttonContainer}>
+          <Button
+            className={ProfileCss.editButton}
+            onClick={handleEditeProfile}
+          >
+            Edit My Profile
+          </Button>
+          <Button
+            className={ProfileCss.deleteButton}
+            onClick={() => {
+              settargetRender("DeleteProfile");
+              setdeleteProfileModal(true);
+            }}
+          >
+            Delete My Profile
+          </Button>
+          <Button className={ProfileCss.logoutButton} onClick={Logout}>
+            Logout
+          </Button>
         </div>
-        {targetRender == "EditProfile" ? (
-          <EditProfile />
-        ) : targetRender == "DeleteProfile" ? (
-          ""
+        {targetRender === "EditProfile" ? (
+          <EditProfile
+            EditProfileOpen={EditProfileOpen}
+            setEditProfileOpen={setEditProfileOpen}
+          />
+        ) : targetRender === "DeleteProfile" ? (
+          <Modal open={deleteProfileModal}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <form
+                className={ProfileCss.deleteProfileForm}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  deleteProfile();
+                }}
+              >
+                <TextField
+                  className={ProfileCss.passwordInput}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                  }}
+                  value={Password}
+                  label="Enter Your Password"
+                />
+                <br />
+                <br />
+                <Box className={ProfileCss.deleteProfileButtons}>
+                  <Button
+                    className={ProfileCss.deleteSubmitButton}
+                    variant="contained"
+                    type="submit"
+                  >
+                    Submit
+                  </Button>
+                  <Button
+                    className={ProfileCss.deleteCloseButton}
+                    onClick={() => {
+                      setdeleteProfileModal(false);
+                    }}
+                    variant="contained"
+                    color="error"
+                  >
+                    Close
+                  </Button>
+                </Box>
+              </form>
+            </Box>
+          </Modal>
         ) : (
           ""
         )}

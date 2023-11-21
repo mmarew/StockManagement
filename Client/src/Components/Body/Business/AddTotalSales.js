@@ -23,14 +23,15 @@ function AddTotalSales({ Time }) {
   const [RegistrationModal, setRegistrationModal] = useState();
   let serverAddress = localStorage.getItem("targetUrl");
   const [ProductsList, setProductsList] = useState("Wait");
-  const [CollectedProducts, setCollectedProducts] = useState({});
+  const [CollectedProducts, setCollectedProducts] = useState({
+    transactionDates: currentDates(),
+  });
+  // alert(currentDates());
   const [selectedTime, setselectedTime] = useState();
   let token = localStorage.getItem("storeToken");
   let BusinessId = localStorage.getItem("businessId");
   let businessName = localStorage.getItem("businessName");
   let collectFormData = (e) => {
-    let dates = $("#dateId").val();
-    console.log(dates);
     setCollectedProducts({
       ...CollectedProducts,
       [e.target.name]: e.target.value,
@@ -68,6 +69,7 @@ function AddTotalSales({ Time }) {
     CollectedProducts.ProductsList.map((items) => {
       if (ProductId == items.ProductId) copy.push(items);
     });
+
     let copyOfCollection = { ...CollectedProducts };
     copyOfCollection.ProductsList = copy;
     $(".LinearProgress").show();
@@ -83,6 +85,8 @@ function AddTotalSales({ Time }) {
     copyOfCollection["registrationSource" + ProductId] = "Total";
     console.log("copyOfCollection", copyOfCollection);
     // return;
+    copyOfCollection.token = token;
+    copyOfCollection.businessId = BusinessId;
     let response = await axios.post(
       serverAddress + "registerTransaction/",
       copyOfCollection
@@ -143,7 +147,7 @@ function AddTotalSales({ Time }) {
               {ProductsList?.map((item) => {
                 return (
                   <div className={AddTotalSalesCss.eachItem}>
-                    <p> {item.productName}</p>
+                    <p style={{ textAlign: "center" }}> {item.productName}</p>
                     <Button
                       onClick={() => {
                         setCollectedProducts({});
@@ -154,7 +158,7 @@ function AddTotalSales({ Time }) {
                       variant="contained"
                       color="primary"
                     >
-                      Add Transaction
+                      Register
                     </Button>
                   </div>
                 );
@@ -199,7 +203,7 @@ function AddTotalSales({ Time }) {
               right: 0,
             }}
           >
-            <CloseIcon sx={{ color: "red" }} />
+            <CloseIcon sx={{ color: "red", marginRight: "20px" }} />
           </IconButton>
 
           {RegistrableProducts.map((item) => {
@@ -216,23 +220,29 @@ function AddTotalSales({ Time }) {
                 onSubmit={(e) => sendFormDataToServer(e, item.ProductId)}
               >
                 <div style={{ marginTop: "100px" }}>
-                  Registration of product.
+                  Registration Form Of Product.
                 </div>
                 <div key={"itemTransAction_" + item.ProductId}>
                   <div className={AddTotalSalesCss.productNameTransaction}>
                     <h4>{item.productName}</h4>
                     <br />
                   </div>
+                  <label>Select date</label>
                   <TextField
                     onChange={(e) => {
                       collectFormData(e, item.ProductId);
                       setselectedTime(e.target.value);
                     }}
+                    value={CollectedProducts.dates}
                     required
                     type="date"
                     name="dates"
                     id={AddTotalSalesCss.dateIdInTotalSales}
                   />
+                  {console.log(
+                    "CollectedProducts.dates",
+                    CollectedProducts.dates
+                  )}
                   <br />
                   <TextField
                     required

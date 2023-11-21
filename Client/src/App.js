@@ -1,8 +1,9 @@
 import "./App.css";
 import Transaction from "./Components/Body/Transaction/Transaction";
 import Report from "./Components/Body/Report/Report";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Profile from "./Components/Body/Profile/Profile";
+import AddExpencesTransaction from "./Components/Body/Business/AddExpencesTransaction";
 import Business from "./Components/Body/Business/Business";
 import Login from "./Components/Body/Login/Login";
 import Register from "./Components/Body/Register/Register";
@@ -16,7 +17,7 @@ import RegisterEmployersProducts from "./Components/Body/Business/RegisterEmploy
 import Help from "./Components/Hepl/Help";
 import AddSingleSales from "./Components/Body/Business/AddSingleSales";
 import AddTotalSales from "./Components/Body/Business/AddTotalSales";
-import AddCostTransaction from "./Components/Body/Business/AddCostTransaction";
+
 import AddSalesTransaction from "./Components/Body/Business/AddSalesTransaction";
 import GetMinimumQty from "./Components/Body/Business/GetMinimumQty";
 import GetMaximumSales from "./Components/Body/Business/GetMaximumSales";
@@ -24,6 +25,10 @@ import NavBar from "./Components/Nav/MuiNav";
 import ForgetPassword from "./Components/Body/ForgetPassword/ForgetPassword";
 import GetCreditLists from "./Components/Body/Business/GetCreditLists";
 import CheckIfUnreportedData from "./Components/Body/Business/CheckIfUnreportedData";
+import { Badge, Button, Tab, Tabs } from "@mui/material";
+import { useState } from "react";
+import BadgeIcons from "./Components/utility/BadgeIcons";
+import OpenBusinessHome from "./Components/Body/Business/OpenBusinessHome";
 function App() {
   return (
     <div className="App">
@@ -124,22 +129,7 @@ function App() {
           />
 
           <Route path="/OpenBusiness" element={<OpenBusiness />}>
-            <Route
-              path=""
-              element={
-                <>
-                  <CheckIfUnreportedData />
-                  <GetCreditLists
-                    dateRange={{
-                      fromDate: "notInDateRange",
-                      toDate: "notInDateRange",
-                    }}
-                  />
-                  <GetMinimumQty />
-                  <GetMaximumSales />
-                </>
-              }
-            />
+            <Route path="" element={<OpenBusinessHome />} />
 
             <Route path="additems" element={<AddItems />} />
             <Route path="search" element={<SearchProducts />} />
@@ -156,7 +146,7 @@ function App() {
               </Route>
               <Route
                 path="AddCostTransaction"
-                element={<AddCostTransaction />}
+                element={<AddExpencesTransaction />}
               ></Route>
 
               {/* <Route

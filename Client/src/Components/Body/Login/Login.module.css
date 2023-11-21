@@ -62,11 +62,14 @@
   display: flex;
   /* text-align: center; */
   justify-content: center;
+  align-items: center;
   width: fit-content;
   margin: auto;
 }
-.titleTohaveAccount span:nth-child(2) {
+.RegisterTex {
   color: #6998ff;
+  text-decoration: none;
+  /* margin-bottom: 10px; */
 }
 #LinearProgress {
   display: none;
@@ -77,7 +80,7 @@
   margin-top: 10px;
 }
 .signupRegister {
-  cursor: pointer;
+  /* cursor: pointer; */
   text-decoration: none;
   margin-top: 10px;
   display: flex;

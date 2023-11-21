@@ -432,12 +432,13 @@ function SearchExpenceTransaction({
           Net cash flow is(total sales - total purchase - total cost - sold in
           credit + collected credits)=
           {CurrencyFormatter(
-            TotalSalesRevenue -
-              TotalPurchaseCost -
-              TotalCostAmount -
-              accountRecivableAmt +
-              collectedMoney.Money -
-              unTimeRecivableCollected
+            TotalSalesRevenue - openedBusiness == "myBusiness"
+              ? TotalPurchaseCost
+              : 0 -
+                  TotalCostAmount -
+                  accountRecivableAmt +
+                  collectedMoney.Money -
+                  unTimeRecivableCollected
           )}
         </>
       ) : (
@@ -447,7 +448,7 @@ function SearchExpenceTransaction({
             Note:- On this day you have not expencess.
             <br />
             <Button sx={{ color: "black", cursor: "default" }}>
-              Total Sales Revenue={TotalSalesRevenue}
+              Total Sales Revenue={CurrencyFormatter(TotalSalesRevenue)}
             </Button>
             {/* {JSON.stringify(collectedMoney.Detail)} */}
             <br />
@@ -460,7 +461,10 @@ function SearchExpenceTransaction({
             </Button>{" "}
             <br />
             <Button sx={{ color: "black", cursor: "default" }}>
-              Total Purchase Cost = {CurrencyFormatter(TotalPurchaseCost)}
+              Total Purchase Cost ={" "}
+              {openedBusiness == "myBusiness"
+                ? CurrencyFormatter(TotalPurchaseCost)
+                : 0}
             </Button>{" "}
             <br />
             <Button sx={{ color: "black", cursor: "default" }}>
@@ -473,12 +477,13 @@ function SearchExpenceTransaction({
               Credit)&nbsp;&nbsp;&nbsp;
               {
                 CurrencyFormatter(
-                  TotalSalesRevenue -
-                    TotalPurchaseCost -
-                    TotalCostAmount -
-                    accountRecivableAmt +
-                    collectedMoney.Money -
-                    unTimeRecivableCollected
+                  TotalSalesRevenue - openedBusiness == "myBusiness"
+                    ? TotalPurchaseCost
+                    : 0 -
+                        TotalCostAmount -
+                        accountRecivableAmt +
+                        collectedMoney.Money -
+                        unTimeRecivableCollected
                 )
                 // - setAccountRecivableCollected
               }

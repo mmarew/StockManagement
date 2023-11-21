@@ -114,14 +114,14 @@ function Login() {
           >
             Login
           </Button>
-          <Link className={Loginmodulecss.signupRegister} to="/register">
+          <div className={Loginmodulecss.signupRegister}>
             <div className={Loginmodulecss.titleTohaveAccount}>
               <span> Don't have an account? </span>
-              <span className={Loginmodulecss.RegisterTex}>
+              <Link to="/register" className={Loginmodulecss.RegisterTex}>
                 &nbsp; Register.
-              </span>
+              </Link>
             </div>
-          </Link>
+          </div>
           <div className={Loginmodulecss.helpClass}>
             <br />
             <span>If you need help please </span>

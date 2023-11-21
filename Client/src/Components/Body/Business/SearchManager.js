@@ -14,6 +14,9 @@ function SearchManager() {
   const [selectedValue, setSelectedValue] = useState("Default");
   let serverAddress = localStorage.getItem("targetUrl");
   const [InputValue, setInputValue] = useState({});
+  useEffect(() => {
+    setSearchTypeValueError("");
+  }, [InputValue.selectSearches]);
   const [searchTarget, setsearchTarget] = useState();
   let businessName = localStorage.getItem("businessName");
   // when we type products name
@@ -60,6 +63,10 @@ function SearchManager() {
     $(".LinearProgress").css("display", "block");
     console.log("InputValue", InputValue.fromDate, InputValue.toDate);
     // return;
+    let businessId = localStorage.getItem("businessId");
+    let token = localStorage.getItem("storeToken");
+    InputValue.token = token;
+    InputValue.businessId = businessId;
     setRequestedSearch("waitting ....");
     setAccountRecivableAmt(0);
     setCollectedMoney(0);
@@ -102,13 +109,17 @@ function SearchManager() {
           fromDate={InputValue.fromDate}
           response={response}
           requestFrom="showExpencesList"
+          searchTarget={searchTarget}
         />
       );
       return;
     } else if (searchTarget == "TRANSACTION") {
       setRequestedSearch(
         <SearchSales_Purchase
+          searchTarget={searchTarget}
           response={response}
+          toDate={InputValue.toDate}
+          fromDate={InputValue.fromDate}
           requestFrom="SearchManagerOnlySalesAndPurchase"
         />
       );
@@ -185,7 +196,7 @@ function SearchManager() {
           <MenuItem value="TRANSACTION">SINGLE TRANSACTION</MenuItem>
           <MenuItem value="ALLTRANSACTION">ALL TRANSACTION</MenuItem>
           <MenuItem value="PRODUCTS">PRODUCTS</MenuItem>
-          <MenuItem value="COSTS">COSTS</MenuItem>
+          <MenuItem value="COSTS">EXPENCES</MenuItem>
         </Select>
         {SearchTypeValueError}
         <div className="searchInputs">

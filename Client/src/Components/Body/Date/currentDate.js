@@ -11,13 +11,6 @@ export default function currentDates() {
     day = "0" + day;
   }
   let currentDate = year + "-" + month + "-" + day;
-  // let satedDate = $("#dateId").val();
-  // //console.log("satedDate is = " + satedDate);
-  // if (satedDate == "") {
-  //   $("#dateId").val(currentDate);
-  //   satedDate = currentDate;
-  // }
-  //console.log(currentDate);
   return currentDate;
 }
 export function DateFormatter(dateTimeString, timeZone) {

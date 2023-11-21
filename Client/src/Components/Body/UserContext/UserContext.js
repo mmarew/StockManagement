@@ -3,7 +3,7 @@ let InitialContext = createContext();
 function UserContext(props) {
   const [ShowProgressBar, setShowProgressBar] = useState(true);
   // This is data where sold by credit and money is not collected so we need it to deduct from sold in cash
-
+  const [Proccessing, setProccessing] = useState(false);
   const [accountRecivableAmt, setAccountRecivableAmt] = useState(0);
   // This is data where sold by credit and collected in our selection time range  so we need it to add in net cash-flow
   const [collectedMoney, setCollectedMoney] = useState({
@@ -29,6 +29,8 @@ function UserContext(props) {
   return (
     <InitialContext.Provider
       value={{
+        Proccessing,
+        setProccessing,
         singleSalesInputValues,
         setSinlgeSalesInputValues,
         ownersName,

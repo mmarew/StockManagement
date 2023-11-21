@@ -16,7 +16,7 @@ function SuccessOrError({ request }) {
   const handleError = (event) => {
     // event.preventDefault();
     setOpen(true);
-    setMessage("Error!");
+    setMessage(request);
     setType("error");
   };
 

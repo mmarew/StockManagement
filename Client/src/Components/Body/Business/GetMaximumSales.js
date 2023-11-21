@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import $ from "jquery";
+
 import GetMaximumStyle from "./GetMaximumSales.module.css";
 import CurrencyFormat from "react-currency-format";
 import {
+  Box,
   Button,
   MenuItem,
   Paper,
@@ -14,12 +15,17 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Typography,
 } from "@mui/material";
 import axios from "axios";
-function GetMaximumSales() {
+import { ConsumeableContext } from "../UserContext/UserContext";
+function GetMaximumSales({ Notifications, viewInTable }) {
+  let { setShowProgressBar, setProccessing } = ConsumeableContext();
+
   const [selectedValue, setSelectedValue] = useState("default");
   const [MaximumDataList, setMaximumDataList] = useState([]);
   const [SelectedTime, setSelectedTime] = useState("");
+  let businessId = localStorage.getItem("businessId");
   let token = localStorage.getItem("storeToken");
   let serverAddress = localStorage.getItem("targetUrl");
   let businessName = localStorage.getItem("businessName");
@@ -102,7 +108,7 @@ function GetMaximumSales() {
     }
   }, [SelectedTime]);
   useEffect(() => {
-    let selectTimeRange = $("#selectTimeRange").val();
+    let selectTimeRange = "";
     // console.log("selectTimeRange = ", selectTimeRange);
     if (
       selectTimeRange == undefined ||
@@ -126,25 +132,28 @@ function GetMaximumSales() {
     if (Object.keys(DateRange).length < 2) {
       return;
     }
-
-    $(".LinearProgress").css("display", "block");
+    setShowProgressBar(true);
     let responce = await axios.post(serverAddress + "getMaximumSales/", {
       token,
       businessName,
       DateRange,
+      businessId,
     });
-    $(".LinearProgress").css("display", "none");
-    // console.log(responce);
+    setShowProgressBar(false);
+
+    console.log("@getMaximumSales", responce);
     let data = responce.data.data;
-    let copyOfData = data?.map((item) => {
-      return item;
-    });
+    if (data == `you are not owner of this business`) {
+      return alert(data);
+    }
+    let copyOfData = [...data];
     let collectedData = [],
       dataFound = "";
     data.map((item) => {
       // console.log(item);
       dataFound = "No";
       let salesQty = 0,
+        creditsalesQty = 0,
         purchaseQty = 0,
         inventory = 0,
         ProductId = item.ProductId,
@@ -156,18 +165,21 @@ function GetMaximumSales() {
           return;
         }
       }
+      // console.log("copyOfData", copyOfData);
       copyOfData.map((d, index) => {
-        // console.log(d);
+        // return;
         if (d.ProductId == item.ProductId) {
           dataFound = "yes";
           // console.log(d.ProductId, item.ProductId);
           salesQty += d.salesQty;
+          creditsalesQty += d.creditsalesQty;
           purchaseQty += d.purchaseQty;
           inventory += d.Inventory;
           broken += d.wrickages;
           // console.log(salesQty, purchaseQty, inventory, broken);
         }
       });
+      ob.creditsalesQty = creditsalesQty;
       ob.productName = item.productName;
       ob.unitCost = item.unitCost;
       ob.unitCost = item.unitCost;
@@ -182,41 +194,62 @@ function GetMaximumSales() {
         collectedData.push(ob);
       }
     });
-    // console.log("collectedData", collectedData);
+    console.log("collectedData", collectedData);
+    // return;
+    let x = [
+      {
+        Inventory: -46474,
+        ProductId: 1,
+        creditsalesQty: 53014,
+        productName: "Adult diper large size",
+        purchaseQty: 6560,
+        salesQty: 0,
+        unitCost: 1500,
+        unitPrice: 1700,
+        wrickages: 20,
+      },
+      {
+        Inventory: 40,
+        ProductId: 2,
+        creditsalesQty: 50,
+        productName: "item 1",
+        purchaseQty: 100,
+        salesQty: 0,
+        unitCost: 500,
+        unitPrice: 650,
+        wrickages: 10,
+      },
+      {
+        Inventory: 55,
+        ProductId: 3,
+        creditsalesQty: 0,
+        productName: "item abcd",
+        purchaseQty: 505,
+        salesQty: 450,
+        unitCost: 300,
+        unitPrice: 350,
+        wrickages: 0,
+      },
+    ];
+    collectedData.sort((a, b) => {
+      const totalSalesA = (a.salesQty + a.creditsalesQty) * a.purchaseQty;
+      const totalSalesB = (b.salesQty + b.creditsalesQty) * b.purchaseQty;
+
+      return totalSalesB - totalSalesA;
+    });
     if (collectedData.length == 0) return;
-    let newCollection = [];
-    newCollection.push(collectedData[0]);
-    for (let index = 1; index < collectedData.length; index++) {
-      let item = collectedData[index];
-      let ProductId = item.ProductId,
-        productName = item.productName,
-        unitCost = item.unitCost,
-        purchaseQty = item.purchaseQty,
-        salesQty = item.salesQty;
-      // console.log(newCollection);
-      let newLength = newCollection.length;
-      for (let i = 0; i < newLength; i++) {
-        let unit = newCollection[i];
 
-        if (purchaseQty * item.unitCost >= unit.purchaseQty * unit.unitCost) {
-          newCollection.splice(i, 0, item);
-          i = newLength;
-        }
-      }
-    }
+    console.log(collectedData, collectedData);
 
-    // console.log(newCollection);
-    setMaximumDataList(newCollection);
+    setMaximumDataList(collectedData);
   };
 
   let handleChangeOnDate = (e) => {
     // console.log(e.target.name, e.target.value);
     setDateRange({ ...DateRange, [e.target.name]: e.target.value });
   };
-
   return (
     <div>
-      <br /> <br /> <br />
       <h5 className={GetMaximumStyle.maximumTitle}>
         Maximum Transaction Data Table
       </h5>
@@ -262,7 +295,6 @@ function GetMaximumSales() {
             />
           </div>
         )}
-        <br />
       </form>
       {/* {console.log("DateRange == ", DateRange)} */}
       <h3 className={GetMaximumStyle.fromDateToDate}>
@@ -272,74 +304,181 @@ function GetMaximumSales() {
       {MaximumDataList?.length > 0 && MaximumDataList[0] != undefined ? (
         <>
           <div className={GetMaximumStyle.tableWrapper}>
-            <TableContainer component={Paper}>
-              <Table sx={{ width: "100%" }} aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell align="center">Product Name</TableCell>
-                    <TableCell align="center">Sales qty</TableCell>
-                    <TableCell align="center">Purchase Qty</TableCell>
-                    <TableCell align="center">Unit Price</TableCell>
-                    <TableCell align="center">Sales Amount</TableCell>
-                    <TableCell align="center">unit Cost</TableCell>
-                    <TableCell align="center">Purchase Amount</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {MaximumDataList?.map((row, index) => (
-                    <TableRow
-                      key={"key_" + index}
-                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                    >
-                      <TableCell component="th" scope="row">
-                        {row.productName}
-                      </TableCell>
-                      <TableCell align="center">{row.salesQty}</TableCell>
-                      <TableCell align="center">{row.purchaseQty}</TableCell>
-                      <TableCell align="center">
-                        <CurrencyFormat
-                          value={row.unitPrice}
-                          displayType={"text"}
-                          thousandSeparator={true}
-                          prefix={"Birr "}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <CurrencyFormat
-                          value={row.unitPrice * row.salesQty}
-                          displayType={"text"}
-                          thousandSeparator={true}
-                          prefix={"Birr "}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <CurrencyFormat
-                          value={row.unitCost}
-                          displayType={"text"}
-                          thousandSeparator={true}
-                          prefix={"Birr "}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <CurrencyFormat
-                          value={row.unitCost * row.purchaseQty}
-                          displayType={"text"}
-                          thousandSeparator={true}
-                          prefix={"Birr "}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
+            {viewInTable ? (
+              <Box style={{ padding: "10px" }}>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <strong>No</strong>
+                        </TableCell>
+                        <TableCell>
+                          <strong>Product&nbsp;Name</strong>
+                        </TableCell>
+                        <TableCell>
+                          <strong>Sales&nbsp;qty&nbsp;in&nbsp;cash</strong>
+                        </TableCell>
+                        <TableCell>
+                          <strong>Sales&nbsp;qty&nbsp;in&nbsp;credit</strong>
+                        </TableCell>
+                        <TableCell>
+                          <strong>Purchase&nbsp;Qty</strong>
+                        </TableCell>
+                        <TableCell>
+                          <strong>Unit&nbsp;Price</strong>
+                        </TableCell>
+                        <TableCell>
+                          <strong>Total&nbsp;Sales</strong>
+                        </TableCell>
+                        <TableCell>
+                          <strong>Unit&nbsp;Cost</strong>
+                        </TableCell>
+                        <TableCell>
+                          <strong>Purchase&nbsp;QTY</strong>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {/* {JSON.stringify(MaximumDataList)} */}
+                      {MaximumDataList?.map((row, index) => {
+                        return (
+                          <TableRow key={"key_" + index}>
+                            <TableCell>{index + 1}</TableCell>
+                            <TableCell>{row.productName}</TableCell>
+                            <TableCell>{row.salesQty}</TableCell>
+                            <TableCell>{row.creditsalesQty}</TableCell>
+                            <TableCell>{row.purchaseQty}</TableCell>
+                            <TableCell>
+                              <CurrencyFormat
+                                value={row.unitPrice}
+                                displayType={"text"}
+                                thousandSeparator={true}
+                                prefix={"Birr "}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <CurrencyFormat
+                                value={
+                                  row.unitPrice *
+                                  (row.creditsalesQty + row.salesQty)
+                                }
+                                displayType={"text"}
+                                thousandSeparator={true}
+                                prefix={"Birr "}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <CurrencyFormat
+                                value={row.unitCost}
+                                displayType={"text"}
+                                thousandSeparator={true}
+                                prefix={"Birr "}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <CurrencyFormat
+                                value={row.unitCost * row.purchaseQty}
+                                displayType={"text"}
+                                thousandSeparator={true}
+                                prefix={"Birr "}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            ) : (
+              <TableContainer>
+                <Table sx={{ width: "100%" }} aria-label="simple table">
+                  <TableBody sx={{ display: "flex", flexWrap: "wrap" }}>
+                    {MaximumDataList?.map((row, index) => (
+                      <TableRow
+                        key={"key_" + index}
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                        }}
+                      >
+                        <TableCell
+                          component={Paper}
+                          className="TableCell"
+                          sx={{
+                            width: "280px",
+                            margin: "3px 6px",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <div>
+                            <strong>No : </strong>
+                            {index + 1}
+                          </div>
+                          <div component="th" scope="row">
+                            <strong>Product Name : </strong>
+                            {row.productName}
+                          </div>
+                          <div align="center">
+                            <strong>Sales qty in cash : </strong>
+                            {row.salesQty}
+                          </div>
+                          <div>
+                            <strong>Sales qty in credit: </strong>
+                            {row.creditsalesQty}
+                          </div>
+                          <div align="center">
+                            <strong>Purchase Qty : </strong>
+                            {row.purchaseQty}
+                          </div>
+                          <div align="center">
+                            <strong>Unit Price : </strong>
+                            <CurrencyFormat
+                              value={row.unitPrice}
+                              displayType={"text"}
+                              thousandSeparator={true}
+                              prefix={"Birr "}
+                            />
+                          </div>
+                          <div align="center">
+                            <strong>STotal Sales : </strong>
+                            <CurrencyFormat
+                              value={
+                                row.unitPrice *
+                                (row.creditsalesQty + row.salesQty)
+                              }
+                              displayType={"text"}
+                              thousandSeparator={true}
+                              prefix={"Birr "}
+                            />
+                          </div>
+                          <div align="center">
+                            <strong>Unit Cost : </strong>
+                            <CurrencyFormat
+                              value={row.unitCost}
+                              displayType={"text"}
+                              thousandSeparator={true}
+                              prefix={"Birr "}
+                            />
+                          </div>
+                          <div align="center">
+                            <strong>Purchase QTY : </strong>
+                            <CurrencyFormat
+                              value={row.unitCost * row.purchaseQty}
+                              displayType={"text"}
+                              thousandSeparator={true}
+                              prefix={"Birr "}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
           </div>
         </>
       ) : (

@@ -85,13 +85,15 @@ function SalesAndPurchaseTable({
               </TableRow>
             </TableHead>
             <TableRow>
-              <TableCell>Product name</TableCell>
+              <TableCell>Product&nbsp;&nbsp;&nbsp;&nbsp;name</TableCell>
               <TableCell>
                 {showEachItems ? " Registration Date" : " Registration Dates"}
               </TableCell>
               <TableCell>Unit price</TableCell>
-              <TableCell>Sold Qty</TableCell>
-              <TableCell>Sold Qty incredit</TableCell>
+              <TableCell>
+                Sold&nbsp;&nbsp;Qty&nbsp;&nbsp;In&nbsp;&nbsp;Cash
+              </TableCell>
+              <TableCell>Sold Qty In Credit</TableCell>
               <TableCell>Total sales</TableCell>
               <TableCell>Unit Cost</TableCell>
               <TableCell>purchase Qty</TableCell>
@@ -137,7 +139,11 @@ function SalesAndPurchaseTable({
                             backgroundColor: "transparent",
                           }}
                           key={"dateOfRegistration_"}
-                          label={DateFormatter(items.registeredTime)}
+                          label={
+                            showEachItems
+                              ? DateFormatter(items.registeredTime)
+                              : items.registeredTime
+                          }
                         />
                       }
                     </TableCell>
@@ -194,7 +200,9 @@ function SalesAndPurchaseTable({
                       id={"unitCost_" + items.transactionId}
                       type="text"
                     >
-                      {CurrencyFormatter(items.unitCost)}
+                      {openedBusiness == "myBusiness"
+                        ? CurrencyFormatter(items.unitCost)
+                        : 0}
                     </TableCell>
                     <TableCell
                       onInput={() =>
@@ -217,7 +225,9 @@ function SalesAndPurchaseTable({
                       id={"totalPurchase_" + items.transactionId}
                       type="text"
                     >
-                      {CurrencyFormatter(items.unitCost * items.purchaseQty)}
+                      {openedBusiness == "myBusiness"
+                        ? CurrencyFormatter(items.unitCost * items.purchaseQty)
+                        : CurrencyFormatter(0)}
                     </TableCell>
                     <TableCell
                       onInput={() =>
@@ -262,17 +272,6 @@ function SalesAndPurchaseTable({
                       !items.contentEditable ? (
                         openedBusiness == "myBusiness" && (
                           <>
-                            <TableCell
-                              onClick={(e) => {
-                                openedBusiness == "myBusiness" &&
-                                  editSalesAndPurchase(e, items, index);
-                              }}
-                              className="cancelOrEditTransaction"
-                            >
-                              {openedBusiness == "myBusiness" && (
-                                <EditIcon sx={{ color: "blue" }} />
-                              )}
-                            </TableCell>
                             <TableCell
                               onClick={() => deleteSales_purchase(items)}
                             >
@@ -328,15 +327,19 @@ function SalesAndPurchaseTable({
                 style={{ backgroundColor: "#B3E5FC" }}
               >
                 <TableCell colSpan={2}></TableCell>
-                <TableCell colSpan={2}>Sum of Sales</TableCell>
-                <TableCell>{CurrencyFormatter(TotalSalesRevenue)}</TableCell>
-                <TableCell colSpan={2}>Sum of Purchase</TableCell>
-                <TableCell>{CurrencyFormatter(TotalPurchaseCost)}</TableCell>
-                <TableCell colSpan={2}>Sales - Purchases</TableCell>
-                <TableCell>
+                <TableCell colSpan={2}>
+                  Sum of Sales = {CurrencyFormatter(TotalSalesRevenue)}
+                </TableCell>
+                <TableCell colSpan={2}>
+                  Sum of Purchase =
+                  {openedBusiness == "myBusiness"
+                    ? CurrencyFormatter(TotalPurchaseCost)
+                    : CurrencyFormatter(0)}
+                </TableCell>
+                <TableCell colSpan={5}>
+                  Sales - Purchases={" "}
                   {CurrencyFormatter(TotalSalesRevenue - TotalPurchaseCost)}
                 </TableCell>
-                <TableCell colSpan={3}></TableCell>
               </TableRow>
             </TableBody>
           </Table>

@@ -1,11 +1,20 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import "./CreateBusiness.css";
-import $ from "jquery";
-import { Button, TextField } from "@mui/material";
-function CreateBusiness({ getBusiness, setnewBusiness, setShowProgressBar }) {
+// import $ from "jquery";
+import { Box, Button, Modal, TextField } from "@mui/material";
+import { ButtonProcessing } from "../../utility/Utility";
+
+function CreateBusiness({
+  getBusiness,
+  setnewBusiness,
+  setShowProgressBar,
+  newBusiness,
+}) {
+  const [Process, setProcess] = useState(false);
   let serverAddress = localStorage.getItem("targetUrl");
   const [businessData, setbusinessData] = useState({});
+
   let handleCreateForm = (e) => {
     e.preventDefault();
     console.log(e.target.value);
@@ -17,108 +26,122 @@ function CreateBusiness({ getBusiness, setnewBusiness, setShowProgressBar }) {
       token,
     });
   };
+
   let submitAlldatas = async (e) => {
     e.preventDefault();
     let businessName = businessData.businessName;
     console.log(businessName);
     let i = 0;
-    for (i = 0; i < businessName.length; i++) {
-      console.log(businessName[i]);
-      if (businessName[i] == " ") {
-        alert("Space is not allowed to business name.");
-        return;
-      }
-    }
+
     console.log("businessData is = ", businessData);
-    // return;
+
     console.log("setShowProgressBar", setShowProgressBar);
     setShowProgressBar(true);
 
-    let response = await axios.post(
-      serverAddress + "createBusiness/",
-      businessData
-    );
-    console.log("createBusiness response is =", response);
-    setShowProgressBar(false);
-    getBusiness();
-    window.location.reload();
-    console.log(response.data);
-    let data = response.data.data;
-    if (data == "created well") {
-      /*
- tableCollections: {
- registerBusinessName: "regesteredBefore"
-_Costs: 0
-_Transaction: 0
-_expenses: 0
-_products: 0 }  */
-      let registerBusinessName =
-        response.data.tableCollections.registerBusinessName;
-      console.log(response.data.tableCollections.registerBusinessName);
-      // console.log(response.data);
-      // return;
-      if (registerBusinessName == "regesteredBefore") {
-        alert(
-          "This business name is reserved before. so please change its name. Thank You"
-        );
-      } else {
-        setnewBusiness("");
-        alert("Your business is created well. Thankyou.");
-      }
-    } else if (data == "alreadyRegistered") {
-      alert("Error. Because this business name is already registered before.");
-    }
-    if (response.data.error == "Unable to create tables.") {
-      alert(response.data.error);
-    }
-    if (response.data.error == "registeredBefore") {
-      alert(
-        "Sorry, you cann't create this business. Because it's name is already reserved before."
+    setProcess(true);
+    try {
+      let response = await axios.post(
+        serverAddress + "createBusiness/",
+        businessData
       );
+      setProcess(false);
+      console.log("createBusiness response is =", response);
+      setShowProgressBar(false);
+      getBusiness();
+      window.location.reload();
+      console.log(response.data);
+      let data = response.data.data;
+
+      if (data === "created well") {
+        let registerBusinessName =
+          response.data.tableCollections.registerBusinessName;
+        console.log(response.data.tableCollections.registerBusinessName);
+
+        if (registerBusinessName === "regesteredBefore") {
+          alert(
+            "This business name is reserved before. Please change its name. Thank you."
+          );
+        } else {
+          setnewBusiness("");
+          alert("Your business is created successfully. Thank you.");
+        }
+      } else if (data === "alreadyRegistered") {
+        alert("Error. This business name is already registered before.");
+      }
+      if (response.data.error === "Unable to create tables.") {
+        alert(response.data.error);
+      }
+      if (response.data.error === "registeredBefore") {
+        alert(
+          "Sorry, you cannot create this business because its name is already reserved before."
+        );
+      }
+    } catch (error) {
+      console.error("Error creating business:", error);
+      setShowProgressBar(false);
+      alert("An error occurred while creating the business.");
     }
   };
+
   let cancelBusinessCreation = () => {
     console.log("cancelBusinessCreation");
     console.log("setnewBusiness", setnewBusiness);
-    // newBusiness = "";
     setShowProgressBar(false);
     setnewBusiness("");
-    $(".LinearProgress").hide();
   };
+
   useEffect(() => {
     setShowProgressBar(false);
   }, []);
+
   return (
     <div>
-      <form action="" className="createBusinessForm" onSubmit={submitAlldatas}>
-        <TextField
-          required
-          name="businessName"
-          onChange={handleCreateForm}
-          label="Enter Business Name"
-        />
-        <br /> <br />
-        <div>
-          <Button
-            variant="contained"
-            color="primary"
-            type="Submit"
-            value={"Create"}
+      <Modal open={newBusiness.Open}>
+        <Box
+          sx={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <form
+            style={{ width: "300px" }}
+            action=""
+            className="createBusinessForm"
+            onSubmit={submitAlldatas}
           >
-            Create
-          </Button>{" "}
-          <Button
-            onClick={cancelBusinessCreation}
-            id="cancelButton"
-            type="button"
-            value={"Cancel"}
-            variant="contained"
-            color="warning"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
+            <TextField
+              fullWidth
+              required
+              name="businessName"
+              onChange={handleCreateForm}
+              label="Enter Business Name"
+            />
+            <br /> <br />
+            <div style={{ textAlign: "center" }}>
+              {!Process ? (
+                <Button variant="contained" color="primary" type="submit">
+                  Create
+                </Button>
+              ) : (
+                <ButtonProcessing />
+              )}
+              &nbsp;&nbsp;&nbsp;
+              <Button
+                onClick={cancelBusinessCreation}
+                id="cancelButton"
+                type="button"
+                value={"Cancel"}
+                variant="contained"
+                color="warning"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Box>
+      </Modal>
     </div>
   );
 }

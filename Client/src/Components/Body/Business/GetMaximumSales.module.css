@@ -26,6 +26,7 @@
 .maxSelectionForm select {
   width: 100%;
   max-width: 200px;
+  border-radius: 10px;
 }
 .maximumTitle {
   padding: 10px;

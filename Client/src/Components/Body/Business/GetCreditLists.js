@@ -14,12 +14,26 @@ import {
   TextField,
   Box,
   TableContainer,
+  Paper,
 } from "@mui/material";
+import "./GetCreditLists.css";
 import { DateFormatter } from "../Date/currentDate";
 import { ConsumeableContext } from "../UserContext/UserContext";
 import CurrencyFormatter, { ButtonProcessing } from "../../utility/Utility";
 import GetCreditListEdit from "./GetCreditListEdit";
-function GetCreditLists({ dateRange }) {
+import { Typography } from "@material-ui/core";
+function GetCreditLists({ dateRange, Notifications, viewInTable }) {
+  let numberOfNotifications, setNumberOfNotifications;
+  if (
+    Notifications != undefined &&
+    Notifications != "undefined" &&
+    Notifications != null &&
+    Notifications != "null"
+  ) {
+    numberOfNotifications = Notifications.numberOfNotifications;
+    setNumberOfNotifications = Notifications.setNumberOfNotifications;
+  }
+
   const [Processing, setProcessing] = useState(false);
   let { fromDate, toDate } = dateRange;
   let {
@@ -27,10 +41,14 @@ function GetCreditLists({ dateRange }) {
     setCollectedMoney,
     collectedMoney,
     accountRecivableAmt,
+    setShowProgressBar,
+    setProccessing,
   } = ConsumeableContext();
   let token = localStorage.getItem("storeToken");
   let serverAddress = localStorage.getItem("targetUrl");
   let businessName = localStorage.getItem("businessName");
+  let businessId = localStorage.getItem("businessId");
+
   const [creditData, setCreditData] = useState({
     soldOnTotal_Oncredit: [],
     soldInDaily_SoldOncredits: [],
@@ -39,10 +57,10 @@ function GetCreditLists({ dateRange }) {
     partiallyPaidInTotal: [],
   });
 
-  let getUsersCreditList = () => {
-    let BusinessId = localStorage.getItem("businessId");
+  let getUsersCreditList = async () => {
     console.log("dateRange", dateRange);
-    axios
+    setShowProgressBar(true);
+    await axios
       .get(
         serverAddress +
           "getUsersCreditList?token=" +
@@ -50,7 +68,7 @@ function GetCreditLists({ dateRange }) {
           "&&businessName=" +
           businessName +
           "&&businessId=" +
-          BusinessId +
+          businessId +
           "&&fromDate=" +
           dateRange.fromDate +
           "&&toDate=" +
@@ -83,6 +101,7 @@ function GetCreditLists({ dateRange }) {
       .catch((error) => {
         console.log("error", error);
       });
+    setShowProgressBar(false);
   };
   useEffect(() => {
     getUsersCreditList();
@@ -105,9 +124,8 @@ function GetCreditLists({ dateRange }) {
       alert("paid amount should be > 0 value");
       return;
     }
-    setOpenConfirmationModal((prevstate) => {
-      return { ...prevstate, Open: false };
-    });
+
+    setShowProgressBar(true);
     setProcessing(true);
     await axios
       .put(serverAddress + "confirmPayments", {
@@ -115,6 +133,7 @@ function GetCreditLists({ dateRange }) {
         salesWAy,
         businessName,
         token,
+        businessId,
         ...Collection,
       })
       .then((Responces) => {
@@ -128,9 +147,13 @@ function GetCreditLists({ dateRange }) {
         alert("error no 13");
         console.log(error);
       });
+    setOpenConfirmationModal((prevstate) => {
+      return { ...prevstate, Open: false };
+    });
     setCollection({ creditPaymentDate: null, partialOrFull: "Partial" });
-    setOpenConfirmationModal({ Open: false });
+    // setOpenConfirmationModal({ Open: false });
     setProcessing(false);
+    setShowProgressBar(false);
   };
   const [openConfirmationModal, setOpenConfirmationModal] = useState({
     Open: false,
@@ -234,8 +257,15 @@ function GetCreditLists({ dateRange }) {
     if (salesRegistrationWay == "Single") {
       transactionId = dailySalesId;
     }
+    console.log(
+      "salesRegistrationWay",
+      salesRegistrationWay,
+      "transactionId",
+      transactionId
+    );
     let Money = 0;
     let infos = creditData.partiallyPaidInTotal;
+    // return console.log("creditData", creditData);
     infos.map((info) => {
       if (info.transactionId == transactionId) {
         let { collectionAmount } = info;
@@ -245,204 +275,259 @@ function GetCreditLists({ dateRange }) {
 
     return Money;
   };
+  useEffect(() => {
+    if (
+      setNumberOfNotifications != undefined &&
+      setNumberOfNotifications != "undefined" &&
+      setNumberOfNotifications != null &&
+      setNumberOfNotifications != "null"
+    )
+      setNumberOfNotifications((prev) => {
+        return {
+          ...prev,
+          Credits: creditData.soldInDaily_SoldOncredits?.length,
+        };
+      });
+  }, [creditData]);
+
   return (
     <div>
-      <br />
+      {creditData.soldInDaily_SoldOncredits?.length > 0 ? (
+        <Box>
+          {!viewInTable ? (
+            <Box style={{ padding: "10px" }}>
+              <Box>
+                <Box style={{ display: "flex", flexWrap: "wrap" }}>
+                  {creditData.soldInDaily_SoldOncredits?.map((data, index) => (
+                    <Box
+                      component={Paper}
+                      key={"indexOfGetData" + index}
+                      style={{
+                        padding: "20px",
+                        margin: "3px 6px",
+                        width: "280px",
+                      }}
+                    >
+                      <Box>
+                        <div>
+                          <strong>Number: </strong>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <strong>Name: </strong>
+                          {data.productName}
+                        </div>
+                        <div>
+                          <strong>Credit sales qty: </strong>
+                          {data.creditsalesQty}
+                        </div>
+                        <div>
+                          <strong>Unit Price: </strong>
+                          {CurrencyFormatter(data.productsUnitPrice)}
+                        </div>
+                        <div>
+                          <strong>Sales Money In Credit: </strong>
+                          {data.creditsalesQty * data.productsUnitPrice}
+                        </div>
+                        <div>
+                          <strong>To Be collected: </strong>
+                          {CurrencyFormatter(
+                            Number(data.creditsalesQty) *
+                              Number(data.productsUnitPrice) -
+                              getCollectedMoney(data, "Single")
+                          )}
+                        </div>
+                        <div>
+                          <strong>Description: </strong>
+                          {data.Description}
+                        </div>
+                        <div>
+                          <strong> Credit Payment Date: </strong>
+                          {DateFormatter(data.creditPaymentDate)}
+                        </div>
+                        <div>
+                          <strong> Registration Date: </strong>
+                          {DateFormatter(data.registeredTimeDaily)}
+                        </div>
 
-      {creditData.soldOnTotal_Oncredit?.length > 0 ||
-      creditData.soldInDaily_SoldOncredits?.length > 0 ? (
-        <TableContainer>
+                        <strong>Collected Money </strong>
+                        <Button
+                          onClick={() => {
+                            setshowCreditListDetails({
+                              transactionId: data.dailySalesId,
+                              open: true,
+                              data: creditData.partiallyPaidInTotal,
+                              salesWay: "singleSales",
+                            });
+                          }}
+                        >
+                          {CurrencyFormatter(getCollectedMoney(data, "Single"))}
+                        </Button>
+                        <div>
+                          <Button
+                            variant="contained"
+                            onClick={() => {
+                              setOpenConfirmationModal({
+                                salesWAy: "singleSales",
+                                Open: true,
+                                data: data,
+                              });
+                            }}
+                          >
+                            Collect Money
+                          </Button>
+                        </div>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+          ) : (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Number</TableCell>
+                    <TableCell>
+                      Product&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name{" "}
+                    </TableCell>
+                    <TableCell>Credit&nbsp;&nbsp;&nbsp;&nbsp;Sales</TableCell>
+                    <TableCell>Unit&nbsp;Price</TableCell>
+                    <TableCell>Total&nbsp;Price</TableCell>
+                    <TableCell>To Be collected </TableCell>
+                    <TableCell>
+                      Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </TableCell>
+                    <TableCell>Collection&nbsp;Date</TableCell>
+                    <TableCell>Sales&nbsp;&nbsp;Date</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Collected</TableCell>
+                    <TableCell>Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {creditData.soldInDaily_SoldOncredits?.map((data, index) => (
+                    <TableRow key={"indexOfGetData" + index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{data.productName}</TableCell>
+                      <TableCell>{data.creditsalesQty}</TableCell>
+                      <TableCell>
+                        {CurrencyFormatter(data.productsUnitPrice)}
+                      </TableCell>
+                      <TableCell>
+                        {data.creditsalesQty * data.productsUnitPrice}
+                      </TableCell>
+                      <TableCell>
+                        {CurrencyFormatter(
+                          Number(data.creditsalesQty) *
+                            Number(data.productsUnitPrice) -
+                            getCollectedMoney(data, "Single")
+                        )}
+                      </TableCell>
+                      <TableCell>{data.Description}</TableCell>
+                      <TableCell>
+                        {DateFormatter(data.creditPaymentDate)}
+                      </TableCell>
+                      <TableCell>
+                        {DateFormatter(data.registeredTimeDaily)}
+                      </TableCell>
+                      <TableCell>Pending</TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            setshowCreditListDetails({
+                              transactionId: data.dailySalesId,
+                              open: true,
+                              data: creditData.partiallyPaidInTotal,
+                              salesWay: "totalSales",
+                            });
+                          }}
+                        >
+                          {CurrencyFormatter(getCollectedMoney(data, "Single"))}
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          onClick={() => {
+                            setOpenConfirmationModal({
+                              salesWAy: "singleSales",
+                              Open: true,
+                              data: data,
+                            });
+                          }}
+                        >
+                          Collect
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
           <Box
-            sx={{ display: "flex", justifyContent: "center", padding: "10px" }}
+            className="Summary_Container"
+            component={Paper}
+            style={{ width: "98%", marginRight: "auto" }}
           >
-            Transaction made by credits
+            <Typography variant="h6" style={{ textAlign: "center" }}>
+              Summary
+            </Typography>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                flex: 1,
+                padding: "20px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "1.2rem",
+                }}
+              >
+                Receivable: {CurrencyFormatter(accountRecivableAmt)}
+              </div>
+
+              <div style={{}}>
+                Collected: {CurrencyFormatter(collectedMoney.Money)}
+              </div>
+
+              <div style={{}} colSpan={4}>
+                To Be Collected:{" "}
+                {CurrencyFormatter(accountRecivableAmt - collectedMoney.Money)}
+              </div>
+            </div>
           </Box>
-          <Table sx={{ overflow: "scroll", width: "100%" }}>
-            <TableHead sx={{ backgroundColor: "white" }}>
-              <TableRow>
-                <TableCell>No</TableCell>
-                <TableCell>Product Name</TableCell>
-                <TableCell>Sales Qty</TableCell>
-                <TableCell>Unit Price</TableCell>
-                <TableCell>Total money</TableCell>
-                <TableCell>Partially Collected </TableCell>
-                <TableCell>To be collected</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell>Credit Payment Date</TableCell>
-                <TableCell>Registered Time</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Confirm</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {creditData.soldInDaily_SoldOncredits?.map((data, index) => {
-                return (
-                  <TableRow key={"indexOfGetData" + index}>
-                    <TableCell>{index}</TableCell>
-                    <TableCell>{data.productName}</TableCell>
-                    <TableCell>{data.creditsalesQty}</TableCell>
-                    <TableCell>
-                      {CurrencyFormatter(data.productsUnitPrice)}
-                    </TableCell>
-                    <TableCell>
-                      {CurrencyFormatter(
-                        data.creditsalesQty * data.productsUnitPrice
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          setshowCreditListDetails({
-                            transactionId: data.dailySalesId,
-                            open: true,
-                            data: creditData.partiallyPaidInTotal,
-                            salesWay: "totalSales",
-                          });
-                        }}
-                      >
-                        {CurrencyFormatter(getCollectedMoney(data, "Single"))}
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      {CurrencyFormatter(
-                        Number(data.creditsalesQty) *
-                          Number(data.productsUnitPrice) -
-                          getCollectedMoney(data, "Single")
-                      )}
-                    </TableCell>
-                    <TableCell>{data.Description}</TableCell>
-                    <TableCell>
-                      {DateFormatter(data.creditPaymentDate)}
-                    </TableCell>
-                    <TableCell>
-                      {DateFormatter(data.registeredTimeDaily)}
-                    </TableCell>
-                    <TableCell>Pending</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          setOpenConfirmationModal({
-                            salesWAy: "singleSales",
-                            Open: true,
-                            data: data,
-                          });
-                        }}
-                      >
-                        Confirm Payment
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              <TableRow>
-                <TableCell
-                  sx={{ textAlign: "center", backgroundColor: "transparent" }}
-                  colSpan={14}
-                >
-                  From Total sales
-                </TableCell>
-              </TableRow>
-              {creditData.soldOnTotal_Oncredit?.map((data, index) => {
-                return (
-                  <TableRow key={"soldOnTotal_Oncredit" + index}>
-                    <TableCell>{index}</TableCell>
-                    <TableCell>{data.productName}</TableCell>
-                    <TableCell>{data.creditsalesQty}</TableCell>
-                    <TableCell>{CurrencyFormatter(data.unitPrice)}</TableCell>
-                    <TableCell>
-                      {CurrencyFormatter(
-                        data.unitPrice * (data.salesQty + data.creditsalesQty)
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          setshowCreditListDetails({
-                            transactionId: data.transactionId,
-                            open: true,
-                            data: creditData.partiallyPaidInTotal,
-                            salesWay: "totalSales",
-                          });
-                        }}
-                      >
-                        {console.log("data collected", data)}
-
-                        {CurrencyFormatter(getCollectedMoney(data))}
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      {console.log("data to be collected", data)}
-                      {CurrencyFormatter(
-                        Number(data.creditsalesQty) * Number(data.unitPrice) -
-                          getCollectedMoney(data)
-                      )}
-                    </TableCell>
-                    <TableCell>{data.description}</TableCell>
-                    <TableCell>{DateFormatter(data.creditDueDate)}</TableCell>
-                    <TableCell>{DateFormatter(data.registeredTime)}</TableCell>
-                    <TableCell>Pending</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          setOpenConfirmationModal({
-                            salesWAy: "totalSales",
-                            Open: true,
-                            data: data,
-                          });
-                        }}
-                      >
-                        Confirm Payment
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              <TableRow>
-                <TableCell sx={{ textAlign: "center" }} colSpan={2}>
-                  Account recivable{" "}
-                  {accountRecivableAmt.toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "ETB",
-                  })}
-                </TableCell>
-
-                <TableCell sx={{ textAlign: "center" }} colSpan={2}>
-                  Collected Money {CurrencyFormatter(collectedMoney.Money)}
-                </TableCell>
-
-                <TableCell sx={{ textAlign: "center" }} colSpan={4}>
-                  Money to be collected{" "}
-                  {CurrencyFormatter(
-                    accountRecivableAmt - collectedMoney.Money
-                  )}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
+        </Box>
       ) : (
-        <h1 style={{ margin: "10px" }}>No credit data</h1>
+        <>
+          {Processing ? (
+            " Waiting ... "
+          ) : (
+            <h1 style={{ margin: "10px" }}> No credit data </h1>
+          )}
+        </>
       )}
       <Dialog
         open={openConfirmationModal.Open}
-        onClose={() => {
-          setOpenConfirmationModal({ Open: false });
-        }}
+        // onClose={() => {
+        //   setOpenConfirmationModal({ Open: false });
+        // }}
       >
         <DialogTitle>Confirm Payment</DialogTitle>
         <DialogContent>
-          {" "}
-          {/* <Box>Account recivable=</Box>
-          <Box>collected Money=</Box>
-        */}
           <Box>
             Remain Amount={" "}
             {CurrencyFormatter(
-              openConfirmationModal.data?.creditsalesQty *
-                openConfirmationModal.data?.productsUnitPrice -
-                getCollectedMoney(openConfirmationModal.data)
+              Number(
+                openConfirmationModal.data?.creditsalesQty *
+                  openConfirmationModal.data?.productsUnitPrice
+              ) -
+                Number(getCollectedMoney(openConfirmationModal.data, "Single"))
             )}
           </Box>
           <Box>When do you have recived your money?</Box>

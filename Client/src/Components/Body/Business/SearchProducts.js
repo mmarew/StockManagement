@@ -4,10 +4,27 @@ import axios from "axios";
 import "./SearchProducts.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import { Button, IconButton, Box, TextField, Modal } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  Box,
+  TextField,
+  Modal,
+  Typography,
+} from "@mui/material";
 import MUIConfirm from "../Others/MUIConfirm";
 import { ButtonProcessing } from "../../utility/Utility";
 function SearchProducts({ response, submitSearch }) {
+  let openedBusiness = localStorage.getItem("openedBusiness");
+  const [ViewPdoductInfo, setViewPdoductInfo] = useState({
+    Open: false,
+    Product: {
+      productName: "",
+      productsUnitPrice: "",
+      productsUnitCost: "",
+      minimumQty: "",
+    },
+  });
   const [Processing, setProcessing] = useState(false);
   const [openEditerModal, setOpenEditerModal] = useState({ open: false });
   const [showEditingModalDialog, setshowEditingModalDialog] = useState();
@@ -77,9 +94,11 @@ function SearchProducts({ response, submitSearch }) {
     });
   }, [searchedProducts]);
   //////////////////////////////////////////////
+  let businessId = localStorage.getItem("businessId");
+  let token = localStorage.getItem("storeToken");
   let updateProductsData = async (productID) => {
     businessName = localStorage.getItem("businessName");
-    let ob = {};
+    let ob = { token, businessId };
     console.log("openEditerModal===", openEditerModal.item);
 
     let previousData = openEditerModal.item;
@@ -97,6 +116,7 @@ function SearchProducts({ response, submitSearch }) {
       setProcessing(false);
       return alert("you can't make update bacause no change in your data");
     }
+
     ob.minimumQty = minimumQty;
     ob.productPrice = productUnitPrice;
     ob.productName = productName;
@@ -187,29 +207,95 @@ function SearchProducts({ response, submitSearch }) {
             <div className={"productList"}>
               <div>{product.productName}</div>
               <br />
+              {openedBusiness == "myBusiness" && (
+                <>
+                  <Button
+                    onClick={(e) => {
+                      setProductName(product.productName);
+                      setProductUnitPrice(product.productsUnitPrice);
+                      setProductUnitCost(product.productsUnitCost);
+                      setMinimumQty(product.minimumQty);
+                      setOpenEditerModal({ open: true, item: product });
+                    }}
+                    variant="contained"
+                    color="primary"
+                  >
+                    Edit
+                  </Button>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <Button
+                    onClick={(e) => deleteProducts(e, product)}
+                    variant="contained"
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                  ></Button>
+                </>
+              )}
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{" "}
               <Button
-                onClick={(e) => {
-                  setProductName(product.productName);
-                  setProductUnitPrice(product.productsUnitPrice);
-                  setProductUnitCost(product.productsUnitCost);
-                  setMinimumQty(product.minimumQty);
-                  setOpenEditerModal({ open: true, item: product });
+                onClick={() => {
+                  setViewPdoductInfo((prev) => {
+                    return { ...prev, Open: true, Product: product };
+                  });
                 }}
                 variant="contained"
-                color="primary"
               >
-                Edit
+                View
               </Button>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <Button
-                onClick={(e) => deleteProducts(e, product)}
-                variant="contained"
-                color="error"
-                startIcon={<DeleteIcon />}
-              ></Button>
             </div>
           );
         })}
+
+      <Modal open={ViewPdoductInfo.Open}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "80%",
+            maxWidth: 400,
+            bgcolor: "background.paper",
+            p: 2,
+            borderRadius: 8,
+            boxShadow: 4,
+          }}
+        >
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              Product Details
+            </Typography>
+            <Box mb={2}>
+              <strong>Name:</strong> {ViewPdoductInfo.Product.productName}
+            </Box>
+            <Box mb={2}>
+              <strong>Unit Price:</strong>{" "}
+              {ViewPdoductInfo.Product.productsUnitPrice}
+            </Box>
+            <Box mb={2}>
+              <strong>Unit Cost:</strong>{" "}
+              {ViewPdoductInfo.Product.productsUnitCost}
+            </Box>
+            <Box mb={2}>
+              <strong>Minimum Qty:</strong> {ViewPdoductInfo.Product.minimumQty}
+            </Box>
+          </Box>
+          <Box display="flex" justifyContent="flex-end">
+            <Button
+              color="error"
+              variant="contained"
+              onClick={() => {
+                setViewPdoductInfo((Prev) => {
+                  return { ...Prev, Open: false };
+                });
+              }}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
       {open.open && confirmRequest}
       <Modal open={openEditerModal.open}>
         <Box
