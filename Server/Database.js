@@ -77,13 +77,13 @@ let createBusiness = async (
   let select = `SELECT * FROM Business WHERE uniqueBusinessName = ?`;
   let insert = `INSERT INTO Business (businessName,uniqueBusinessName, ownerId, createdDate) VALUES (?,?,?,?)`;
   let tableExpenses =
-    "CREATE TABLE IF NOT EXISTS ?? (expenseId INT(11) NOT NULL AUTO_INCREMENT, costId INT(11) NOT NULL, costAmount INT(11) NOT NULL, costDescription VARCHAR(9000) NOT NULL, costRegisteredDate DATE NOT NULL, PRIMARY KEY (expenseId)) ";
+    "CREATE TABLE IF NOT EXISTS ?? (expenseId INT(11) NOT NULL AUTO_INCREMENT, costId INT(11) NOT NULL,registeredBy int, costAmount INT(11) NOT NULL, costDescription VARCHAR(9000) NOT NULL, costRegisteredDate DATE NOT NULL, PRIMARY KEY (expenseId)) ";
   let costTable =
-    "CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, unitCost INT(11) NOT NULL, PRIMARY KEY (costsId)) ";
+    "CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, registeredBy int,  expItemRegistrationDate Date, unitCost INT(11) NOT NULL, PRIMARY KEY (costsId)) ";
   let createProductsTable =
-    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, productRegistrationDate date, mainProductId int, productsUnitCost INT(11) NOT NULL, prevUnitCost int, productsUnitPrice INT(11) NOT NULL, prevUnitPrice int, productName VARCHAR(900) NOT NULL, prevProductName varchar(1000), minimumQty INT(11) NOT NULL, prevMinimumQty int, Status enum('active','changed','replaced','active_but_updated'), PRIMARY KEY (ProductId)) ";
+    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, productRegistrationDate date, registeredBy int, mainProductId int, productsUnitCost INT(11) NOT NULL, prevUnitCost int, productsUnitPrice INT(11) NOT NULL, prevUnitPrice int, productName VARCHAR(900) NOT NULL, prevProductName varchar(1000), minimumQty INT(11) NOT NULL, prevMinimumQty int, Status enum('active','changed','replaced','active_but_updated'), PRIMARY KEY (ProductId)) ";
   let createTransaction =
-    "CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL, mainProductId int, salesQty INT(11) NOT NULL default 0, creditsalesQty int(11) NOT NULL  default 0,  purchaseQty INT(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory INT(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, creditDueDate date ,salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'),registrationSource enum('Total','Single'), partiallyPaidInfo JSON, creditPayementdate date, PRIMARY KEY (transactionId)) ";
+    "CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL,registeredBy int, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL, mainProductId int, salesQty INT(11) NOT NULL default 0, creditsalesQty int(11) NOT NULL  default 0,  purchaseQty INT(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory INT(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, creditDueDate date ,salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'),registrationSource enum('Total','Single'), partiallyPaidInfo JSON, creditPayementdate date, PRIMARY KEY (transactionId)) ";
 
   let queries = [],
     tableCollections = {};

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 // import AddCost from "./AddExpencesTransaction";
-import AddCostItems from "./AddCostItems";
+import AddCostItems from "./AddExpencesItems";
 import "./AddItems.css";
 import AddProducts from "./AddProducts";
 function AddItems() {

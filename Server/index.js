@@ -73,8 +73,8 @@ server.post(path, (req, res) => {
   );
 });
 server.get(path, async (req, res) => {
-  //   let alterBusiness = `ALTER TABLE Business
-  // ADD uniqueBusinessName VARCHAR(900)`;
+  //   let alterBusiness = `ALTER TABLE dailyTransaction
+  // ADD COLUMN IF NOT EXISTS registeredBy INT`;
   //   let results = await Pool.query(alterBusiness);
   //   res.json({ data: results });
   //   return console.log("results", results);
@@ -84,18 +84,23 @@ server.get(path, async (req, res) => {
     .then(([results]) => {
       myData = results;
       results.map(async (data) => {
-        let { BusinessName, BusinessID, ownerId, createdDate } = data;
-        // businessName, ownerId, createdDate, res, source;
-        // await createBusiness(BusinessName, ownerId, createdDate, res, "");
+        try {
+          let { uniqueBusinessName, BusinessID, ownerId, createdDate } = data;
 
-        // let update = `update Business set uniqueBusinessName='${BusinessName}' where BusinessID='${BusinessID}'`;
-        // let updateResults = await Pool.query(update);
-        // console.log("updateResults", updateResults);
-        // lllllllllllll
-        // Execute the SQL statement to add columns to the table
-        // using the appropriate database library or framework`;
+          let businessName = uniqueBusinessName + "_Transaction";
+          // registeredBy, expItemRegistrationDate;
+          let Update = `alter TABLE ${businessName} add column if not exists registeredBy int not null`;
+          let [myUpdate] = await Pool.query(Update);
+          console.log("myUpdate", myUpdate);
+        } catch (error) {
+          console.log(error);
+          console.log("code:", error.errno);
+          console.log("code:", error.code);
+          let Code = error.code;
 
-        // res.json({ data });
+          if (Code == ER_NO_SUCH_TABLE) {
+          }
+        }
       });
     })
     .catch((error) => {
@@ -209,13 +214,16 @@ server.post(path + "RegisterUsers/", async (req, res) => {
 });
 server.post(path + "addProducts/", async (req, res) => {
   let rowData = req.body;
-  let productName = rowData.productName;
-  let productPrice = rowData.productUnitPrice;
-  let productCost = rowData.productUnitCost;
+  console.log("rowData", rowData);
   let businessId = rowData.businessId;
-  let minimumQty = rowData.minimumQty;
   let userId = await Auth(rowData.token);
-
+  let {
+    minimumQty,
+    productUnitPrice,
+    productUnitCost,
+    productName,
+    productRegistrationDate,
+  } = rowData;
   let select = `SELECT * FROM Business WHERE businessId = ?`;
   Pool.query(select, [businessId])
     .then(([rows]) => {
@@ -235,11 +243,13 @@ server.post(path + "addProducts/", async (req, res) => {
         .then(([rows]) => {
           result = rows;
           if (result.length == 0) {
-            let insertProduct = `INSERT INTO ?? (productsUnitCost, productsUnitPrice, productName, minimumQty,Status) VALUES (?, ?, ?, ?, ?)`;
+            let insertProduct = `INSERT INTO ?? (registeredBy,productRegistrationDate,productsUnitCost, productsUnitPrice, productName, minimumQty,Status) VALUES (?,?,?, ?, ?, ?, ?)`;
             Pool.query(insertProduct, [
               `${businessName}_products`,
-              productCost,
-              productPrice,
+              userId,
+              productRegistrationDate,
+              productUnitCost,
+              productUnitPrice,
               productName,
               minimumQty,
               "active",
@@ -248,7 +258,7 @@ server.post(path + "addProducts/", async (req, res) => {
                 return res.json({ data: "productIsAdded" });
               })
               .catch((err) => {
-                //console.error(err);
+                console.error(err);
                 return res.status(500).json({ error: "Internal Server Error" });
               });
           } else {
@@ -302,6 +312,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
     let { businessId, token } = rowData,
       businessName = await getUniqueBusinessName(businessId, token);
     const validate = validateAlphabet(businessName, res);
+    let { userID } = jwt.verify(token, tokenKey);
 
     if (validate === "correctData") {
       const productsList = rowData.ProductsList;
@@ -374,7 +385,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
             Number(creditSalesQty);
           //////////////// it is fine and good /////////////////
           inventoryList.push(Inventory);
-          const insertQuery = `INSERT INTO ${businessName}_Transaction(description, unitCost, unitPrice, productIDTransaction, mainProductId, salesQty, purchaseQty, registeredTime, wrickages, Inventory,creditDueDate,salesTypeValues,creditSalesQty,registrationSource) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+          const insertQuery = `INSERT INTO ${businessName}_Transaction(description, unitCost, unitPrice, productIDTransaction, mainProductId, salesQty, purchaseQty, registeredTime, wrickages, Inventory,creditDueDate,salesTypeValues,creditSalesQty,registrationSource,registeredBy ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
           let Values = [
             description,
             product.productsUnitCost,
@@ -390,6 +401,7 @@ server.post(path + "registerTransaction/", async (req, res) => {
             salesTypeValues,
             creditSalesQty,
             registrationSource,
+            userID,
           ];
           if (registrationSource == "Single") {
             console.log("first");
@@ -824,13 +836,22 @@ server.post(path + "updateProducts/", async (req, res) => {
       res.json({ err: error });
     });
 });
-server.post(path + "AddCostItems/", async (req, res) => {
+server.post(path + "AddExpencesItems/", async (req, res) => {
   // //console.log(req.body);
-  let { token, businessId } = req.body;
+  let { token, businessId, registrationDate } = req.body;
   let businessName = await getUniqueBusinessName(businessId, token);
+  let { userID } = jwt.verify(token, tokenKey);
+  console.log("userID", userID);
+
   if (businessName == "you are not owner of this business")
     return res.json({ data: "you are not owner of this business" });
-  insertIntoCosts(`${businessName}_Costs`, req.body, res);
+  insertIntoCosts(
+    `${businessName}_Costs`,
+    req.body,
+    res,
+    userID,
+    registrationDate
+  );
 });
 server.post(path + "getCostLists/", async (req, res) => {
   // //console.log(req.body);
@@ -1061,34 +1082,37 @@ let x = [
     Inventory: -212,
   },
 ];
-// updateNextDateInventory(
-//   "DesetawHappyShope_Transaction",
-//   x,
-//   "2023-11-20",
-//   [1608],
-//   undefined
-// );
-// Usage
-
-function insertIntoCosts(businessName, data, res) {
-  const sanitizedCostName = mysql2.escape(data.Costname);
-  // Build the sanitized SQL query
-  const checkQuery = `SELECT * FROM ?? WHERE costName=${sanitizedCostName}`;
-  let values = [businessName];
+function insertIntoCosts(businessName, data, res, userID, registrationDate) {
+  const sanitizedCostName = data.Costname;
+  const checkQuery = `SELECT * FROM ?? WHERE costName=?`;
+  let values = [businessName, sanitizedCostName];
   Pool.query(checkQuery, values)
     .then(([rows]) => {
       let result = rows;
+      console.log("result", result);
+      // return;
       if (result.length > 0) {
         return res.json({ data: "already registered before" });
       } else {
-        let insert = `insert into ?? (costName) values(${sanitizedCostName})`;
-        values = [businessName];
+        let insert = `insert into ?? (costName,registeredBy,expItemRegistrationDate) values( ?,?,?)`;
+        values = [businessName, sanitizedCostName, userID, registrationDate];
         Pool.query(insert, values)
-          .then(([rows]) => res.json({ data: "Registered successfully" }))
-          .catch((error) => res.json({ err: error }));
+          .then(([rows]) => {
+            console.log(`rows on ${businessName}`, rows);
+            if (rows.affectedRows > 0)
+              res.json({ data: "Registered successfully" });
+            else {
+              res.json({ data: "unable to  register data" });
+            }
+          })
+          .catch((error) => {
+            res.json({ err: error });
+            console.log("error", error);
+          });
       }
     })
     .catch((error) => {
+      console.log("error 1120", error);
       return res.json({ error });
     });
 }
@@ -1317,15 +1341,17 @@ server.post(path + "registerSinglesalesTransaction/", (req, res) => {
     salesType,
     creditPaymentDate,
     items,
+    token,
   } = req.body;
   console.log("req.body", req.body);
+  let { userID } = jwt.verify(token, tokenKey);
   // return;
   let salesTypeColumn = "salesQty";
   if (salesType == "On credit") {
     salesTypeColumn = "creditsalesQty";
   }
   // salesTypeValues; creditPaymentDate
-  const query = `INSERT INTO dailyTransaction (purchaseQty, ${salesTypeColumn},salesTypeValues,creditPaymentDate,businessId, ProductId, brokenQty, Description, registeredTimeDaily,itemDetailInfo,reportStatus) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?,?)`;
+  const query = `INSERT INTO dailyTransaction (purchaseQty, ${salesTypeColumn},salesTypeValues,creditPaymentDate,businessId, ProductId, brokenQty, Description, registeredTimeDaily, itemDetailInfo, reportStatus,registeredBy) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?,?,?)`;
   const values = [
     purchaseQty,
     salesQty,
@@ -1338,6 +1364,7 @@ server.post(path + "registerSinglesalesTransaction/", (req, res) => {
     currentDate,
     JSON.stringify(items),
     "unreported to total sales",
+    userID,
   ];
 
   Pool.query(query, values)
@@ -2356,3 +2383,8 @@ server.post("/updatePartiallyPaidInfo", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// tsega
+// seife
+// aseche
+// bekalu
+// saron

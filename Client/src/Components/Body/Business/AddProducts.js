@@ -9,7 +9,13 @@ const AddProducts = () => {
   let serverAddress = localStorage.getItem("targetUrl");
   let token = localStorage.getItem("storeToken");
   let businessId = localStorage.getItem("businessId");
-  const [FormData, setFormData] = useState({});
+  const [FormData, setFormData] = useState({
+    minimumQty: "",
+    productName: "",
+    productRegistrationDate: "",
+    productUnitCost: "",
+    productUnitPrice: "",
+  });
   const [Processing, setProcessing] = useState(false);
   let CollectData = (e) => {
     console.log(e.target.name);
@@ -23,11 +29,20 @@ const AddProducts = () => {
   let registerProducts = async (e) => {
     e.preventDefault();
     setProcessing(true);
+    FormData.productRegistrationDate = currentDates();
+    console.log("FormData", FormData);
     // return;
     $(".LinearProgress").css("display", "block");
     let response = await axios.post(serverAddress + "addProducts/", FormData);
     let data = response.data.data;
     setProcessing(false);
+    setFormData({
+      minimumQty: "",
+      productName: "",
+      productRegistrationDate: "",
+      productUnitCost: "",
+      productUnitPrice: "",
+    });
     console.log("response", response);
     let registerProducts = document.getElementsByClassName("registerProducts");
     if (data == "notAllowedFroYou") {
@@ -55,11 +70,9 @@ const AddProducts = () => {
       <h4 className="registrationFormToproducts">Forms To Register Products</h4>
 
       <form id="registerProductsForm" onSubmit={registerProducts} method="post">
-        <div>Date</div>
-
-        <TextField required id="productDate" type="date" />
-        <br />
+        <br />{" "}
         <TextField
+          value={FormData.productName}
           className="registerProducts"
           onChange={CollectData}
           name="productName"
@@ -68,6 +81,7 @@ const AddProducts = () => {
         />
         <br />
         <TextField
+          value={FormData.productUnitCost}
           className="registerProducts"
           onChange={CollectData}
           name="productUnitCost"
@@ -76,6 +90,7 @@ const AddProducts = () => {
         />
         <br />
         <TextField
+          value={FormData.productUnitPrice}
           className="registerProducts"
           onChange={CollectData}
           name="productUnitPrice"
@@ -84,6 +99,7 @@ const AddProducts = () => {
         />
         <br />
         <TextField
+          value={FormData.minimumQty}
           className="registerProducts"
           onChange={CollectData}
           type="number"

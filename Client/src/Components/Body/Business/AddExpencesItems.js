@@ -4,32 +4,21 @@ import currentDates from "../Date/currentDate";
 import "./AddCostItems.css";
 import $ from "jquery";
 import { Button, TextField } from "@mui/material";
-function AddCostItems() {
+function AddExpencesItems() {
   let serverAddress = localStorage.getItem("targetUrl");
   const businessId = localStorage.getItem("businessId");
   const [data, setdata] = useState({});
+  /////////////////////
   let collectInputInformation = (e) => {
     console.log(e.target.value);
     let businessName = localStorage.getItem("businessName");
-    let date = document.getElementById("dateIdInCost").value;
-    if (date == "") {
-      date = currentDates();
-      document.getElementById("dateIdInCost").value = date;
-    }
-    setdata({ ...data, [e.target.name]: e.target.value, businessName });
+
+    setdata({
+      ...data,
+      [e.target.name]: e.target.value,
+      businessName,
+    });
   };
-  useEffect(() => {
-    let gateDate = async () => {
-      let date = document.getElementById("dateIdInCost").value;
-      console.log("date == ", date);
-      if (date == "") {
-        date = await currentDates();
-      }
-      console.log(date);
-      document.getElementById("dateIdInCost").value = date;
-    };
-    gateDate();
-  }, []);
 
   let token = localStorage.getItem("storeToken");
   let submitCosts = async (e) => {
@@ -38,7 +27,10 @@ function AddCostItems() {
     console.log("data", data);
     data.token = token;
     data.businessId = businessId;
-    let response = await axios.post(serverAddress + "AddCostItems/", data);
+    data.registrationDate = currentDates();
+    console.log("data", data);
+    // return;
+    let response = await axios.post(serverAddress + "AddExpencesItems/", data);
     console.log("response", response);
     if (response.data.data == "Registered successfully") {
       alert("Registered successfully");
@@ -56,14 +48,14 @@ function AddCostItems() {
     <div>
       <h5 className="titleToRegistrationForm">Forms To Register Costs</h5>
       <form className="form-add-cost" onSubmit={submitCosts}>
-        <TextField
+        {/* <TextField
           className="inputToCotsRegistration"
           label="Date"
           required
           type="date"
           name="date"
           id="dateIdInCost"
-        />
+        /> */}
 
         <br />
         <TextField
@@ -89,4 +81,4 @@ function AddCostItems() {
   );
 }
 
-export default AddCostItems;
+export default AddExpencesItems;

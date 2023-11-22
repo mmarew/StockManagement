@@ -106,13 +106,15 @@ function AddSingleSales_GetItems() {
       return;
     }
     // Default;
-    console.log("formInputValues", formInputValues.selectedDate);
+    formInputValues.selectedDate = currentDates();
+    console.log("formInputValues", formInputValues);
     // return;
     setProccess(true);
     let responce = await axios.post(
       serverAddress + "registerSinglesalesTransaction/",
       {
         // registerTransaction
+        token,
         items,
         ...formInputValues,
         businessId: localStorage.getItem("businessId"),
@@ -224,7 +226,8 @@ function AddSingleSales_GetItems() {
             }}
           >
             <div variant="h6" component="h2">
-              Registration to {RegisterableItems.items.productName}
+              <h4> Registration to {RegisterableItems.items.productName}</h4>
+              <h6>Today {currentDates()}</h6>
             </div>
 
             <Typography variant="body1" component="p">
@@ -233,10 +236,9 @@ function AddSingleSales_GetItems() {
                   registerSinglesalesTransaction(e, RegisterableItems.items);
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "center" }}>
+                {/* <div style={{ display: "flex", justifyContent: "center" }}>
                   Date
-                </div>
-                <TextField
+                </div>   <TextField
                   onInput={(e) =>
                     handleSalesTransactionInput(
                       e,
@@ -248,8 +250,8 @@ function AddSingleSales_GetItems() {
                   fullWidth
                   type="date"
                   name="selectedDate"
-                />
-                <br /> <br />
+                /> */}
+                <br />
                 <TextField
                   fullWidth
                   type="number"

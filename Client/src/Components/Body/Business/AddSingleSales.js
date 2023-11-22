@@ -5,11 +5,6 @@ import CloseIcon from "@material-ui/icons/Close";
 import {
   Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   IconButton,
   MenuItem,
   Modal,
