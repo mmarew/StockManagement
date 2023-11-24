@@ -20,6 +20,15 @@ function SearchSales_Purchase({
   console.log("response", response.data.data, " requestFrom === ", requestFrom);
   // return;
   // set correct data format to time because it is bringing us like registeredTime: "2023-08-05T21:00:00.000Z". The correct format is year month day
+  const [viewInTable, setviewInTable] = useState(
+    window.innerWidth > 768 ? true : false
+  );
+  //  const [viewInTable, setviewInTable] = useState(false);
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 768) {
+      setviewInTable(true);
+    } else setviewInTable(false);
+  });
   const [editTransactions, seteditTransactions] = useState({
     Open: false,
     item: {},
@@ -30,18 +39,21 @@ function SearchSales_Purchase({
     console.log("@SearchSales_Purchase item is ", item);
     item.registrationDate = DateFormatter(item.registrationDate, timeZone);
   });
+  const [SearchedDatas, setSearchedDatas] = useState(dateData);
+
   let businessName = localStorage.getItem("businessName");
   const [UpdateSalesAndPurchase, setUpdateSalesAndPurchase] = useState({});
   const [showEachItems, setshowEachItems] = useState(false);
   const [ShowExpences, setShowExpences] = useState();
   const [ListOfSalesAndPurchase, setListOfSalesAndPurchase] = useState([]);
-  const [SearchedDatas, setSearchedDatas] = useState(dateData);
+
   let businessId = localStorage.getItem("businessId");
   const [ShowConfirmDialog, setShowConfirmDialog] = useState(false);
   const [ConfirmDeletePurchaseAndSales, setConfirmDeletePurchaseAndSales] =
     useState({ Delete: false });
   const [confirmAction, setConfirmAction] = useState("");
   const [confirmMessages, setConfirmMessages] = useState("");
+  // to delete data
   let deleteData = async (deletableItems) => {
     deletableItems.businessId = businessId;
     console.log("deletableItems", deletableItems);
@@ -82,6 +94,8 @@ function SearchSales_Purchase({
   }, [ConfirmDeletePurchaseAndSales]);
 
   let token = localStorage.getItem("storeToken");
+
+  // delete sales and purchases
   let deleteSales_purchase = async (items) => {
     items.businessName = businessName;
     items.token = token;
@@ -106,7 +120,7 @@ function SearchSales_Purchase({
       let resData = response.data.data.map((items) => {
         console.log("items.creditsalesQty", items.creditsalesQty);
         console.log("items.salesQty", items.salesQty);
-        if (items.creditsalesQty == null || items.creditsalesQty == null)
+        if (items.creditsalesQty == null || items.creditsalesQty == "null")
           items.creditsalesQty = 0;
         totalSalesAmt +=
           (parseFloat(items.salesQty) + parseFloat(items.creditsalesQty)) *
@@ -268,7 +282,17 @@ function SearchSales_Purchase({
   return (
     <div>
       {searchTarget == "ALLTRANSACTION" && (
-        <GetCreditLists dateRange={{ fromDate: fromDate, toDate: toDate }} />
+        <>
+          <Checkbox
+            checked={viewInTable}
+            onChange={() => setviewInTable(!viewInTable)}
+          />
+          View in table
+          <GetCreditLists
+            viewInTable={viewInTable}
+            dateRange={{ fromDate: fromDate, toDate: toDate }}
+          />
+        </>
       )}
       <div className="">
         {response.data.data.length > 0 && (
@@ -289,6 +313,7 @@ function SearchSales_Purchase({
       {console.log("ListOfSalesAndPurchase", ListOfSalesAndPurchase)}
       {
         <SalesAndPurchaseTable
+          viewInTable={viewInTable}
           changesOnInputsOfTransaction={changesOnInputsOfTransaction}
           showEachItems={showEachItems}
           setshowEachItems={setshowEachItems}

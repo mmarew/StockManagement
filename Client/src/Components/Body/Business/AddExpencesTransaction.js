@@ -92,7 +92,7 @@ function AddExpencesTransaction() {
   let collectCotForm = (e) => {
     console.log(e.target);
     console.log(Formdata);
-    let costDate = document.getElementById("costDate").value;
+    let costDate = currentDates();
     setFormdata({
       ...Formdata,
       costDate,
@@ -205,18 +205,18 @@ function AddExpencesTransaction() {
                   className={AddCostTransactionCss.costTransactionForm}
                 >
                   <br />
-                  <h3>Cost Transaction Registration Form</h3>
+                  <h3>Expences Transaction Registration Form</h3>
                   <br />
-                  <div> Select Date</div>
+                  {/* <div> Select Date</div> */}
 
-                  <TextField
+                  {/* <TextField
                     className={AddCostTransactionCss.formInputToTransaction}
                     required
                     name="costDate"
                     onChange={collectCotForm}
                     type="Date"
                     id="costDate"
-                  />
+                  /> */}
 
                   <h4 className={AddCostTransactionCss.costName}>
                     {items.costName}
@@ -224,7 +224,7 @@ function AddExpencesTransaction() {
                   <TextField
                     required
                     type="number"
-                    label="Cost Amount"
+                    label="Expences Amount"
                     name={items?.costName?.replaceAll(/\s/g, "")}
                     onChange={collectCotForm}
                     className={AddCostTransactionCss.formInputToTransaction}
@@ -233,7 +233,7 @@ function AddExpencesTransaction() {
                   <TextField
                     required
                     onChange={collectCotForm}
-                    label="Cost Description"
+                    label="Expences Description"
                     className={AddCostTransactionCss.formInputToTransaction}
                     name={
                       "Description_" + items?.costName?.replaceAll(/\s/g, "")

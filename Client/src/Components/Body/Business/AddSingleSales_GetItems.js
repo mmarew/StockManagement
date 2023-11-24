@@ -145,17 +145,15 @@ function AddSingleSales_GetItems() {
   const { ShowProgressBar, setShowProgressBar } = ConsumeableContext();
   return (
     <>
-      <div
-        style={{
+      {console.log("searchedProducts", searchedProducts)}
+      <Box
+        sx={{
           display: "flex",
           flexDirection: "row",
           padding: "10px",
           flexWrap: "wrap",
-          // justifyContent: "center",
-          // alignItems: "center",
         }}
       >
-        {console.log("searchedProducts", searchedProducts)}
         {searchedProducts?.map((items) => {
           return (
             <Box
@@ -184,7 +182,6 @@ function AddSingleSales_GetItems() {
               <Button
                 color="success"
                 variant="contained"
-                style={{}}
                 onClick={() =>
                   setGetAllDailyRegisters((prev) => {
                     return {
@@ -201,42 +198,44 @@ function AddSingleSales_GetItems() {
             </Box>
           );
         })}
+      </Box>
+      <hr />
+      <br />
+      {getAllDailyRegisters.Open && (
+        <GetEachTransaction
+          setGetAllDailyRegisters={setGetAllDailyRegisters}
+          ProductId={getAllDailyRegisters.ProductId}
+        />
+      )}
+      <Modal open={RegisterableItems.Open}>
+        <Box
+          sx={{
+            marginBottom: "20px",
+            maxHeight: "90vh",
+            overflowY: "scroll",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            maxWidth: 300,
+            width: "90%",
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <div variant="h6" component="h2">
+            <h4> Registration to {RegisterableItems.items.productName}</h4>
+            <h6>Today {currentDates()}</h6>
+          </div>
 
-        {getAllDailyRegisters.Open && (
-          <GetEachTransaction
-            setGetAllDailyRegisters={setGetAllDailyRegisters}
-            ProductId={getAllDailyRegisters.ProductId}
-          />
-        )}
-        <Modal open={RegisterableItems.Open}>
-          <Box
-            sx={{
-              marginBottom: "20px",
-              maxHeight: "90vh",
-              overflowY: "scroll",
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              maxWidth: 300,
-              width: "90%",
-              bgcolor: "background.paper",
-              boxShadow: 24,
-              p: 4,
-            }}
-          >
-            <div variant="h6" component="h2">
-              <h4> Registration to {RegisterableItems.items.productName}</h4>
-              <h6>Today {currentDates()}</h6>
-            </div>
-
-            <Typography variant="body1" component="p">
-              <form
-                onSubmit={(e) => {
-                  registerSinglesalesTransaction(e, RegisterableItems.items);
-                }}
-              >
-                {/* <div style={{ display: "flex", justifyContent: "center" }}>
+          <Typography variant="body1" component="p">
+            <form
+              onSubmit={(e) => {
+                registerSinglesalesTransaction(e, RegisterableItems.items);
+              }}
+            >
+              {/* <div style={{ display: "flex", justifyContent: "center" }}>
                   Date
                 </div>   <TextField
                   onInput={(e) =>
@@ -251,152 +250,151 @@ function AddSingleSales_GetItems() {
                   type="date"
                   name="selectedDate"
                 /> */}
-                <br />
-                <TextField
-                  fullWidth
-                  type="number"
-                  required
-                  value={formInputValues.purchaseQty}
-                  className={"dailyRegistrationInputs"}
-                  onInput={(e) =>
-                    handleSalesTransactionInput(
-                      e,
-                      RegisterableItems.items.ProductId
-                    )
-                  }
-                  name="purchaseQty"
-                  label="purchase quantity"
-                />
-                <br /> <br />
-                <TextField
-                  fullWidth
-                  type="number"
-                  required
-                  className={"dailyRegistrationInputs"}
-                  onInput={(e) =>
-                    handleSalesTransactionInput(
-                      e,
-                      RegisterableItems.items.ProductId
-                    )
-                  }
-                  name="salesQty"
-                  label="Sales quantity"
-                  value={formInputValues.salesQty}
-                />
-                <br /> <br />
-                <TextField
-                  required
-                  fullWidth
-                  type="number"
-                  className={"dailyRegistrationInputs"}
-                  onInput={(e) =>
-                    handleSalesTransactionInput(
-                      e,
-                      RegisterableItems.items.ProductId
-                    )
-                  }
-                  name="brokenQty"
-                  label="Broken quantity"
-                  value={formInputValues.brokenQty}
-                />
-                <br /> <br />
-                <label>payment type</label>
-                {console.log(
-                  "formInputValues.salesType",
-                  formInputValues.salesType
-                )}
-                <Select
-                  value={formInputValues.salesType}
-                  name="salesType"
-                  onChange={(e) => {
-                    setsingleSalesError({});
-                    handleSalesTransactionInput(
-                      e,
-                      RegisterableItems.items.ProductId
-                    );
-                  }}
-                  sx={{ margin: "20px auto" }}
-                  fullWidth
-                  required
-                >
-                  <MenuItem value={"Default"}>Choose values </MenuItem>
-                  <MenuItem value={"On cash"}>On cash</MenuItem>
-                  <MenuItem value={"By bank"}>By bank</MenuItem>
-                  <MenuItem value={"On credit"}>On credit</MenuItem>
-                  {/* <MenuItem value={"On credit"}>On credit</MenuItem> */}
-                </Select>
-                <Box sx={{ color: "red", marginBottom: "0px" }}>
-                  {singleSalesError.salesType}
+              <br />
+              <TextField
+                fullWidth
+                type="number"
+                required
+                value={formInputValues.purchaseQty}
+                className={"dailyRegistrationInputs"}
+                onInput={(e) =>
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  )
+                }
+                name="purchaseQty"
+                label="purchase quantity"
+              />
+              <br /> <br />
+              <TextField
+                fullWidth
+                type="number"
+                required
+                className={"dailyRegistrationInputs"}
+                onInput={(e) =>
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  )
+                }
+                name="salesQty"
+                label="Sales quantity"
+                value={formInputValues.salesQty}
+              />
+              <br /> <br />
+              <TextField
+                required
+                fullWidth
+                type="number"
+                className={"dailyRegistrationInputs"}
+                onInput={(e) =>
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  )
+                }
+                name="brokenQty"
+                label="Broken quantity"
+                value={formInputValues.brokenQty}
+              />
+              <br /> <br />
+              <label>payment type</label>
+              {console.log(
+                "formInputValues.salesType",
+                formInputValues.salesType
+              )}
+              <Select
+                value={formInputValues.salesType}
+                name="salesType"
+                onChange={(e) => {
+                  setsingleSalesError({});
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  );
+                }}
+                sx={{ margin: "20px auto" }}
+                fullWidth
+                required
+              >
+                <MenuItem value={"Default"}>Choose values </MenuItem>
+                <MenuItem value={"On cash"}>On cash</MenuItem>
+                <MenuItem value={"By bank"}>By bank</MenuItem>
+                <MenuItem value={"On credit"}>On credit</MenuItem>
+                {/* <MenuItem value={"On credit"}>On credit</MenuItem> */}
+              </Select>
+              <Box sx={{ color: "red", marginBottom: "0px" }}>
+                {singleSalesError.salesType}
+              </Box>
+              {formInputValues.salesType == "On credit" && (
+                <Box sx={{ width: "100%" }}>
+                  <label>Payment date</label>
+                  <TextField
+                    id=""
+                    onChange={(e) =>
+                      handleSalesTransactionInput(
+                        e,
+                        RegisterableItems.items.ProductId
+                      )
+                    }
+                    value={formInputValues.creditPaymentDate}
+                    name="creditPaymentDate"
+                    className=""
+                    required
+                    fullWidth
+                    type="date"
+                  />
+                  <br /> <br />
                 </Box>
-                {formInputValues.salesType == "On credit" && (
-                  <Box sx={{ width: "100%" }}>
-                    <label>Payment date</label>
-                    <TextField
-                      id=""
-                      onChange={(e) =>
-                        handleSalesTransactionInput(
-                          e,
-                          RegisterableItems.items.ProductId
-                        )
-                      }
-                      value={formInputValues.creditPaymentDate}
-                      name="creditPaymentDate"
-                      className=""
-                      required
-                      fullWidth
-                      type="date"
-                    />
-                    <br /> <br />
-                  </Box>
-                )}
-                <TextField
-                  fullWidth
-                  required
-                  className={"dailyRegistrationInputs"}
-                  onInput={(e) =>
-                    handleSalesTransactionInput(
-                      e,
-                      RegisterableItems.items.ProductId
-                    )
-                  }
-                  value={formInputValues.Description}
-                  name="Description"
-                  label="Description"
-                />
-                <br /> <br />
-                <Box sx={{ display: "flex" }}>
-                  {!Proccess ? (
-                    <Button color="primary" variant="contained" type="submit">
-                      ADD
-                    </Button>
-                  ) : (
-                    <Button disabled variant="contained">
-                      Proccessing...
-                    </Button>
-                  )}
-                  &nbsp; &nbsp; &nbsp;
-                  <Button
-                    onClick={(e) => {
-                      setRegisterableItems((prevItems) => {
-                        return {
-                          ...prevItems,
-                          Open: false,
-                        };
-                      });
-                      setProccess(false);
-                      // setShowHiddenProducts(false);
-                    }}
-                    color="warning"
-                    variant="contained"
-                  >
-                    CANCEL
+              )}
+              <TextField
+                fullWidth
+                required
+                className={"dailyRegistrationInputs"}
+                onInput={(e) =>
+                  handleSalesTransactionInput(
+                    e,
+                    RegisterableItems.items.ProductId
+                  )
+                }
+                value={formInputValues.Description}
+                name="Description"
+                label="Description"
+              />
+              <br /> <br />
+              <Box sx={{ display: "flex" }}>
+                {!Proccess ? (
+                  <Button color="primary" variant="contained" type="submit">
+                    ADD
                   </Button>
-                </Box>
-              </form>
-            </Typography>
-          </Box>
-        </Modal>
-      </div>
+                ) : (
+                  <Button disabled variant="contained">
+                    Proccessing...
+                  </Button>
+                )}
+                &nbsp; &nbsp; &nbsp;
+                <Button
+                  onClick={(e) => {
+                    setRegisterableItems((prevItems) => {
+                      return {
+                        ...prevItems,
+                        Open: false,
+                      };
+                    });
+                    setProccess(false);
+                    // setShowHiddenProducts(false);
+                  }}
+                  color="warning"
+                  variant="contained"
+                >
+                  CANCEL
+                </Button>
+              </Box>
+            </form>
+          </Typography>
+        </Box>
+      </Modal>
     </>
   );
 }

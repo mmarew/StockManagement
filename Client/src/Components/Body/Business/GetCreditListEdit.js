@@ -15,6 +15,7 @@ import { makeStyles } from "@mui/styles";
 import { Box } from "@material-ui/core";
 import axios from "axios";
 import { DateFormatter } from "../Date/currentDate";
+import CurrencyFormatter from "../../utility/Utility";
 
 const useStyles = makeStyles((theme) => ({
   modalContainer: {
@@ -137,7 +138,9 @@ const GetCreditListEdit = ({
                   {partiallyPaidInfo?.map((info, id) => (
                     <TableRow key={"partiallyPaidInfo" + id}>
                       {console.log("info", info)}
-                      <TableCell>{info.collectionAmount}</TableCell>
+                      <TableCell>
+                        {CurrencyFormatter(info.collectionAmount)}
+                      </TableCell>
                       <TableCell>
                         {DateFormatter(info.collectionDate)}
                       </TableCell>

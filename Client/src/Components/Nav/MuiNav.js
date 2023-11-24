@@ -119,8 +119,9 @@ export default function NavBar() {
                   className="Lists"
                   to="/Business"
                 >
-                  <div>
+                  <div className="logoAndTitleWrapper">
                     <img className="listImg" src={BusinessLogo} />
+                    <span>Business</span>
                   </div>
                 </Link>
                 <Link
@@ -128,8 +129,9 @@ export default function NavBar() {
                   className="Lists"
                   to="/help"
                 >
-                  <div>
+                  <div className="logoAndTitleWrapper">
                     <img className="listImg" src={HelpLogo} />
+                    <span>Help</span>
                   </div>
                 </Link>
                 <Link
@@ -137,8 +139,9 @@ export default function NavBar() {
                   className="Lists ownerName"
                   to="/Profiles"
                 >
-                  <div>
+                  <div className={"logoAndTitleWrapper"}>
                     <img className="listImg" src={ProfileLogo} />
+                    <span>Profile</span>
                   </div>
                 </Link>
               </div>

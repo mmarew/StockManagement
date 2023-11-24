@@ -28,6 +28,7 @@ import currentDates, { DateFormatter } from "../Date/currentDate";
 import { ButtonProcessing } from "../../utility/Utility";
 import CloseIcon from "@material-ui/icons/Close";
 import { ConsumeableContext } from "../UserContext/UserContext";
+import { Checkbox, Paper } from "@material-ui/core";
 function GetEachTransaction({
   RandValue,
   ProductId,
@@ -35,6 +36,7 @@ function GetEachTransaction({
   currentDay,
   setGetAllDailyRegisters,
 }) {
+  const [modalToConfirm, setmodalToConfirm] = useState(false);
   let openedBusiness = localStorage.getItem("openedBusiness");
   let { setShowProgressBar, setProccessing } = ConsumeableContext();
   const [formInputValues, setFormInputValues] = useState({
@@ -252,9 +254,10 @@ function GetEachTransaction({
     // getTotalRegisters(ProductId);
   }, [RandValue, ProductId]);
   let RegiterCollectedDailyTransaction = async (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     setProccess(true);
     // return;
+    setmodalToConfirm(true);
     let serverAddress = localStorage.getItem("targetUrl"),
       businessName = localStorage.getItem("businessName"),
       BusinessId = localStorage.getItem("businessId"),
@@ -291,6 +294,7 @@ function GetEachTransaction({
       serverAddress + "registerTransaction/",
       productsInfo
     );
+    setmodalToConfirm(false);
     setProccess(false);
     // console.log("Response", Response);
     let datas = Response.data.data;
@@ -309,103 +313,210 @@ function GetEachTransaction({
       alert("unkown error");
     }
   };
+  const [deviceSize, setdeviceSize] = useState(window.innerWidth);
+  window.addEventListener("resize", () => {
+    setdeviceSize(window.innerWidth);
+  });
   return (
     <>
       {DailyTransaction.length > 0 && (
         <div>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Product Name</TableCell>
-                  <TableCell>Purchase Qty </TableCell>
-                  <TableCell>Sales Qty In Cash</TableCell>
-                  <TableCell>Sales Qty Credit</TableCell>
-                  <TableCell>unit Price</TableCell>
-                  <TableCell>Sales Date</TableCell>
-                  <TableCell>Credit Payment Date</TableCell>
-                  <TableCell> Sales Type</TableCell>
-                  <TableCell>Broken Qty</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell> Update / Delete </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {DailyTransaction?.map((items, index) => {
-                  console.log(items.itemDetailInfo);
+          <Checkbox
+            onChange={() => {
+              setdeviceSize(deviceSize > 768 ? 700 : 800);
+            }}
+          />{" "}
+          View in table
+          {/* opop opopo po popo po pop po popo po popop p opopo pop o po opop */}
+          {deviceSize < 768 ? (
+            DailyTransaction?.map((items, index) => {
+              console.log(items.itemDetailInfo);
 
-                  return (
-                    <TableRow key={"detailes_" + index}>
-                      <TableCell>
-                        {items.itemDetailInfo
-                          ? JSON.parse(items.itemDetailInfo).productName
-                          : ""}
-                      </TableCell>
-                      <TableCell>{items.purchaseQty}</TableCell>
-                      <TableCell>{items.salesQty}</TableCell>
-                      <TableCell>{items.creditsalesQty}</TableCell>
-                      <TableCell>
-                        {JSON.parse(items.itemDetailInfo)?.productsUnitPrice}
-                      </TableCell>
-                      <TableCell>
-                        {DateFormatter(items.registeredTimeDaily)}
-                      </TableCell>
-                      <TableCell>
-                        {DateFormatter(items.creditPaymentDate)}
-                      </TableCell>
-                      <TableCell>{items.salesTypeValues}</TableCell>
-                      {/* {(creditPaymentDate, creditsalesQty,)} */}
-                      <TableCell> {items.brokenQty} </TableCell>
-                      <TableCell> {items.Description}</TableCell>
-                      <TableCell>
-                        {openedBusiness !== "employersBusiness" ? (
-                          <>
-                            <IconButton
-                              onClick={() => {
-                                setShowDeleteConfirmationModal({
-                                  open: true,
-                                  Items: items,
-                                });
-                              }}
-                              aria-label="delete"
-                            >
-                              <DeleteIcon color="error" />
-                            </IconButton>
-                            <IconButton
-                              onClick={() => {
-                                setFormInputValues(items);
-                                setEditSingleItem((previousState) => {
-                                  return {
-                                    ...previousState,
+              return (
+                <Paper
+                  style={{ padding: "20px", margin: "10px" }}
+                  key={"detailes_" + index}
+                >
+                  <div>
+                    <strong>Product Name: </strong>
+                    {items.itemDetailInfo
+                      ? JSON.parse(items.itemDetailInfo).productName
+                      : ""}
+                  </div>
+                  <div>
+                    <strong>Purchase QTY: </strong>
+                    {items.purchaseQty}
+                  </div>
+                  <div>
+                    <strong>Sales QTY: </strong>
+                    {items.salesQty}
+                  </div>
+                  <div>
+                    <strong>Sales QTY Credit: </strong>
+                    {items.creditsalesQty}
+                  </div>
+                  <div>
+                    <strong>Unit Price: </strong>
+                    {JSON.parse(items.itemDetailInfo)?.productsUnitPrice}
+                  </div>
+                  <div>
+                    <strong>Registration Date: </strong>
+                    {DateFormatter(items.registeredTimeDaily)}
+                  </div>
+                  <div>
+                    <strong>Payment Date: </strong>
+                    {DateFormatter(items.creditPaymentDate)}
+                  </div>
+                  <div>
+                    <strong>Sales Type : </strong>
+                    {items.salesTypeValues}
+                  </div>
+                  {/* {(creditPaymentDate, creditsalesQty,)} */}
+                  <div>
+                    {" "}
+                    <strong>Broken QTY: </strong>
+                    {items.brokenQty}{" "}
+                  </div>
+                  <div>
+                    <strong>Description: </strong> {items.Description}
+                  </div>
+                  <div>
+                    <strong>Actions: </strong>
+                    {openedBusiness !== "employersBusiness" ? (
+                      <>
+                        <IconButton
+                          onClick={() => {
+                            setShowDeleteConfirmationModal({
+                              open: true,
+                              Items: items,
+                            });
+                          }}
+                          aria-label="delete"
+                        >
+                          <DeleteIcon color="error" />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            setFormInputValues(items);
+                            setEditSingleItem((previousState) => {
+                              return {
+                                ...previousState,
+                                open: true,
+                                Items: items,
+                              };
+                            });
+                          }}
+                        >
+                          <EditIcon color="info" />
+                        </IconButton>
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </Paper>
+              );
+            })
+          ) : (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Product Name</TableCell>
+                    <TableCell>Purchase Qty </TableCell>
+                    <TableCell>Sales Qty In Cash</TableCell>
+                    <TableCell>Sales Qty Credit</TableCell>
+                    <TableCell>unit Price</TableCell>
+                    <TableCell>Sales Date</TableCell>
+                    <TableCell>Credit Payment Date</TableCell>
+                    <TableCell> Sales Type</TableCell>
+                    <TableCell>Broken Qty</TableCell>
+                    <TableCell>Description</TableCell>
+                    <TableCell> Update / Delete </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {DailyTransaction?.map((items, index) => {
+                    console.log(items.itemDetailInfo);
+
+                    return (
+                      <TableRow key={"detailes_" + index}>
+                        <TableCell>
+                          {items.itemDetailInfo
+                            ? JSON.parse(items.itemDetailInfo).productName
+                            : ""}
+                        </TableCell>
+                        <TableCell>{items.purchaseQty}</TableCell>
+                        <TableCell>{items.salesQty}</TableCell>
+                        <TableCell>{items.creditsalesQty}</TableCell>
+                        <TableCell>
+                          {JSON.parse(items.itemDetailInfo)?.productsUnitPrice}
+                        </TableCell>
+                        <TableCell>
+                          {DateFormatter(items.registeredTimeDaily)}
+                        </TableCell>
+                        <TableCell>
+                          {DateFormatter(items.creditPaymentDate)}
+                        </TableCell>
+                        <TableCell>{items.salesTypeValues}</TableCell>
+                        {/* {(creditPaymentDate, creditsalesQty,)} */}
+                        <TableCell> {items.brokenQty} </TableCell>
+                        <TableCell> {items.Description}</TableCell>
+                        <TableCell>
+                          {openedBusiness !== "employersBusiness" ? (
+                            <>
+                              <IconButton
+                                onClick={() => {
+                                  setShowDeleteConfirmationModal({
                                     open: true,
                                     Items: items,
-                                  };
-                                });
-                              }}
-                            >
-                              <EditIcon color="info" />
-                            </IconButton>
-                          </>
-                        ) : (
-                          ""
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                <TableRow>
-                  <TableCell colSpan={6}></TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+                                  });
+                                }}
+                                aria-label="delete"
+                              >
+                                <DeleteIcon color="error" />
+                              </IconButton>
+                              <IconButton
+                                onClick={() => {
+                                  setFormInputValues(items);
+                                  setEditSingleItem((previousState) => {
+                                    return {
+                                      ...previousState,
+                                      open: true,
+                                      Items: items,
+                                    };
+                                  });
+                                }}
+                              >
+                                <EditIcon color="info" />
+                              </IconButton>
+                            </>
+                          ) : (
+                            ""
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  <TableRow>
+                    <TableCell colSpan={6}></TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             {!Proccess ? (
               <Button
                 variant="contained"
                 color="primary"
                 className={singleSalesCss.btnAddTotalSales}
-                onClick={RegiterCollectedDailyTransaction}
+                onClick={
+                  () => {
+                    setmodalToConfirm(true);
+                  }
+                  // RegiterCollectedDailyTransaction
+                }
               >
                 Generate Reports
               </Button>
@@ -415,6 +526,67 @@ function GetEachTransaction({
           </Box>
         </div>
       )}
+      <Modal open={modalToConfirm}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh", // Set the height of the container to full viewport height
+          }}
+        >
+          <Box
+            sx={{
+              padding: "20px 2px",
+              backgroundColor: "white",
+              display: "flex",
+              flexDirection: "column",
+              width: "400px",
+              position: "absolute",
+              top: "50%", // Position the modal 50% from the top
+              left: "50%", // Position the modal 50% from the left
+              transform: "translate(-50%, -50%)", // Center the modal horizontally and vertically
+              justifyContent: "center",
+            }}
+          >
+            <Typography sx={{ textAlign: "center" }}>
+              Are you sure to generate the report?
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "16px",
+              }}
+            >
+              {!Proccess ? (
+                <Button
+                  color="primary"
+                  variant="contained"
+                  onClick={() => {
+                    RegiterCollectedDailyTransaction();
+                  }}
+                >
+                  Yes
+                </Button>
+              ) : (
+                <ButtonProcessing />
+              )}
+              &nbsp;&nbsp;&nbsp;
+              <Button
+                onClick={() => {
+                  setmodalToConfirm(false);
+                }}
+                variant="contained"
+                color="error"
+              >
+                No
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
       <Modal
         open={EditSingleItem.open}
         onClose={() => {
@@ -541,7 +713,7 @@ function GetEachTransaction({
                   formInputValues.salesTypeValues
               )}
               {formInputValues.salesTypeValues == "On credit" && (
-                <Box sx={{ width: "100%" }}>
+                <Box>
                   <lab>Payment date</lab>
                   <TextField
                     id=""

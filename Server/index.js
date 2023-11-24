@@ -73,11 +73,11 @@ server.post(path, (req, res) => {
   );
 });
 server.get(path, async (req, res) => {
-  //   let alterBusiness = `ALTER TABLE dailyTransaction
-  // ADD COLUMN IF NOT EXISTS registeredBy INT`;
-  //   let results = await Pool.query(alterBusiness);
-  //   res.json({ data: results });
-  //   return console.log("results", results);
+  // let alterBusiness = `ALTER TABLE dailyTransaction
+  // ADD COLUMN  registeredBy INT not null `;
+  // let results = await Pool.query(alterBusiness);
+  // res.json({ data: results });
+  // return console.log("results", results);
   let select = "select * from Business ";
   let myData = [];
   await Pool.query(select)
@@ -87,9 +87,9 @@ server.get(path, async (req, res) => {
         try {
           let { uniqueBusinessName, BusinessID, ownerId, createdDate } = data;
 
-          let businessName = uniqueBusinessName + "_Transaction";
+          let businessName = uniqueBusinessName + "_Costs";
           // registeredBy, expItemRegistrationDate;
-          let Update = `alter TABLE ${businessName} add column if not exists registeredBy int not null`;
+          let Update = `alter TABLE ${businessName} add column expItemRegistrationDate date not null`;
           let [myUpdate] = await Pool.query(Update);
           console.log("myUpdate", myUpdate);
         } catch (error) {
@@ -98,13 +98,13 @@ server.get(path, async (req, res) => {
           console.log("code:", error.code);
           let Code = error.code;
 
-          if (Code == ER_NO_SUCH_TABLE) {
+          if (Code == "ER_NO_SUCH_TABLE") {
           }
         }
       });
     })
     .catch((error) => {
-      //console.log(error);
+      console.log(error);
     });
 
   res.json({ data: "myData" });
@@ -907,7 +907,7 @@ server.post(`/registerExpenceTransaction/`, async (req, res) => {
             res.json({ data: "Inserted properly" });
           })
           .catch((error) => {
-            //console.log("error", error);
+            console.log("error", error);
             res.json({ data: "error", error: "unable to insert" });
           });
       }
@@ -1829,6 +1829,9 @@ let getUniqueBusinessName = async (businessId, token) => {
     let selectAsEmployee = `select * from employeeTable,Business where userIdInEmployee='${userID}' and BusinessIDEmployee='${businessId}'  and BusinessID=BusinessIDEmployee`;
 
     let [businessData] = await Pool.query(getBusinessData);
+    console.log("getBusinessData", getBusinessData);
+    console.log("businessData", businessData);
+    // return;
     if (businessData.length == 0) {
       // check if u r employee
       let [employeeResult] = await Pool.query(selectAsEmployee);

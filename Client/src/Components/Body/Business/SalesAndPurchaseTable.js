@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Chip,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -32,6 +33,7 @@ function SalesAndPurchaseTable({
   TotalSalesRevenue,
   TotalPurchaseCost,
   seteditTransactions,
+  viewInTable,
 }) {
   let { singleSalesInputValues, setSinlgeSalesInputValues } =
     ConsumeableContext();
@@ -75,53 +77,25 @@ function SalesAndPurchaseTable({
   return (
     <Box>
       {ListOfSalesAndPurchase.length > 0 ? (
-        <TableContainer>
-          <Table id="productTransaction">
-            <TableHead>
-              <TableRow>
-                <TableCell colSpan={15}>
-                  <h3>purchase , sales, inventory and description table</h3>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableRow>
-              <TableCell>Product&nbsp;&nbsp;&nbsp;&nbsp;name</TableCell>
-              <TableCell>
-                {showEachItems ? " Registration Date" : " Registration Dates"}
-              </TableCell>
-              <TableCell>Unit price</TableCell>
-              <TableCell>
-                Sold&nbsp;&nbsp;Qty&nbsp;&nbsp;In&nbsp;&nbsp;Cash
-              </TableCell>
-              <TableCell>Sold Qty In Credit</TableCell>
-              <TableCell>Total sales</TableCell>
-              <TableCell>Unit Cost</TableCell>
-              <TableCell>purchase Qty</TableCell>
-              <TableCell>Total Purchase</TableCell>
-              <TableCell>Broken</TableCell>
-              <TableCell>Inventory</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell colSpan={2}>Action</TableCell>
-              <TableCell>Status</TableCell>
-            </TableRow>
-            <TableBody>
+        <>
+          {!viewInTable ? (
+            <Box>
               {console.log("ListOfSalesAndPurchase", ListOfSalesAndPurchase)}
               {ListOfSalesAndPurchase?.map((items, index) => {
                 return (
-                  <TableRow
+                  <Paper
+                    sx={{ padding: "20px", margin: "10px", width: "320px" }}
                     className={
                       SearchSales_PurchaseCss.searchedDatas +
                       " Transaction_" +
                       index
                     }
                   >
-                    <TableCell
-                      id={"productName_" + items.transactionId}
-                      type="text"
-                    >
+                    <div id={"productName_" + items.transactionId} type="text">
+                      <strong>Product Name:- </strong>
                       {items.productName}
-                    </TableCell>
-                    <TableCell
+                    </div>
+                    <div
                       type="text"
                       id={"RegistrationDate_" + items.transactionId}
                       className={
@@ -132,10 +106,10 @@ function SalesAndPurchaseTable({
                         "items.registrationDate",
                         items.regiteredTime
                       )}
+                      <strong> Registration Time :-</strong>
                       {
                         <Chip
                           style={{
-                            marginTop: "5px",
                             backgroundColor: "transparent",
                           }}
                           key={"dateOfRegistration_"}
@@ -146,15 +120,16 @@ function SalesAndPurchaseTable({
                           }
                         />
                       }
-                    </TableCell>
-                    <TableCell
+                    </div>
+                    <div
                       className={"unitPrice" + items.transactionId}
                       id={"unitPrice_" + items.transactionId}
                       type="text"
                     >
+                      <strong>Unit Price </strong>
                       {CurrencyFormatter(items.productsUnitPrice)}
-                    </TableCell>
-                    <TableCell
+                    </div>
+                    <div
                       onInput={() =>
                         changesOnInputsOfTransaction("updateId_" + index, index)
                       }
@@ -166,9 +141,9 @@ function SalesAndPurchaseTable({
                       id={"salesQty_" + items.transactionId}
                       type="text"
                     >
-                      {items.salesQty}
-                    </TableCell>
-                    <TableCell
+                      <strong>Sales qty</strong> {items.salesQty}
+                    </div>
+                    <div
                       onInput={() =>
                         changesOnInputsOfTransaction("updateId_" + index, index)
                       }
@@ -182,29 +157,32 @@ function SalesAndPurchaseTable({
                       id={"salesQtyInCredit_" + items.transactionId}
                       type="text"
                     >
+                      <strong>Credit Sales QTY</strong>
                       {items.creditsalesQty}
-                    </TableCell>
-                    <TableCell
+                    </div>
+                    <div
                       className={`totalSales${items.transactionId}`}
                       id={"totalSales_" + items.transactionId}
                       type="text"
                     >
+                      <strong>Total Sales:-</strong>
                       {CurrencyFormatter(
                         (items.salesQty + items.creditsalesQty) *
                           items.productsUnitPrice
                       )}
-                    </TableCell>
-                    <TableCell
+                    </div>
+                    <div
                       className={`unitCost${items.transactionId}`}
                       name="unitCost"
                       id={"unitCost_" + items.transactionId}
                       type="text"
                     >
+                      <strong>Unit Cost:- </strong>
                       {openedBusiness == "myBusiness"
                         ? CurrencyFormatter(items.unitCost)
                         : 0}
-                    </TableCell>
-                    <TableCell
+                    </div>
+                    <div
                       onInput={() =>
                         changesOnInputsOfTransaction("updateId_" + index, index)
                       }
@@ -217,19 +195,21 @@ function SalesAndPurchaseTable({
                       type="text"
                       name="purchaseQty"
                     >
+                      <strong>Purchasing Qty :- </strong>
                       {items.purchaseQty}
-                    </TableCell>
-                    <TableCell
+                    </div>
+                    <div
                       className={`totalCost${items.transactionId}`}
                       name="totalCost"
                       id={"totalPurchase_" + items.transactionId}
                       type="text"
                     >
+                      <strong>Purchase Cost</strong>{" "}
                       {openedBusiness == "myBusiness"
                         ? CurrencyFormatter(items.unitCost * items.purchaseQty)
                         : CurrencyFormatter(0)}
-                    </TableCell>
-                    <TableCell
+                    </div>
+                    <div
                       onInput={() =>
                         changesOnInputsOfTransaction("updateId_" + index, index)
                       }
@@ -242,16 +222,16 @@ function SalesAndPurchaseTable({
                       type="text"
                       name="broken"
                     >
-                      {items.wrickages}
-                    </TableCell>
-                    <TableCell
+                      <strong>Broken QTY</strong> {items.wrickages}
+                    </div>
+                    <div
                       className={`inventory${items.transactionId}`}
                       id={"Inventory_" + items.transactionId}
                       type="text"
                     >
-                      {items.Inventory}
-                    </TableCell>
-                    <TableCell
+                      <strong>Inventory :- </strong> {items.Inventory}
+                    </div>
+                    <div
                       sx={{ minWidth: "300px" }}
                       onInput={() =>
                         changesOnInputsOfTransaction("updateId_" + index, index)
@@ -266,34 +246,33 @@ function SalesAndPurchaseTable({
                       type="text"
                       name="description"
                     >
+                      <strong> Description :- </strong>
                       {items.description}
-                    </TableCell>
+                    </div>
                     {showEachItems ? (
                       !items.contentEditable ? (
                         openedBusiness == "myBusiness" && (
                           <>
-                            <TableCell
-                              onClick={() => deleteSales_purchase(items)}
-                            >
+                            <div onClick={() => deleteSales_purchase(items)}>
                               {openedBusiness == "myBusiness" && (
                                 <DeleteIcon sx={{ color: "red" }} />
                               )}
-                            </TableCell>
+                            </div>
                           </>
                         )
                       ) : (
-                        <TableCell
+                        <div
                           className="cancelOrEditTransaction"
                           onClick={(e) => cancelSalesAndPurchase(e, index)}
                         >
                           <Button>cancel </Button>
-                        </TableCell>
+                        </div>
                       )
                     ) : (
-                      <TableCell></TableCell>
+                      <div></div>
                     )}
                     {items.updateEditedContent ? (
-                      <TableCell>
+                      <div>
                         <Button
                           variant="contained"
                           color="info"
@@ -315,35 +294,328 @@ function SalesAndPurchaseTable({
                           {/* kkkkkkkkk */}
                           Update
                         </Button>
-                      </TableCell>
+                      </div>
                     ) : (
-                      <TableCell>&nbsp;</TableCell>
+                      <div>&nbsp;</div>
                     )}
-                  </TableRow>
+                  </Paper>
                 );
               })}
-              <TableRow
+              <div
                 className={SearchSales_PurchaseCss.salesPurchaseLastRow}
                 style={{ backgroundColor: "#B3E5FC" }}
               >
-                <TableCell colSpan={2}></TableCell>
-                <TableCell colSpan={2}>
+                <div colSpan={2}></div>
+                <div colSpan={2}>
                   Sum of Sales = {CurrencyFormatter(TotalSalesRevenue)}
-                </TableCell>
-                <TableCell colSpan={2}>
+                </div>
+                <div colSpan={2}>
                   Sum of Purchase =
                   {openedBusiness == "myBusiness"
                     ? CurrencyFormatter(TotalPurchaseCost)
                     : CurrencyFormatter(0)}
-                </TableCell>
-                <TableCell colSpan={5}>
+                </div>
+                <div colSpan={5}>
                   Sales - Purchases={" "}
                   {CurrencyFormatter(TotalSalesRevenue - TotalPurchaseCost)}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
+                </div>
+              </div>
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table id="productTransaction">
+                <TableHead>
+                  <TableRow>
+                    <TableCell colSpan={15}>
+                      <h3>purchase , sales, inventory and description table</h3>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableRow>
+                  <TableCell>Product&nbsp;&nbsp;&nbsp;&nbsp;name</TableCell>
+                  <TableCell>
+                    {showEachItems
+                      ? " Registration Date"
+                      : " Registration Dates"}
+                  </TableCell>
+                  <TableCell>Unit price</TableCell>
+                  <TableCell>
+                    Sold&nbsp;&nbsp;Qty&nbsp;&nbsp;In&nbsp;&nbsp;Cash
+                  </TableCell>
+                  <TableCell>Sold Qty In Credit</TableCell>
+                  <TableCell>Total sales</TableCell>
+                  <TableCell>Unit Cost</TableCell>
+                  <TableCell>purchase Qty</TableCell>
+                  <TableCell>Total Purchase</TableCell>
+                  <TableCell>Broken</TableCell>
+                  <TableCell>Inventory</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell colSpan={2}>Action</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+                <TableBody>
+                  {console.log(
+                    "ListOfSalesAndPurchase",
+                    ListOfSalesAndPurchase
+                  )}
+                  {ListOfSalesAndPurchase?.map((items, index) => {
+                    return (
+                      <TableRow
+                        className={
+                          SearchSales_PurchaseCss.searchedDatas +
+                          " Transaction_" +
+                          index
+                        }
+                      >
+                        <TableCell
+                          id={"productName_" + items.transactionId}
+                          type="text"
+                        >
+                          {items.productName}
+                        </TableCell>
+                        <TableCell
+                          type="text"
+                          id={"RegistrationDate_" + items.transactionId}
+                          className={
+                            items.contentEditable &&
+                            "date" + items.transactionId
+                          }
+                        >
+                          {console.log(
+                            "items.registrationDate",
+                            items.regiteredTime
+                          )}
+                          {
+                            <Chip
+                              style={{
+                                marginTop: "5px",
+                                backgroundColor: "transparent",
+                              }}
+                              key={"dateOfRegistration_"}
+                              label={
+                                showEachItems
+                                  ? DateFormatter(items.registeredTime)
+                                  : items.registeredTime
+                              }
+                            />
+                          }
+                        </TableCell>
+                        <TableCell
+                          className={"unitPrice" + items.transactionId}
+                          id={"unitPrice_" + items.transactionId}
+                          type="text"
+                        >
+                          {CurrencyFormatter(items.productsUnitPrice)}
+                        </TableCell>
+                        <TableCell
+                          onInput={() =>
+                            changesOnInputsOfTransaction(
+                              "updateId_" + index,
+                              index
+                            )
+                          }
+                          className={
+                            items.contentEditable &&
+                            `salesQty${items.transactionId} editableTD`
+                          }
+                          contentEditable={items.contentEditable}
+                          id={"salesQty_" + items.transactionId}
+                          type="text"
+                        >
+                          {items.salesQty}
+                        </TableCell>
+                        <TableCell
+                          onInput={() =>
+                            changesOnInputsOfTransaction(
+                              "updateId_" + index,
+                              index
+                            )
+                          }
+                          className={
+                            items.contentEditable &&
+                            `salesQty${items.transactionId} editableTD`
+                          }
+                          contentEditable={items.contentEditable}
+                          // className={`salesQtyInCredit${items.transactionId}  `}
+                          // contentEditable={items.contentEditable}
+                          id={"salesQtyInCredit_" + items.transactionId}
+                          type="text"
+                        >
+                          {items.creditsalesQty}
+                        </TableCell>
+                        <TableCell
+                          className={`totalSales${items.transactionId}`}
+                          id={"totalSales_" + items.transactionId}
+                          type="text"
+                        >
+                          {CurrencyFormatter(
+                            (items.salesQty + items.creditsalesQty) *
+                              items.productsUnitPrice
+                          )}
+                        </TableCell>
+                        <TableCell
+                          className={`unitCost${items.transactionId}`}
+                          name="unitCost"
+                          id={"unitCost_" + items.transactionId}
+                          type="text"
+                        >
+                          {openedBusiness == "myBusiness"
+                            ? CurrencyFormatter(items.unitCost)
+                            : 0}
+                        </TableCell>
+                        <TableCell
+                          onInput={() =>
+                            changesOnInputsOfTransaction(
+                              "updateId_" + index,
+                              index
+                            )
+                          }
+                          className={
+                            items.contentEditable &&
+                            `purchaseQty${items.transactionId} editableTD`
+                          }
+                          contentEditable={items.contentEditable}
+                          id={"purchaseQty_" + items.transactionId}
+                          type="text"
+                          name="purchaseQty"
+                        >
+                          {items.purchaseQty}
+                        </TableCell>
+                        <TableCell
+                          className={`totalCost${items.transactionId}`}
+                          name="totalCost"
+                          id={"totalPurchase_" + items.transactionId}
+                          type="text"
+                        >
+                          {openedBusiness == "myBusiness"
+                            ? CurrencyFormatter(
+                                items.unitCost * items.purchaseQty
+                              )
+                            : CurrencyFormatter(0)}
+                        </TableCell>
+                        <TableCell
+                          onInput={() =>
+                            changesOnInputsOfTransaction(
+                              "updateId_" + index,
+                              index
+                            )
+                          }
+                          className={
+                            items.contentEditable &&
+                            `broken${items.transactionId} editableTD`
+                          }
+                          contentEditable={items.contentEditable}
+                          id={"wrickages_" + items.transactionId}
+                          type="text"
+                          name="broken"
+                        >
+                          {items.wrickages}
+                        </TableCell>
+                        <TableCell
+                          className={`inventory${items.transactionId}`}
+                          id={"Inventory_" + items.transactionId}
+                          type="text"
+                        >
+                          {items.Inventory}
+                        </TableCell>
+                        <TableCell
+                          sx={{ minWidth: "300px" }}
+                          onInput={() =>
+                            changesOnInputsOfTransaction(
+                              "updateId_" + index,
+                              index
+                            )
+                          }
+                          className={
+                            items.contentEditable
+                              ? `description${items.transactionId} editableTD`
+                              : ""
+                          }
+                          contentEditable={items.contentEditable}
+                          id={"Description_" + items.transactionId}
+                          type="text"
+                          name="description"
+                        >
+                          {items.description}
+                        </TableCell>
+                        {showEachItems ? (
+                          !items.contentEditable ? (
+                            openedBusiness == "myBusiness" && (
+                              <>
+                                <TableCell
+                                  onClick={() => deleteSales_purchase(items)}
+                                >
+                                  {openedBusiness == "myBusiness" && (
+                                    <DeleteIcon sx={{ color: "red" }} />
+                                  )}
+                                </TableCell>
+                              </>
+                            )
+                          ) : (
+                            <TableCell
+                              className="cancelOrEditTransaction"
+                              onClick={(e) => cancelSalesAndPurchase(e, index)}
+                            >
+                              <Button>cancel </Button>
+                            </TableCell>
+                          )
+                        ) : (
+                          <TableCell></TableCell>
+                        )}
+                        {items.updateEditedContent ? (
+                          <TableCell>
+                            <Button
+                              variant="contained"
+                              color="info"
+                              className="updateTransaction"
+                              id={"updateId_" + index}
+                              onClick={(e) => {
+                                setConfirmMessages(
+                                  "Are you sure to update this data?"
+                                );
+                                setConfirmAction("updateSalesAndPurchaseData");
+                                setUpdateSalesAndPurchase({
+                                  items,
+                                  index,
+                                  status: "notVerified",
+                                });
+                                setShowConfirmDialog(true);
+                              }}
+                            >
+                              {/* kkkkkkkkk */}
+                              Update
+                            </Button>
+                          </TableCell>
+                        ) : (
+                          <TableCell>&nbsp;</TableCell>
+                        )}
+                      </TableRow>
+                    );
+                  })}
+                  <TableRow
+                    className={SearchSales_PurchaseCss.salesPurchaseLastRow}
+                    style={{ backgroundColor: "#B3E5FC" }}
+                  >
+                    <TableCell colSpan={2}></TableCell>
+                    <TableCell colSpan={2}>
+                      Sum of Sales = {CurrencyFormatter(TotalSalesRevenue)}
+                    </TableCell>
+                    <TableCell colSpan={2}>
+                      Sum of Purchase =
+                      {openedBusiness == "myBusiness"
+                        ? CurrencyFormatter(TotalPurchaseCost)
+                        : CurrencyFormatter(0)}
+                    </TableCell>
+                    <TableCell colSpan={5}>
+                      Sales - Purchases={" "}
+                      {CurrencyFormatter(TotalSalesRevenue - TotalPurchaseCost)}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </>
       ) : (
         <>
           <Chip

@@ -1,4 +1,4 @@
-import { Button, TextField } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import React, { useState } from "react";
 import forgetCss from "./Forget.module.css";
 import axios from "axios";
@@ -109,13 +109,16 @@ function ForgetPassword() {
           onChange={colllectPhoneNumber}
           label="Enter Phone Number"
         />
-        <Button
-          className={forgetCss.requestButton}
-          type="submit"
-          variant="contained"
-        >
-          Request Forget
-        </Button>
+        <div>
+          <Button
+            sx={{ display: "block", margin: "auto" }}
+            className={forgetCss.requestButton}
+            type="submit"
+            variant="contained"
+          >
+            Request Forget
+          </Button>
+        </div>
         <Link className={forgetCss.linkToOthers} to={"/login"}>
           If you have an account, Login here.
         </Link>
@@ -126,8 +129,8 @@ function ForgetPassword() {
       {showPincodeField && (
         <form className={forgetCss.pincodeWrapper} onSubmit={verifyPincode}>
           <p className={forgetCss.pincodeMessage}>
-            Your forget pin has been sent to your phone. Please check your phone
-            and enter it in the following input field.
+            Your forgotten resetting PIN has been sent to your phone. Please
+            check your phone and enter it in the following input field.
           </p>
           <TextField
             className={forgetCss.pincodeInput}
@@ -137,14 +140,16 @@ function ForgetPassword() {
             label="Enter Pin Code"
           />
           {PincodeStatus}
-          <Button
-            className={forgetCss.verifyButton}
-            variant="contained"
-            color="primary"
-            type="submit"
-          >
-            Verify
-          </Button>
+          <div style={{ display: "block", margin: "auto" }}>
+            <Button
+              className={forgetCss.verifyButton}
+              variant="contained"
+              color="primary"
+              type="submit"
+            >
+              Verify
+            </Button>
+          </div>
         </form>
       )}
       {showPasswordField && (
@@ -168,14 +173,17 @@ function ForgetPassword() {
             type="password"
             label="Re-enter Password"
           />
-          <Button
-            className={forgetCss.updateButton}
-            type="submit"
-            color="primary"
-            variant="contained"
-          >
-            Update
-          </Button>
+          <Box>
+            <Button
+              sx={{ margin: "auto", display: "block" }}
+              className={forgetCss.updateButton}
+              type="submit"
+              color="primary"
+              variant="contained"
+            >
+              Update
+            </Button>
+          </Box>
         </form>
       )}
     </div>

@@ -381,11 +381,7 @@ function AddSingleSales() {
         <Tab label="Search" value={1} />
         <Tab label="View daily" value={2} />
       </Tabs>
-      {tabValue == 0 && (
-        <>
-          <AddSingleSales_GetItems />
-        </>
-      )}
+      {tabValue == 0 && <AddSingleSales_GetItems />}
       {tabValue == 1 && (
         <form
           className={singleSalesCss.formToSearchItems}

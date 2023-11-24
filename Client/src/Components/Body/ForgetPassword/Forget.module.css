@@ -1,9 +1,8 @@
 .retypePassword,
 .pincodeWrapper,
+.passwordForm,
 .forgetForm {
   display: flex;
-  align-items: center;
-  justify-content: center;
   flex-direction: column;
   margin-top: 50px;
   background-color: white;
@@ -11,6 +10,7 @@
   margin: 20px auto;
   padding: 20px;
 }
+
 .pincodeMessage,
 .forgetFormTitle {
   padding-bottom: 20px;
@@ -33,4 +33,7 @@
 .linkToOthers {
   text-decoration: none;
   /* color: ; */
+}
+.passwordInput {
+  margin: 20px 0;
 }

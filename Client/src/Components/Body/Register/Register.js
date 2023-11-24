@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { ConsumeableContext, InitialContext } from "../UserContext/UserContext";
 import ImgApp from "../../../ImgSlider";
 function Register() {
+  const [Processing, setProcessing] = useState(false);
   let serverUrl = localStorage.getItem("targetUrl");
   const navigate = useNavigate();
   const [RegisterForm, setRegisterForm] = useState({});
@@ -23,8 +24,9 @@ function Register() {
     e.preventDefault();
     $("#LinearProgress2").show();
     console.log("RegisterForm", RegisterForm);
-
+    setProcessing(true);
     let response = await axios.post(serverUrl + "RegisterUsers/", RegisterForm);
+    setProcessing(false);
     let data = response.data.data,
       token = response.data.token;
     console.log("response.data.data is ", data);
@@ -96,16 +98,20 @@ function Register() {
               Login here
             </span>
           </div>
-          <Button
-            variant="contained"
-            name="submitButton"
-            type="submit"
-            placeholder=""
-            color="primary"
-            className={RegisterCss.userRegistrationSubmitBtn}
-          >
-            Register
-          </Button>
+          {!Processing ? (
+            <Button
+              variant="contained"
+              name="submitButton"
+              type="submit"
+              placeholder=""
+              color="primary"
+              className={RegisterCss.userRegistrationSubmitBtn}
+            >
+              Register
+            </Button>
+          ) : (
+            <Button disabled>Processing</Button>
+          )}
         </form>
       </div>
       <div className={RegisterCss.rightSideWrapper}>
