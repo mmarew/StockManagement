@@ -19,16 +19,10 @@ import AddSingleSales from "./Components/Body/Business/AddSingleSales";
 import AddTotalSales from "./Components/Body/Business/AddTotalSales";
 
 import AddSalesTransaction from "./Components/Body/Business/AddSalesTransaction";
-import GetMinimumQty from "./Components/Body/Business/GetMinimumQty";
-import GetMaximumSales from "./Components/Body/Business/GetMaximumSales";
 import NavBar from "./Components/Nav/MuiNav";
 import ForgetPassword from "./Components/Body/ForgetPassword/ForgetPassword";
-import GetCreditLists from "./Components/Body/Business/GetCreditLists";
-import CheckIfUnreportedData from "./Components/Body/Business/CheckIfUnreportedData";
-import { Badge, Button, Tab, Tabs } from "@mui/material";
-import { useState } from "react";
-import BadgeIcons from "./Components/utility/BadgeIcons";
 import OpenBusinessHome from "./Components/Body/Business/OpenBusinessHome";
+import Admin from "./Components/Admin/Admin";
 function App() {
   return (
     <div className="App">
@@ -43,15 +37,7 @@ function App() {
             {/* <Route path="Search" element={<SearchProducts />} /> */}
           </Route>
 
-          <Route
-            path="/help"
-            element={
-              <>
-                {window.innerWidth < 768 && <NavBar />}
-                <Help />
-              </>
-            }
-          />
+          <Route path="/admin" element={<Admin />} />
           <Route
             path="/Transaction"
             element={
@@ -103,6 +89,15 @@ function App() {
             }
           />
           <Route
+            path="/help"
+            element={
+              <>
+                {window.innerWidth < 768 && <NavBar />}
+                <Help />
+              </>
+            }
+          />
+          <Route
             path="/login"
             element={
               <>
@@ -147,33 +142,12 @@ function App() {
               <Route
                 path="AddCostTransaction"
                 element={<AddExpencesTransaction />}
-              ></Route>
-
-              {/* <Route
-                path="singleSalestransaction"
-                element={<AddSingleSales />}
-              />
-              <Route path="totalSalestransaction" element={<AddTotalSales />} /> */}
+              ></Route>{" "}
             </Route>
           </Route>
         </Routes>
-        {/* <Routes>
-  <Route path="/" element={<Dashboard />}>
-    <Route
-      path="messages"
-      element={<DashboardMessages />}
-    />
-    <Route path="tasks" element={<DashboardTasks />} />
-  </Route>
-  <Route path="about" element={<AboutPage />} />
-</Routes> */}
       </Router>
     </div>
   );
 }
 export default App;
-//git actions with branch1
-// git commit -m "first commit"
-// git branch -M main
-// git remote add origin https://github.com/mmarew/StockManagement.git
-// git push -u origin main

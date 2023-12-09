@@ -37,8 +37,8 @@ function AddTransaction({ Time }) {
           className="salesOrCosts"
           name="Sales"
           onClick={setTargatedRegistration}
-          variant="contained"
-          color="success"
+          // variant="contained"
+          // color="success"
           sx={{ marginRight: "10px" }}
         >
           Purchase and Sales
@@ -47,14 +47,14 @@ function AddTransaction({ Time }) {
           className="salesOrCosts"
           name="Cost"
           onClick={setTargatedRegistration}
-          variant="contained"
-          color="warning"
+          // variant="contained"
+          // color="warning"
         >
           Expenses
         </Button>
       </div>
-      <hr style={{ borderTop: "1px solid #ccc", margin: "20px 0" }} />
-      <br />
+      {/* <hr style={{ borderTop: "1px solid #ccc", margin: "20px 0" }} /> */}
+
       <div>{Transaction}</div>
       <Outlet />
     </div>

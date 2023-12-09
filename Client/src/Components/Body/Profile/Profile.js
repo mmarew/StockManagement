@@ -45,8 +45,6 @@ function Profile() {
   };
   let handleEditeProfile = (e) => {
     setEditProfileOpen(true);
-    $(".ActiveButton").removeClass(ProfileCss.ActiveButton);
-    $(e.target).addClass(ProfileCss.ActiveButton);
     settargetRender("EditProfile");
   };
   let Logout = async () => {
@@ -57,27 +55,29 @@ function Profile() {
       navigate("/login");
     }
   };
+  const [windowsInnerWidth, setWindowsInnerWidth] = useState(window.innerWidth);
   const [EditProfileOpen, setEditProfileOpen] = useState(true);
+  window.addEventListener("resize", () => {
+    setWindowsInnerWidth(window.innerWidth);
+  });
+
   return (
     <div className={ProfileCss.ProfileWrapper}>
-      {window.innerWidth > 768 && (
+      {windowsInnerWidth > 768 && (
         <div className={ProfileCss.leftOfProfile}>
           <LeftSideBusiness />
         </div>
       )}
       <div>
-        {/* <Button sx={{ margin: "auto" }} variant="contained" color="primary">
-        Home
-      </Button> */}
         <div className={ProfileCss.buttonContainer}>
           <Button
-            className={ProfileCss.editButton}
+            // className={ProfileCss.editButton}
             onClick={handleEditeProfile}
           >
             Edit My Profile
           </Button>
           <Button
-            className={ProfileCss.deleteButton}
+            // className={ProfileCss.deleteButton}
             onClick={() => {
               settargetRender("DeleteProfile");
               setdeleteProfileModal(true);
@@ -85,7 +85,10 @@ function Profile() {
           >
             Delete My Profile
           </Button>
-          <Button className={ProfileCss.logoutButton} onClick={Logout}>
+          <Button
+            //  className={ProfileCss.logoutButton}
+            onClick={Logout}
+          >
             Logout
           </Button>
         </div>
@@ -98,9 +101,14 @@ function Profile() {
           <Modal open={deleteProfileModal}>
             <Box
               sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                bgcolor: "white",
+                p: 4,
+                borderRadius: 4,
+                boxShadow: 4,
               }}
             >
               <form

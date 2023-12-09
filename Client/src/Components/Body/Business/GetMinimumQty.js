@@ -77,10 +77,10 @@ function GetMinimumQty({ viewInTable }) {
                     {MinimumQty?.data?.map((item, index) => (
                       <TableRow key={"minimum_" + index}>
                         <TableCell>{item.productName}</TableCell>
-                        <TableCell>{item.Inventory}</TableCell>
+                        <TableCell>{item.inventoryItem}</TableCell>
                         <TableCell>{item.minimumQty}</TableCell>
                         <TableCell>
-                          {item.Inventory > item.minimumQty ? (
+                          {item.inventoryItem > item.minimumQty ? (
                             <Chip
                               style={{
                                 backgroundColor: "green",
@@ -136,14 +136,14 @@ function GetMinimumQty({ viewInTable }) {
                             <strong>Product Name:</strong> {item.productName}
                           </div>
                           <div>
-                            <strong>Inventory:</strong> {item.Inventory}
+                            <strong>Inventory:</strong> {item.inventoryItem}
                           </div>
                           <div>
                             <strong>Minimum Qty:</strong> {item.minimumQty}
                           </div>
                           <div>
                             <strong>Status:</strong>{" "}
-                            {item.Inventory > item.minimumQty ? (
+                            {item.inventoryItem > item.minimumQty ? (
                               <Chip
                                 style={{
                                   backgroundColor: "green",
@@ -151,7 +151,7 @@ function GetMinimumQty({ viewInTable }) {
                                   fontWeight: 600,
                                 }}
                                 label="GOOD"
-                                color="success"
+                                color="primary"
                                 variant="contained"
                               />
                             ) : (

@@ -8,6 +8,7 @@ import { Box, Button, IconButton, Modal, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { ButtonProcessing } from "../../utility/Utility";
 import { ConsumeableContext } from "../UserContext/UserContext";
+import { LogoutofThisPage } from "../../Logout/Logout";
 function AddExpencesTransaction() {
   const { setShowProgressBar } = ConsumeableContext();
   const [Procecssing, setProcecssing] = useState(false);
@@ -37,16 +38,26 @@ function AddExpencesTransaction() {
     });
     setShowProgressBar(false);
     setProcecssing(false);
+    setshowCostForm(true);
     console.log("response", response);
-    if (response.data == "err") {
+    if (response.data.data == "you are not owner of this business") {
+      setcostList([]);
+      LogoutofThisPage();
+      return alert("you are not the owner of the business.");
+    }
+    if (response.data.data == "err") {
       alert(response.data.err);
+      setcostList([]);
       return;
     }
     let costData = response.data.data;
     console.log("costData", costData);
-    setshowCostForm(true);
+    // return;
+
     if (costData.length == 0) {
-      // alert("No cost list data.");
+      alert("No cost list data.");
+      setcostList([]);
+      return;
       // $(".costTransactionForm").hide();
     } else {
     }
@@ -125,8 +136,6 @@ function AddExpencesTransaction() {
   }, [costList]);
   return (
     <div>
-      {console.log(Object.keys(Formdata).length)}
-
       {showCostForm ? (
         <>
           {costList?.length > 0 ? (

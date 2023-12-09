@@ -13,6 +13,7 @@ import MUIConfirm from "../Others/MUIConfirm";
 import SuccessOrError from "../Others/SuccessOrError";
 import LeftSideBusiness from "./LeftSideBusiness";
 import ModalToEditBusinessName from "./ModalToEditBusinessName";
+import { DateFormatter } from "../Date/currentDate";
 let serverAddress = localStorage.getItem("targetUrl");
 function Business() {
   let Navigate = useNavigate();
@@ -31,7 +32,8 @@ function Business() {
     localStorage.setItem("businessId", businessId);
     localStorage.setItem("businessName", businessName);
     localStorage.setItem("openedBusiness", "myBusiness");
-    Navigate("/OpenBusiness");
+    // Navigate("/OpenBusiness");
+    window.location.href = "/OpenBusiness";
   };
   const [ConfirmRequest, setConfirmRequest] = useState();
   const [open, setOpen] = useState({});
@@ -57,7 +59,8 @@ function Business() {
       token,
     });
     setShowProgressBar(false);
-    console.log(results.data);
+    console.log("results.data===", results.data);
+    // return;
     if (results.data.data == "You haven't loged in before.") {
       Navigate("/login");
     }
@@ -106,7 +109,7 @@ function Business() {
     getBusiness();
     setownersName(localStorage.getItem("ownersName"));
   }, []);
-  // const [actionsOnConfirmation, setActionsOnConfirmation] = useState(null);
+
   useEffect(() => {
     if (open.open) {
       console.log("open", open);
@@ -232,18 +235,29 @@ function Business() {
                         className={Businessmodulecss.Business}
                         id={"eachBusiness_" + datas.BusinessID}
                       >
-                        <h2
+                        <h4
+                          style={{ textAlign: "center" }}
                           id={"businessNameH2_" + datas.BusinessID}
-                          className={Businessmodulecss.businessName}
                         >
                           {datas.BusinessName}
-                        </h2>
+                        </h4>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            padding: "10px",
+                            textAlign: "center",
+                          }}
+                        >
+                          Created on {DateFormatter(datas.createdDate)}
+                        </div>
+
                         <div
                           className={Businessmodulecss.businessButton}
                           id={"openEditWrapper" + datas.BusinessID}
                         >
                           <Button
-                            variant="contained"
+                            variant="outlined"
+                            size="small"
                             onClick={() =>
                               openThisBusiness(
                                 datas.BusinessID,
@@ -346,7 +360,11 @@ function Business() {
                               className={Businessmodulecss.updateCancelWrapper}
                               id={"updateCancelWrapper_" + datas.BusinessID}
                             >
-                              <Button type="submit" variant="contained">
+                              <Button
+                                size="small"
+                                type="submit"
+                                variant="contained"
+                              >
                                 Update
                               </Button>
                               <Button
@@ -374,11 +392,23 @@ function Business() {
                           key={"EmployyersBusiness_" + items.employeeId}
                           className={Businessmodulecss.Business}
                         >
-                          <h1>{items.BusinessName}</h1>
+                          <h4 style={{ textAlign: "center" }}>
+                            {items.BusinessName}
+                          </h4>
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              padding: "10px",
+                              textAlign: "center",
+                            }}
+                          >
+                            {" "}
+                            Created on {DateFormatter(items.createdDate)}
+                          </div>
                           <div className={Businessmodulecss.businessButton}>
                             <Button
+                              variant="outlined"
                               size="small"
-                              variant="contained"
                               onClick={() => {
                                 openEmployeerBusiness(
                                   items.BusinessID,

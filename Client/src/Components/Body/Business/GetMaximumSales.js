@@ -17,6 +17,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import CurrencyFormatter from "../../utility/Utility";
 import axios from "axios";
 import { ConsumeableContext } from "../UserContext/UserContext";
 function GetMaximumSales({ Notifications, viewInTable }) {
@@ -151,6 +152,15 @@ function GetMaximumSales({ Notifications, viewInTable }) {
       dataFound = "";
     data.map((item) => {
       // console.log(item);
+      let { itemDetailInfo } = item;
+      let { productsUnitPrice } = JSON.parse(itemDetailInfo);
+      console.log(
+        "itemDetailInfo",
+        itemDetailInfo,
+        " productsUnitPrice",
+        productsUnitPrice
+      );
+      // return;
       dataFound = "No";
       let salesQty = 0,
         creditsalesQty = 0,
@@ -170,67 +180,27 @@ function GetMaximumSales({ Notifications, viewInTable }) {
         // return;
         if (d.ProductId == item.ProductId) {
           dataFound = "yes";
-          // console.log(d.ProductId, item.ProductId);
           salesQty += d.salesQty;
           creditsalesQty += d.creditsalesQty;
           purchaseQty += d.purchaseQty;
           inventory += d.Inventory;
           broken += d.wrickages;
-          // console.log(salesQty, purchaseQty, inventory, broken);
         }
       });
       ob.creditsalesQty = creditsalesQty;
       ob.productName = item.productName;
-      ob.unitCost = item.unitCost;
-      ob.unitCost = item.unitCost;
+      ob.unitCost = item.productsUnitPrice;
       ob.unitPrice = item.unitPrice;
       ob.ProductId = ProductId;
       ob.salesQty = salesQty;
       ob.purchaseQty = purchaseQty;
       ob.Inventory = inventory;
       ob.wrickages = broken;
-      // console.log(ob);
       if (dataFound == "yes") {
         collectedData.push(ob);
       }
     });
-    console.log("collectedData", collectedData);
-    // return;
-    let x = [
-      {
-        Inventory: -46474,
-        ProductId: 1,
-        creditsalesQty: 53014,
-        productName: "Adult diper large size",
-        purchaseQty: 6560,
-        salesQty: 0,
-        unitCost: 1500,
-        unitPrice: 1700,
-        wrickages: 20,
-      },
-      {
-        Inventory: 40,
-        ProductId: 2,
-        creditsalesQty: 50,
-        productName: "item 1",
-        purchaseQty: 100,
-        salesQty: 0,
-        unitCost: 500,
-        unitPrice: 650,
-        wrickages: 10,
-      },
-      {
-        Inventory: 55,
-        ProductId: 3,
-        creditsalesQty: 0,
-        productName: "item abcd",
-        purchaseQty: 505,
-        salesQty: 450,
-        unitCost: 300,
-        unitPrice: 350,
-        wrickages: 0,
-      },
-    ];
+
     collectedData.sort((a, b) => {
       const totalSalesA = (a.salesQty + a.creditsalesQty) * a.purchaseQty;
       const totalSalesB = (b.salesQty + b.creditsalesQty) * b.purchaseQty;
@@ -239,7 +209,7 @@ function GetMaximumSales({ Notifications, viewInTable }) {
     });
     if (collectedData.length == 0) return;
 
-    console.log(collectedData, collectedData);
+    // console.log(collectedData, collectedData);
 
     setMaximumDataList(collectedData);
   };
@@ -369,20 +339,12 @@ function GetMaximumSales({ Notifications, viewInTable }) {
                               />
                             </TableCell>
                             <TableCell>
-                              <CurrencyFormat
-                                value={row.unitCost}
-                                displayType={"text"}
-                                thousandSeparator={true}
-                                prefix={"Birr "}
-                              />
+                              {CurrencyFormatter(row.unitCost)}
                             </TableCell>
                             <TableCell>
-                              <CurrencyFormat
-                                value={row.unitCost * row.purchaseQty}
-                                displayType={"text"}
-                                thousandSeparator={true}
-                                prefix={"Birr "}
-                              />
+                              {CurrencyFormatter(
+                                row.unitCost * row.purchaseQty
+                              )}
                             </TableCell>
                           </TableRow>
                         );
@@ -431,16 +393,11 @@ function GetMaximumSales({ Notifications, viewInTable }) {
                           </div>
                           <div align="center">
                             <strong>Purchase Qty : </strong>
-                            {row.purchaseQty}
+                            {row.purchaseQty}purchaseQty
                           </div>
                           <div align="center">
                             <strong>Unit Price : </strong>
-                            <CurrencyFormat
-                              value={row.unitPrice}
-                              displayType={"text"}
-                              thousandSeparator={true}
-                              prefix={"Birr "}
-                            />
+                            {row.unitPrice}
                           </div>
                           <div align="center">
                             <strong>STotal Sales : </strong>
@@ -456,21 +413,15 @@ function GetMaximumSales({ Notifications, viewInTable }) {
                           </div>
                           <div align="center">
                             <strong>Unit Cost : </strong>
-                            <CurrencyFormat
-                              value={row.unitCost}
-                              displayType={"text"}
-                              thousandSeparator={true}
-                              prefix={"Birr "}
-                            />
+                            {CurrencyFormatter(row.unitCost)}
                           </div>
                           <div align="center">
                             <strong>Purchase QTY : </strong>
-                            <CurrencyFormat
-                              value={row.unitCost * row.purchaseQty}
-                              displayType={"text"}
-                              thousandSeparator={true}
-                              prefix={"Birr "}
-                            />
+                            {CurrencyFormatter(row.purchaseQty)}
+                          </div>{" "}
+                          <div align="center">
+                            <strong>Total Purchase : </strong>
+                            {CurrencyFormatter(row.unitCost * row.purchaseQty)}
                           </div>
                         </TableCell>
                       </TableRow>

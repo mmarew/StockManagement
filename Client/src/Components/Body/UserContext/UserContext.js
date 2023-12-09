@@ -19,13 +19,11 @@ function UserContext(props) {
   // singleSalesInputValues, setSinlgeSalesInputValues
 
   const [ownersName, setownersName] = useState("");
-  const [TransactionData, setTransactionData] = useState([
-    {
-      TotalSales: 0,
-      TotalPurchase: 0,
-      TotalExpences: 0,
-    },
-  ]);
+  const [TransactionData, setTransactionData] = useState({
+    TotalSales: 0,
+    TotalPurchase: 0,
+    TotalExpences: 0,
+  });
   return (
     <InitialContext.Provider
       value={{
@@ -43,6 +41,8 @@ function UserContext(props) {
         setunTimeRecivableCollected,
         collectedMoney,
         setCollectedMoney,
+        TransactionData,
+        setTransactionData,
       }}
     >
       {props.children}

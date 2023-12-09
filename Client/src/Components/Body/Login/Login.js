@@ -24,7 +24,7 @@ function Login() {
       let token = response.data.token;
       localStorage.setItem("storeToken", token);
       let getToken = localStorage.getItem("storeToken");
-      Navigate("/Business");
+      window.location.href = "/Business";
     } else if (response.data.data == "data not found") {
       alert(
         "Your phone number is not registered before. please sign up first or type your number correctly. Thank you."

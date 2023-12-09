@@ -8,9 +8,11 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
+import { ButtonProcessing } from "../../utility/Utility";
 import DeleteBusiness from "../Business/DeleteBusiness";
 import UpdateBusinesssName from "../Business/UpdateBusinesssName";
 import { RemoveMyEmployeersBusiness } from "../Business/__Business";
+import { ConsumeableContext } from "../UserContext/UserContext";
 function MUIConfirm({
   Action,
   open,
@@ -22,24 +24,27 @@ function MUIConfirm({
   setConfirmDelete,
   ConfirmDelete,
 }) {
+  const { Proccessing, setProccessing } = ConsumeableContext();
   let [userPassword, setUserPassword] = useState();
   const handleClose = async (confirmed) => {
     setSuccessError({});
     let { businessId, businessName, getBusiness } = targetdBusiness;
-    setOpen({ ...open, open: false });
+    // setOpen({ ...open, open: false });
 
     if (confirmed) {
       if (Action == "deleteProducts") {
-        setConfirmDelete({ ...ConfirmDelete, Verify: true });
+        setConfirmDelete({ ...ConfirmDelete, userPassword, Verify: true });
       } else if (Action == "deleteCosts") {
-        setConfirmDelete({ ...ConfirmDelete, Verify: true });
+        setConfirmDelete({ ...ConfirmDelete, Verify: true, userPassword });
       } else if (Action == "deleteBusiness") {
         // Handle confirmed action here
         let responce = await DeleteBusiness(
           businessId,
           businessName,
           getBusiness,
-          userPassword
+          userPassword,
+          setOpen,
+          setProccessing
         );
         if (responce == "deletedWell")
           setSuccessError({
@@ -97,7 +102,7 @@ function MUIConfirm({
 
   return (
     <div>
-      <Dialog open={open?.open}>
+      <Dialog open={open.open}>
         <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -120,6 +125,7 @@ function MUIConfirm({
             }}
           >
             <TextField
+              type="password"
               value={userPassword}
               onChange={(e) => setUserPassword(e.target.value)}
               fullWidth
@@ -127,19 +133,23 @@ function MUIConfirm({
               label={"Enter Password to verify"}
             />
             <br />
-            <div>
-              <Button
-                color="error"
-                variant="contained"
-                onClick={() => handleClose(false)}
-              >
-                Cancel
-              </Button>
-              &nbsp; &nbsp; &nbsp;
-              <Button variant="contained" type="submit">
-                Confirm
-              </Button>
-            </div>
+            {!Proccessing ? (
+              <div>
+                <Button
+                  color="error"
+                  variant="contained"
+                  onClick={() => setOpen(false)}
+                >
+                  Cancel
+                </Button>
+                &nbsp; &nbsp; &nbsp;
+                <Button variant="contained" type="submit">
+                  Confirm
+                </Button>
+              </div>
+            ) : (
+              <ButtonProcessing />
+            )}
             <br />
           </form>
         </DialogActions>

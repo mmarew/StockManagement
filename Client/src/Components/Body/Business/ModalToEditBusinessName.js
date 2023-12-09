@@ -3,6 +3,7 @@ import { TextField, Button } from "@mui/material";
 import { Box, Modal } from "@material-ui/core";
 import axios from "axios";
 import { ButtonProcessing } from "../../utility/Utility";
+import NameValidators from "./NameValidators";
 function ModalToEditBusinessName({
   setopenBusinessEditingModal,
   openBusinessEditingModal,
@@ -37,6 +38,7 @@ function ModalToEditBusinessName({
 
     setUpdatedBusinessName(openBusinessEditingModal.datas.BusinessName);
   }, []);
+  const [BusinessNameError, setBusinessNameError] = useState(null);
 
   return (
     <div>
@@ -68,8 +70,19 @@ function ModalToEditBusinessName({
             <TextField
               label="Business Name"
               value={updatedBusinessName}
-              onChange={(e) => setUpdatedBusinessName(e.target.value)}
+              onChange={(e) => {
+                let Value = e.target.value;
+                let namingRule = NameValidators(Value, setBusinessNameError);
+                console.log("namingRule", namingRule);
+                if (namingRule == "wrong naming rule") {
+                  return;
+                }
+                setUpdatedBusinessName(Value);
+              }}
             />
+            {BusinessNameError && (
+              <div style={{ color: "red" }}>{BusinessNameError}</div>
+            )}
             <br />
             <div style={{ textAlign: "center" }}>
               {!Processing ? (

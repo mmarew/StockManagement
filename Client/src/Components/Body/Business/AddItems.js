@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-// import AddCost from "./AddExpencesTransaction";
 import AddCostItems from "./AddExpencesItems";
 import "./AddItems.css";
 import AddProducts from "./AddProducts";
 function AddItems() {
+  const [randVal, setrandVal] = useState(Math.random());
   const [activeComponent, setActiveComponent] = useState();
   let selectTarget = (e, target) => {
     console.log(e.target.className);
@@ -13,7 +13,10 @@ function AddItems() {
     }
 
     e.target.classList.add("activeClass");
-    if (target == "SALES") return setActiveComponent(<AddProducts />);
+    if (target == "SALES")
+      return setActiveComponent(
+        <AddProducts setrandVal={setrandVal} randVal={randVal} />
+      );
     {
       setActiveComponent(<AddCostItems />);
     }
@@ -23,13 +26,20 @@ function AddItems() {
       <div className="salesAndCostItemsWrapper">
         <div
           className="salesButton salesAndCostItems"
-          onClick={(e) => selectTarget(e, "SALES")}
+          onClick={(e) => {
+            setrandVal(Math.random());
+            setTimeout(() => {
+              selectTarget(e, "SALES");
+            }, 10);
+          }}
         >
           Add Product Items
         </div>
         <div
           className="costButton salesAndCostItems"
-          onClick={(e) => selectTarget(e, "COST")}
+          onClick={(e) => {
+            selectTarget(e, "COST");
+          }}
         >
           Add Expences
         </div>

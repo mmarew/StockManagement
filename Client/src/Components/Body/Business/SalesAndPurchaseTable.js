@@ -14,7 +14,6 @@ import React, { useEffect, useState } from "react";
 import CurrencyFormatter from "../../utility/Utility";
 import { useNavigate } from "react-router-dom";
 import SearchSales_PurchaseCss from "./SearchSales_Purchase.module.css";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ConsumeableContext } from "../UserContext/UserContext";
 import { DateFormatter } from "../Date/currentDate";
@@ -35,6 +34,7 @@ function SalesAndPurchaseTable({
   seteditTransactions,
   viewInTable,
 }) {
+  // opopopop;
   let { singleSalesInputValues, setSinlgeSalesInputValues } =
     ConsumeableContext();
   useEffect(() => {
@@ -84,6 +84,7 @@ function SalesAndPurchaseTable({
               {ListOfSalesAndPurchase?.map((items, index) => {
                 return (
                   <Paper
+                    key={"ListOfSalesAndPurchase_" + index}
                     sx={{ padding: "20px", margin: "10px", width: "320px" }}
                     className={
                       SearchSales_PurchaseCss.searchedDatas +
@@ -110,6 +111,7 @@ function SalesAndPurchaseTable({
                       {
                         <Chip
                           style={{
+                            color: "rgb(25,118,210)",
                             backgroundColor: "transparent",
                           }}
                           key={"dateOfRegistration_"}
@@ -152,8 +154,6 @@ function SalesAndPurchaseTable({
                         `salesQty${items.transactionId} editableTD`
                       }
                       contentEditable={items.contentEditable}
-                      // className={`salesQtyInCredit${items.transactionId}  `}
-                      // contentEditable={items.contentEditable}
                       id={"salesQtyInCredit_" + items.transactionId}
                       type="text"
                     >
@@ -303,19 +303,20 @@ function SalesAndPurchaseTable({
               })}
               <div
                 className={SearchSales_PurchaseCss.salesPurchaseLastRow}
-                style={{ backgroundColor: "#B3E5FC" }}
+                style={{
+                  backgroundColor: "#B3E5FC",
+                  padding: "20px",
+                  width: "300px",
+                }}
               >
-                <div colSpan={2}></div>
-                <div colSpan={2}>
-                  Sum of Sales = {CurrencyFormatter(TotalSalesRevenue)}
-                </div>
-                <div colSpan={2}>
+                <div>Sum of Sales = {CurrencyFormatter(TotalSalesRevenue)}</div>
+                <div>
                   Sum of Purchase =
                   {openedBusiness == "myBusiness"
                     ? CurrencyFormatter(TotalPurchaseCost)
                     : CurrencyFormatter(0)}
                 </div>
-                <div colSpan={5}>
+                <div>
                   Sales - Purchases={" "}
                   {CurrencyFormatter(TotalSalesRevenue - TotalPurchaseCost)}
                 </div>
@@ -361,6 +362,7 @@ function SalesAndPurchaseTable({
                   {ListOfSalesAndPurchase?.map((items, index) => {
                     return (
                       <TableRow
+                        key={"ListOfSalesAndPurchase_1" + index}
                         className={
                           SearchSales_PurchaseCss.searchedDatas +
                           " Transaction_" +
@@ -374,6 +376,7 @@ function SalesAndPurchaseTable({
                           {items.productName}
                         </TableCell>
                         <TableCell
+                          onClick={() => setshowEachItems(!showEachItems)}
                           type="text"
                           id={"RegistrationDate_" + items.transactionId}
                           className={
@@ -385,27 +388,26 @@ function SalesAndPurchaseTable({
                             "items.registrationDate",
                             items.regiteredTime
                           )}
-                          {
-                            <Chip
-                              style={{
-                                marginTop: "5px",
-                                backgroundColor: "transparent",
-                              }}
-                              key={"dateOfRegistration_"}
-                              label={
-                                showEachItems
-                                  ? DateFormatter(items.registeredTime)
-                                  : items.registeredTime
-                              }
-                            />
-                          }
+                          <Chip
+                            sx={{
+                              maxWidth: "200px",
+                              fontWeight: "700",
+                              color: "rgb(25,118,210)",
+                              cursor: "pointer",
+                            }}
+                            label={
+                              showEachItems
+                                ? DateFormatter(items.registeredTime)
+                                : items.registeredTime
+                            }
+                          />
                         </TableCell>
                         <TableCell
                           className={"unitPrice" + items.transactionId}
                           id={"unitPrice_" + items.transactionId}
                           type="text"
                         >
-                          {CurrencyFormatter(items.productsUnitPrice)}
+                          {CurrencyFormatter(items.unitPrice)}
                         </TableCell>
                         <TableCell
                           onInput={() =>

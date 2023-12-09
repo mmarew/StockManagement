@@ -7,7 +7,7 @@ import EmployeeIcon from "../../ICONS/BusinessJS/iconEmployee.svg";
 import viewIcon from "../../ICONS/BusinessJS/iconView.svg";
 import ItemsIcon from "../../ICONS/BusinessJS/iconItems.svg";
 import OpenBusinesscss from "./OpenBusiness.module.css";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { IconButton, LinearProgress, Menu } from "@mui/material";
 import { ConsumeableContext } from "../UserContext/UserContext";
@@ -15,8 +15,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { AppBar, Box, MenuItem, Toolbar } from "@material-ui/core";
 import OpenBusinessLeftSide from "./OpenBusinessLeftSide";
 import HoverableLink from "./HoverableLink";
-import BadgeIcons from "../../utility/BadgeIcons";
-import OpenBusinessHome from "./OpenBusinessHome";
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -45,17 +43,15 @@ function OpenBusiness() {
   const [HoverableTitle, setHoverableTitle] = useState("");
   // localStorage.setItem("openedBusiness", "myBusiness");
   // const savedContext = ConsumeableContext();
+  let Navigate = useNavigate();
   const { ownersName, setownersName, ShowProgressBar, setShowProgressBar } =
     ConsumeableContext();
-  setownersName(localStorage.getItem("ownersName"));
+  useEffect(() => {
+    setownersName(localStorage.getItem("ownersName"));
+  }, []);
 
-  let navigate = useNavigate();
-  let registerItems = (e) => {
-    console.log(e.target);
-    $("." + OpenBusinesscss.openBusinessTab).removeClass(
-      OpenBusinesscss.activeLink
-    );
-    e.currentTarget.className += " " + OpenBusinesscss.activeLink;
+  let registerItems = (activeTab) => {
+    setActiveTab(activeTab);
   };
 
   const classes = useStyles();
@@ -84,20 +80,31 @@ function OpenBusiness() {
     console.log("Option clicked:", option);
     handleMenuClose();
   };
+  const [activeTab, setActiveTab] = useState("Home");
+  const location = useLocation();
+  useEffect(() => {
+    setActiveTab(location.pathname);
+  }, [location]);
   //////////////////////////
   return (
     <div className={OpenBusinesscss.openBusinesswrapper}>
+      {console.log("activeTab", activeTab)}
       <div className={OpenBusinesscss.navBar}>
         <AppBar position="static" className={classes.appBar}>
           <Toolbar>
             <div className={OpenBusinesscss.registerViewSearch}>
-              <HoverableLink
+              <span
+                // style={{ display: "none  !important" }}
                 title="Open Business"
-                onClick={registerItems}
-                className={OpenBusinesscss.openBusinessTab}
+                onClick={() => {
+                  Navigate("/OpenBusiness");
+                  registerItems("Home");
+                }}
+                className={`${
+                  activeTab == "/OpenBusiness" ? OpenBusinesscss.activeLink : ""
+                }`}
                 name="gotoHome"
-                to="/OpenBusiness"
-                id="Open Business"
+                id="OpenBusiness"
               >
                 <IconButton className={OpenBusinesscss.iconButton}>
                   <img
@@ -107,17 +114,20 @@ function OpenBusiness() {
                   />
                   <span className={OpenBusinesscss.Title}>Home</span>
                 </IconButton>
-              </HoverableLink>{" "}
-              <HoverableLink
+              </span>{" "}
+              <span
                 title="Transaction"
                 onClick={(e) => {
-                  registerItems(e);
-
+                  Navigate("addTransaction");
+                  registerItems("Transaction");
                   setHoverableTitle();
                 }}
-                className={OpenBusinesscss.openBusinessTab}
+                className={`${
+                  activeTab.startsWith("/OpenBusiness/addTransaction")
+                    ? OpenBusinesscss.activeLink
+                    : ""
+                }`}
                 name="addTransaction"
-                to="addTransaction"
                 id="addTransaction"
               >
                 <IconButton className={OpenBusinesscss.iconButton}>
@@ -129,14 +139,21 @@ function OpenBusiness() {
                   />{" "}
                   <span className={OpenBusinesscss.Title}>Sale/Buy</span>
                 </IconButton>
-              </HoverableLink>
-              <HoverableLink
+              </span>
+              <span
                 title="Add Item"
-                onClick={registerItems}
-                className={OpenBusinesscss.openBusinessTab}
+                onClick={() => {
+                  Navigate("additems");
+                  registerItems("addItem");
+                }}
+                className={`${
+                  activeTab.startsWith("/OpenBusiness/additems")
+                    ? OpenBusinesscss.activeLink
+                    : ""
+                }`}
                 name="addItem"
                 id="addItem"
-                to="additems"
+                // to="additems"
               >
                 <IconButton className={OpenBusinesscss.iconButton}>
                   <img
@@ -147,13 +164,19 @@ function OpenBusiness() {
                   />{" "}
                   <span className={OpenBusinesscss.Title}>Item</span>
                 </IconButton>
-              </HoverableLink>
-              <HoverableLink
+              </span>
+              <span
                 title="Search"
-                onClick={registerItems}
-                className={OpenBusinesscss.openBusinessTab}
+                onClick={() => {
+                  Navigate("search");
+                  registerItems("Search");
+                }}
+                className={`${
+                  activeTab.startsWith("/OpenBusiness/search")
+                    ? OpenBusinesscss.activeLink
+                    : ""
+                }`}
                 name="Search"
-                to="search"
                 id="search"
               >
                 <IconButton className={OpenBusinesscss.iconButton}>
@@ -166,7 +189,7 @@ function OpenBusiness() {
                   <span className={OpenBusinesscss.Title}>View</span>
                 </IconButton>
                 {/* <img src={viewIcon} /> */}
-              </HoverableLink>
+              </span>
               <span>
                 <IconButton
                   sx={{ display: "flex", flexDirection: "column" }}

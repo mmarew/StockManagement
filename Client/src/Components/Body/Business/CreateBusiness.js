@@ -1,9 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import "./CreateBusiness.css";
-// import $ from "jquery";
 import { Box, Button, Modal, TextField } from "@mui/material";
 import { ButtonProcessing } from "../../utility/Utility";
+import currentDates from "../Date/currentDate";
+import { red } from "@mui/material/colors";
 
 function CreateBusiness({
   getBusiness,
@@ -13,12 +14,20 @@ function CreateBusiness({
 }) {
   const [Process, setProcess] = useState(false);
   let serverAddress = localStorage.getItem("targetUrl");
-  const [businessData, setbusinessData] = useState({});
+  const [businessData, setbusinessData] = useState({
+    createdDate: currentDates(),
+  });
 
   let handleCreateForm = (e) => {
     e.preventDefault();
     console.log(e.target.value);
     console.log(e.target.name);
+    setBusinessNameError("");
+    let filteredName = e.target.value.replace(/[^a-zA-Z0-9_ ]/g, "");
+    if (filteredName != e.target.value) {
+      setBusinessNameError(`Business name must be from a-z and 0-9`);
+      return;
+    }
     let token = localStorage.getItem("storeToken");
     setbusinessData({
       ...businessData,
@@ -32,18 +41,19 @@ function CreateBusiness({
     let businessName = businessData.businessName;
     console.log(businessName);
     let i = 0;
-
-    console.log("businessData is = ", businessData);
-
-    console.log("setShowProgressBar", setShowProgressBar);
+    let filteredName = businessName.replace(/[^a-zA-Z0-9_ ]/g, "");
+    if (filteredName != businessName) {
+      setBusinessNameError(`Business name must be from a-z and 0-9`);
+      return;
+    }
     setShowProgressBar(true);
-
     setProcess(true);
     try {
       let response = await axios.post(
         serverAddress + "createBusiness/",
         businessData
       );
+
       setProcess(false);
       console.log("createBusiness response is =", response);
       setShowProgressBar(false);
@@ -93,7 +103,7 @@ function CreateBusiness({
   useEffect(() => {
     setShowProgressBar(false);
   }, []);
-
+  const [businessNameError, setBusinessNameError] = useState(null);
   return (
     <div>
       <Modal open={newBusiness.Open}>
@@ -106,7 +116,7 @@ function CreateBusiness({
           }}
         >
           <form
-            style={{ width: "300px" }}
+            style={{ width: "100%", maxWidth: "400px" }}
             action=""
             className="createBusinessForm"
             onSubmit={submitAlldatas}
@@ -119,6 +129,11 @@ function CreateBusiness({
               label="Enter Business Name"
             />
             <br /> <br />
+            {businessNameError && (
+              <div style={{ color: "red", margin: "10px" }}>
+                {businessNameError}
+              </div>
+            )}
             <div style={{ textAlign: "center" }}>
               {!Process ? (
                 <Button variant="contained" color="primary" type="submit">

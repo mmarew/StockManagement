@@ -6,7 +6,7 @@ let dotenv = require("dotenv");
 let sqlstring = require("sqlstring");
 let mysql2 = require("mysql2");
 let tokenKey = "shhhhh";
-let { CurrentYMD } = require("./DateFormatter.js");
+let { CurrentYMD, isValidDateFormat } = require("./DateFormatter.js");
 // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-let
 dotenv.config();
 let path = "/";
@@ -20,31 +20,14 @@ server.use(
 );
 
 let Databases = require("./Database.js");
-let date = new Date();
-let fullTime,
-  year = date.getFullYear(),
-  month = date.getMonth() + 1,
-  day = date.getDate(),
-  hour = date.getHours(),
-  minuite = date.getMinutes(),
-  second = date.getSeconds();
+const date = new Date();
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, "0");
+const day = String(date.getDate()).padStart(2, "0");
+const hour = String(date.getHours()).padStart(2, "0");
+const minute = String(date.getMinutes()).padStart(2, "0");
 
-if (month < 10) {
-  month = "0" + month;
-}
-if (day < 10) {
-  day = "0" + day;
-}
-if (hour < 10) {
-  hour = "0" + hour;
-}
-if (minuite < 10) {
-  minuite = "0" + minuite;
-}
-if (second < 10) {
-  second = "0" + second;
-}
-fullTime = year + "-" + month + "-" + day + "" + hour + ":" + minuite;
+const fullTime = `${year}-${month}-${day} ${hour}:${minute}`;
 // //console.log("fullTime is " + fullTime);
 Databases.createBasicTables();
 let jwt = require("jsonwebtoken");
@@ -72,42 +55,11 @@ server.post(path, (req, res) => {
     "<h1><center>This is server is running well in post methodes.</center></h1>"
   );
 });
+server.get("/updateTables", (req, res) => {
+  res.json({ data: "here it is" });
+});
 server.get(path, async (req, res) => {
-  // let alterBusiness = `ALTER TABLE dailyTransaction
-  // ADD COLUMN  registeredBy INT not null `;
-  // let results = await Pool.query(alterBusiness);
-  // res.json({ data: results });
-  // return console.log("results", results);
-  let select = "select * from Business ";
-  let myData = [];
-  await Pool.query(select)
-    .then(([results]) => {
-      myData = results;
-      results.map(async (data) => {
-        try {
-          let { uniqueBusinessName, BusinessID, ownerId, createdDate } = data;
-
-          let businessName = uniqueBusinessName + "_Costs";
-          // registeredBy, expItemRegistrationDate;
-          let Update = `alter TABLE ${businessName} add column expItemRegistrationDate date not null`;
-          let [myUpdate] = await Pool.query(Update);
-          console.log("myUpdate", myUpdate);
-        } catch (error) {
-          console.log(error);
-          console.log("code:", error.errno);
-          console.log("code:", error.code);
-          let Code = error.code;
-
-          if (Code == "ER_NO_SUCH_TABLE") {
-          }
-        }
-      });
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-
-  res.json({ data: "myData" });
+  res.json({ data: "it is working well" });
 });
 server.post(path + "getBusiness/", (req, res) => {
   let tokens = req.body.token;
@@ -282,10 +234,18 @@ server.post(path + "addProducts/", async (req, res) => {
 });
 // i am here
 server.post(path + "createBusiness/", (req, res) => {
-  let businessName = req.body.businessName;
-  let decoded = jwt.verify(req.body.token, tokenKey);
+  let { businessName, token, createdDate } = req.body;
+  let decoded = jwt.verify(token, tokenKey);
   let userID = decoded.userID;
-  let response = createBusiness(businessName, userID, fullTime, res);
+  console.log("fullTime", fullTime);
+  // return;
+  let response = createBusiness(
+    businessName,
+    userID,
+    fullTime,
+    res,
+    createdDate
+  );
 });
 server.post(path + "getRegisteredProducts/", async (req, res) => {
   try {
@@ -655,32 +615,122 @@ async function getPreviousDay(date) {
   //console.log("Previous day:", formattedDate);
   return formattedDate;
 }
-
-server.post(path + "searchProducts/", async (req, res) => {
-  console.log(req.body);
-  // return;
+server.get("/getexpencesLists", async (req, res) => {
   let businessName = "";
-  // productName = req.body.InputValue.productName,
-  // toDate = req.body.InputValue.toDate,
-  // fromDate = req.body.InputValue.fromDate,
-  // selectSearches = req.body.InputValue.selectSearches;
-  let { toDate, fromDate, selectSearches, productName, token, businessId } =
-    req.body.InputValue;
+  let { token, businessId } = req.query;
   businessName = await getUniqueBusinessName(businessId, token);
-  if (selectSearches == "PRODUCTS") {
-    let selectProducts = `select * from ?? where Status='active' || Status IS NULL`;
-    let tableName = `${businessName}_products`;
-    Pool.query(selectProducts, [tableName])
-      .then(([rows]) => {
-        console.log("Selected PRODUCTS=", rows);
-        return res.json({ data: "no results", products: rows });
-      })
-      .catch((Error) => {
-        console.log("Error", Error);
-        return res.json({ Error });
+  if (businessName == `you are not owner of this business`) {
+    return res.json({ data: businessName });
+  }
+  let selectCost = `select * from?? , ??  where userId=registeredBy`;
+  let costValues = [`${businessName}_Costs`, "usersTable"];
+  Pool.query(selectCost, costValues)
+    .then(([rows]) => {
+      return res.json({ data: rows });
+    })
+    .catch((error) => {
+      console.log("err is", error);
+      return res.json({ data: "error 678" });
+    });
+});
+/////////////////
+server.get("/getSingleItemsTransaction", async (req, res) => {
+  let businessName = "";
+  console.log("req.query", req.query);
+  // return;
+  let { token, businessId, toDate, fromDate, productName } = req.query;
+  businessName = await getUniqueBusinessName(businessId, token);
+  if (businessName == `you are not owner of this business`) {
+    return res.json({ data: businessName });
+  }
+  const query = `SELECT *
+               FROM ??, ??
+               WHERE productIDTransaction = ProductId
+               AND productName LIKE CONCAT('%', ?, '%')
+               AND  registeredTime  BETWEEN ? AND ?`;
+
+  const table1 = `${businessName}_Transaction`;
+  const table2 = `${businessName}_products`;
+  // define the input data as an array of values
+  const input = [];
+
+  Pool.query(query, [table1, table2, productName, fromDate, toDate])
+    .then(([rows]) => {
+      console.log("rowsrowsrowsrowsrows", rows);
+      res.json({ data: rows });
+    })
+    .catch((error) => {
+      res.json({ error });
+    });
+  // res.json({ data: "opopopopop" });
+});
+// klklk;
+server.get("/getExpTransactions", async (req, res) => {
+  let { businessId, token, fromDate, toDate } = req.query;
+  console.log("req.query", req.query);
+  // res.json({ data: "opopop" });
+  // return;
+
+  let businessName = await getUniqueBusinessName(businessId, token);
+
+  // console.log("data in all", rows);
+  const sql = `SELECT * FROM ?? as e, ?? as c WHERE e.costRegisteredDate BETWEEN ? AND ? AND e.costId = c.costsId`;
+  // define the input data as an array of values
+  const inputExp = [
+    `${businessName}_expenses`,
+    `${businessName}_Costs`,
+    fromDate,
+    toDate,
+  ];
+
+  // execute the query with the input data
+  Pool.query(sql, inputExp)
+    .then(([rows]) => {
+      res.json({
+        expenceTransaction: rows,
       });
-    return;
-  } else if (selectSearches == "TRANSACTION") {
+    })
+    .catch((error) => {
+      res.json({ expenceTransaction: "error no 113" });
+    });
+});
+server.get("/getMultipleItemsTransaction", async (req, res) => {
+  try {
+    let { toDate, fromDate, selectSearches, productName, token, businessId } =
+      req.query;
+
+    let selectData = `select * from dailyTransaction where registeredTimeDaily BETWEEN '${fromDate}' and '${toDate}' and businessId='${businessId}'`;
+    // console.log("  req.query;", req.query);
+    let [results] = await Pool.query(selectData);
+    res.json({ data: results });
+  } catch (error) {
+    console.log("error", error);
+    res.json({ data: "error 113" });
+  }
+  return;
+});
+
+///////////
+server.get(path + "searchProducts/", async (req, res) => {
+  let businessName = "";
+  let { toDate, fromDate, selectSearches, productName, token, businessId } =
+    req.query;
+  businessName = await getUniqueBusinessName(businessId, token);
+
+  let selectProducts = `select * from ?? where Status='active' || Status IS NULL`;
+  let tableName = `${businessName}_products`;
+  Pool.query(selectProducts, [tableName])
+    .then(([rows]) => {
+      console.log("Selected PRODUCTS=", rows);
+      return res.json({ products: rows });
+    })
+    .catch((Error) => {
+      console.log("Error", Error);
+      return res.json({ Error });
+    });
+  return;
+
+  if (selectSearches == "TRANSACTION") {
     const query = `SELECT *
                FROM ??, ??
                WHERE productIDTransaction = ProductId
@@ -752,18 +802,6 @@ server.post(path + "searchProducts/", async (req, res) => {
       .catch((error) => {
         //console.log("error in alltransaction", error);
         res.json({ data: error, error: "9090" });
-      });
-  } else if (selectSearches == "COSTS") {
-    //console.log("in cost req.body==", req.body);
-    let selectCost = `select * from??`;
-    let costValues = `${businessName}_Costs`;
-    Pool.query(selectCost, costValues)
-      .then(([rows]) => {
-        return res.json({ data: rows });
-      })
-      .catch((error) => {
-        //console.log("err is", error);
-        return res.json({ data: "error 678" });
       });
   } else {
     res.json({ data: "Bad request.", products: "Bad request", selectSearches });
@@ -857,6 +895,9 @@ server.post(path + "getCostLists/", async (req, res) => {
   // //console.log(req.body);
   let { businessId, token } = req.body;
   let businessName = await getUniqueBusinessName(businessId, token);
+  if (businessName == "you are not owner of this business") {
+    return res.json({ data: businessName });
+  }
   let select = `select * from ??`;
   Pool.query(select, [`${businessName}_Costs`])
     .then(([rows]) => {
@@ -867,7 +908,7 @@ server.post(path + "getCostLists/", async (req, res) => {
       //// //console.log(businessName);
     })
     .catch((error) => {
-      res.json({ data: "err", err: error });
+      res.json({ data: "err", err: "error 111" });
     });
 });
 server.post(`/registerExpenceTransaction/`, async (req, res) => {
@@ -1003,7 +1044,7 @@ const updateNextDateInventory = async (
 
         if (mainProductId == null || mainProductId == "null")
           mainProductId = productId;
-        //////11111111
+
         let select = `SELECT * FROM ?? WHERE mainProductId=? AND 
          registeredTime>? ORDER BY  registeredTime  ASC`;
         let values = [businessName, mainProductId, date];
@@ -1302,14 +1343,21 @@ server.post(path + "registerEmployeersProducts/", (req, res) => {
   // //console.log(purchaseQty, salesQty, wrickageQty);
   res.json({ data: req.body });
 });
-server.post(path + "getsingleProducts/", async (req, res) => {
+server.post(path + "getSingleProducts/", async (req, res) => {
   let productName = req.body.searchInput;
   let { token, businessId, Target } = req.body;
-  console.log("req.body", req.body);
+  console.log("@getSingleProducts req.body", req.body);
+  // return;
 
   let businessName = await getUniqueBusinessName(businessId, token);
   console.log("businessName", businessName);
   // return;
+  if (
+    businessName == "you are not owner of this business" ||
+    businessName == `Error in server 456`
+  ) {
+    return res.json({ data: businessName });
+  }
   let query = `SELECT * FROM ?? WHERE productName LIKE ? and Status=?`;
   let values = [`${businessName}_products`, "%" + productName + "%", "active"];
   if (Target == "All Products") {
@@ -1329,30 +1377,50 @@ server.post(path + "getsingleProducts/", async (req, res) => {
       // Handle the error
     });
 });
-server.post(path + "registerSinglesalesTransaction/", (req, res) => {
-  const {
+server.post(path + "registerSinglesalesTransaction/", async (req, res) => {
+  let {
     Description,
     brokenQty,
     businessId,
     purchaseQty,
     salesQty,
     ProductId,
-    currentDate,
+    selectedDate,
     salesType,
     creditPaymentDate,
     items,
     token,
+    unitPrice,
+    useNewPrice,
   } = req.body;
-  console.log("req.body", req.body);
+  console.log("@registerSinglesalesTransaction", req.body);
+  let { mainProductId, productsUnitPrice } = items;
+  items.productsUnitPrice = unitPrice;
+  if (!useNewPrice) {
+    unitPrice = productsUnitPrice;
+  }
+
+  if (mainProductId == null) mainProductId = ProductId;
   let { userID } = jwt.verify(token, tokenKey);
-  // return;
   let salesTypeColumn = "salesQty";
   if (salesType == "On credit") {
     salesTypeColumn = "creditsalesQty";
   }
-  // salesTypeValues; creditPaymentDate
-  const query = `INSERT INTO dailyTransaction (purchaseQty, ${salesTypeColumn},salesTypeValues,creditPaymentDate,businessId, ProductId, brokenQty, Description, registeredTimeDaily, itemDetailInfo, reportStatus,registeredBy) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?,?,?)`;
+  let sqlToGetPreviousInventory = `select * from dailyTransaction where   registeredTimeDaily<='${selectedDate}' and mainProductId=${mainProductId} and businessId='${businessId}' order by registeredTimeDaily DESC,dailySalesId DESC limit 1`;
+  let [inventoryData] = await Pool.query(sqlToGetPreviousInventory);
+  console.log(" inventoryData ===", inventoryData);
+  let inventoryItem = 0;
+
+  if (inventoryData.length > 0) inventoryItem = inventoryData[0].inventoryItem;
+  inventoryItem =
+    Number(inventoryItem) +
+    Number(purchaseQty) -
+    Number(salesQty) -
+    Number(brokenQty);
+
+  const query = `INSERT INTO dailyTransaction (mainProductId,purchaseQty, ${salesTypeColumn},salesTypeValues,creditPaymentDate,businessId, ProductId, brokenQty, Description, registeredTimeDaily, itemDetailInfo, reportStatus,registeredBy,inventoryItem,unitPrice) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
   const values = [
+    mainProductId,
     purchaseQty,
     salesQty,
     salesType,
@@ -1361,80 +1429,86 @@ server.post(path + "registerSinglesalesTransaction/", (req, res) => {
     ProductId,
     brokenQty,
     Description,
-    currentDate,
+    selectedDate,
     JSON.stringify(items),
     "unreported to total sales",
     userID,
+    inventoryItem,
+    unitPrice,
   ];
-
-  Pool.query(query, values)
-    .then(([result]) => {
-      //console.log(`Inserted ${result.affectedRows} row(s)`);
-      // Do something else
-      console.log("result", result);
-      res.json({ data: "successfullyRegistered" });
-    })
-    .catch((error) => {
-      console.error("An error occurred:", error);
-      res.json({ data: "err", err: error });
-      // Handle the error
-    });
+  let [result] = await Pool.query(query, values);
+  res.json({ data: "successfullyRegistered" });
+  //update next inventory from insert
+  console.log("first");
+  // return;
+  updateNextInventory(
+    result.insertId,
+    mainProductId,
+    businessId,
+    inventoryItem,
+    token,
+    ProductId,
+    selectedDate
+  );
 });
 server.post(path + "getDailyTransaction/", async (req, res) => {
-  let getTransaction = "";
-  let { productId, businessId, currentDates, businessName, token } = req.body;
-  businessName = await getUniqueBusinessName(businessId, token);
-  // console.log("businessName", businessName);
-  // console.log("req.body", req.body);
-  // return;
-  let query, values;
-  if (productId === "getAllTransaction") {
-    query = `
-    SELECT *
-    FROM ?? AS dt
-    JOIN ?? AS bp
-    ON bp.ProductId = dt.ProductId
-    WHERE dt.businessId = ?
-    AND dt.registeredTimeDaily = ?  `;
-    values = [
-      "dailyTransaction",
-      `${businessName}_products`,
-      businessId,
-      currentDates,
-    ];
-  } else {
-    query = `
-    SELECT *
-    FROM ?? AS dt
-    JOIN ?? AS bp
-    ON bp.ProductId = dt.ProductId
-    WHERE dt.businessId = ?
-    AND dt.ProductId = ?
-    AND dt.registeredTimeDaily = ? `;
-    values = [
-      "dailyTransaction",
-      `${businessName}_products`,
-      businessId,
+  try {
+    let getTransaction = "";
+    let {
+      fromDate,
+      toDate,
       productId,
+      businessId,
       currentDates,
-    ];
+      businessName,
+      token,
+    } = req.body;
+    businessName = await getUniqueBusinessName(businessId, token);
+
+    let query, values;
+    if (productId === "getAllTransaction") {
+      query = `SELECT * FROM ?? AS dt JOIN ?? AS bp JOIN ?? as ut  ON ut.userId=dt.registeredBy and  bp.ProductId = dt.ProductId    WHERE dt.businessId = ?  AND dt.registeredTimeDaily = ?  `;
+      values = [
+        "dailyTransaction",
+        `${businessName}_products`,
+        "usersTable",
+        businessId,
+        currentDates,
+      ];
+      if (isValidDateFormat(fromDate) && isValidDateFormat(toDate)) {
+        query = `SELECT * FROM ?? AS dt JOIN ?? AS bp JOIN ?? as ut  ON ut.userId=dt.registeredBy and  bp.ProductId = dt.ProductId WHERE dt.businessId = ?  AND dt.registeredTimeDaily between '${fromDate}' and '${toDate}'`;
+        values = [
+          "dailyTransaction",
+          `${businessName}_products`,
+          "usersTable",
+          businessId,
+        ];
+      }
+    } else {
+      query = `SELECT * FROM ?? AS dt JOIN ?? AS bp JOIN ?? as ut ON bp.ProductId = dt.ProductId and ut.userId = dt.registeredBy WHERE dt.businessId = ?  AND dt.ProductId = ?  AND dt.registeredTimeDaily = ? `;
+      values = [
+        "dailyTransaction",
+        `${businessName}_products`,
+        "usersTable",
+        businessId,
+        productId,
+        currentDates,
+      ];
+    }
+
+    let [rows] = await Pool.query(query, values);
+    // rows.map(async (row) => {
+    //   console.log("row is ", row);
+    //   let { registeredBy } = row;
+    //   let selectUser = `select * from usersTable where registeredBy='${registeredBy}'`;
+    //   let [users] = await Pool.query(selectUser);
+    // });
+
+    res.json({ data: rows, getTransaction });
+  } catch (error) {
+    console.log("error", error);
+    res.json({ data: "error" });
   }
-  console.log("11 111 11 111 values", values, " query", query);
-  console.log("marew");
-  console.log("values", values);
-  Pool.query(query, values)
-    .then(([rows]) => {
-      //console.log(rows);
-      // Do something else
-      console.log("rows", rows);
-      res.json({ data: rows, getTransaction });
-    })
-    .catch((error) => {
-      console.log("error", error);
-      res.json({ data: error });
-      //console.error("An error occurred:", error);
-      // Handle the error
-    });
 });
 server.post(path + "deleteBusines/", async (req, res) => {
   deleteBusiness(req.body, res);
@@ -1793,10 +1867,28 @@ server.post(path + "deleteSales_purchase/", async (req, res) => {
     res.json({ data: "error no 2020" });
   }
 });
-server.post(path + "deleteCostData", async (req, res) => {
-  let { Token, costsId, businessName, businessId } = req.body;
-  businessName = await getUniqueBusinessName(businessId, Token);
-  const userId = await Auth(Token);
+server.post(path + "deleteExpenceItem", async (req, res) => {
+  // console.log("req.body", req.body);
+  // return;
+  let { token, costsId, businessName, businessId, userPassword } = req.body;
+
+  businessName = await getUniqueBusinessName(businessId, token);
+  const userId = await Auth(token);
+  let Password = "";
+  let selectUserInfo = `select * from usersTable where userId='${userId}'`;
+  console.log("businessName", businessName);
+  let isMatch = false;
+  let [Responces] = await Pool.query(selectUserInfo);
+  console.log("Responces", Responces);
+  if (Responces.length <= 0) {
+    return res.json({ data: "Please make logout and login again." });
+  } else {
+    Password = Responces[0].password;
+    isMatch = bcrypt.compareSync(userPassword, Password);
+    console.log("isMatch", isMatch);
+  }
+
+  if (!isMatch) return res.json({ data: "Wrong Password" });
   const select =
     "SELECT * FROM Business WHERE uniqueBusinessName = ? AND ownerId = ?";
   const selectValues = [businessName, userId];
@@ -1827,11 +1919,7 @@ let getUniqueBusinessName = async (businessId, token) => {
     let getBusinessData = `select * from Business where BusinessID='${businessId}' and ownerId='${userID}'`;
     // userIdInEmployee int,BusinessIDEmployee int, employerId
     let selectAsEmployee = `select * from employeeTable,Business where userIdInEmployee='${userID}' and BusinessIDEmployee='${businessId}'  and BusinessID=BusinessIDEmployee`;
-
     let [businessData] = await Pool.query(getBusinessData);
-    console.log("getBusinessData", getBusinessData);
-    console.log("businessData", businessData);
-    // return;
     if (businessData.length == 0) {
       // check if u r employee
       let [employeeResult] = await Pool.query(selectAsEmployee);
@@ -1846,7 +1934,7 @@ let getUniqueBusinessName = async (businessId, token) => {
     return uniqueBusinessName;
   } catch (error) {
     console.log("error", error);
-    return "Error ";
+    return "Error in server 456";
   }
 };
 
@@ -1861,15 +1949,12 @@ server.post(path + "GetMinimumQty/", async (req, res) => {
   console.log("uniqueBusinessName", uniqueBusinessName);
   const table = `${uniqueBusinessName}_`;
 
-  const selectInventory = `
-    SELECT P.*, T.*
-    FROM ${table}products AS P
-    LEFT JOIN ${table}Transaction AS T
-    ON T.productIDTransaction = P.ProductId
-    WHERE T.registeredTime = (
-      SELECT MAX(registeredTime)
-      FROM ${table}Transaction
-      WHERE productIDTransaction = P.ProductId
+  const selectInventory = `SELECT P.*, T.* FROM ${table}products AS P LEFT JOIN  dailyTransaction  AS T
+    ON T.ProductId = P.ProductId
+    WHERE T.registeredTimeDaily = (
+      SELECT MAX(registeredTimeDaily)
+      FROM dailyTransaction
+      WHERE T.ProductId = P.ProductId
     ) ORDER BY P.ProductId`;
 
   try {
@@ -1891,12 +1976,12 @@ server.post(path + "getMaximumSales/", async (req, res) => {
   businessName = uniqueBusinessName;
   // let select = `select * from ${businessName}_products, ${businessName}_Transaction where  ProductId = productIDTransaction and  registrationDate  between '${toDate}' and '${fromDate}'`;
   const table1 = `${businessName}_products`;
-  const table2 = `${businessName}_Transaction`;
+  const table2 = `dailyTransaction`;
 
   const select = `SELECT *
                 FROM ?? as P, ?? AS T
-                WHERE ProductId = productIDTransaction
-                AND  T.registeredTime  BETWEEN ? AND ?`;
+                WHERE P.ProductId = T.ProductId
+                AND  T.registeredTimeDaily  BETWEEN ? AND ?`;
 
   const values = [table1, table2, fromDate, toDate];
 
@@ -1966,27 +2051,50 @@ server.post(path + "removeEmployeersBusiness/", async (req, res) => {
   // });
 });
 server.post(path + "deleteProducts/", async (req, res) => {
-  let businessName = req.body.businessName;
-  let { productId, mainProductId } = req.body;
+  try {
+    let { ProductId, mainProductId, businessId, token, userPassword } =
+      req.body;
+    console.log("req.body", req.body);
+    // return;
 
-  let deleteData = `DELETE FROM ?? WHERE ProductId = ? or mainProductId=?`;
+    let businessName = await getUniqueBusinessName(businessId, token);
+    console.log(" businessName == == ", businessName);
+    let userID = await Auth(token);
 
-  Pool.query(deleteData, [
-    `${businessName}_products`,
-    mainProductId,
-    mainProductId,
-  ])
-    .then(([rows]) => {
-      res.status(200).json({ data: rows });
-    })
-    .catch((err) => {
-      //console.error(err);
-      res.status(500).json({ error: "Internal Server Error" });
-    });
+    let select = `select * from usersTable where userId='${userID}'`;
+    let [rows] = await Pool.query(select);
+
+    console.log("rows", rows, " select", select);
+    // return;
+    if (rows.length == 0) {
+      return res.json({
+        data: "Error",
+        Messages: "Your are not allowed to do this action",
+      });
+    }
+    let savedPassword = rows[0].password;
+    const isMatch = bcrypt.compareSync(userPassword, savedPassword);
+    if (!isMatch) {
+      return res.json({
+        data: "Error",
+        Messages: "Wrong Password",
+      });
+    }
+    let deleteData = `DELETE FROM ?? WHERE ProductId = ? or mainProductId=?`;
+    if (mainProductId == null) mainProductId = ProductId;
+
+    let [results] = await Pool.query(deleteData, [
+      `${businessName}_products`,
+      ProductId,
+      mainProductId,
+    ]);
+    console.log("delete results", results);
+    res.status(200).json({ data: results });
+  } catch (error) {
+    console.log("error", error);
+  }
 });
 server.post(path + "deleteExpencesItem", (req, res) => {
-  // //console.log('deleteExpencesItem')
-  // return
   let sql = `DELETE FROM ?? WHERE expenseId = ?`;
   let params = [`${req.body.businessName}_expenses`, req.body.expenseId];
 
@@ -2293,10 +2401,92 @@ server.put(path + "confirmPayments", async (req, res) => {
     res.json({ data: "You have inserted your data correctly" });
   }
 });
+let getPreviousDayInventory = async (
+  dailySalesId,
+  mainProductId,
+  businessId,
+  registeredTimeDaily
+) => {
+  let sqlToGetPrevInventori = `select * from dailyTransaction where dailySalesId<'${dailySalesId}' and registeredTimeDaily<='${registeredTimeDaily}' and mainProductId='${mainProductId}' and businessId='${businessId}' order by registeredTimeDaily desc, dailySalesId desc limit 1`;
+  let [prevResult] = await Pool.query(sqlToGetPrevInventori);
+  let inventoryItem = 0;
+  if (prevResult.length > 0) inventoryItem = prevResult[0].inventoryItem;
+  // console.log("inventoryItem", inventoryItem);
 
-server.delete(path + "deleteDailyTransaction", (req, res) => {
-  //console.log("req.body.source:");
-  let { dailySalesId } = req.body.source;
+  return [inventoryItem, prevResult];
+};
+let updateNextInventory = async (
+  dailySalesId,
+  mainProductId,
+  businessId,
+  inventoryItem,
+  token,
+  ProductId,
+  registeredTimeDaily
+) => {
+  let sqlToGetNextInventori = `select * from dailyTransaction where  mainProductId='${mainProductId}' and businessId='${businessId}' and registeredTimeDaily>'${registeredTimeDaily}' and dailySalesId !='${dailySalesId}' order by registeredTimeDaily, dailySalesId asc`;
+
+  let uniqueBusinessName = await getUniqueBusinessName(businessId, token);
+  if (
+    uniqueBusinessName == "you are not owner of this business" ||
+    uniqueBusinessName == "Error"
+  ) {
+    return res.json({ data: "you are not owner of this business" });
+  }
+
+  let [nextResult] = await Pool.query(sqlToGetNextInventori);
+
+  let updates = async (Result) => {
+    let { purchaseQty, salesQty, creditsalesQty, brokenQty, dailySalesId } =
+      Result;
+    inventoryItem =
+      Number(inventoryItem) +
+      Number(purchaseQty) -
+      Number(salesQty) -
+      Number(creditsalesQty) -
+      Number(brokenQty);
+    let id = Result.dailySalesId;
+    console.log(
+      "@Update inventoryItem",
+      inventoryItem,
+      "dailySalesId == ",
+      dailySalesId
+    );
+
+    let update = `update dailyTransaction set inventoryItem='${inventoryItem}',reportStatus='unreported to total sales' where dailySalesId='${id}'`;
+    let MyUpdate = await Pool.query(update);
+    /////////////////// => yy-mm-dd-hh-m-s
+    let deleteFromTotalSales = `delete from ${uniqueBusinessName}_Transaction where productIDTransaction='${ProductId}' and registeredTime='${DateFormatter(
+      registeredTimeDaily
+    )}'`;
+    Pool.query(deleteFromTotalSales);
+  };
+  nextResult.map(async (Result, index) => {
+    // console.log("nextResult is ", Result);
+    await updates(Result);
+  });
+};
+server.delete(path + "deleteDailyTransaction", async (req, res) => {
+  console.log("req.body.source:", req.body);
+  // return;
+  let {
+    dailySalesId,
+    mainProductId,
+    businessId,
+    ProductId,
+    token,
+    registeredTimeDaily,
+  } = req.body.source;
+
+  if (mainProductId == null) mainProductId = ProductId;
+
+  let [inventoryItem, prevResult] = await getPreviousDayInventory(
+    dailySalesId,
+    mainProductId,
+    businessId,
+    registeredTimeDaily
+  );
+  console.log("inventoryItem === ", inventoryItem);
   let deleteSql = `delete from dailyTransaction where dailySalesId='${dailySalesId}'`;
   Pool.query(deleteSql)
     .then((data) => {
@@ -2308,9 +2498,23 @@ server.delete(path + "deleteDailyTransaction", (req, res) => {
       res.json({ data: "error", error: "error no 23" });
       //console.log(error);
     });
+  //from delete daily transactions
+  updateNextInventory(
+    dailySalesId,
+    mainProductId,
+    businessId,
+    inventoryItem,
+    token,
+    ProductId,
+    registeredTimeDaily
+  );
 });
-server.put(path + "editDailyTransaction", (req, res) => {
+
+server.put(path + "updateDailyTransactions", async (req, res) => {
   let x = ({
+    registeredTimeDaily,
+    ProductId,
+    businessId,
     dailySalesId,
     Description,
     brokenQty,
@@ -2320,12 +2524,24 @@ server.put(path + "editDailyTransaction", (req, res) => {
     registrationDate,
     salesQty,
     salesTypeValues,
+    token,
+    mainProductId,
   } = req.body.items);
-  //console.log(" req.body.items", x);
-  // return;
+  console.log("2344", x);
+  if (mainProductId == null) mainProductId = ProductId;
+
+  let [inventoryItem, prevResult] = await getPreviousDayInventory(
+    dailySalesId,
+    mainProductId,
+    businessId,
+    registeredTimeDaily
+  );
+  inventoryItem =
+    inventoryItem + purchaseQty - salesQty - creditsalesQty - brokenQty;
+
   let update = `update dailyTransaction set purchaseQty=?,  salesQty=?,
   creditsalesQty=?, salesTypeValues=?, creditPaymentDate=?,  brokenQty=?,
-  Description=? where dailySalesId=? `,
+  Description=?, inventoryItem=? ,reportStatus='unreported to total sales' where dailySalesId=?`,
     values = [
       purchaseQty,
       salesQty,
@@ -2334,9 +2550,10 @@ server.put(path + "editDailyTransaction", (req, res) => {
       creditPaymentDate,
       brokenQty,
       Description,
+      inventoryItem,
       dailySalesId,
     ];
-  Pool.query(update, values)
+  await Pool.query(update, values)
     .then((data) => {
       //console.log([data]);
       res.json({ data: "update successfully" });
@@ -2345,12 +2562,23 @@ server.put(path + "editDailyTransaction", (req, res) => {
       res.json({ data: error });
       //console.log("error", error);
     });
-  // res.json({ data: req.body });
+  // from update daily transaction
+  console.log("inventoryItem in update == ", inventoryItem);
+  // return;
+  updateNextInventory(
+    dailySalesId,
+    mainProductId,
+    businessId,
+    inventoryItem,
+    token,
+    ProductId,
+    registeredTimeDaily
+  );
 });
 server.post("/CheckIfUnreportedData", async (req, res) => {
-  // res.json({ data: "working" });
   try {
     let { BusinessId, businessName } = req.body;
+
     let sqlToTelectUnReportedData = `select * from dailyTransaction where reportStatus='unreported to total sales' and businessId='${BusinessId}'`;
     let [results] = await Pool.query(sqlToTelectUnReportedData);
     res.json({ data: results });
@@ -2386,8 +2614,29 @@ server.post("/updatePartiallyPaidInfo", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// tsega
-// seife
-// aseche
-// bekalu
-// saron
+server.get("/admin__getUsers", async (req, res) => {
+  let allusers = `select * from usersTable`;
+  let [users] = await Pool.query(allusers);
+
+  res.json({ data: users });
+});
+server.get("/get__businesses", async (req, res) => {
+  // console.log("req", res);'
+  try {
+    let get__businesses = `select * from Business, usersTable where userId=ownerId`;
+    let [Result1] = await Pool.query(get__businesses);
+    res.json({ data: Result1 });
+    console.log("Result1", Result1);
+    console.log("get__businesses");
+  } catch (error) {
+    console.log("error", error);
+  }
+});
+server.get("/getBusinessTransactions", async (req, res) => {
+  console.log(req.query);
+  let { uniqueBusinessName, BusinessID } = req.query.business;
+  let selcetEachInfo = `select * from dailyTransaction where businessId='${BusinessID}'`;
+  console.log("selcetEachInfo", selcetEachInfo);
+  let [eachResult] = await Pool.query(selcetEachInfo);
+  res.json({ data: eachResult });
+});

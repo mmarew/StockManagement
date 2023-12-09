@@ -1,26 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import OpenBusinessLeftCss from "./OpenBusinessLeftSide.module.css";
 import HomeIcon from "../../ICONS/BusinessJS/clarity_home-line.svg";
 import BusinessIcon from "../../ICONS/BusinessJS/BusinessWhite.svg";
-
-import $ from "jquery";
 import iconView from "../../ICONS/BusinessJS/iconView.svg";
 import transactioIcon from "../../ICONS/BusinessJS/icons_transaction.svg";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import itemsIcon from "../../ICONS/BusinessJS/iconItems.svg";
 import iconLogout from "../../ICONS/Login/logout-svgrepo-com.svg";
 import iconEmployee from "../../ICONS/BusinessJS/iconEmployee.svg";
 import MASETAWOSHAICONICON from "../../ICONS/BusinessJS/MASETAWOSHAICON.svg";
+import { useLocation } from "react-router-dom";
 function OpenBusinessLeftSide() {
   let openedBusiness = localStorage.getItem("openedBusiness");
-
-  let markTargetedLink = (e) => {
-    $("." + OpenBusinessLeftCss.openBusinessTabLeft).removeClass(
-      OpenBusinessLeftCss.activeClass
-    );
-    e.currentTarget.className += " " + OpenBusinessLeftCss.activeClass + " ";
-  };
-
+  const [currentURL, setcurrentURL] = useState("/");
+  const location = useLocation();
+  useEffect(() => {
+    setcurrentURL(location.pathname);
+  }, [location]);
+  console.log("currentURL", currentURL);
   return (
     <div id="Wrapper" className={OpenBusinessLeftCss.Wrapper}>
       <div className={OpenBusinessLeftCss.listWrapper}>
@@ -36,56 +33,78 @@ function OpenBusinessLeftSide() {
             className={OpenBusinessLeftCss.TransactionIcon}
             src={BusinessIcon}
           />
-          <a> Business</a>
+          <span> Business</span>
         </Link>
         <Link
-          className={OpenBusinessLeftCss.openBusinessTabLeft}
+          className={
+            `${OpenBusinessLeftCss.openBusinessTabLeft} ` +
+            `  ${
+              currentURL == "/OpenBusiness" && OpenBusinessLeftCss.activeClass
+            }`
+          }
           to="/OpenBusiness"
-          onClick={markTargetedLink}
         >
           <img className={OpenBusinessLeftCss.TransactionIcon} src={HomeIcon} />
-          <a> Home</a>
+          <span> Home</span>
         </Link>
 
         <Link
           to="addTransaction"
-          onClick={markTargetedLink}
-          className={OpenBusinessLeftCss.openBusinessTabLeft}
+          // onClick={markTargetedLink}
+          className={
+            `${OpenBusinessLeftCss.openBusinessTabLeft} ` +
+            `  ${
+              currentURL.startsWith("/OpenBusiness/addTransaction") &&
+              OpenBusinessLeftCss.activeClass
+            }`
+          }
         >
           <img
             className={OpenBusinessLeftCss.TransactionIcon}
             src={transactioIcon}
             alt="Transaction icon"
           />
-          <a className={"t"} name="addTransaction" id="addTransaction">
-            Transaction
-          </a>
+          <span className={"t"} name="addTransaction" id="addTransaction">
+            Sale/Buy
+          </span>
         </Link>
         {/* ///////////////////// */}
         {openedBusiness == "myBusiness" && (
           <Link
             to="additems"
-            onClick={markTargetedLink}
-            className={OpenBusinessLeftCss.openBusinessTabLeft}
+            // onClick={markTargetedLink}
+            className={
+              `${OpenBusinessLeftCss.openBusinessTabLeft} ` +
+              `  ${
+                currentURL.startsWith("/OpenBusiness/additems") &&
+                OpenBusinessLeftCss.activeClass
+              }`
+            }
           >
             <img
               src={itemsIcon}
               className={OpenBusinessLeftCss.nonTransaction}
             />
-            <a name="addItem" id="additems">
+            <span name="addItem" id="additems">
               Items
-            </a>
+            </span>
           </Link>
         )}
         <Link
           to="search"
-          onClick={markTargetedLink}
-          className={OpenBusinessLeftCss.openBusinessTabLeft}
+          // onClick={markTargetedLink}
+          className={
+            `${OpenBusinessLeftCss.openBusinessTabLeft} ` +
+            `  ${
+              currentURL.startsWith("/OpenBusiness/search") &&
+              OpenBusinessLeftCss.activeClass
+            }`
+          }
         >
           <img src={iconView} className={OpenBusinessLeftCss.nonTransaction} />
-          <a id="View" name="View">
+          <span id="View" name="View">
             View
-          </a>
+          </span>
         </Link>
         {/* <Link
           to="search"
@@ -104,14 +123,20 @@ function OpenBusinessLeftSide() {
           <Link
             to="Employee"
             id="Employee"
-            onClick={markTargetedLink}
-            className={OpenBusinessLeftCss.openBusinessTabLeft}
+            // onClick={markTargetedLink}
+            className={
+              `${OpenBusinessLeftCss.openBusinessTabLeft} ` +
+              `  ${
+                currentURL.startsWith("/OpenBusiness/Employee") &&
+                OpenBusinessLeftCss.activeClass
+              }`
+            }
           >
             <img
               src={iconEmployee}
               className={OpenBusinessLeftCss.nonTransaction}
             />
-            <a name="Employee">Employee</a>
+            <span name="Employee">Employee</span>
           </Link>
         )}
         <Link
@@ -131,7 +156,7 @@ function OpenBusinessLeftSide() {
               OpenBusinessLeftCss.iconLogout
             }
           />
-          <a name="Logout">Logout</a>
+          <span name="Logout">Logout</span>
         </Link>
       </div>
     </div>

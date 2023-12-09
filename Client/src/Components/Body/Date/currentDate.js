@@ -27,8 +27,7 @@ export function DateFormatter(dateTimeString, timeZone) {
     "-" +
     Day.toString().padStart(2, "0");
 
-  //console.log("formattedDate", formattedDate);
-  if (formattedDate == "1970-01-01") {
+  if (new Date(formattedDate) <= new Date("2000-01-01")) {
     formattedDate = " - - - ";
   }
   return formattedDate;

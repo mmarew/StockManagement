@@ -31,9 +31,6 @@ function OpenBusinessHome() {
     <div>
       {/*used to show notifications amount only */}
       <div style={{ display: "none" }}>
-        <CheckIfUnreportedData
-          Notifications={{ numberOfNotifications, setNumberOfNotifications }}
-        />{" "}
         <GetCreditLists
           Notifications={{ numberOfNotifications, setNumberOfNotifications }}
           dateRange={{
@@ -41,13 +38,9 @@ function OpenBusinessHome() {
             toDate: "notInDateRange",
           }}
         />
-        <CheckIfUnreportedData
-          Notifications={{ numberOfNotifications, setNumberOfNotifications }}
-        />
       </div>
       <>
         <Tabs
-          TabIndicatorProps={{ style: { display: "none" } }}
           sx={{
             position: "relative",
             "& .MuiTab-root": {
@@ -96,19 +89,6 @@ function OpenBusinessHome() {
               </>
             }
             value={2}
-          />
-          <Tab
-            label={
-              <>
-                <Badge
-                  sx={{ position: "absolute", top: "10px" }}
-                  badgeContent={numberOfNotifications.Reports}
-                  color="error"
-                />
-                <span>Reports</span>
-              </>
-            }
-            value={3}
           />
         </Tabs>
         <Box

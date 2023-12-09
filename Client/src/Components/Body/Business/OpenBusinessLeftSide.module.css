@@ -10,10 +10,14 @@
 .MASETAWOSHAICONICON {
   width: 70%;
 }
+.openBusinessTabLeft span {
+  text-decoration: none;
+  color: black;
+}
 .activeClass {
   background-color: rgb(25, 118, 210);
 }
-.activeClass a {
+.activeClass span {
   color: white;
 }
 .activeClass .TransactionIcon {
@@ -37,16 +41,15 @@
   filter: invert(1);
   width: 20px;
 }
-.openBusinessTabLeft a {
-  text-decoration: none;
-  margin-left: 7px;
-  margin-top: 6px;
+.openBusinessTabLeft img {
+  margin-right: 10px;
 }
+
 .openBusinessTabLeft:hover {
   background-color: rgb(7, 136, 95);
   text-decoration: none;
 }
-.openBusinessTabLeft:hover a {
+.openBusinessTabLeft:hover span {
   color: white;
 }
 .openBusinessTabLeft:hover img {

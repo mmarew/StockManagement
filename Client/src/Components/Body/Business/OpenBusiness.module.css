@@ -1,5 +1,4 @@
 .openBusinesswrapper {
-  /* text-align: center; */
   width: 100%;
   margin: 0;
   padding: 0;
@@ -14,7 +13,7 @@
 
 .Title {
   font-size: 14px;
-  /* text-decoration: none; */
+  text-decoration: none;
   color: black;
 }
 .navBar {
@@ -48,21 +47,17 @@
   align-items: end;
 }
 
-.openBusinessTab:hover {
-  /* background-color: rgb(172, 172, 223); */
-  border-bottom: 3px solid rgb(25, 118, 210);
-}
 #dateId {
   margin: 10px auto;
   display: block;
 }
 
 .activeLink {
-  /* background-color: rgb(25, 118, 210); */
-  /* color: white; */
+  /* display: none; */
+  border-bottom: 10px rgb(75, 75, 237) solid;
 }
-.activeLink img {
-  /* filter: invert(100%) brightness(200%); */
+.activeLink button {
+  padding-bottom: 0;
 }
 
 table {
