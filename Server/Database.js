@@ -1,33 +1,26 @@
 let bcript = require("bcryptjs");
-const mysql2 = require("mysql2/promise");
+const { pool, executeQuery } = require("./Config/db.config");
 const JWT = require("jsonwebtoken");
-let tokenKey = "shhhhh";
-let bcrypt = require("bcryptjs");
-const { json } = require("express");
 require("dotenv").config();
+
 try {
-  pool = mysql2.createPool({
-    host: process.env.host,
-    user: process.env.user,
-    password: process.env.password,
-    database: process.env.database,
-    connectTimeout: 300000, // 30 seconds
-  });
 } catch (error) {
   //console.log("connection to data base error", error);
 }
-pool.getConnection();
+
 let createBasicTables = async () => {
   try {
     let createCreditCollection = `CREATE TABLE IF NOT EXISTS creditCollection (
     collectionId INT NOT NULL auto_increment,
     collectionDate DATE,
     userId int,
-    collectionAmount int,
+    collectionAmount float,
     registrationSource enum('total','Single'),
     businessId INT,
     targtedProductId INT,
     transactionId INT,
+    collectedBy varchar(3000),
+    descriptions varchar (3000),
     PRIMARY KEY (collectionId)
 )`;
 
@@ -35,20 +28,21 @@ let createBasicTables = async () => {
 
     let createTableDailyTransaction = `create table if not exists dailyTransaction(dailySalesId int auto_increment,
        mainProductId int, 
-       purchaseQty int not null default 0,
-        unitPrice int not null default 0, 
-        salesQty int not null default 0 ,
-         creditsalesQty int not null default 0, 
+       purchaseQty float not null default 0,
+        unitPrice float not null default 0, 
+         unitCost float not null default 0, 
+        salesQty float not null default 0 ,
+         creditsalesQty float not null default 0, 
          salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'),
          creditPaymentDate date,
           partiallyPaidInfo JSON,
            businessId int, 
            ProductId int, 
-           brokenQty int, Description varchar(2000),
+           brokenQty float, Description varchar(2000),
             registeredTimeDaily Date,
             itemDetailInfo varchar(9000), 
             reportStatus ENUM('unreported to total sales', 'reported to total sales'),
-             inventoryItem int not null, 
+             inventoryItem float not null, 
              primary key(dailySalesId))`;
     pool
       .query(createTableDailyTransaction)
@@ -59,7 +53,7 @@ let createBasicTables = async () => {
         //console.log(error);
       });
 
-    let create = `create table if not exists employeeTable(employeeId int auto_increment, createdDate DATETIME, userIdInEmployee int,BusinessIDEmployee int, employerId int, primary key(employeeId))`;
+    let create = `create table if not exists employeeTable(employeeId int auto_increment, hiredDate DATETIME, userIdInEmployee int,BusinessIDEmployee int, employerId int, primary key(employeeId))`;
     pool
       .query(create)
       .then(() => {})
@@ -81,7 +75,7 @@ let createBasicTables = async () => {
     console.log(error);
   }
 };
-//  businessName, userID, fullTime, res, createdDate;
+
 let createBusiness = async (
   businessName,
   ownerId,
@@ -92,13 +86,14 @@ let createBusiness = async (
   let uniqueBusinessName = businessName.replace(/[^A-Za-z0-9_]/g, "");
 
   let tableExpenses =
-    "CREATE TABLE IF NOT EXISTS ?? (expenseId INT(11) NOT NULL AUTO_INCREMENT, costId INT(11) NOT NULL,registeredBy int, costAmount INT(11) NOT NULL, costDescription VARCHAR(9000) NOT NULL, costRegisteredDate DATE NOT NULL, PRIMARY KEY (expenseId)) ";
+    "CREATE TABLE IF NOT EXISTS ?? (expenseId INT(11) NOT NULL AUTO_INCREMENT, costId INT(11) NOT NULL,registeredBy int, costAmount float(11) NOT NULL, costDescription VARCHAR(9000) NOT NULL, costRegisteredDate DATE NOT NULL, PRIMARY KEY (expenseId)) ";
   let costTable =
-    "CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, registeredBy int,  expItemRegistrationDate Date, unitCost INT(11) NOT NULL, PRIMARY KEY (costsId)) ";
+    "CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, registeredBy int,  expItemRegistrationDate Date, unitCost float(11) NOT NULL, PRIMARY KEY (costsId)) ";
+
   let createProductsTable =
-    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, productRegistrationDate date, registeredBy int, mainProductId int, productsUnitCost INT(11) NOT NULL, prevUnitCost int, productsUnitPrice INT(11) NOT NULL, prevUnitPrice int, productName VARCHAR(900) NOT NULL, prevProductName varchar(1000), minimumQty INT(11) NOT NULL, prevMinimumQty int, Status enum('active','changed','replaced','active_but_updated'), PRIMARY KEY (ProductId)) ";
+    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, productRegistrationDate date, registeredBy int, mainProductId int, productsUnitCost float(11) NOT NULL, prevUnitCost float, productsUnitPrice float(11) NOT NULL, prevUnitPrice float, productName VARCHAR(900) NOT NULL, prevProductName varchar(1000), minimumQty float(11) NOT NULL, prevMinimumQty float, Status enum('active','changed','replaced','active_but_updated'), PRIMARY KEY (ProductId)) ";
   /////////////////////////
-  let createTransaction = `CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL,registeredBy int, unitPrice INT(11) NOT NULL, productIDTransaction INT(11) NOT NULL, mainProductId int, salesQty INT(11) NOT NULL default 0, creditsalesQty int(11) NOT NULL  default 0,  purchaseQty INT(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory INT(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, creditDueDate date ,salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'),registrationSource enum('Total','Single'), partiallyPaidInfo JSON, creditPayementdate date, PRIMARY KEY (transactionId))`;
+  let createTransaction = `CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL,registeredBy int, unitPrice float(11) NOT NULL, productIDTransaction INT(11) NOT NULL, mainProductId int, salesQty float(11) NOT NULL default 0, creditsalesQty float(11) NOT NULL  default 0,  purchaseQty float(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory float(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, creditDueDate date ,salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'),registrationSource enum('Total','Single'), partiallyPaidInfo JSON, creditPayementdate date, PRIMARY KEY (transactionId))`;
 
   let queries = [],
     tableCollections = {};
@@ -143,8 +138,6 @@ let createBusiness = async (
         const [data] = await pool.query(query, [
           newBusinessName + tables[index],
         ]);
-        console.log("data == ", data);
-        console.log("query == ", query);
         return data; // Return the query result
       } catch (error) {
         console.log(error);
@@ -159,11 +152,11 @@ let createBusiness = async (
       });
     }
 
-    res.json({ data: "created well", source, tableCollections });
+    return { data: "created well", source, tableCollections };
   } catch (error) {
     console.error("errors on table creating systems", error);
-    if (error === "registeredBefore") return res.json({ error });
-    res.json({ error: "Unable to create tables." });
+    if (error === "registeredBefore") return { error };
+    return { error: "Unable to create tables." };
   }
 };
 const insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
@@ -198,74 +191,57 @@ const insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
       res.json({ error: "An error occurred while checking phone number." });
     });
 };
-const deleteBusiness = async (body, res) => {
+const deleteBusiness = async (body) => {
   try {
-    let { businessName, businessId, userPassword, token } = body;
-    let { userID } = JWT.verify(token, tokenKey);
-    let select = `SELECT * FROM usersTable WHERE userId = '${userID}' LIMIT 1`;
-    [rows] = await pool.query(select);
-    if (rows.length == 0) return res.json({ data: "user is not found." });
-
-    let savedPassword = rows[0].password;
-    const isMatch = bcrypt.compareSync(userPassword, savedPassword);
-    if (!isMatch) return res.json({ data: "wrong password." });
-    let sqlToGetBusiness = `select * from Business where BusinessID='${businessId}'`;
-    let [businessRows] = await pool.query(sqlToGetBusiness);
-
-    if (businessRows.length == 0) {
-      return res.json({ data: "business not found" });
+    let { businessName, businessId } = body;
+    console.log("businessName, businessId");
+    let sqlToGetBusiness = `select * from Business where BusinessID=?`;
+    let businessRows = await executeQuery(sqlToGetBusiness, [businessId]);
+    console.log("businessRows", businessRows);
+    if (businessRows.length === 0) {
+      return { data: "business not found" };
     }
-    let { uniqueBusinessName } = businessRows[0];
 
+    let uniqueBusinessName = businessRows[0]?.uniqueBusinessName;
+    if (!uniqueBusinessName) {
+      return { data: "business not found" };
+    }
     let sql = `DELETE FROM Business WHERE BusinessID=?`;
     let tables = ["_expenses", "_Costs", "_Transaction", "_products"];
-    let tableLength = tables.length,
-      i = 0;
+    let tableLength = tables.length;
+    let i = 0;
     let sqlValues = [businessId];
 
-    let deleteEachTable = () => {
+    const deleteEachTable = async () => {
       let drop = `DROP TABLE IF EXISTS ??`;
-      dropvalues = [uniqueBusinessName + tables[i]];
-      pool
-        .query(drop, dropvalues)
-        .then((results) => {
-          if (i === tableLength - 1) {
-            pool
-              .query(sql, sqlValues)
-              .then((result) => {
-                return res.json({ data: result[0] });
-              })
-              .catch((error) => {
-                return res.json({
-                  message: error,
-                  error: "An error occurred while deleting business data.",
-                });
-              });
-          } else if (i <= tableLength - 1) {
-            i++;
-            deleteEachTable();
-          }
-        })
-        .catch((error) => {
-          //console.error(error);
-          return res.json({
-            error: `An error occurred while dropping ${
-              businessName + tables[i]
-            } table.`,
-          });
-        });
+      let dropvalues = [uniqueBusinessName + tables[i]];
+
+      try {
+        await pool.query(drop, dropvalues);
+
+        if (i === tableLength - 1) {
+          const result = await pool.query(sql, sqlValues);
+          return { data: "delete success" };
+        } else if (i < tableLength - 1) {
+          i++;
+          return deleteEachTable(); // Return the promise to properly handle the async flow
+        }
+      } catch (error) {
+        console.error(error);
+        return {
+          error: `error in deleting business`,
+        };
+      }
     };
 
-    deleteEachTable();
+    return deleteEachTable(); // Return the promise to properly handle the async flow
   } catch (error) {
-    res.json({ data: "error", error: "error no d1" });
+    console.log(error);
+    return { data: "error", error: "error no d1" };
   }
 };
 
-module.exports.Pool = pool;
-module.exports.mysql2 = mysql2;
 module.exports.deleteBusiness = deleteBusiness;
 module.exports.insertIntoUserTable = insertIntoUserTable;
 module.exports.createBusiness = createBusiness;
-module.exports.pool = pool;
 module.exports.createBasicTables = createBasicTables;

@@ -6,7 +6,7 @@ import ProfileCss from "./Profile.module.css";
 import EditProfile from "./EditProfile";
 import axios from "axios";
 import $ from "jquery";
-import LeftSideBusiness from "../Business/LeftSideBusiness";
+import LeftSideBusiness from "../../LeftSide/LeftSideBusiness";
 import { Box, Button, Modal, TextField } from "@mui/material";
 function Profile() {
   const [targetRender, settargetRender] = useState("");

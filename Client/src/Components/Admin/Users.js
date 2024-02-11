@@ -13,7 +13,7 @@ function Users() {
   let getUsers = async () => {
     // alert(serverAddress);
     try {
-      let Users = await axios.get(serverAddress + "admin__getUsers", {});
+      let Users = await axios.get(serverAddress + "admin/admin__getUsers", {});
       console.log("user", Users.data.data[0]);
 
       setUsers(Users.data.data);

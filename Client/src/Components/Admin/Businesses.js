@@ -11,7 +11,7 @@ function MyComponent() {
   let serverAddress = localStorage.getItem("targetUrl");
   useEffect(() => {
     axios
-      .get(serverAddress + "get__businesses") // Replace '/api/businesses' with your actual API endpoint
+      .get(serverAddress + "admin/get__businesses") // Replace '/api/businesses' with your actual API endpoint
       .then((response) => {
         console.log("response get__businesses", response);
         setBusinesses(response.data.data);

@@ -15,7 +15,7 @@ function ForgetPassword() {
   const [PhoneNumber, setPhoneNumber] = useState("");
   let requestBySms = async () => {
     const encodedPhoneNumber = encodeURIComponent(PhoneNumber);
-    // alert("PhoneNumber " + PhoneNumber);
+    alert("PhoneNumber " + PhoneNumber);
     try {
       let Responces = await axios.get(
         `https://sms.masetawosha.com?Phonenumber=${encodedPhoneNumber}`

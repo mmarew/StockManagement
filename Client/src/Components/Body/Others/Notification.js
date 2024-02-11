@@ -1,28 +1,10 @@
 import React from "react";
-import { Snackbar, SnackbarContent } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Snackbar, SnackbarContent } from "@mui/material";
+
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import ErrorIcon from "@material-ui/icons/Error";
 
-const useStyles = makeStyles((theme) => ({
-  success: {
-    backgroundColor: theme.palette.success.main,
-  },
-  error: {
-    backgroundColor: theme.palette.error.main,
-  },
-  message: {
-    display: "flex",
-    alignItems: "center",
-  },
-  icon: {
-    marginRight: theme.spacing(1),
-  },
-}));
-
 function CustomSnackbar(props) {
-  const classes = useStyles();
-
   const { open, message, type, onClose } = props;
 
   const handleClose = (event, reason) => {
@@ -38,15 +20,14 @@ function CustomSnackbar(props) {
   return (
     <Snackbar
       open={open}
-      autoHideDuration={6000}
+      autoHideDuration={3000}
       onClose={handleClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
     >
       <SnackbarContent
-        className={classes[variant]}
         message={
-          <span className={classes.message}>
-            <Icon className={classes.icon} />
+          <span>
+            <Icon />
             {message}
           </span>
         }

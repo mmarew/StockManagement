@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogActions,
-} from "@material-ui/core";
+import { Button, Dialog, DialogContent, DialogActions } from "@mui/material";
 function ConfirmDialog(props) {
   const [open, setOpen] = useState(props.open);
   const handleClose = () => {

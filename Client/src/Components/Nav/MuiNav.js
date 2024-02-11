@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useContext } from "react";
+import VerifyLogin from "../../Pages/Login/VerifyLogin";
 import {
   ConsumeableContext,
   InitialContext,
@@ -72,26 +73,14 @@ export default function NavBar() {
   let serverAddress = localStorage.getItem("targetUrl");
   let navigate = useNavigate();
   let savedToken = localStorage.getItem("storeToken");
-  let VerifyLogin = async () => {
-    console.log("savedStore ===== " + savedToken);
-    if (savedToken == null || savedToken == "") {
-      navigate("/login");
-      return;
-    }
-    let response = await axios.post(serverAddress + "verifyLogin/", {
-      token: savedToken,
-    });
-    if (response.data.data == "alreadyConnected") {
-      let employeeName = response.data.result[0].employeeName;
-      employeeName = employeeName.split(" ")[0];
-      setownersName(employeeName);
-      // navigate("/");
-    } else {
-      Navigate("/Login");
-    }
-  };
+
   useEffect(() => {
-    VerifyLogin();
+    let verify = VerifyLogin();
+    verify.then((res) => {
+      if (!res) {
+        navigate("/login");
+      }
+    });
   }, []);
   return (
     <div className="NavBar">

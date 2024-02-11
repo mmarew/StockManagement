@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CustomSnackbar from "./Notification";
 
-function SuccessOrError({ request }) {
+function SuccessOrError({ request, setErrors }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
@@ -29,18 +29,24 @@ function SuccessOrError({ request }) {
       return;
     }
     handleError();
-  }, []);
+    if (typeof setErrors == "function" && setErrors != undefined)
+      setTimeout(() => {
+        setErrors(false);
+      }, 3000);
+  }, [, request]);
 
   return (
     <div>
       {/* <button onClick={handleSuccess}>Show success message</button> */}
       {/* <button onClick={handleError}>Show error message</button> */}
-      <CustomSnackbar
-        open={open}
-        message={message}
-        type={type}
-        onClose={handleClose}
-      />
+      {open && (
+        <CustomSnackbar
+          open={open}
+          message={message}
+          type={type}
+          onClose={handleClose}
+        />
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import helpStyles from "./Help.module.css";
 import { Link, useNavigate } from "react-router-dom";
-import LeftSideBusiness from "../Body/Business/LeftSideBusiness";
+import LeftSideBusiness from "../LeftSide/LeftSideBusiness";
 import { Button } from "@mui/material";
 import { common } from "@mui/material/colors";
 function Help() {
