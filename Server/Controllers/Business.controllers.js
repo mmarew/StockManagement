@@ -45,7 +45,17 @@ let updateBusinessName = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+let removeEmployeersBusinessController = async (req, res) => {
+  try {
+    let result = await businessService.removeEmployeersBusiness(req.body);
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 module.exports = {
+  removeEmployeersBusinessController,
   createBusiness,
   getBusiness,
   deleteBusiness,

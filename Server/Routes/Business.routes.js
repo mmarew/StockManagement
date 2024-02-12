@@ -5,7 +5,9 @@ let {
   getBusiness,
   deleteBusiness,
   updateBusinessName,
+  removeEmployeersBusinessController,
 } = require("../Controllers/Business.controllers");
+const { pool } = require("../Config/db.config");
 // console.log("Business", Business);
 Router.post("/business/createbusiness", authMiddleware, createBusiness);
 Router.post("/business/getBusiness", authMiddleware, getBusiness);
@@ -16,38 +18,12 @@ Router.post(
   deleteBusiness
 );
 Router.post("/business/updateBusinessName", authMiddleware, updateBusinessName);
-Router.post("/removeEmployeersBusiness/", async (req, res) => {
-  const userID = await Auth(req.body.token);
-  const getEmployeerBusiness = `SELECT * FROM employeeTable WHERE userIdInEmployee = ? AND BusinessIDEmployee = ?`;
-  const getEmployeerBusinessValues = [userID, req.body.BusinessID];
+Router.post(
+  "/removeEmployeersBusiness/",
+  authMiddleware,
+  authMiddleware2,
+  removeEmployeersBusinessController
+);
 
-  pool
-    .query(getEmployeerBusiness, getEmployeerBusinessValues)
-    .then((results) => {
-      if (results.length > 0) {
-        const deleteData = `DELETE FROM employeeTable WHERE userIdInEmployee = ? AND BusinessIDEmployee = ?`;
-        const deleteDataValues = [userID, req.body.BusinessID];
-        return pool
-          .query(deleteData, deleteDataValues)
-          .then((resultsOfSelect) => {
-            if (resultsOfSelect) {
-              return res.json({ data: resultsOfSelect });
-            } else {
-              return res.json({ data: "alreadyDeleted" });
-            }
-          })
-          .catch((error) => {
-            //console.log(error);
-            return res.json({ data: error });
-          });
-      } else {
-        return res.json({ data: "NoDataLikeThis" });
-      }
-    })
-    .catch((error) => {
-      //console.log(error);
-      return res.json({ data: error });
-    });
-});
 // getBusiness;
 module.exports = Router;

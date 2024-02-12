@@ -116,12 +116,10 @@ let createBusiness = async (
         let { BusinessID } = rows[0];
         newBusinessName = uniqueBusinessName + "_" + BusinessID;
         return await registerMainBusinessName(newBusinessName);
-        // tableCollections.registerBusinessName = "registeredBefore";
-        // throw "registeredBefore";
       }
     } catch (error) {
       console.log("error", error);
-      return res.json({ data: "unable to register business name" });
+      return res.json({ data: "Errors" });
     }
   };
   try {
@@ -159,38 +157,34 @@ let createBusiness = async (
     return { error: "Unable to create tables." };
   }
 };
-const insertIntoUserTable = async (fullName, phoneNumber, password, res) => {
-  const salt = bcript.genSaltSync();
-  const encryptedPassword = bcript.hashSync(password, salt);
+const insertIntoUserTable = async (fullName, phoneNumber, password) => {
+  try {
+    const salt = bcript.genSaltSync();
+    const encryptedPassword = bcript.hashSync(password, salt);
 
-  let check = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
-  pool
-    .query(check, [phoneNumber])
-    .then(([rows]) => {
-      if (rows.length > 0) {
-        let token = JWT.sign({ userID: rows[0].userId }, "shhhhh");
-        res.json({ data: "This phone number is registered before.", token });
-      } else {
-        let insertIntoUsers = `INSERT INTO usersTable (employeeName, phoneNumber, password) VALUES (?, ?, ?)`;
-        pool
-          .query(insertIntoUsers, [fullName, phoneNumber, encryptedPassword])
-          .then((result) => {
-            const insertedId = result.insertId; // Get the ID of the inserted row
-            let token = JWT.sign({ userID: insertedId }, "shhhhh");
+    const checkQuery = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
+    const [rows] = await pool.query(checkQuery, [phoneNumber]);
 
-            res.json({ data: "Data is inserted successfully.", token });
-          })
-          .catch((error) => {
-            //console.error(error);
-            res.json({ error: "An error occurred while inserting data." });
-          });
-      }
-    })
-    .catch((error) => {
-      //console.error(error);
-      res.json({ error: "An error occurred while checking phone number." });
-    });
+    if (rows.length > 0) {
+      const token = JWT.sign({ userID: rows[0].userId }, "shhhhh");
+      return { data: "This phone number is registered before.", token };
+    } else {
+      const insertQuery = `INSERT INTO usersTable (employeeName, phoneNumber, password) VALUES (?, ?, ?)`;
+      const result = await pool.query(insertQuery, [
+        fullName,
+        phoneNumber,
+        encryptedPassword,
+      ]);
+      const insertedId = result.insertId;
+      const token = JWT.sign({ userID: insertedId }, "shhhhh");
+      return { data: "Data is inserted successfully.", token };
+    }
+  } catch (error) {
+    console.error("Error in insertIntoUserTable:", error);
+    return { error: "An error occurred." };
+  }
 };
+
 const deleteBusiness = async (body) => {
   try {
     let { businessName, businessId } = body;

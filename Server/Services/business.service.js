@@ -67,7 +67,40 @@ let updateBusinessName = async (body) => {
     return { error };
   }
 };
+let removeEmployeersBusiness = async (body) => {
+  try {
+    const { userID, businessId } = body;
+    const getEmployeerBusiness = `SELECT * FROM employeeTable WHERE userIdInEmployee = ? AND BusinessIDEmployee = ?`;
+    const getEmployeerBusinessValues = [userID, businessId];
+    if (userID === null || businessId === null) {
+      return { data: "NoDataLikeThis" };
+    }
+    const [results] = await pool.query(
+      getEmployeerBusiness,
+      getEmployeerBusinessValues
+    );
+
+    if (results.length > 0) {
+      const deleteData = `DELETE FROM employeeTable WHERE userIdInEmployee = ? AND BusinessIDEmployee = ?`;
+      const deleteDataValues = [userID, businessId];
+
+      const [resultOfDelete] = await pool.query(deleteData, deleteDataValues);
+
+      if (resultOfDelete.affectedRows > 0) {
+        return { data: resultOfDelete };
+      } else {
+        return { data: "alreadyDeleted" };
+      }
+    } else {
+      return { data: "NoDataLikeThis" };
+    }
+  } catch (error) {
+    console.error("Error in removeEmployeersBusiness:", error);
+    return res.status(500).json({ data: "Internal Server Error" });
+  }
+};
 module.exports = {
+  removeEmployeersBusiness,
   createBusiness,
   getBusiness,
   deleteBusiness,

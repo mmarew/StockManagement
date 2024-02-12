@@ -94,12 +94,8 @@ const GetCreditListEdit = ({
   const [Processing, setProcessing] = useState(false);
   return (
     <div>
-      <Modal
-        open={showCreditListDetails.open}
-        onClose={handleClose}
-        className={classes.modalContainer}
-      >
-        <Paper className={classes.modalContent}>
+      <Modal open={showCreditListDetails.open} onClose={handleClose}>
+        <Paper>
           {console.log("partiallyPaidInfo111111", partiallyPaidInfo)}
           {partiallyPaidInfo?.length > 0 ? (
             <TableContainer>

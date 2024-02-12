@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+import EditIcon from "@mui/icons-material/Edit"; // Import css
 import CreateBusiness from "../Components/Business/CreateBusiness";
 import { useNavigate } from "react-router-dom";
 import { Button, LinearProgress, TextField } from "@mui/material";
@@ -15,16 +13,18 @@ import LeftSideBusiness from "../Components/LeftSide/LeftSideBusiness";
 import ModalToEditBusinessName from "../Components/Business/ModalToEditBusinessName";
 import { DateFormatter } from "../Components/Body/Date/currentDate";
 import ModalToDeleteBusiness from "../Components/Business/ModalToDeleteBusiness";
+import ModalToRemoveEmployerBusiness from "../Components/Business/ModalToRemoveEmployerBusiness";
 let serverAddress = localStorage.getItem("targetUrl");
 function Business() {
   // usestate data
+  const [requestFailOrSuccess, setRequestFailOrSuccess] = useState({
+    Responce: "",
+    Message: "",
+  });
   let ModalData = {
     Open: false,
     datas: {},
   };
-  // usestate data ends here
-
-  /*use states*/
   const [getBusinessErrors, setgetBusinessErrors] = useState(null);
   const [businessListsInfo, setBusinessListsInfo] = useState(
     <h4>Looking for your business lists .... </h4>
@@ -41,6 +41,8 @@ function Business() {
     useState(ModalData);
   const [openBusinessDeletingModal, setopenBusinessDeletingModal] =
     useState(ModalData);
+  const [RemoveEmployerBusiness, setRemoveEmployerBusiness] =
+    useState(ModalData);
   /* Use states endes here*/
   const { ownersName, setownersName, ShowProgressBar, setShowProgressBar } =
     ConsumeableContext();
@@ -48,20 +50,16 @@ function Business() {
   let token = localStorage.getItem("storeToken");
   let openThisBusiness = (businessId, businessName) => {
     try {
-      console.log(businessId);
       localStorage.setItem("businessId", businessId);
       localStorage.setItem("businessName", businessName);
       localStorage.setItem("openedBusiness", "myBusiness");
       Navigate("/OpenBusiness");
-      // window.location.href = "/OpenBusiness";
     } catch (error) {
-      // console.log('first')
       alert("unable to open business");
     }
   };
 
   let openEmployeerBusiness = (businessID, ownersId, businessName) => {
-    console.log(businessID, ownersId);
     localStorage.setItem("businessId", businessID);
     localStorage.setItem("businessName", businessName);
     localStorage.setItem("businessOwnreId", ownersId);
@@ -80,6 +78,7 @@ function Business() {
       let results = await axios.post(`${serverAddress}business/getBusiness`, {
         token,
       });
+
       setShowProgressBar(false);
 
       if (results.data.data == "You haven't loged in before.") {
@@ -109,16 +108,15 @@ function Business() {
       }
       setgetBusinessErrors("");
     } catch (error) {
+      setRequestFailOrSuccess(() => ({
+        ...requestFailOrSuccess,
+        Responce: "FAIL",
+        Message: error.message,
+      }));
       setgetBusinessErrors(error.message);
-      console.log("error is ", error);
       setShowProgressBar(false);
       setBusinessListsInfo("");
     }
-    // setbusinessName()
-  };
-  let cancelBusinessUpdate = (businessId) => {
-    // $("#businessWrapper_" + businessId).hide();
-    // $("#openEditWrapper" + businessId).show();
   };
 
   useEffect(() => {
@@ -134,7 +132,6 @@ function Business() {
 
   useEffect(() => {
     if (open.open) {
-      console.log("open", open);
       const { businessId, businessName, getBusiness, setBusinessLists } =
         open.targetdBusiness;
       if (open.Action == "deleteBusiness") {
@@ -176,10 +173,19 @@ function Business() {
 
   return (
     <>
+      {requestFailOrSuccess.Responce && (
+        <SuccessOrError
+          request={
+            requestFailOrSuccess.Responce == "SUCCESS"
+              ? "SUCCESS"
+              : requestFailOrSuccess.Message
+          }
+          setErrors={setRequestFailOrSuccess}
+        />
+      )}
       {ShowProgressBar && <LinearProgress />}
 
       <div className={Businessmodulecss.MainBusinessWrapper}>
-        {console.log("screenSize " + window.innerWidth)}
         {window.innerWidth > 768 && (
           <div className={Businessmodulecss.LeftSideBusinessWrapper}>
             <LeftSideBusiness />
@@ -213,6 +219,7 @@ function Business() {
             <br />
             {newBusiness.Open && (
               <CreateBusiness
+                setRequestFailOrSuccess={setRequestFailOrSuccess}
                 ShowProgressBar={ShowProgressBar}
                 setShowProgressBar={setShowProgressBar}
                 getBusiness={getBusiness}
@@ -229,21 +236,13 @@ function Business() {
               {businessListsInfo}
               <div className={Businessmodulecss.createdBusinessWrapper}>
                 {createdBusiness?.map((datas) => {
-                  console.log(datas);
                   return (
                     <div
                       key={datas.BusinessID}
                       className={Businessmodulecss.createdBusiness}
-                      // id={"createdBusiness_" + datas.BusinessID}
                     >
-                      <div
-                        className={Businessmodulecss.Business}
-                        // id={"eachBusiness_" + datas.BusinessID}
-                      >
-                        <h4
-                          style={{ textAlign: "center" }}
-                          // id={"businessNameH2_" + datas.BusinessID}
-                        >
+                      <div className={Businessmodulecss.Business}>
+                        <h4 style={{ textAlign: "center" }}>
                           {datas.BusinessName}
                         </h4>
                         <div
@@ -371,13 +370,7 @@ function Business() {
                               >
                                 Update
                               </Button>
-                              <Button
-                                variant="contained"
-                                color="warning"
-                                onClick={() =>
-                                  cancelBusinessUpdate(datas.BusinessID)
-                                }
-                              >
+                              <Button variant="contained" color="warning">
                                 Cancel
                               </Button>
                             </div>
@@ -390,7 +383,6 @@ function Business() {
                 {
                   <>
                     {employeerBusiness?.map((items) => {
-                      console.log(items);
                       return (
                         <div
                           key={"EmployyersBusiness_" + items.employeeId}
@@ -440,17 +432,10 @@ function Business() {
                             </Button>
                             <Button
                               onClick={() => {
-                                // <MUIConfirm/
-                                setOpen({
-                                  Action: "RemoveEmployerBusiness",
+                                setRemoveEmployerBusiness({
                                   open: true,
-                                  targetdBusiness: {
-                                    ownerId: items.ownerId,
-                                    businessId: items.BusinessID,
-                                    businessName: items.BusinessName,
-                                    getBusiness: getBusiness,
-                                    setBusinessLists: setBusinessListsInfo,
-                                  },
+                                  getBusiness: getBusiness,
+                                  items,
                                 });
                               }}
                               // open.targetdBusiness.getBusiness
@@ -472,9 +457,7 @@ function Business() {
           </div>
         </div>
       </div>
-      {console.log("open.open is ", open.open)}
       {open.open && ConfirmRequest}
-      {console.log("ShowSuccessError == ", ShowSuccessError)}
       {ShowSuccessError?.show && (
         <SuccessOrError request={ShowSuccessError.message} />
       )}
@@ -491,6 +474,15 @@ function Business() {
           getBusiness={getBusiness}
           setopenBusinessEditingModal={setopenBusinessEditingModal}
           openBusinessEditingModal={openBusinessEditingModal}
+        />
+      )}
+      {RemoveEmployerBusiness?.open && (
+        <ModalToRemoveEmployerBusiness
+          data={{
+            RemoveEmployerBusiness,
+            setRemoveEmployerBusiness,
+            getBusiness,
+          }}
         />
       )}
     </>

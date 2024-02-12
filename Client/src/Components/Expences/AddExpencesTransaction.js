@@ -93,7 +93,6 @@ function AddExpencesTransaction() {
       alert("Inserted properly");
       setopen(false);
     }
-    $(".LinearProgress").hide();
   };
   //////////
   let collectCotForm = (e) => {
@@ -108,11 +107,11 @@ function AddExpencesTransaction() {
   };
   useEffect(() => {
     if (showCostForm) {
-      let costDate = $("#costDate").value;
+      let costDate = "";
       console.log(" costDate is ", costDate);
       if (costDate == "") {
         costDate = currentDates();
-        $("#costDate").val(costDate);
+        // $("#costDate").val(costDate);
       }
     }
     // businessName = localStorage.getItem("businessName");

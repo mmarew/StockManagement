@@ -1,4 +1,5 @@
-const { insertIntoUserTable } = require("../Database");
+const { RegisterUsersController } = require("../Controllers/Users.Controller");
+
 const { authMiddleware, authMiddleware2 } = require("../middleware/Auth");
 
 let Router = require("express").Router();
@@ -74,19 +75,7 @@ Router.post(
     }
   }
 );
-Router.post(path + "RegisterUsers/", authMiddleware, async (req, res) => {
-  let registerPhone = req.body.registerPhone,
-    registerPassword = req.body.registerPassword,
-    fullName = req.body.fullName;
-  let results = await insertIntoUserTable(
-    fullName,
-    registerPhone,
-    registerPassword,
-    res
-  );
-
-  // //console.log("results is " + results);
-});
+Router.post(path + "RegisterUsers/", RegisterUsersController);
 Router.post(path + "getMyProfile/", authMiddleware, async (req, res) => {
   let userId = await Auth(req.body.myToken);
   //console.log("userId", userId);

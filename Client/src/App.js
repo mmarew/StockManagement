@@ -9,7 +9,7 @@ import Register from "./Components/Body/Register/Register";
 import AddTransaction from "./Components/Transaction/AddTrans/addTransaction";
 import AddTotalSales from "./Components/Transaction/AddTrans/AddTotalSales";
 import AddItems from "./Components/Products/AddItems";
-import Employee from "./Components/Body/Employee/Employee";
+import Employee from "./Components/Employee/Employee";
 import Help from "./Components/Hepl/Help";
 import OpenEmployeersBusiness from "./Components/OPEN/OpenEmployeersBusiness";
 import AddSalesTransaction from "./Components/Transaction/AddTrans/AddSalesTransaction";

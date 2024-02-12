@@ -18,8 +18,7 @@ import HoverableLink from "../Body/HoverableLink";
 
 function OpenBusiness() {
   const [HoverableTitle, setHoverableTitle] = useState("");
-  // localStorage.setItem("openedBusiness", "myBusiness");
-  // const savedContext = ConsumeableContext();
+
   let Navigate = useNavigate();
   const { ownersName, setownersName, ShowProgressBar, setShowProgressBar } =
     ConsumeableContext();
@@ -64,9 +63,8 @@ function OpenBusiness() {
   //////////////////////////
   return (
     <div className={OpenBusinesscss.openBusinesswrapper}>
-      {console.log("activeTab", activeTab)}
       <div className={OpenBusinesscss.navBar}>
-        <AppBar position="static">
+        <AppBar sx={{ backgroundColor: "white" }} position="static">
           <Toolbar>
             <div className={OpenBusinesscss.registerViewSearch}>
               <span

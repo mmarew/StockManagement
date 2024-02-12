@@ -4,13 +4,13 @@ import "./CreateBusiness.css";
 import { Box, Button, Modal, TextField } from "@mui/material";
 import { ButtonProcessing } from "../Utilities/Utility";
 import currentDates from "../Body/Date/currentDate";
-import { red } from "@mui/material/colors";
 
 function CreateBusiness({
   getBusiness,
   setnewBusiness,
   setShowProgressBar,
   newBusiness,
+  setRequestFailOrSuccess,
 }) {
   const [Process, setProcess] = useState(false);
   let serverAddress = localStorage.getItem("targetUrl");
@@ -20,8 +20,6 @@ function CreateBusiness({
 
   let handleCreateForm = (e) => {
     e.preventDefault();
-    console.log(e.target.value);
-    console.log(e.target.name);
     setBusinessNameError("");
     let filteredName = e.target.value.replace(/[^a-zA-Z0-9_ ]/g, "");
     if (filteredName != e.target.value) {
@@ -39,7 +37,6 @@ function CreateBusiness({
   let submitAlldatas = async (e) => {
     e.preventDefault();
     let businessName = businessData.businessName;
-    console.log(businessName);
     let i = 0;
     let filteredName = businessName.replace(/[^a-zA-Z0-9_ ]/g, "");
     if (filteredName != businessName) {
@@ -55,47 +52,38 @@ function CreateBusiness({
       );
 
       setProcess(false);
-      console.log("createBusiness response is =", response);
       setShowProgressBar(false);
       getBusiness();
-      window.location.reload();
-      console.log(response.data);
+      // window.location.reload();
       let data = response.data.data;
 
       if (data === "created well") {
-        let registerBusinessName =
-          response.data.tableCollections.registerBusinessName;
-        console.log(response.data.tableCollections.registerBusinessName);
-
-        if (registerBusinessName === "regesteredBefore") {
-          alert(
-            "This business name is reserved before. Please change its name. Thank you."
-          );
-        } else {
-          setnewBusiness("");
-          alert("Your business is created successfully. Thank you.");
-        }
-      } else if (data === "alreadyRegistered") {
-        alert("Error. This business name is already registered before.");
-      }
-      if (response.data.error === "Unable to create tables.") {
-        alert(response.data.error);
-      }
-      if (response.data.error === "registeredBefore") {
-        alert(
-          "Sorry, you cannot create this business because its name is already reserved before."
-        );
+        setRequestFailOrSuccess((prev) => ({
+          ...prev,
+          Responce: "SUCCESS",
+          Message:
+            "This business name is reserved before. Please change its name. Thank you.",
+        }));
+        cancelBusinessCreation("");
+      } else if (data == "Errors") {
+        setRequestFailOrSuccess((prev) => ({
+          ...prev,
+          Responce: "FAIL",
+          Message: "Error on create table ",
+        }));
+        return;
       }
     } catch (error) {
-      console.error("Error creating business:", error);
+      setRequestFailOrSuccess((prev) => ({
+        ...prev,
+        Responce: "FAIL",
+        Message: "An error occurred while creating the business.",
+      }));
       setShowProgressBar(false);
-      alert("An error occurred while creating the business.");
     }
   };
 
   let cancelBusinessCreation = () => {
-    console.log("cancelBusinessCreation");
-    console.log("setnewBusiness", setnewBusiness);
     setShowProgressBar(false);
     setnewBusiness("");
   };

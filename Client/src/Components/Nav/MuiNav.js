@@ -87,15 +87,6 @@ export default function NavBar() {
       <Box sx={{}}>
         <AppBar position="static" sx={{ backgroundColor: "#fff" }}>
           <Toolbar>
-            {/* <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton> */}
             <Typography
               variant="h6"
               noWrap
@@ -135,15 +126,6 @@ export default function NavBar() {
                 </Link>
               </div>
             </Typography>
-            {/* <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-              />
-            </Search> */}
           </Toolbar>
         </AppBar>
       </Box>
