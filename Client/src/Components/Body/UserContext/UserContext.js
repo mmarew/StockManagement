@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState } from "react";
+import currentDates from "../Date/currentDate";
 let InitialContext = createContext();
 function UserContext(props) {
   const [ShowProgressBar, setShowProgressBar] = useState(true);
   // This is data where sold by credit and money is not collected so we need it to deduct from sold in cash
-  const [Proccessing, setProccessing] = useState(false);
+  const [Processing, setProcessing] = useState(false);
   const [accountRecivableAmt, setAccountRecivableAmt] = useState(0);
   // This is data where sold by credit and collected in our selection time range  so we need it to add in net cash-flow
   const [collectedMoney, setCollectedMoney] = useState({
@@ -13,7 +14,7 @@ function UserContext(props) {
   // This is data where sold by credit and money is collected but collected time may or may not in selected time range so we need it to deduct from sold in cash
   const [unTimeRecivableCollected, setunTimeRecivableCollected] = useState(0);
   const [singleSalesInputValues, setSinlgeSalesInputValues] = useState({
-    singleSalesDate: null,
+    singleSalesDate: currentDates(),
     searchInput: null,
   });
   // singleSalesInputValues, setSinlgeSalesInputValues
@@ -27,8 +28,8 @@ function UserContext(props) {
   return (
     <InitialContext.Provider
       value={{
-        Proccessing,
-        setProccessing,
+        Processing,
+        setProcessing,
         singleSalesInputValues,
         setSinlgeSalesInputValues,
         ownersName,

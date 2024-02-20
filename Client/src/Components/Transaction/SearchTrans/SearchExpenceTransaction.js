@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import axios from "axios";
 import { Typography } from "@mui/material";
 import ConfirmDialog from "../../Body/Others/Confirm";
@@ -16,6 +15,7 @@ function SearchExpenceTransaction({
   fromDate,
   toDate,
   InputValue,
+  searchTarget,
 }) {
   const [expencesData, setexpencesData] = useState([]);
   let businessId = localStorage.getItem("businessId");
@@ -28,9 +28,7 @@ function SearchExpenceTransaction({
   let TotalSalesRevenue = 0,
     TotalPurchaseCost = 0;
   let { TransactionData } = ConsumeableContext();
-  //  TotalSales: 0,
-  //       TotalPurchase: 0,
-  //       TotalExpences: 0,
+
   TotalSalesRevenue = TransactionData.TotalSales;
   TotalPurchaseCost = TransactionData.TotalPurchase;
 
@@ -97,7 +95,14 @@ function SearchExpenceTransaction({
       let results = await axios.get(
         serverAddress + "Expences/getExpTransactions",
         {
-          params: { token, businessId, fromDate, toDate },
+          params: {
+            token,
+            businessId,
+            fromDate,
+            toDate,
+            searchTarget,
+            InputValue,
+          },
         }
       );
       console.log("getExpTransactions", results);
@@ -118,28 +123,20 @@ function SearchExpenceTransaction({
   let modifyAmountOrDescription = (e, updateBtnID) => {};
 
   const [DeleteConfirmation, setDeleteConfirmation] = useState({});
-
-  //  confirmAction, confirmMessages;
   const [confirmAction, setconfirmAction] = useState("");
-
   const [showConfirmDialog, setshowConfirmDialog] = useState(false);
   const [TotalCostAmount, setTotalCostAmount] = useState(0);
   const [ExpencesTransaction, setExpencesTransaction] = useState([]);
-  let businessName = localStorage.getItem("businessName");
   let serverAddress = localStorage.getItem("targetUrl");
   const [ViewCostList, setViewCostList] = useState([]);
   const [AllMyExpences, setAllMyExpences] = useState([]);
-
   let cancelEditingProcess = (e, index) => {
-    console.log(e);
-
     let updatedList = ExpencesTransaction.map((items, i) => {
       if (i == index) {
         return { ...items, contentEditable: false };
       }
       return items;
     });
-    // console.log(CostTransaction);
     setViewCostList(updatedList);
   };
 
@@ -149,8 +146,6 @@ function SearchExpenceTransaction({
   }, [showEachItems]);
 
   useEffect(() => {
-    // send expences data to return using setViewCostList
-
     setshowEachItems(showEachItems);
     if (showEachItems) setViewCostList(ExpencesTransaction);
     else setViewCostList(AllMyExpences);
@@ -160,13 +155,10 @@ function SearchExpenceTransaction({
     });
     setTotalCostAmount(costAmount);
   }, [AllMyExpences]);
-  // useEffect(() => {
-  //   console.log("@ViewCostList", ViewCostList);
-  // }, [ViewCostList]);
 
   return (
     <div>
-      {ViewCostList.length > 0 && (
+      {ViewCostList.length > 0 ? (
         <SearchExpTransTable
           getExpencesTransaction={getExpencesTransaction}
           expencesData={expencesData}
@@ -180,9 +172,10 @@ function SearchExpenceTransaction({
           setconfirmAction={setconfirmAction}
           ViewCostList={ViewCostList}
         />
+      ) : (
+        <h3>no expence transaction</h3>
       )}
       {Errors && <SuccessOrError setErrors={setErrors} request={Errors} />}
-
       <Paper style={{ padding: "20px" }}>
         <Typography variant="body1" sx={{ color: "black", cursor: "default" }}>
           Total Sales Revenue = {CurrencyFormatter(TotalSalesRevenue)}
@@ -227,7 +220,6 @@ function SearchExpenceTransaction({
               )}
         </Typography>
       </Paper>
-
       {ShowMoneyDetailModal && (
         <ModalToshowCollectedMoneyDetails
           setShowMoneyDetailModal={setShowMoneyDetailModal}
@@ -239,12 +231,6 @@ function SearchExpenceTransaction({
           action={confirmAction}
           open={showConfirmDialog}
           setShowConfirmDialog={setshowConfirmDialog}
-          // onConfirm={
-          //   confirmAction == "updateExpencesList"
-          //     ? setUpdateConfirmation
-          //     : setDeleteConfirmation
-          // }
-          // {setConfirmDeletePurchaseAndSales}
         />
       )}
     </div>

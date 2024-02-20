@@ -7,14 +7,15 @@ const path = "/";
 
 Router.post(path + "/updateCostData/", authMiddleware, async (req, res) => {
   // let businessName = req.body.businessName,
-  //   CostName_ = req.body.CostName_,
+  //   costName = req.body.costName,
   //   costsId = req.body.costsId;
-  let { businessName, CostName_, costsId, businessId, userID } = req.body;
+  //  costName, businessId, businessName, token;
+  let { businessName, costName, costsId, businessId, userID } = req.body;
 
   businessName = await getUniqueBusinessName(businessId, userID);
   console.log("@updateCostData businessName", businessName);
   const updateQuery = `UPDATE ?? SET costName=? WHERE costsId=?`;
-  let values = [businessName + "_Costs", CostName_, costsId];
+  let values = [businessName + "_Costs", costName, costsId];
   // return;
   pool
     .query(updateQuery, values)
@@ -25,25 +26,5 @@ Router.post(path + "/updateCostData/", authMiddleware, async (req, res) => {
       res.json({ data: error });
     });
 });
-Router.post(path + "getCostLists/", authMiddleware, async (req, res) => {
-  // //console.log(req.body);
-  let { businessId, userID } = req.body;
-  let businessName = await getUniqueBusinessName(businessId, userID);
-  if (businessName == "you are not owner of this business") {
-    return res.json({ data: businessName });
-  }
-  let select = `select * from ??`;
-  pool
-    .query(select, [`${businessName}_Costs`])
-    .then(([rows]) => {
-      //console.log("line 458", rows);
-      res.json({
-        data: rows,
-      });
-      //// //console.log(businessName);
-    })
-    .catch((error) => {
-      res.json({ data: "err", err: "error 111" });
-    });
-});
+
 module.exports = Router;

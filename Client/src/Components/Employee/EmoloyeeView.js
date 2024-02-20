@@ -1,10 +1,21 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Button } from "@mui/material";
+import {
+  Button,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import SuccessOrError from "../Body/Others/SuccessOrError";
 import RemoveEmployeeModal from "./EmployeeRemove";
+import { ButtonProcessing } from "../Utilities/Utility";
 
 function EmployeeView() {
+  const [Processing, setProcessing] = useState(true);
   const serverAddress = localStorage.getItem("targetUrl");
   const [employeesList, setEmployeesList] = useState([]);
   const [errors, setErrors] = useState("");
@@ -23,9 +34,11 @@ function EmployeeView() {
           token: localStorage.getItem("storeToken"),
         }
       );
+      setProcessing(false);
       setEmployeesList(response.data.data);
       setErrors("");
     } catch (error) {
+      setProcessing(false);
       setErrors(error.message);
     }
   };
@@ -36,42 +49,53 @@ function EmployeeView() {
 
   return (
     <div>
+      {Processing && (
+        <div style={{ marginTop: "10px" }}>
+          <LinearProgress />{" "}
+        </div>
+      )}
       {errors && <SuccessOrError setErrors={setErrors} request={errors} />}
       <div>
         {employeesList.length === 0 && (
           <h4 style={{ color: "red" }}>No Employee</h4>
         )}
-        {employeesList.map((employee) => (
-          <div key={employee.employeeId} className="EmployeeListWrapper">
-            <div className="Employee">
-              <div> Name</div>
-              <div> {employee.employeeName}</div>
-            </div>
-            <div>
-              <div> Phone number</div>
-              <div>
-                <a href={"tel:+" + employee.phoneNumber}>
-                  {employee.phoneNumber}
-                </a>
-              </div>
-            </div>
-            <div>
-              <div>Action</div>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => {
-                  setShowConfirmDialog({
-                    open: true,
-                    employeeId: employee.employeeId,
-                  });
-                }}
-              >
-                Remove
-              </Button>
-            </div>
-          </div>
-        ))}
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Phone Number</TableCell>
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {employeesList.map((employee) => (
+                <TableRow key={employee.employeeId}>
+                  <TableCell>{employee.employeeName}</TableCell>
+                  <TableCell>
+                    <a href={"tel:+" + employee.phoneNumber}>
+                      {employee.phoneNumber}
+                    </a>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => {
+                        setShowConfirmDialog({
+                          open: true,
+                          employeeId: employee.employeeId,
+                        });
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
       {showConfirmDialog.open && (
         <RemoveEmployeeModal

@@ -8,13 +8,12 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useContext } from "react";
-import VerifyLogin from "../../Pages/Login/VerifyLogin";
+import VerifyLogin from "../../Pages/VerifyLogin";
 import {
   ConsumeableContext,
   InitialContext,
 } from "../Body/UserContext/UserContext";
 import { useEffect } from "react";
-import axios from "axios";
 import BusinessLogo from "../../Components/ICONS/BusinessJS/businessBlack.svg";
 import HelpLogo from "../../Components/ICONS/BusinessJS/SupportBlack.svg";
 import ProfileLogo from "../../Components/ICONS/BusinessJS/ProfileBlack.svg";

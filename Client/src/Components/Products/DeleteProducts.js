@@ -33,33 +33,24 @@ function DeleteProducts({ data }) {
       item.businessId = businessId;
       item.token = token;
       item.userPassword = userPassword;
-      console.log("item", item);
-      // return;
+      setProccessing(true);
       let deletResponce = await axios.post(
         serverAddress + "products/deleteProducts/",
         item
       );
+      setProccessing(false);
+
       fetchProducts();
       handleClose(true);
-      console.log("deletResponce", deletResponce.data);
       let { data, Messages } = deletResponce.data;
       if (data == "Error") {
         alert(Messages);
         return;
       }
-      let affectedRows = deletResponce.data.data.affectedRows;
-      let copyOfProducts = [];
-      if (affectedRows >= 0) {
-        //   searchedProducts?.map((product) => {
-        //     console.log("searchedProducts", product);
-        //     if (product.ProductId !== item.ProductId) {
-        //       copyOfProducts.push(product);
-        //     }
-        //   });
-      }
     } catch (error) {
       console.log(error.message);
       setErrors(error.message);
+      setProccessing(false);
     }
   };
 

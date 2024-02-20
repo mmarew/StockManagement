@@ -65,6 +65,7 @@ function ModalToshowCollectedMoneyDetails({
             overflow: "auto", // Enable scrolling when content overflows
           }}
         >
+          xxxxxxxxxxxx
           <h2 id="modal-title">Details of collected money</h2>
           <Box id="modal-description">
             {console.log(collectedMoney.Detail)}

@@ -31,27 +31,21 @@ let login = async (phoneNumber, password) => {
 };
 // server.post(path + "verifyLogin/",
 
-let verifyLogin = async (body) => {
+const verifyLogin = async (body) => {
   try {
-    let userID = body.userID;
-    let select = `SELECT * FROM usersTable WHERE userId = ?`;
+    const userID = body.userID;
+    const selectQuery = `SELECT * FROM usersTable WHERE userId = ?`;
 
-    pool
-      .query(select, [userID])
-      .then(([rows]) => {
-        if (rows.length > 0) {
-          return { data: "alreadyConnected", decoded, result: rows };
-        } else {
-          return { data: "dataNotFound", decoded };
-        }
-      })
-      .catch((err) => {
-        //console.error(err);
-        res.status(500).json({ error: "Internal Server Error" });
-      });
+    const [rows] = await pool.query(selectQuery, [userID]);
+
+    if (rows.length > 0) {
+      return { data: "alreadyConnected", result: rows };
+    } else {
+      return { data: "dataNotFound" };
+    }
   } catch (err) {
     console.error(err);
-    res.status(400).json({ error: "Invalid token" });
+    return { error: "Internal Server Error" };
   }
 };
 

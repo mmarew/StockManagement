@@ -1,27 +1,27 @@
 import "./App.css";
-import Transaction from "./Components/Transaction/Transaction";
-import Report from "./Components/Body/Report/Report";
+import Transaction from "./Pages/Transaction";
+import Report from "./Pages/Report";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Profile from "./Components/Body/Profile/Profile";
-import AddExpencesTransaction from "./Components/Expences/AddExpencesTransaction";
-import Login from "./Pages/Login/Login";
-import Register from "./Components/Body/Register/Register";
-import AddTransaction from "./Components/Transaction/AddTrans/addTransaction";
-import AddTotalSales from "./Components/Transaction/AddTrans/AddTotalSales";
-import AddItems from "./Components/Products/AddItems";
-import Employee from "./Components/Employee/Employee";
-import Help from "./Components/Hepl/Help";
-import OpenEmployeersBusiness from "./Components/OPEN/OpenEmployeersBusiness";
-import AddSalesTransaction from "./Components/Transaction/AddTrans/AddSalesTransaction";
+import Profile from "./Pages/Profile";
+import ExpencesTransaction from "./Components/Transaction/ExpencesTransaction";
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
+import AddTransaction from "./Pages/OpenBusiness/AddTransaction/addTransaction";
+import AddTotalSales from "./Pages/OpenBusiness/AddTransaction/AddTotalSales";
+import AddItems from "./Pages/OpenBusiness/AddItems";
+import Employee from "./Pages/Employee";
+import Help from "./Pages/Help";
+import AddSalesTransaction from "./Pages/OpenBusiness/AddTransaction/AddSalesTransaction";
 import NavBar from "./Components/Nav/MuiNav";
-import ForgetPassword from "./Components/Body/ForgetPassword/ForgetPassword";
-import OpenBusinessHome from "./Components/OPEN/OpenBusinessHome";
-import Admin from "./Components/Admin/Admin";
+import ForgetPassword from "./Pages/ForgetPassword";
+import OpenBusinessHome from "./Pages/OpenBusinessHome";
+import Admin from "./Pages/Admin";
 import Business from "./Pages/Business";
-import OpenBusiness from "./Components/OPEN/OpenBusiness";
-import RegisterEmployersProducts from "./Components/Products/RegisterEmployersProducts";
-import AddSingleSales from "./Components/Transaction/AddTrans/AddSingleSales";
-import SearchManager from "./Components/Search/SearchManager";
+import OpenBusiness from "./Pages/OpenBusiness/OpenBusiness";
+import RegisterEmployersProducts from "./Pages/RegisterEmployersProducts";
+import AddSingleSales from "./Pages/OpenBusiness/AddTransaction/AddSingleSales";
+import SearchManager from "./Pages/OpenBusiness/SearchManager";
+import OpenEmployeersBusiness from "./Pages/OpenEmployeersBusiness";
 function App() {
   return (
     <div className="App">
@@ -33,7 +33,6 @@ function App() {
           >
             <Route path="Register" element={<RegisterEmployersProducts />} />
             <Route path="view" element={<Transaction />} />
-            {/* <Route path="Search" element={<SearchProducts />} /> */}
           </Route>
 
           <Route path="/admin" element={<Admin />} />
@@ -130,8 +129,8 @@ function App() {
                 <Route path="addTotalSales" element={<AddTotalSales />} />
               </Route>
               <Route
-                path="AddCostTransaction"
-                element={<AddExpencesTransaction />}
+                path="ExpencesTransaction"
+                element={<ExpencesTransaction />}
               ></Route>{" "}
             </Route>
           </Route>

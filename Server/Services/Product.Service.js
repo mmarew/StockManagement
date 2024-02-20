@@ -56,12 +56,6 @@ let addProducts = async (body) => {
   } catch (error) {
     console.error(error);
 
-    if (error.sqlState === "42S02") {
-      // Handle table not found error
-      // You may want to call a function like createBusiness
-      // createBusiness(businessName, userID, fullTime, res, 'recreate');
-    }
-
     return (500).json({ error: "Internal Server Error" });
   }
 };

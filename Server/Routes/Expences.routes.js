@@ -4,7 +4,7 @@ const tokenKey = process.env.tokenKey;
 const { getUniqueBusinessName } = require("../UniqueBusinessName");
 const JWT = require("jsonwebtoken");
 const { CurrentYMD } = require("../DateFormatter");
-const { authMiddleware } = require("../middleware/Auth");
+const { authMiddleware, authMiddleware2 } = require("../middleware/Auth");
 const {
   getExpensesListsController,
 } = require("../Controllers/Expences.controller");
@@ -120,19 +120,20 @@ router.post(
   async (req, res) => {
     try {
       let rowData = req.body;
-      let { businessId, userID, costData, costDate, expDate } = req.body;
+      console.log("rowData", rowData);
+      // return;
+      // expDescription: 'klkl', expAmount: '90909', expDate: '2024-02-16'
+      let { businessId, userID, costData, expDescription, expAmount, expDate } =
+        req.body;
       let businessName = await getUniqueBusinessName(businessId, userID);
 
       let i = 0;
-      let costsId = costData[i].costsId,
-        costName = costData[i].costName;
+      let costsId = costData.costsId,
+        costName = costData.costName;
       costName = costName.replace(/ /g, "");
-      let Description = "Description_" + costName;
-      let costAmount = rowData[costName],
-        costDescription = rowData[Description];
       const table = `${businessName}_expenses`;
       const insert = `INSERT INTO ?? (costId, costAmount, costDescription, costRegisteredDate) VALUES (?, ?, ?, ?)`;
-      const values = [table, costsId, costAmount, costDescription, expDate];
+      const values = [table, costsId, expAmount, expDescription, expDate];
       pool
         .query(insert, values)
         // //console
@@ -152,79 +153,111 @@ router.post(
 router.get("/Expences/getExpTransactions", authMiddleware, async (req, res) => {
   try {
     console.log("in getExpTransactions", req.query);
-    let { businessId, fromDate, toDate } = req.query;
+    let { businessId, fromDate, toDate, searchTarget, InputValue } = req.query;
     let { userID } = req.body;
     console.log("userID", userID);
-
     let businessName = await getUniqueBusinessName(businessId, userID);
-    const sql = `SELECT * FROM ?? as e, ?? as c WHERE e.costRegisteredDate BETWEEN ? AND ? AND e.costId = c.costsId`;
+    let sql = `SELECT * FROM ?? as e, ?? as c WHERE e.costRegisteredDate BETWEEN ? AND ? AND e.costId = c.costsId`;
     // define the input data as an array of values
-    const inputExp = [
+    let inputExp = [
       `${businessName}_expenses`,
       `${businessName}_Costs`,
       fromDate,
       toDate,
     ];
-    // console.log("sql", sql, " inputExp ", inputExp);
-    // return;
-
-    // execute the query with the input data
+    if (searchTarget == "singleTransaction") {
+      console.log("InputValue", InputValue);
+      let { costName, costsId } = InputValue;
+      sql += ` and c.costsId = ?`;
+      inputExp.push(costsId);
+    }
     let [rows] = await pool.query(sql, inputExp);
     res.json({
       expenceTransaction: rows,
     });
   } catch (error) {
-    console.log("error on get expence transaction", error);
     res.json({ expenceTransaction: "error no 113" });
   }
 });
 router.get("/getexpencesLists", authMiddleware, getExpensesListsController);
-router.post("/deleteExpenceItem", async (req, res) => {
-  // console.log("req.body", req.body);
-  // return;
-  let { token, costsId, businessName, businessId, userPassword } = req.body;
+router.post(
+  "/deleteExpenceItem",
+  authMiddleware,
+  authMiddleware2,
+  async (req, res) => {
+    try {
+      const { userID, costsId, businessId } = req.body;
 
-  businessName = await getUniqueBusinessName(businessId, token);
-  const userId = await Auth(token);
-  let Password = "";
-  let selectUserInfo = `select * from usersTable where userId='${userId}'`;
-  console.log("businessName", businessName);
-  let isMatch = false;
-  let [Responces] = await pool.query(selectUserInfo);
-  console.log("Responces", Responces);
-  if (Responces.length <= 0) {
-    return res.json({ data: "Please make logout and login again." });
-  } else {
-    Password = Responces[0].password;
-    isMatch = bcrypt.compareSync(userPassword, Password);
-    console.log("isMatch", isMatch);
-  }
+      // Retrieve businessName based on businessId and userID
+      const businessName = await getUniqueBusinessName(businessId, userID);
 
-  if (!isMatch) return res.json({ data: "Wrong Password" });
-  const select =
-    "SELECT * FROM Business WHERE uniqueBusinessName = ? AND ownerId = ?";
-  const selectValues = [businessName, userId];
-
-  pool
-    .query(select, selectValues)
-    .then((responce) => {
-      if (responce.length > 0) {
-        const deleteCostItem = "DELETE FROM ?? WHERE costsId = ?";
-        const table = `${businessName}_Costs`;
-        const deleteCostItemValues = [table, costsId];
-        return pool
-          .query(deleteCostItem, deleteCostItemValues)
-          .then((results) => {
-            return res.json({ data: "deleted" });
-          });
-      } else {
-        return res.json({ data: "youAreNotAllowed" });
+      if (!businessName) {
+        return res.json({ data: "Please make logout and login again." });
       }
-    })
-    .catch((error) => {
-      //console.error(error);
-      res.json({ data: "err 501.1" });
-    });
+
+      // Check if the business and user combination is valid
+      const [businessData] = await pool.query(
+        "SELECT * FROM Business WHERE uniqueBusinessName = ? AND ownerId = ?",
+        [businessName, userID]
+      );
+
+      if (!businessData.length) {
+        return res.json({ data: "You are not allowed" });
+      }
+
+      // Delete the cost item
+      const table = `${businessName}_Costs`;
+      await pool.query("DELETE FROM ?? WHERE costsId = ?", [table, costsId]);
+
+      res.json({ data: "deleted" });
+    } catch (error) {
+      console.error(error);
+      res.json({ data: "Internal Server Error" });
+    }
+  }
+);
+router.post("/getExpencesLists/", authMiddleware, async (req, res) => {
+  try {
+    const { businessId, userID } = req.body;
+    const businessName = await getUniqueBusinessName(businessId, userID);
+
+    if (businessName === "you are not owner of this business") {
+      return res.json({ data: businessName });
+    }
+
+    const selectQuery = `SELECT * FROM ??`;
+    const [rows] = await pool.query(selectQuery, [`${businessName}_Costs`]);
+
+    res.json({ data: rows });
+  } catch (error) {
+    res.json({ data: "err", err: "error 111" });
+  }
+});
+
+router.post("/searchExpByName", authMiddleware, async (req, res) => {
+  try {
+    console.log("req", req.body);
+    const { expName, businessId, userID } = req.body;
+    const businessName = await getUniqueBusinessName(businessId, userID);
+
+    if (businessName === "you are not owner of this business") {
+      return res.json({ data: businessName });
+    }
+    // Construct the SQL query with a dynamic LIKE clause
+    const selectQuery = `
+      SELECT * 
+      FROM ${businessName}_Costs 
+      WHERE costName LIKE ?
+    `;
+
+    // Execute the query passing '%' + expName + '%' to search for any occurrence of expName
+    const [rows] = await pool.query(selectQuery, [`%${expName}%`]);
+
+    res.json({ data: rows });
+  } catch (error) {
+    console.error("Error searching expenses by name:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 module.exports = router;

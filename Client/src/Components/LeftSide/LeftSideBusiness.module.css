@@ -37,12 +37,20 @@
 }
 .LeftSideWrapper ul li div {
   display: flex;
+  justify-content: center;
   align-items: center;
   font-family: "Manrope";
   font-style: normal;
   font-weight: 500;
   line-height: normal;
   padding-left: 15%;
+}
+.LeftSideWrapper ul li div span {
+  /* text-align: center; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 13px;
 }
 
 .imgLeftBusiness {

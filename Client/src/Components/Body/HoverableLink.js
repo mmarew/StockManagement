@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import OpenBusinesscss from "../../Components/OPEN/OpenBusiness.module.css";
+import OpenBusinesscss from "../../CSS/OpenBusiness.module.css";
 import { Box } from "@mui/material";
 function HoverableLink(props) {
   const [open, setOpen] = useState(false);

@@ -37,8 +37,6 @@ function SuccessOrError({ request, setErrors }) {
 
   return (
     <div>
-      {/* <button onClick={handleSuccess}>Show success message</button> */}
-      {/* <button onClick={handleError}>Show error message</button> */}
       {open && (
         <CustomSnackbar
           open={open}

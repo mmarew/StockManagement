@@ -4,20 +4,23 @@ import React, { useState } from "react";
 import currentDates from "../Body/Date/currentDate";
 import { Box, Button, Modal, TextField } from "@mui/material";
 import { ButtonProcessing } from "../Utilities/Utility";
-import AddSingleSales_GetItems from "../Transaction/AddTrans/AddSingleSales_GetItems";
+import SearchProducts from "./SearchedProducts";
 const AddProducts = () => {
   /* local storage parts*/
   let serverAddress = localStorage.getItem("targetUrl");
   let token = localStorage.getItem("storeToken");
   let businessId = localStorage.getItem("businessId");
   /*use state parts */
-  const [getItems, setGetItems] = useState(<AddSingleSales_GetItems />);
-  const [FormData, setFormData] = useState({
+  const [Errors, setErrors] = useState(null);
+  let formOBJ = {
     minimumQty: "",
     productName: "",
     productRegistrationDate: "",
     productUnitCost: "",
     productUnitPrice: "",
+  };
+  const [FormData, setFormData] = useState({
+    ...formOBJ,
   });
   const [Processing, setProcessing] = useState(false);
   const [openProductRegistrationModal, setOpenProductRegistrationModal] =
@@ -25,7 +28,6 @@ const AddProducts = () => {
   /*function Parts*/
 
   let CollectData = (e) => {
-    console.log(e.target.name);
     setFormData({
       ...FormData,
       [e.target.name]: e.target.value,
@@ -42,51 +44,54 @@ const AddProducts = () => {
         serverAddress + "products/addProducts/",
         FormData
       );
-      setGetItems(<AddSingleSales_GetItems />);
       let data = response.data.data;
       setProcessing(false);
 
-      console.log("response", response);
-      let registerProducts =
-        document.getElementsByClassName("registerProducts");
       if (data == "notAllowedFroYou") {
-        alert(
-          `you haven't permit to make registration. so please tell to owner to make registration`
+        setErrors(
+          "You are not allowed to make registration. so please tell to owner to make registration"
         );
         // return;
       } else if (data == "productIsAlreadyAddedBefore") {
-        alert("Already registered");
+        setErrors("This product is added before.");
       } else if (data == "productIsAdded") {
         setFormData({
-          minimumQty: "",
-          productName: "",
-          productRegistrationDate: "",
-          productUnitCost: "",
-          productUnitPrice: "",
+          ...formOBJ,
         });
-        alert("you have added products successfully");
-        // $(".registerProducts input").val("");
-      } else if (data == "created well") {
-        alert("Your product is not registered. please try again.");
+        setErrors("Success");
+      } else {
+        setErrors("Something went wrong in server.");
         return;
       }
       for (let i = 0; i < registerProducts.length; i++) {
         registerProducts[i].value = "";
       }
-    } catch (error) {}
+    } catch (error) {
+      setProcessing(false);
+      // console.log("error", error);
+    }
   };
 
   return (
     <div>
-      <br />
-
+      {/* button used to open modal to add products */}
       <Button
+        sx={{ marginTop: "20px" }}
         onClick={() => setOpenProductRegistrationModal(true)}
         variant="contained"
       >
         Add Product
       </Button>
 
+      {/* show errors start here */}
+      <Box sx={{ margin: "20px 0", color: "red", fontSize: "20px" }}>
+        {Errors}
+
+        <br />
+      </Box>
+      {/* show errors ends here here */}
+
+      {/* Modal to add products starts here */}
       <Modal open={openProductRegistrationModal}>
         <Box
           sx={{
@@ -101,7 +106,6 @@ const AddProducts = () => {
             id="registerProductsForm"
             onSubmit={(e) => {
               e.preventDefault();
-              setGetItems();
               registerProducts(e);
             }}
             method="post"
@@ -172,7 +176,15 @@ const AddProducts = () => {
           </form>
         </Box>
       </Modal>
-      {getItems}
+      {/* Modal to add products ends here */}
+      {/* display registerd products start here */}
+
+      <SearchProducts
+        InputValue={FormData}
+        setSearchTypeValueError={setErrors}
+      />
+      {/* display registerd products ends here */}
+      {/* <GetRegisterableItems /> */}
     </div>
   );
 };

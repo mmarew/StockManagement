@@ -25,6 +25,7 @@ import { ConsumeableContext } from "../Body/UserContext/UserContext";
 import CurrencyFormatter, { ButtonProcessing } from "../Utilities/Utility";
 import GetCreditListEdit from "./GetCreditListEdit";
 import ExportToExcel from "../PDF_EXCEL/PDF_EXCEL";
+import SuccessOrError from "../Body/Others/SuccessOrError";
 
 export let getCollectedMoney = (data, salesRegistrationWay, infos) => {
   if (data == undefined || data == null) return 0;
@@ -57,7 +58,7 @@ function GetCreditLists({
   viewInTable,
   setFetchedDataLength,
 }) {
-  const [errorsOnCredit, seterrorsOnCredit] = useState(null);
+  const [SuccessOrErrorsOnCredit, setSuccessOrErrorsOnCredit] = useState(null);
   let numberOfNotifications, setNumberOfNotifications;
   if (
     Notifications != undefined &&
@@ -137,7 +138,7 @@ function GetCreditLists({
 
       setShowProgressBar(false);
     } catch (error) {
-      seterrorsOnCredit(error.message);
+      setSuccessOrErrorsOnCredit(error.message);
       // console.log(error);
     }
   };
@@ -178,10 +179,10 @@ function GetCreditLists({
         console.log(Responces.data.data);
         let Message = Responces.data.data;
         console.log("Message", Message);
-        alert(Message);
+        setSuccessOrErrorsOnCredit("SUCCESS");
       })
       .catch((error) => {
-        alert("error no 13");
+        setSuccessOrErrorsOnCredit("error no 13");
         console.log(error);
       });
     setOpenConfirmationModal((prevstate) => {
@@ -286,7 +287,12 @@ function GetCreditLists({
         <Typography sx={{ width: "80%", margin: "auto" }}>
           Sales in credit
         </Typography>
-        {errorsOnCredit}
+        {SuccessOrErrorsOnCredit && (
+          <SuccessOrError
+            request={SuccessOrErrorsOnCredit}
+            setErrors={setSuccessOrErrorsOnCredit}
+          />
+        )}
         <IconButton onClick={() => setminimizeTable(!minimizeTable)}>
           {minimizeTable ? <ExpandMore /> : <ExpandLess />}
         </IconButton>

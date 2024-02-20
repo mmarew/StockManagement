@@ -13,8 +13,7 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import { DateFormatter } from "../../Body/Date/currentDate";
 
 import ExportToExcel from "../../PDF_EXCEL/PDF_EXCEL";
@@ -32,7 +31,6 @@ function SearchExpTransTable({
   setconfirmAction,
   TotalCostAmount,
   setshowConfirmDialog,
-  setViewCostList,
 }) {
   expencesData.map((data) => {
     console.log("data", data);

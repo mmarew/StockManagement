@@ -17,7 +17,7 @@ import {
 import axios from "axios";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import singleSalesCss from "../AddTrans/AddSingleSales.module.css";
+import singleSalesCss from "../../../CSS/AddSingleSales.module.css";
 import React, { useEffect, useState } from "react";
 import currentDates, { DateFormatter } from "../../Body/Date/currentDate";
 import CurrencyFormatter, { ButtonProcessing } from "../../Utilities/Utility";
@@ -43,7 +43,7 @@ function GetEachTransaction({
   const [Errors, setErrors] = useState("");
   let token = localStorage.getItem("storeToken");
   let openedBusiness = localStorage.getItem("openedBusiness");
-  let { setShowProgressBar, setProccessing } = ConsumeableContext();
+  let { setShowProgressBar, setProcessing } = ConsumeableContext();
   // use state starts here
   const [formInputValues, setFormInputValues] = useState({
     salesType: "Default",
@@ -91,7 +91,7 @@ function GetEachTransaction({
       console.log("@getDailyTransaction", OB);
       // return;
       setShowProgressBar(true);
-      setProccessing(true);
+      setProcessing(true);
       setTransactionData((prev) => ({ TotalSales: 0, TotalPurchase: 0 }));
       let responce = await axios.post(
         serverAddress + "Transaction/getDailyTransaction/",
@@ -100,7 +100,7 @@ function GetEachTransaction({
         }
       );
       setShowProgressBar(false);
-      setProccessing(false);
+      setProcessing(false);
       let mydata = responce.data.data;
       console.log("mydata", mydata);
       // return;
@@ -132,13 +132,7 @@ function GetEachTransaction({
       console.log("mergedDataArray===", mergedDataArray);
 
       if (mydata.length == 0) {
-        setErrors("There is no registered data on this date.");
-        setTimeout(() => {
-          setGetAllDailyRegisters({
-            Open: false,
-            ProductId: 0,
-          });
-        }, 3000);
+        return setErrors("There is no registered data on this date.");
       }
       let i = 0;
       let Description = "",
@@ -228,7 +222,7 @@ function GetEachTransaction({
       setDailyTransaction(mydata);
     } catch (error) {
       setShowProgressBar(false);
-      setProccessing(false);
+      setProcessing(false);
       setErrors(error.message);
     }
   };
@@ -302,7 +296,6 @@ function GetEachTransaction({
       });
     });
   }, [DailyTransaction]);
-  const [downloadExcel, setDownloadExcel] = useState(false);
   const [viewEachTransactions, setviewEachTransactions] = useState(true);
 
   const [viewableData, setviewableData] = useState([]);
@@ -352,16 +345,14 @@ function GetEachTransaction({
               {deviceSize < 768 ? (
                 <div style={{ display: "flex", flexWrap: "wrap" }}>
                   {viewableData?.map((items, index) => {
-                    console.log(items.itemDetailInfo);
-
                     return (
                       <Paper
-                        style={{
+                        sx={{
                           padding: "20px",
                           margin: "10px",
                           width: "300px",
                         }}
-                        key={"detailes_" + index}
+                        key={"details_" + index}
                       >
                         <div>
                           <strong>Product Name: </strong>
@@ -391,12 +382,19 @@ function GetEachTransaction({
                         </div>
                         <div>
                           <strong>Sales QTY: </strong>
-                          {items.salesQty}
+                          {items.salesQty ? items.salesQty : 0}
                         </div>
                         <div>
                           <strong>Sales QTY Credit: </strong>
-                          {items.creditsalesQty}
+                          {items.creditsalesQty ? items.creditsalesQty : 0}
                         </div>
+                        <div
+                          style={{ color: "white", backgroundColor: "green" }}
+                        >
+                          <strong>Inventory: </strong>
+                          {items.inventoryItem}
+                        </div>
+
                         <div>
                           <strong>Unit Price: </strong>
                           {CurrencyFormatter(items.unitPrice)}
@@ -423,9 +421,8 @@ function GetEachTransaction({
                         </div>
                         {/* {(creditPaymentDate, creditsalesQty,)} */}
                         <div>
-                          {" "}
                           <strong>Broken QTY: </strong>
-                          {items.brokenQty}{" "}
+                          {items.brokenQty}
                         </div>
                         <div>
                           <strong>Description: </strong> {items.Description}

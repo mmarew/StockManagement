@@ -1,6 +1,5 @@
 const express = require("express");
 const { pool } = require("../Database");
-const { Auth } = require("../Auth");
 const router = express.Router();
 
 router.get("/admin__getUsers", async (req, res) => {

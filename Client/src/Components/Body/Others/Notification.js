@@ -20,7 +20,7 @@ function CustomSnackbar(props) {
   return (
     <Snackbar
       open={open}
-      autoHideDuration={3000}
+      autoHideDuration={2000}
       onClose={handleClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
     >
