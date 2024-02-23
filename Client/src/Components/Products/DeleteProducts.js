@@ -24,7 +24,6 @@ function DeleteProducts({ data }) {
   const [Proccessing, setProccessing] = useState(null);
   let { item } = ConfirmDelete;
   const [Errors, setErrors] = useState(null);
-  console.log("ConfirmDelete", ConfirmDelete);
 
   item.businessName = businessName;
 
@@ -48,7 +47,6 @@ function DeleteProducts({ data }) {
         return;
       }
     } catch (error) {
-      console.log(error.message);
       setErrors(error.message);
       setProccessing(false);
     }

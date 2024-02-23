@@ -4,7 +4,6 @@ import DeleteBusiness from "./DeleteBusiness";
 import { useState } from "react";
 import { ButtonProcessing } from "../Utilities/Utility";
 function ModalToDeleteBusiness({ Data }) {
-  //   console.log("openBusinessDeletingModal", openBusinessDeletingModal);
   let { openBusinessDeletingModal, setopenBusinessDeletingModal } = Data;
   let { datas, Open } = openBusinessDeletingModal;
   let { businessId, businessName, getBusiness, setBusinessLists } = datas;
@@ -26,7 +25,6 @@ function ModalToDeleteBusiness({ Data }) {
     });
     if (responce == "") {
     }
-    console.log("responce", responce);
   };
 
   return (

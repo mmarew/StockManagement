@@ -23,8 +23,6 @@ const GetCreditListEdit = ({
 }) => {
   let openedBusiness = localStorage.getItem("openedBusiness");
   let { salesWay } = showCreditListDetails;
-  console.log("salesWay", salesWay);
-  console.log("showCreditListDetails.data", showCreditListDetails.data);
   // return;
   let targetedTransactionId = showCreditListDetails.transactionId;
   let { dailySalesId, transactionId } = showCreditListDetails.data;
@@ -45,7 +43,6 @@ const GetCreditListEdit = ({
     let { data } = showCreditListDetails;
     data.map((d) => {
       if (targetedTransactionId == d.transactionId) {
-        console.log("d====", d.transactionId);
         setpartiallyPaiedInfo((Prev) => {
           return [...Prev, d];
         });
@@ -57,8 +54,6 @@ const GetCreditListEdit = ({
     setDeletableInfo((prev) => {
       return [...prev, info];
     });
-    // console.log("partiallyPaidInfo", partiallyPaidInfo);
-    // let rermoveByindex = [...partiallyPaidInfo];
     partiallyPaidInfo.splice(index, 1);
     setpartiallyPaiedInfo(partiallyPaidInfo);
 
@@ -73,8 +68,6 @@ const GetCreditListEdit = ({
   let serverAddress = localStorage.getItem("targetUrl");
   let businessName = localStorage.getItem("businessName");
   let confirmDeletionofPartiallyPaiedInfo = async () => {
-    console.log("ConfirmDeletion", ConfirmDeletion.data);
-    // return;
     setProcessing(true);
     let Result = await axios.post(serverAddress + "updatePartiallyPaidInfo", {
       data: partiallyPaidInfo,
@@ -117,7 +110,6 @@ const GetCreditListEdit = ({
                 <TableBody>
                   {partiallyPaidInfo?.map((info, id) => (
                     <TableRow key={"partiallyPaidInfo" + id}>
-                      {console.log("info", info)}
                       <TableCell>
                         {CurrencyFormatter(info.collectionAmount)}
                       </TableCell>

@@ -48,18 +48,14 @@ router.post(
   (req, res) => {
     let TranactionProducts = req.body.tranactionProducts,
       EmployeersProduct = req.body.EmployeersProduct;
-    // //console.log("TranactionProducts = ", TranactionProducts,    "EmployeersProduct = ",  EmployeersProduct );
     let ProductId = EmployeersProduct[0].ProductId;
     //  { purchase_1: '456', sales_1: '400', Wrickage_1: '6' }
     let purchase_ = "purchase_" + ProductId,
       sales_ = "sales_" + ProductId,
       Wrickage_ = "Wrickage_" + ProductId;
-    // //console.log("EmployeersProduct[0]", EmployeersProduct[0]);
-    // //console.log();
     let purchaseQty = TranactionProducts[purchase_],
       salesQty = TranactionProducts[sales_],
       wrickageQty = TranactionProducts[Wrickage_];
-    // //console.log(purchaseQty, salesQty, wrickageQty);
     res.json({ data: req.body });
   }
 );

@@ -33,11 +33,9 @@ function SearchExpTransTable({
   setshowConfirmDialog,
 }) {
   expencesData.map((data) => {
-    console.log("data", data);
     data.costRegisteredDate = DateFormatter(data.costRegisteredDate);
   });
   const [showEachItems, setshowEachItems] = useState(false);
-  console.log("@SearchExpTransTable ViewCostList", ViewCostList);
   const [viewInTable, setviewInTable] = useState(false);
 
   let openedBusiness = localStorage.getItem("openedBusiness");
@@ -114,7 +112,6 @@ function SearchExpTransTable({
                       </div>
                       <div>
                         {expencesData?.map((items, index) => {
-                          console.log(items);
                           return (
                             <Paper
                               sx={{
@@ -199,10 +196,6 @@ function SearchExpTransTable({
                                     <>
                                       {items.contentEditable && (
                                         <>
-                                          {console.log(
-                                            "717",
-                                            items.contentEditable
-                                          )}
                                           <Button
                                             className="cancelExpeEditing1"
                                             id={
@@ -243,7 +236,6 @@ function SearchExpTransTable({
                                                 Open: true,
                                                 item: items,
                                               });
-                                              console.log("items", items);
                                             }}
                                           />
                                         </>
@@ -303,7 +295,6 @@ function SearchExpTransTable({
                         </TableHead>
                         <TableBody>
                           {expencesData?.map((items, index) => {
-                            console.log(items);
                             return (
                               <TableRow
                                 key={"expenceWrapper_" + index}
@@ -366,10 +357,6 @@ function SearchExpTransTable({
                                     <>
                                       {items.contentEditable && (
                                         <>
-                                          {console.log(
-                                            "717",
-                                            items.contentEditable
-                                          )}
                                           <Button
                                             className="cancelExpeEditing1"
                                             id={
@@ -382,10 +369,6 @@ function SearchExpTransTable({
                                             CANCEL
                                           </Button>
                                         </>
-                                      )}
-                                      {console.log(
-                                        "items.contentEditable",
-                                        items.contentEditable
                                       )}
 
                                       {openedBusiness == "myBusiness" && (
@@ -414,8 +397,6 @@ function SearchExpTransTable({
                                                 Open: true,
                                                 item: items,
                                               });
-                                              ///////////////
-                                              console.log("items", items);
                                             }}
                                           />
                                         </>

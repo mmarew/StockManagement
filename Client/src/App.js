@@ -8,7 +8,7 @@ import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import AddTransaction from "./Pages/OpenBusiness/AddTransaction/addTransaction";
 import AddTotalSales from "./Pages/OpenBusiness/AddTransaction/AddTotalSales";
-import AddItems from "./Pages/OpenBusiness/AddItems";
+import Items from "./Pages/OpenBusiness/Items";
 import Employee from "./Pages/Employee";
 import Help from "./Pages/Help";
 import AddSalesTransaction from "./Pages/OpenBusiness/AddTransaction/AddSalesTransaction";
@@ -116,7 +116,7 @@ function App() {
 
           <Route path="/OpenBusiness" element={<OpenBusiness />}>
             <Route path="" element={<OpenBusinessHome />} />
-            <Route path="additems" element={<AddItems />} />
+            <Route path="Items" element={<Items />} />
             <Route path="search" element={<SearchManager />} />
             <Route path="view" element={<Transaction />} />
             <Route path="Employee" element={<Employee />} />

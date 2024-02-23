@@ -41,8 +41,6 @@ const updateNextDateInventory = async (
   );
   // return;
   try {
-    // console.log("dataToSendResponceToClient======", dataToSendResponceToClient);
-    // return;
     let sqlToSelect, inputToSelect, res;
     let dataSent = 0;
     function sendResponses() {
@@ -62,8 +60,6 @@ const updateNextDateInventory = async (
         });
       }
     }
-
-    //console.log("903 =", businessName, ProductsList, date, previousInventory);
 
     let index = 0;
 
@@ -109,7 +105,6 @@ const updateNextDateInventory = async (
 
               try {
                 await pool.query(update, valuesToUpdate).then((results) => {
-                  //console.log("results", results);
                   if (i >= rows.length - 1) {
                     sendResponses();
                   }
@@ -180,7 +175,6 @@ let updateNextInventory = async ({
       pool.query(deleteFromTotalSales);
     };
     nextResult.map(async (Result, index) => {
-      // console.log("nextResult is ", Result);
       await updates(Result);
     });
   } catch (error) {

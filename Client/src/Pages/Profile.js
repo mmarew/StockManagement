@@ -11,11 +11,9 @@ function Profile() {
   let navigate = useNavigate();
   let serverUrl = localStorage.getItem("targetUrl");
   let storeToken = localStorage.getItem("storeToken");
-  console.log("storeToken", storeToken);
 
   useEffect(() => {
     if (storeToken == null || storeToken == undefined || storeToken == "") {
-      console.log("storeToken", storeToken);
       navigate("/login");
     }
   }, [navigate, storeToken]);
@@ -27,10 +25,9 @@ function Profile() {
     if (Password != null)
       if (Password.length > 0) {
         let responces = await axios.post(serverUrl + "deleteUsers/", {
-          storeToken,
-          Password,
+          token: storeToken,
+          userPassword: Password,
         });
-        console.log("responces", responces);
         if (responces.data.data == "deleted data") {
           alert("you are deleted from stock management system");
           localStorage.removeItem("storeToken");
@@ -116,6 +113,7 @@ function Profile() {
                 }}
               >
                 <TextField
+                  type="password"
                   className={ProfileCss.passwordInput}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -127,6 +125,9 @@ function Profile() {
                 <br />
                 <Box className={ProfileCss.deleteProfileButtons}>
                   <Button
+                    sx={{
+                      marginRight: "10px",
+                    }}
                     className={ProfileCss.deleteSubmitButton}
                     variant="contained"
                     type="submit"

@@ -27,6 +27,7 @@ function GetSingleProducts({ data }) {
   //   const [productDetailes, setproductDetailes] = useState([]);
   const [singleSalesInputValues, setSinlgeSalesInputValues] = useState({
     singleSalesDate: currentDates(),
+    searchInput: null,
   });
   //   functions start here
   let handleSearchSubmit = async (e) => {
@@ -43,21 +44,20 @@ function GetSingleProducts({ data }) {
           businessName,
         }
       );
-      console.log("responce", responce);
       setProcessing(false);
       let { data } = responce.data;
       if (data.length == 0) {
-        setErrors("no product founds");
+        setErrors(
+          `ummmmm product name like ${singleSalesInputValues.searchInput}    is not found`
+        );
       } else setsearchedProducts(data);
     } catch (error) {
-      console.log("error", error);
       setProcessing(false);
       setErrors(error.message);
     }
   };
 
   let handleSearchableProductInput = (event) => {
-    console.log(event.target.value);
     setSinlgeSalesInputValues({
       ...singleSalesInputValues,
       [event.target.name]: event.target.value,
@@ -114,7 +114,7 @@ function GetSingleProducts({ data }) {
         )}
         <br />
       </form>
-      {searchedProducts.length > 0 && (
+      {searchedProducts.length > 0 ? (
         <TableContainer className={singleSalesCss.TableContainer}>
           <Table>
             <TableHead>
@@ -164,6 +164,23 @@ function GetSingleProducts({ data }) {
             </TableBody>
           </Table>
         </TableContainer>
+      ) : (
+        <>
+          {Errors && (
+            <div
+              style={{
+                color: "red",
+                backgroundColor: "white",
+                padding: "10px",
+                marginTop: "10px",
+                width: "320px",
+              }}
+            >
+              {Errors}
+            </div>
+          )}
+          {/* {Errors && <SuccessOrError setErrors={setErrors} request={Errors} />} */}
+        </>
       )}
     </div>
   );

@@ -35,7 +35,6 @@ function AddExpTransaction({ data }) {
       copyOfForm.costData = each;
       copyOfForm.token = token;
       copyOfForm.businessId = businessId;
-      console.log("copyOfForm", copyOfForm, "Formdata  ==", Formdata);
       setProcecssing(true);
       let response = await axios.post(
         `${serverAddress}Expences/registerExpenceTransaction`,

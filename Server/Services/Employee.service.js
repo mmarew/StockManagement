@@ -10,7 +10,6 @@ const getBusinessEmployee = async (body) => {
     const values = [body.businessId];
 
     const [rows] = await pool.query(query, values);
-    //console.log(rows);
     // Do something else
     return { data: rows };
   } catch (error) {
@@ -69,7 +68,6 @@ const addEmployee = async (body) => {
         "INSERT INTO employeeTable (userIdInEmployee, BusinessIDEmployee, employerId) VALUES (?, ?, ?)";
       const insertValues = [userId, businessId, employerId];
       const [insertResult] = await pool.query(insertQuery, insertValues);
-      //console.log("Insert successful:", insertResult);
       return { data: "data is inserted correctly." };
     }
   } catch (error) {
@@ -85,7 +83,6 @@ const removeEmployees = async (body) => {
     const values = [body.employeeId];
     console.log(values);
     const [result] = await pool.query(query, values);
-    //console.log("Delete successful:", result);
     // Do something else
     return { Status: "deleted", EmployeeId: body.employeeId };
   } catch (error) {

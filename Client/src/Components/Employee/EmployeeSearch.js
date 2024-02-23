@@ -23,7 +23,6 @@ const EmployeeSearch = () => {
   const [PersonAsEmployee, setThisPersonAsEmployee] = useState({});
   const [Errors, setErrors] = useState("");
   useEffect(() => {
-    console.log(PersonAsEmployee);
     let items = PersonAsEmployee.items,
       status = PersonAsEmployee.status;
     if (status == "Confirmed")
@@ -34,7 +33,11 @@ const EmployeeSearch = () => {
   const [InputValue, setInputValue] = useState({
     token: localStorage.getItem("storeToken"),
   });
-  const [searchedEmployee, setsearchedEmployee] = useState([]);
+  // const [first, setfirst] = useState(second)
+  const [searchedEmployee, setsearchedEmployee] = useState({
+    noOfEmployees: [],
+    status: null,
+  });
   let addEmployeeDatas = async (name, phone, userId) => {
     try {
       let businessId = localStorage.getItem("businessId");
@@ -48,7 +51,6 @@ const EmployeeSearch = () => {
         userId,
       });
       // setProcessing(false);
-      console.log("response is", response);
       if (response.data.data == "data is already registered bofore") {
         setErrors(
           "This Employee is already registered before in this business. Try other employee. Thank you."
@@ -69,7 +71,6 @@ const EmployeeSearch = () => {
   };
   let searchEmployees = async (e, employeeName) => {
     if (e != "noEvent") e.preventDefault();
-    console.log("InputValue", InputValue);
     try {
       setProcessing(true);
       let response = await axios.post(
@@ -80,14 +81,12 @@ const EmployeeSearch = () => {
       const allEmployee = response.data.data.result,
         connectedEmployees = response.data.data.result1;
 
-      const SearchedEmployees = allEmployee?.map((item, index1) => {
+      const targetedEmployees = allEmployee?.map((item, index1) => {
         allEmployee[index1].connection = "notConnected";
         // filter connected and not connected employees
         connectedEmployees?.map((employee, index) => {
           let x = index;
-
           if (employee.userId == item.userId) {
-            console.log(employee.userId, item.userId);
             allEmployee[index1].connection = "connected";
             return (item.connection = "connected");
           }
@@ -95,7 +94,11 @@ const EmployeeSearch = () => {
         return item;
       });
 
-      setsearchedEmployee(SearchedEmployees);
+      setsearchedEmployee({
+        ...searchedEmployee,
+        noOfEmployees: targetedEmployees,
+        status: targetedEmployees.length == 0 ? "noData" : "DataFound",
+      });
     } catch (error) {
       setErrors(error.message);
     }
@@ -141,92 +144,99 @@ const EmployeeSearch = () => {
           )}
         </div>
       </form>
+
       <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {deviceWidth > 500 && searchedEmployee?.length > 0 ? (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Phone</TableCell>
-                  <TableCell>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {searchedEmployee?.map((items) => (
-                  <TableRow key={items.userId}>
-                    <TableCell>{items.employeeName}</TableCell>
-                    <TableCell>{items.phoneNumber}</TableCell>
-                    <TableCell>
-                      {items.connection === "connected" ? (
-                        <Chip
-                          label="Employee To This Business"
-                          color="info"
-                          disabled
-                        />
-                      ) : (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => {
-                            setShowConfirmDialog(true);
-                            setconfirmAction("addAsEmployee");
-                            setconfirmMessages(
-                              "are you sure to add this person as employee"
-                            );
-                            setThisPersonAsEmployee({
-                              items,
-                              status: "notConfirmed",
-                            });
-                          }}
-                        >
-                          Add This Employee
-                        </Button>
-                      )}
-                    </TableCell>
+        {searchedEmployee.noOfEmployees?.length > 0 ? (
+          deviceWidth > 500 ? (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Phone</TableCell>
+                    <TableCell>Action</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {searchedEmployee.noOfEmployees?.map((items) => (
+                    <TableRow key={items.userId}>
+                      <TableCell>{items.employeeName}</TableCell>
+                      <TableCell>{items.phoneNumber}</TableCell>
+                      <TableCell>
+                        {items.connection === "connected" ? (
+                          <Chip
+                            label="Employee To This Business"
+                            color="info"
+                            disabled
+                          />
+                        ) : (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => {
+                              setShowConfirmDialog(true);
+                              setconfirmAction("addAsEmployee");
+                              setconfirmMessages(
+                                "are you sure to add this person as employee"
+                              );
+                              setThisPersonAsEmployee({
+                                items,
+                                status: "notConfirmed",
+                              });
+                            }}
+                          >
+                            Add This Employee
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            searchedEmployee.noOfEmployees?.map((items) => {
+              return (
+                <div
+                  id={"employeId_" + items.userId}
+                  key={items.userId}
+                  className="searchedEmloyee"
+                >
+                  <div>Name :- {items.employeeName}</div>
+                  <div>Phone :- {items.phoneNumber}</div>
+                  {items.connection == "connected" ? (
+                    <Chip
+                      label=" Employee To This Business"
+                      color="info"
+                      disabled
+                    />
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => {
+                        setShowConfirmDialog(true);
+                        setconfirmAction("addAsEmployee");
+                        setconfirmMessages(
+                          "are you sure to add this person as employee"
+                        );
+                        setThisPersonAsEmployee({
+                          items,
+                          status: "notConfirmed",
+                        });
+                      }}
+                    >
+                      Add This Employee
+                    </Button>
+                  )}
+                </div>
+              );
+            })
+          )
         ) : (
-          searchedEmployee?.map((items) => {
-            return (
-              <div
-                id={"employeId_" + items.userId}
-                key={items.userId}
-                className="searchedEmloyee"
-              >
-                <div>Name :- {items.employeeName}</div>
-                <div>Phone :- {items.phoneNumber}</div>
-                {items.connection == "connected" ? (
-                  <Chip
-                    label=" Employee To This Business"
-                    color="info"
-                    disabled
-                  />
-                ) : (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      setShowConfirmDialog(true);
-                      setconfirmAction("addAsEmployee");
-                      setconfirmMessages(
-                        "are you sure to add this person as employee"
-                      );
-                      setThisPersonAsEmployee({
-                        items,
-                        status: "notConfirmed",
-                      });
-                    }}
-                  >
-                    Add This Employee
-                  </Button>
-                )}
-              </div>
-            );
-          })
+          searchedEmployee.status == "noData" && (
+            <div style={{ color: "red" }}>No employee data found</div>
+          )
         )}
       </div>
       {ShowConfirmDialog && (

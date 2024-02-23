@@ -2,7 +2,6 @@ let cors = require("cors");
 let express = require("express");
 require("dotenv").config();
 const { getUniqueBusinessName } = require("./UniqueBusinessName.js");
-console.log("getUniqueBusinessName", getUniqueBusinessName);
 
 let Routes = require("./Routes/index.js");
 let path = "/";
@@ -53,12 +52,9 @@ try {
     if (err) {
       return res.json({ err });
     } else {
-      console.log(`connected at ${process.env.serverPort}`);
     }
   });
-} catch (error) {
-  console.log(error);
-}
+} catch (error) {}
 
 // Input validation and sanitization
 server.post(

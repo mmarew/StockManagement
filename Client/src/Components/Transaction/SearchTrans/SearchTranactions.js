@@ -14,7 +14,6 @@ function SearchTranactions({ data }) {
 
   const [Processing, setProcessing] = useState(false);
   let handleSearchableProductInput = (event) => {
-    console.log(event.target.value);
     setSinlgeSalesInputValues({
       ...singleSalesInputValues,
       [event.target.name]: event.target.value,

@@ -1,7 +1,16 @@
-const { registerUsers } = require("../Services/Users.Service");
+const serviceData = require("../Services/Users.Service");
 
 let RegisterUsersController = (req, res) => {
-  let result = registerUsers(req.body);
+  let result = serviceData.registerUsers(req.body);
   res.json(result);
 };
-module.exports = { RegisterUsersController };
+
+let getMyProfile = async (req, res) => {
+  let results = await serviceData.getMyProfile(req.body);
+  res.json(results);
+};
+let deleteUsers = async (req, res) => {
+  let results = await serviceData.deleteUsers(req.body);
+  res.json(results);
+};
+module.exports = { RegisterUsersController, getMyProfile, deleteUsers };

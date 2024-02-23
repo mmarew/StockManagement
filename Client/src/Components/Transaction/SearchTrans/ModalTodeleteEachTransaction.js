@@ -45,7 +45,6 @@ function ModalTodeleteEachTransaction({
       setErrors(null);
     } catch (error) {
       setProcessing(false);
-      console.error(error);
       setErrors(error.message);
     }
   };

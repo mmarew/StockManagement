@@ -9,7 +9,6 @@ function ModalToRemoveEmployerBusiness({ data }) {
   let serverAddress = localStorage.getItem("targetUrl");
   let businessId = localStorage.getItem("businessId");
   let { RemoveEmployerBusiness, setRemoveEmployerBusiness, getBusiness } = data;
-  console.log("RemoveEmployerBusiness", RemoveEmployerBusiness);
   const [userPassword, setuserPassword] = useState(null);
   const [Errors, setErrors] = useState(null);
   let handleInputSubmit = async (e) => {
@@ -23,7 +22,6 @@ function ModalToRemoveEmployerBusiness({ data }) {
         { userPassword, token, businessId }
       );
       let { data } = Responces.data;
-      console.log("data", data);
       if (data == "wrong Password.") setErrors(data);
       else {
         getBusiness();

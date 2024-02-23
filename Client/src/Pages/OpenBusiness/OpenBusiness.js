@@ -29,9 +29,6 @@ function OpenBusiness() {
     setActiveTab(activeTab);
   };
 
-  window.addEventListener("locationchange", function () {
-    console.log("location changed!");
-  });
   const [screenSize, setScreenSize] = useState(window.innerWidth);
   useEffect(() => {
     setShowProgressBar(false);
@@ -51,13 +48,11 @@ function OpenBusiness() {
 
   const handleOptionClick = (option) => {
     // Handle the option click here
-    console.log("Option clicked:", option);
     handleMenuClose();
   };
   const [activeTab, setActiveTab] = useState("Home");
   const location = useLocation();
   useEffect(() => {
-    console.log("first location", location);
     setActiveTab(location.pathname);
   }, [location]);
   //////////////////////////
@@ -117,17 +112,17 @@ function OpenBusiness() {
               <span
                 title="Add Item"
                 onClick={() => {
-                  Navigate("additems");
+                  Navigate("Items");
                   registerItems("addItem");
                 }}
                 className={`${
-                  activeTab.startsWith("/OpenBusiness/additems")
+                  activeTab.startsWith("/OpenBusiness/Items")
                     ? OpenBusinesscss.activeLink
                     : ""
                 }`}
                 name="addItem"
                 id="addItem"
-                // to="additems"
+                // to="Items"
               >
                 <IconButton className={OpenBusinesscss.iconButton}>
                   <img
@@ -238,7 +233,6 @@ function OpenBusiness() {
         </AppBar>
       </div>
       <main className={OpenBusinesscss.MainWrapper}>
-        {console.log("screenSize == " + screenSize)}
         {screenSize > 768 && (
           <div className={OpenBusinesscss.leftSideDiv}>
             <OpenBusinessLeftSide />

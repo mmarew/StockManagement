@@ -3,7 +3,6 @@ export default function currentDates() {
   let year = date.getFullYear(),
     month = date.getMonth() + 1,
     day = date.getDate();
-  //console.log(month.length);
   if (month < 10) {
     month = "0" + month;
   }
@@ -14,7 +13,6 @@ export default function currentDates() {
   return currentDate;
 }
 export function DateFormatter(dateTimeString, timeZone) {
-  //console.log("dateTimeString==", new Date(dateTimeString));
   let date = new Date(dateTimeString);
   let Year = date.getFullYear();
   let Month = date.getMonth();

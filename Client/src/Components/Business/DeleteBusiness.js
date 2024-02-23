@@ -23,7 +23,6 @@ async function DeleteBusiness({
         }
       );
       setProccessing(false);
-      console.log("updateRes", updateRes);
       let data = updateRes.data.data;
 
       if (data == "user is not found.") {
@@ -35,11 +34,8 @@ async function DeleteBusiness({
       } else {
         setDeleteError(data);
       }
-
-      // $(".LinearProgress").hide();
     } catch (error) {
       setProccessing(false);
-      console.log(error);
       let err = error.message;
 
       setDeleteError(err);

@@ -11,7 +11,6 @@ function ExpTransEdit({
 }) {
   let businessId = localStorage.getItem("businessId");
   let token = localStorage.getItem("storeToken");
-  console.log("EditExpences", EditExpences);
   const [Processing, setProcessing] = useState(false);
   const [formData, setFormData] = useState({
     ...EditExpences.item,
@@ -44,10 +43,8 @@ function ExpTransEdit({
     );
     setEditExpences({ Open: false });
     setProcessing(false);
-    console.log("Res", Res.data.data);
     getExpencesTransaction();
     // Perform form submission or other logic here
-    console.log("Form Data:", formData);
     if (Res.data.data == "updated") {
       alert("updated");
     } else {

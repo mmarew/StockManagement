@@ -75,7 +75,6 @@ function GetEachTransaction({
 
   let getTotalRegisters = async (targetproductId) => {
     try {
-      console.log("targetproductId", targetproductId);
       setSearchedProducts([]);
       // searchInput, currentDay;
       let OB = {
@@ -88,8 +87,6 @@ function GetEachTransaction({
         fromDate,
         toDate,
       };
-      console.log("@getDailyTransaction", OB);
-      // return;
       setShowProgressBar(true);
       setProcessing(true);
       setTransactionData((prev) => ({ TotalSales: 0, TotalPurchase: 0 }));
@@ -102,8 +99,6 @@ function GetEachTransaction({
       setShowProgressBar(false);
       setProcessing(false);
       let mydata = responce.data.data;
-      console.log("mydata", mydata);
-      // return;
       if (mydata == "Error") {
         setErrors(responce.data.Error);
         return;
@@ -128,8 +123,6 @@ function GetEachTransaction({
       });
 
       setmergedDataArray(Object.values(mergedData));
-
-      console.log("mergedDataArray===", mergedDataArray);
 
       if (mydata.length == 0) {
         return setErrors("There is no registered data on this date.");
@@ -232,7 +225,6 @@ function GetEachTransaction({
 
     try {
       formInputValues.token = token;
-      console.log("formInputValues", formInputValues);
       // return;
 
       const response = await axios.put(
@@ -250,13 +242,11 @@ function GetEachTransaction({
         await getTotalRegisters("getAllTransaction");
       }
     } catch (error) {
-      console.error(error);
       setErrors(error.message);
     }
   };
 
   let handleSalesTransactionInput = (e, ProductId) => {
-    console.log(e.target.value);
     setFormInputValues((prev) => {
       return {
         ...prev,
@@ -265,7 +255,6 @@ function GetEachTransaction({
       };
     });
   };
-  console.log("RandValue", RandValue);
   useEffect(() => {
     setDailyTransaction([]);
     getTotalRegisters(ProductId);
@@ -279,10 +268,8 @@ function GetEachTransaction({
   });
   let { TransactionData, setTransactionData } = ConsumeableContext();
   useEffect(() => {
-    console.log("==DailyTransaction", DailyTransaction);
     DailyTransaction.map((items) => {
       setTransactionData((prev) => {
-        console.log("prev", prev);
         return {
           ...prev,
           TotalSales:
@@ -442,7 +429,6 @@ function GetEachTransaction({
                               >
                                 <DeleteIcon color="error" />
                               </IconButton>
-                              {console.log("items==", items)}
                               <IconButton
                                 onClick={() => {
                                   setFormInputValues({
@@ -492,7 +478,6 @@ function GetEachTransaction({
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {console.log("@DailyTransaction", DailyTransaction)}
                       {viewableData?.map((items, index) => {
                         return (
                           <TableRow key={"detailes_" + index}>
@@ -590,15 +575,7 @@ function GetEachTransaction({
               </Box>
             </div>
           )}
-          <Modal
-            open={EditSingleItem.open}
-            // onClose={() => {
-            //   setEditSingleItem((prev) => {
-            //     return { ...prev, open: false };
-            //   });
-            // }}
-          >
-            {/* {console.log("formInputValues", formInputValues)} */}
+          <Modal open={EditSingleItem.open}>
             <Box
               sx={{
                 height: "90%",
@@ -703,10 +680,6 @@ function GetEachTransaction({
                         : formInputValues.salesQty
                     }
                   />
-                  {console.log(
-                    "formInputValues.salesType",
-                    formInputValues.salesType
-                  )}
                   <br /> <br />
                   <TextField
                     value={formInputValues.unitPrice}
@@ -742,10 +715,6 @@ function GetEachTransaction({
                   />
                   <br />
                   <label>payment type</label>
-                  {console.log(
-                    "inselect formInputValues",
-                    formInputValues.salesTypeValues
-                  )}
                   <Select
                     value={formInputValues.salesTypeValues}
                     name="salesTypeValues"
@@ -764,10 +733,6 @@ function GetEachTransaction({
                     <MenuItem value={"On credit"}>On credit</MenuItem>
                     <MenuItem value={"credit paied"}>credit paied</MenuItem>
                   </Select>
-                  {console.log(
-                    "formInputValues.salesTypeValues" +
-                      formInputValues.salesTypeValues
-                  )}
                   {formInputValues.salesTypeValues == "On credit" && (
                     <Box>
                       <lab>Payment date</lab>

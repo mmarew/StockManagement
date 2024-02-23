@@ -5,22 +5,23 @@ import currentDates from "../Body/Date/currentDate";
 import { Box, Button, Modal, TextField } from "@mui/material";
 import { ButtonProcessing } from "../Utilities/Utility";
 import SearchProducts from "./SearchedProducts";
+import SuccessOrError from "../Body/Others/SuccessOrError";
+const initialFormData = {
+  minimumQty: "",
+  productName: "",
+  productUnitCost: "",
+  productUnitPrice: "",
+};
 const AddProducts = () => {
   /* local storage parts*/
   let serverAddress = localStorage.getItem("targetUrl");
   let token = localStorage.getItem("storeToken");
   let businessId = localStorage.getItem("businessId");
   /*use state parts */
-  const [Errors, setErrors] = useState(null);
-  let formOBJ = {
-    minimumQty: "",
-    productName: "",
-    productRegistrationDate: "",
-    productUnitCost: "",
-    productUnitPrice: "",
-  };
+  const [ErrorsVsSuccess, setErrorsVsSuccess] = useState(null);
+
   const [FormData, setFormData] = useState({
-    ...formOBJ,
+    ...initialFormData,
   });
   const [Processing, setProcessing] = useState(false);
   const [openProductRegistrationModal, setOpenProductRegistrationModal] =
@@ -48,19 +49,19 @@ const AddProducts = () => {
       setProcessing(false);
 
       if (data == "notAllowedFroYou") {
-        setErrors(
+        setErrorsVsSuccess(
           "You are not allowed to make registration. so please tell to owner to make registration"
         );
         // return;
       } else if (data == "productIsAlreadyAddedBefore") {
-        setErrors("This product is added before.");
+        setErrorsVsSuccess("This product is added before.");
       } else if (data == "productIsAdded") {
         setFormData({
-          ...formOBJ,
+          ...initialFormData,
         });
-        setErrors("Success");
+        setErrorsVsSuccess("SUCCESS");
       } else {
-        setErrors("Something went wrong in server.");
+        setErrorsVsSuccess("Something went wrong in server.");
         return;
       }
       for (let i = 0; i < registerProducts.length; i++) {
@@ -68,7 +69,6 @@ const AddProducts = () => {
       }
     } catch (error) {
       setProcessing(false);
-      // console.log("error", error);
     }
   };
 
@@ -82,15 +82,14 @@ const AddProducts = () => {
       >
         Add Product
       </Button>
-
       {/* show errors start here */}
-      <Box sx={{ margin: "20px 0", color: "red", fontSize: "20px" }}>
-        {Errors}
-
-        <br />
-      </Box>
+      {ErrorsVsSuccess && (
+        <SuccessOrError
+          request={ErrorsVsSuccess}
+          setErrors={setErrorsVsSuccess}
+        />
+      )}
       {/* show errors ends here here */}
-
       {/* Modal to add products starts here */}
       <Modal open={openProductRegistrationModal}>
         <Box
@@ -178,11 +177,12 @@ const AddProducts = () => {
       </Modal>
       {/* Modal to add products ends here */}
       {/* display registerd products start here */}
-
-      <SearchProducts
-        InputValue={FormData}
-        setSearchTypeValueError={setErrors}
-      />
+      {!openProductRegistrationModal && (
+        <SearchProducts
+          InputValue={FormData}
+          setSearchTypeValueError={setErrorsVsSuccess}
+        />
+      )}
       {/* display registerd products ends here */}
       {/* <GetRegisterableItems /> */}
     </div>

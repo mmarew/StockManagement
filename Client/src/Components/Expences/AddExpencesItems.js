@@ -5,7 +5,6 @@ import "../Costs/AddCostItems.css";
 import { Box, Button, Modal, TextField } from "@mui/material";
 import { ButtonProcessing } from "../Utilities//Utility";
 import SuccessOrError from "../Body/Others/SuccessOrError";
-import AddExpencesTransaction from "../Transaction/ExpencesTransaction";
 import SearchExpencesItem from "./SearchExpencesItem";
 function AddExpencesItems(props) {
   const [inputValue, setinputValue] = useState(null);
@@ -25,10 +24,14 @@ function AddExpencesItems(props) {
   const [Errors, setErrors] = useState(null);
   const [Success, setSuccess] = useState(null);
   // uuse state ends here
+  let resetUsestate = (array) => {
+    array.map((item) => {
+      item(null);
+    });
+  };
   let collectInputInformation = (e) => {
     let businessName = localStorage.getItem("businessName");
-    setErrors(null);
-
+    resetUsestate([setErrors, setSuccess]);
     setdata({
       ...data,
       [e.target.name]: e.target.value,
@@ -40,6 +43,7 @@ function AddExpencesItems(props) {
     e.preventDefault();
 
     try {
+      resetUsestate([setErrors, setSuccess]);
       setProcessing(true);
       let response = await axios.post(
         serverAddress + "Expences/AddExpencesItems/",
@@ -48,7 +52,7 @@ function AddExpencesItems(props) {
 
       setErrors(null);
       if (response.data.data == "Registered successfully") {
-        setSuccess(response.data.data);
+        setSuccess("SUCCESS");
         setdata(ExpData);
       } else if (response.data.data == "already registered before") {
         setErrors("Already registered before");
@@ -58,7 +62,6 @@ function AddExpencesItems(props) {
         );
       }
       setProcessing(false);
-      console.log("response", response.data);
     } catch (error) {
       setProcessing(false);
       setErrors(error.message);
@@ -74,6 +77,8 @@ function AddExpencesItems(props) {
       <Modal open={AddExpences}>
         <Box
           sx={{
+            width: "80%",
+            maxWidth: "400px",
             position: "absolute",
             top: "50%",
             left: "50%",
@@ -107,8 +112,12 @@ function AddExpencesItems(props) {
             <br />
 
             {!Processing ? (
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <Button variant="contained" type="Submit">
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <Button
+                  sx={{ marginRight: "10px" }}
+                  variant="contained"
+                  type="Submit"
+                >
                   submit
                 </Button>
                 <Button
@@ -128,11 +137,13 @@ function AddExpencesItems(props) {
           </form>
         </Box>
       </Modal>
-      <SearchExpencesItem
-        proccessData={{ Processing, setProcessing }}
-        InputValue={inputValue}
-        setSearchTypeValueError={setErrors}
-      />
+      {!AddExpences && (
+        <SearchExpencesItem
+          proccessData={{ Processing, setProcessing }}
+          InputValue={inputValue}
+          setSearchTypeValueError={setErrors}
+        />
+      )}
       {/* {!AddExpences && <AddExpencesTransaction />} */}
       {Success && <SuccessOrError request={Success} setErrors={setSuccess} />}
     </div>

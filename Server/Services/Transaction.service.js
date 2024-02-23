@@ -71,7 +71,6 @@ let getPreviousDayInventory = async (
   let [prevResult] = await pool.query(sqlToGetPrevInventori);
   let inventoryItem = 0;
   if (prevResult.length > 0) inventoryItem = prevResult[0].inventoryItem;
-  // console.log("inventoryItem", inventoryItem);
 
   return [inventoryItem, prevResult];
 };
@@ -94,8 +93,6 @@ let registerSinglesalesTransaction = async (body) => {
       useNewPrice,
       userID,
     } = body;
-    // console.log("@registerSinglesalesTransaction", body);
-    // return;
     let { productsUnitCost, mainProductId, productsUnitPrice } = items;
     if (unitPrice) items.productsUnitPrice = unitPrice;
     if (!useNewPrice) {
@@ -370,7 +367,6 @@ let getMultipleItemsTransaction = async (body, query) => {
       query;
 
     let selectData = `select * from dailyTransaction where registeredTimeDaily BETWEEN '${fromDate}' and '${toDate}' and businessId='${businessId}'`;
-    // console.log("  query;", query);
     let [results] = await pool.query(selectData);
     return { data: results };
   } catch (error) {

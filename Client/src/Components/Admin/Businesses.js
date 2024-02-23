@@ -13,12 +13,9 @@ function MyComponent() {
     axios
       .get(serverAddress + "admin/get__businesses") // Replace '/api/businesses' with your actual API endpoint
       .then((response) => {
-        console.log("response get__businesses", response);
         setBusinesses(response.data.data);
       })
-      .catch((error) => {
-        console.error("Error fetching businesses:", error);
-      });
+      .catch((error) => {});
   }, []);
   const getBusinessTransactions = async (business) => {
     try {
@@ -31,10 +28,8 @@ function MyComponent() {
         }
       );
       // Handle the response data here
-      console.log(response.data);
     } catch (error) {
       // Handle any errors here
-      console.error("Error fetching business transactions:", error);
     }
   };
   return (

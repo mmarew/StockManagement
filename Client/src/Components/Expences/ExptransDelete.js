@@ -27,7 +27,6 @@ function ExptransDelete({
     setDeleteConfirmation({ Open: false });
     setProcessing(false);
     getExpencesTransaction();
-    console.log("responses", responses);
   };
 
   useEffect(() => {

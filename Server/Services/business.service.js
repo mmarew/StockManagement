@@ -13,6 +13,12 @@ const fullTime = `${year}-${month}-${day} ${hour}:${minute}`;
 
 let createBusiness = async (body) => {
   let { businessName, userID, res, createdDate } = body;
+  let verifyExistance = `SELECT * FROM Business WHERE businessName = ?`;
+
+  let [Results] = await pool.query(verifyExistance, [businessName]);
+  if (Results > 0) {
+    return { data: "already exist" };
+  }
   return await database.createBusiness(
     businessName,
     userID,

@@ -29,7 +29,6 @@ function EditProducts({ data }) {
     try {
       businessName = localStorage.getItem("businessName");
       let ob = { token, businessId };
-      console.log("openEditerModal===", openEditerModal.item);
 
       let previousData = openEditerModal.item;
       let prevPrice = previousData.productsUnitPrice,
@@ -64,19 +63,9 @@ function EditProducts({ data }) {
       setProcessing(false);
 
       handleClose();
-
-      let Copy = [];
-      //   searchedProducts.map((each) => {
-      //     each.updateMode = false;
-      //     Copy.push(each);
-      //   });
-      //   setSearchedProducts(Copy);
-    } catch (error) {
-      console.log("error", error);
-    }
+    } catch (error) {}
   };
   let handleClose = () => {
-    // setshowEditingModalDialog("");
     setOpenEditerModal({ open: false });
   };
 
@@ -89,7 +78,6 @@ function EditProducts({ data }) {
   };
 
   const handleProductUnitCostChange = (e) => {
-    console.log("handleProductUnitCostChange", e.target.value);
     setProductUnitCost(e.target.value);
   };
 

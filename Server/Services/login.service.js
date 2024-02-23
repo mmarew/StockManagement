@@ -4,12 +4,11 @@ const jwt = require("jsonwebtoken");
 const tokenKey = process.env.tokenKey;
 let login = async (phoneNumber, password) => {
   try {
-    // let phoneNumber = req.body.phoneNumber;
+    // let phoneNumber = body.phoneNumber;
     let select = `SELECT * FROM usersTable WHERE phoneNumber = ? LIMIT 1`;
     let [rows] = await pool.query(select, [phoneNumber]);
-    // console.log("usersTable", rows);
     if (rows.length == 0) {
-      return "wrong phone number.";
+      return "Not Registered Phone Number";
     }
 
     let savedPassword = rows[0].password;
@@ -48,5 +47,99 @@ const verifyLogin = async (body) => {
     return { error: "Internal Server Error" };
   }
 };
+const requestPasswordReset = async (body) => {
+  try {
+    const select = `SELECT * FROM usersTable WHERE passwordStatus = 'requestedToReset'`;
+    const [rows] = await pool.query(select);
 
-module.exports = { login, verifyLogin };
+    if (rows.length > 0) {
+      const userId = rows[0].userId;
+      const update = `UPDATE usersTable SET passwordStatus = 'pinSentedToUser' WHERE userId = ?`;
+      await pool.query(update, [userId]);
+
+      const phoneNumber = rows[0].phoneNumber;
+      const pinCode = rows[0].passwordResetPin;
+      return { phoneNumber, pinCode };
+    } else {
+      return { phoneNumber: "notFound", pinCode: "notFound" };
+    }
+  } catch (error) {
+    console.error(error);
+    return { error: "Internal Server Error" };
+  }
+};
+const verifyPin = async (body) => {
+  try {
+    const phone = body.PhoneNumber;
+    const pincode = body.pincode;
+    const select = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
+    const [rows] = await pool.query(select, [phone]);
+
+    if (rows.length > 0) {
+      const pin = rows[0].passwordResetPin;
+      if (pincode == pin) {
+        return { data: "correctPin" };
+      } else {
+        return { data: "wrongPin" };
+      }
+    } else {
+      return { error: "Phone number not found" };
+    }
+  } catch (error) {
+    console.error(error);
+    return { error: "Internal Server Error" };
+  }
+};
+const forgetRequest = async (body) => {
+  try {
+    const phoneNumber = body.PhoneNumber;
+    const sql = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
+    const [rows] = await pool.query(sql, [phoneNumber]);
+
+    if (rows.length > 0) {
+      const rand = Math.floor(Math.random() * 1000000);
+      const updateForgetPassStatus = `UPDATE usersTable SET passwordStatus = 'requestedToReset', passwordResetPin = ? WHERE phoneNumber = ?`;
+
+      await pool.query(updateForgetPassStatus, [rand, phoneNumber]);
+      return { data: "requestedToChangePassword" };
+    } else {
+      console.log("Phone number not found");
+      return { error: "Phone number not found" };
+    }
+  } catch (error) {
+    console.error(error);
+    return { error: "Internal Server Error" };
+  }
+};
+const updateChangeInpassword = async (body) => {
+  try {
+    let phoneNumber = body.PhoneNumber;
+    let password = body.Password.password;
+    let retypedPassword = body.Password.retypedPassword;
+
+    if (password !== retypedPassword) {
+      return { error: "Passwords do not match" };
+    }
+    const salt = bcrypt.genSaltSync();
+    const encryptedPassword = bcrypt.hashSync(password, salt);
+    let update = `UPDATE usersTable SET password = ? WHERE phoneNumber = ?`;
+    let [result] = await pool.query(update, [encryptedPassword, phoneNumber]);
+
+    if (result.affectedRows > 0) {
+      return { data: "passwordChanged" };
+    } else {
+      return { data: "unableToMakeChange" };
+    }
+  } catch (error) {
+    console.log("error");
+  }
+};
+
+module.exports = {
+  updateChangeInpassword,
+  login,
+  verifyLogin,
+  requestPasswordReset,
+  verifyPin,
+  forgetRequest,
+};

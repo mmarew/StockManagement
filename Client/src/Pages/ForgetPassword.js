@@ -8,7 +8,6 @@ function ForgetPassword() {
   let serverUrl = localStorage.getItem("targetUrl");
   const [showPasswordField, setshowPasswordField] = useState(false);
   let colllectPhoneNumber = (e) => {
-    console.log(e);
     setPhoneNumber(e.target.value);
     e.preventDefault();
   };
@@ -20,25 +19,19 @@ function ForgetPassword() {
       let Responces = await axios.get(
         `https://sms.masetawosha.com?Phonenumber=${encodedPhoneNumber}`
       );
-      console.log("Responces requestBySms === ", Responces);
-    } catch (error) {
-      console.log("error", error);
-    }
+    } catch (error) {}
   };
   let submitRegistrationRequest = async (e) => {
     e.preventDefault();
     try {
-      console.log("setPhoneNumber", PhoneNumber);
       let Responces = await axios.post(serverUrl + "forgetRequest/", {
         PhoneNumber,
       });
-      console.log("Responces", Responces.data);
       if (Responces.data.data == "requestedToChangePassword") {
         setshowPincodeField(true);
         requestBySms();
       }
     } catch (error) {
-      console.log("error", error.response.data.error);
       if (error.response.data.error == "Phone number not found") {
         alert("This Phone number is not found");
       }
@@ -49,7 +42,6 @@ function ForgetPassword() {
   let navigate = useNavigate();
   let updatePassword = async (e) => {
     e.preventDefault();
-    console.log("Password", Password);
     // password: "marew123";
     // retypedPassword: "marew123";
     if (Password.password !== Password.retypedPassword) {
@@ -59,7 +51,6 @@ function ForgetPassword() {
       PhoneNumber,
       Password,
     });
-    console.log("updateChangeInpassword Responces= ", Responces);
     if ((Responces.data.data = "passwordChanged")) {
       setshowPasswordField(false);
       navigate("/login");
@@ -78,12 +69,10 @@ function ForgetPassword() {
   const [PincodeStatus, setPincodeStatus] = useState("");
   let verifyPincode = async (e) => {
     e.preventDefault();
-    console.log(pincode);
     let responce = await axios.post(serverUrl + "verifyPin/", {
       PhoneNumber,
       pincode,
     });
-    console.log("responce", responce);
     if (responce.data.data == "correctPin") {
       setshowPasswordField(true);
       setPincodeStatus("");
@@ -94,7 +83,6 @@ function ForgetPassword() {
 
   return (
     <div className={forgetCss.forgetFormWrapper}>
-      {console.log("Password", Password)}
       <form
         onSubmit={submitRegistrationRequest}
         className={forgetCss.forgetForm}

@@ -8,7 +8,6 @@ let {
   removeEmployeersBusinessController,
 } = require("../Controllers/Business.controllers");
 const { pool } = require("../Config/db.config");
-// console.log("Business", Business);
 Router.post("/business/createbusiness", authMiddleware, createBusiness);
 Router.post("/business/getBusiness", authMiddleware, getBusiness);
 Router.post(

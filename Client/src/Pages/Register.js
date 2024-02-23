@@ -24,18 +24,15 @@ function Register() {
   const { ownersName, setownersName } = ConsumeableContext();
   let handleRegistrationSubmit = async (e) => {
     e.preventDefault();
-    console.log("RegisterForm", RegisterForm);
     setProcessing(true);
     let response = await axios.post(serverUrl + "RegisterUsers/", RegisterForm);
     setProcessing(false);
     let data = response.data.data,
       token = response.data.token;
-    console.log("response.data.data is ", data);
     if (data == "This phone number is registered before.") {
       alert(data);
     } else if (data == "Data is inserted successfully.") {
       alert("You are registered as user in stock management system. Thankyou");
-      console.log("fullName =", RegisterForm.fullName);
       setownersName(RegisterForm.fullName);
       localStorage.setItem("storeToken", token);
       localStorage.setItem("ownersName", RegisterForm.fullName);

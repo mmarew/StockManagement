@@ -27,12 +27,10 @@ router.get("/updateBusiness", async (req, res) => {
   try {
     let select = `select * from Business`;
     let [selectResults] = await pool.query(select);
-    //   console.log("selectResults", selectResults);
     res.json({ data: selectResults });
     let tables = ["_expenses", "_Costs", "_products", "_Transaction"];
     selectResults.map(async (result) => {
       let { uniqueBusinessName } = result;
-      //   console.log("uniqueBusinessName", uniqueBusinessName + tables[2]);
       let ProductsTable = uniqueBusinessName + tables[2];
       let updateProducts = `ALTER TABLE ${ProductsTable} 
     modify productsUnitCost float,

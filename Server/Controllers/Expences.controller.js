@@ -1,6 +1,53 @@
-const { getExpensesLists } = require("../Services/Expences.service");
-let getExpensesListsController = async (req, res) => {
-  let result = await getExpensesLists(req.query, req.body);
+let serviceData = require("../Services/Expences.service");
+// router.post("/updateCostData/", authMiddleware, async (req, res) => {})
+let controllerUpdateExpencesData = async (req, res) => {
+  let Results = await serviceData.UpdateExpencesData(req.body);
+  let { Type } = Results;
+  if (Type === "error") return res.status(500).json(Results);
+  res.json(Results);
+};
+let searchExpByName = async (req, res) => {
+  let Results = await serviceData.searchExpByName(req.body);
+  res.json(Results);
+};
+let getExpencesLists = async (req, res) => {
+  let result = await serviceData.getExpensesLists(req.query, req.body);
+  console.log("in getExpencesLists result", result);
   res.json(result);
 };
-module.exports = { getExpensesListsController };
+let deleteExpenceItem = async (req, res) => {
+  let result = await serviceData.deleteExpenceItem(req.body);
+  res.json(result);
+};
+let getExpTransactions = async (req, res) => {
+  let Results = await serviceData.getExpTransactions(req.query, req.body);
+  res.json(Results);
+};
+let AddExpencesItems = async (req, res) => {
+  let Results = await serviceData.AddExpencesItems(req.body);
+  res.json(Results);
+};
+let registerExpenseTransaction = async (req, res) => {
+  let Results = await serviceData.registerExpenseTransaction(req.body);
+  res.json(Results);
+};
+let updateMyExpensesList = async (req, res) => {
+  let Results = await serviceData.updateMyExpensesList(req.body);
+  res.json(Results);
+};
+let updateExpencesItem = async (req, res) => {
+  let Results = await serviceData.updateExpencesItem(req.body);
+  res.json(Results);
+};
+
+module.exports = {
+  updateExpencesItem,
+  updateMyExpensesList,
+  registerExpenseTransaction,
+  AddExpencesItems,
+  getExpTransactions,
+  deleteExpenceItem,
+  getExpencesLists,
+  controllerUpdateExpencesData,
+  searchExpByName,
+};

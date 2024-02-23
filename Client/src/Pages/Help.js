@@ -6,17 +6,9 @@ import { Button } from "@mui/material";
 function Help() {
   let navigate = useNavigate();
   let goTo = (data) => {
-    console.log("data", data);
     navigate("/");
   };
   let storeToken = localStorage.getItem("storeToken");
-  console.log("storeToken", storeToken);
-  // useEffect(() => {
-  //   if (storeToken == null || storeToken == undefined || storeToken == "") {
-  //     console.log("storeToken", storeToken);
-  //     console.log("in navigation", navigate("/login"));
-  //   }
-  // }, [storeToken, navigate]);
 
   return (
     <div

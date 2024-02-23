@@ -8,6 +8,8 @@ let serverUrl = localStorage.getItem("targetUrl");
 function EditProfile({ EditProfileOpen, setEditProfileOpen }) {
   const [changePassword, setchangePassword] = useState(false);
   const [profileInfo, setprofileInfo] = useState({});
+  let token = localStorage.getItem("storeToken");
+
   // const navigate = useNavigate();
   const [RegisterForm, setRegisterForm] = useState({});
   let handleRegistrationChange = (e) => {
@@ -17,55 +19,57 @@ function EditProfile({ EditProfileOpen, setEditProfileOpen }) {
     setRegisterForm({ ...RegisterForm, [names]: value });
   };
   let handleUpdateSubmit = async (e) => {
-    e.preventDefault();
-    $("#LinearProgress2").show();
-    let fullName = $('input[name="fullName"]').val(),
-      phoneNumber = $('input[name="registerPhone"]').val(),
-      oldPassword = $('input[name="registerPassword"]').val(),
-      newPassword = "",
-      retypeNewPassword = "";
+    try {
+      e.preventDefault();
+      $("#LinearProgress2").show();
+      let fullName = $('input[name="fullName"]').val(),
+        phoneNumber = $('input[name="registerPhone"]').val(),
+        oldPassword = $('input[name="registerPassword"]').val(),
+        newPassword = "",
+        retypeNewPassword = "";
 
-    if (newPassword != retypeNewPassword) {
-      alert("password mis mutch");
-      return;
-    }
-    if (!changePassword) {
-      // if we dont need to change password
-      newPassword = "noChangeOnPassword";
-    } else {
-      // if we need to change passwords
-      newPassword = $('input[name="password"]').val();
-      retypeNewPassword = $('input[name="retypePassword"]').val();
-      if (oldPassword == newPassword) {
-        alert("your old and new password is the same.");
+      if (newPassword != retypeNewPassword) {
+        alert("password mis mutch");
         return;
       }
-    }
-    let submitData = {
-      fullName,
-      phoneNumber,
-      oldPassword,
-      newPassword,
-      myToken,
-    };
-    let response = await axios.post(serverUrl + "updateUsers/", submitData);
-    let data = response.data.data;
-    console.log("response is ", response);
+      if (!changePassword) {
+        // if we dont need to change password
+        newPassword = "noChangeOnPassword";
+      } else {
+        // if we need to change passwords
+        newPassword = $('input[name="password"]').val();
+        retypeNewPassword = $('input[name="retypePassword"]').val();
+        if (oldPassword == newPassword) {
+          alert("your old and new password is the same.");
+          return;
+        }
+      }
+      let submitData = {
+        fullName,
+        phoneNumber,
+        userPassword: oldPassword,
+        newPassword,
+        token,
+      };
+      let response = await axios.post(serverUrl + "updateUsers/", submitData);
+      let data = response.data.data;
 
-    if (response.data.data == "wrong old password") alert(response.data.data);
-    else if (response.data.data == "no data found") {
-      alert("you are not registered");
-    } else if (response.data.data == "your data is updated") {
-      alert("your data is updated");
-    }
+      if (response.data.data == "wrong old password") alert(response.data.data);
+      else if (response.data.data == "no data found") {
+        alert("you are not registered");
+      } else if (response.data.data == "your data is updated") {
+        alert("your data is updated");
+      }
+    } catch (error) {}
   };
-  let myToken = localStorage.getItem("storeToken");
   let getMyProfile = async () => {
-    let response = await axios.post(serverUrl + "getMyProfile/", {
-      myToken,
-    });
-    let rowData = response.data.data[0];
-    setprofileInfo(rowData);
+    try {
+      let response = await axios.post(serverUrl + "getMyProfile/", {
+        token,
+      });
+      let rowData = response.data.data[0];
+      setprofileInfo(rowData);
+    } catch (error) {}
   };
   useEffect(() => {
     getMyProfile();

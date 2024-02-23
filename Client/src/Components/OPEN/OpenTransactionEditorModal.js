@@ -20,16 +20,13 @@ function OpenTransactionEditorModal({
   toDate,
   fromDate,
 }) {
-  console.log("editTransactions", editTransactions.item);
   // return;
   let { item } = editTransactions;
   let { registrationDate } = item;
-  // console.log("item.mainProductId", item);
 
   let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
   let serverAddress = localStorage.getItem("targetUrl");
-  // console.log("item", item);
   const [editedData, setEditedData] = useState({
     salesTypeValues: "Default",
     creditPaymentDate: "2023-10-10",
@@ -43,8 +40,6 @@ function OpenTransactionEditorModal({
     const { name, value } = event.target;
     let { salesQtyInCredit, salesTypeValues } = editedData;
     setEditedData((prevData) => ({ ...prevData, [name]: value }));
-    console.log("value", value);
-    console.log("name", name);
     if (name == "salesQtyInCredit") {
       if (salesTypeValues == "On credit") {
         if (value > 0) {
@@ -72,12 +67,8 @@ function OpenTransactionEditorModal({
       } else {
       }
     } else if (name == "salesTypeValues") {
-      console.log("salesQtyInCredit", salesQtyInCredit);
-      console.log("value", value);
-
       if (Number(salesQtyInCredit) == 0) {
         if (value == "On credit") {
-          console.log("error on salesQtyInCredit ");
           setformInputError((errors) => {
             return {
               ...errors,
@@ -113,12 +104,6 @@ function OpenTransactionEditorModal({
   };
   const [Processing, setProcessing] = useState(false);
   const handleSave = async () => {
-    console.log(
-      "editedData",
-      editedData.salesQtyInCredit,
-      " salesTypeValues",
-      editedData.salesTypeValues
-    );
     if (
       formInputError.creditSalesError != "" ||
       formInputError.creditSalesTypeError != ""
@@ -127,12 +112,9 @@ function OpenTransactionEditorModal({
       return;
     }
     setProcessing(true);
-    console.log("editedData", editedData);
     let updates = await axios
       .post(serverAddress + "updateTransactions/", { ...editedData })
       .then((data) => {
-        console.log("@updateTransactions", data);
-
         alert("updated successfully");
         seteditTransactions((prev) => {
           return { ...prev, Open: false };
@@ -145,13 +127,9 @@ function OpenTransactionEditorModal({
         // alert(mapedList);
         setListOfSalesAndPurchase([...mapedList]);
       })
-      .catch((error) => {
-        console.log("error", error);
-      });
+      .catch((error) => {});
 
     setProcessing(false);
-    // $(".LinearProgress").css("display", "none");
-    console.log("editedData", editedData);
   };
   useEffect(() => {
     setEditedData((prev) => {

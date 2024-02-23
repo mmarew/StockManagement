@@ -19,8 +19,6 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
   const [singleSalesError, setsingleSalesError] = useState({});
   const [ErrorsOrSuccess, setErrorsOrSuccess] = useState(null);
   let handleSalesTransactionInput = (e, ProductId) => {
-    console.log(e.target.value);
-
     let { name, value } = e.target;
     setformInputValues((previousState) => ({
       ...previousState,
@@ -246,10 +244,6 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
               />
               <br />
               <label>payment type</label>
-              {console.log(
-                "formInputValues.salesType",
-                formInputValues.salesType
-              )}
               <Select
                 value={formInputValues.salesType}
                 name="salesType"

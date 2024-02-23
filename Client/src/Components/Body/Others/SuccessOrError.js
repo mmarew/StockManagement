@@ -31,9 +31,9 @@ function SuccessOrError({ request, setErrors }) {
     handleError();
     if (typeof setErrors == "function" && setErrors != undefined)
       setTimeout(() => {
-        setErrors(false);
+        setErrors(null);
       }, 3000);
-  }, [, request]);
+  }, [, request, setErrors]);
 
   return (
     <div>

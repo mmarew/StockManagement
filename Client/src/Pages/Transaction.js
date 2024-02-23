@@ -18,10 +18,8 @@ export default function Transaction() {
   const [TotalExpenses, setTotalExpenses] = useState();
   const [ExpenseTransaction, setExpenseTransaction] = useState([]);
   let updateTransactionItems = async (e) => {
-    console.log(e.target.name);
     let transactionId = e.target.name;
     let inputsValue = document.getElementsByClassName(transactionId);
-    console.log(inputsValue);
     let businessName = localStorage.getItem("businessName");
     let date = document.getElementById("dateIdTransaction").value;
     let ob = { businessName, date };
@@ -31,15 +29,12 @@ export default function Transaction() {
       let name = inputsValue[i].name;
       ob[name] = value;
     }
-    console.log(ob);
 
     let updates = await axios
       .post(serverAddress + "updateTransactions/", ob)
       .then((data) => {
-        // console.log(data);
         alert("updated well");
       });
-    console.log("updates", updates);
   };
   let businessName = localStorage.getItem("businessName");
   const [FormData, setFormData] = useState({
@@ -48,8 +43,6 @@ export default function Transaction() {
     costDescription_: "",
   });
   let updateCosts = async (ids) => {
-    console.log("ids");
-    console.log(ids);
     FormData.ids = ids;
     let updateResponse = await axios.post(serverAddress + "updateBusiness/", {
       ...FormData,
@@ -66,25 +59,18 @@ export default function Transaction() {
   };
   let ViewTransactions = async (e) => {
     if (e != "notEvent") e.preventDefault();
-    console.log("ViewTransactions");
     let ob = {};
     let time = "";
-    console.log("Time = " + time);
     if (time == "") {
       time = currentDates();
     }
-    console.log(time);
     let businessName = localStorage.getItem("businessName");
-    console.log("wrong businessName = " + businessName);
     if (!businessName) {
-      console.log("wrong businessName = " + businessName);
       alert(businessName);
       return;
     }
     ob.businessName = businessName;
-    console.log(ob);
     let response = await axios.post(serverAddress + "ViewTransactions/", ob);
-    console.log("@ViewTransactions = response", response);
     let arrayData = response.data.salesTransaction;
     let expenses = response.data.expenseTransaction;
     let exp = expenses?.reduce((a, c) => {
@@ -115,7 +101,6 @@ export default function Transaction() {
     let transactionId = e.target.className;
   };
   useEffect(() => {
-    console.log(ExpenseTransaction);
     ExpenseTransaction?.map((items) => {});
   }, [ExpenseTransaction]);
 
@@ -147,7 +132,6 @@ export default function Transaction() {
           View
         </Button>
       </form>
-      {console.log("FetchedDatas == ", FetchedDatas)}
       {FetchedDatas.length > 0 ? (
         <TableContainer>
           <Table border="1" id="TransactionTable">
@@ -167,7 +151,6 @@ export default function Transaction() {
             </TableHead>
             <TableBody>
               {FetchedDatas?.map((Items) => {
-                console.log(Items);
                 return (
                   <TableRow
                     id={"tr_" + Items.transactionId}
@@ -299,8 +282,6 @@ export default function Transaction() {
               </TableHead>
               <TableBody>
                 {ExpenseTransaction?.map((items) => {
-                  $(".tableExpenses").show();
-                  console.log(ExpenseTransaction);
                   return (
                     <TableRow key={items.expenseId}>
                       <TableCell>{items.costName} </TableCell>

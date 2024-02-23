@@ -15,7 +15,6 @@ const addEmployeeController = async (req, res) => {
   res.json(Results);
 };
 const removeEmployeesController = async (req, res) => {
-  // console.log("req.body", req.body);
   Results = await removeEmployees(req.body);
   res.json(Results);
 };

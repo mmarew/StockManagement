@@ -19,7 +19,6 @@ const executeQuery = async (query, values) => {
 
     return rows;
   } catch (error) {
-    console.error(error);
     return null;
   } finally {
     if (connection) {

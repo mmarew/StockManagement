@@ -27,7 +27,6 @@ Router.post(path + "getMaximumSales/", authMiddleware, async (req, res) => {
     .query(select, values)
     .then(([rows]) => {
       if (rows) {
-        //console.log(rows);
         return res.json({ data: rows, values });
       }
     })

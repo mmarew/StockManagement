@@ -53,7 +53,6 @@ function SalesAndPurchaseTable({
   let openedBusiness = localStorage.getItem("openedBusiness");
   let businessName = localStorage.getItem("businessName");
   let editSalesAndPurchase = async (e, item, index) => {
-    console.log("item", item);
     let { registrationSource } = item;
 
     if (registrationSource == "Total")
@@ -73,14 +72,12 @@ function SalesAndPurchaseTable({
       );
     }
   };
-  // return console.log("ListOfSalesAndPurchase", ListOfSalesAndPurchase);
   return (
     <Box>
       {ListOfSalesAndPurchase.length > 0 ? (
         <>
           {!viewInTable ? (
             <Box>
-              {console.log("ListOfSalesAndPurchase", ListOfSalesAndPurchase)}
               {ListOfSalesAndPurchase?.map((items, index) => {
                 return (
                   <Paper
@@ -103,10 +100,6 @@ function SalesAndPurchaseTable({
                         items.contentEditable && "date" + items.transactionId
                       }
                     >
-                      {console.log(
-                        "items.registrationDate",
-                        items.regiteredTime
-                      )}
                       <strong> Registration Time :-</strong>
                       {
                         <Chip
@@ -355,10 +348,6 @@ function SalesAndPurchaseTable({
                   <TableCell>Status</TableCell>
                 </TableRow>
                 <TableBody>
-                  {console.log(
-                    "ListOfSalesAndPurchase",
-                    ListOfSalesAndPurchase
-                  )}
                   {ListOfSalesAndPurchase?.map((items, index) => {
                     return (
                       <TableRow
@@ -384,10 +373,6 @@ function SalesAndPurchaseTable({
                             "date" + items.transactionId
                           }
                         >
-                          {console.log(
-                            "items.registrationDate",
-                            items.regiteredTime
-                          )}
                           <Chip
                             sx={{
                               maxWidth: "200px",

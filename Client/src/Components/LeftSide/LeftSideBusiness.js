@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 function LeftSideBusiness() {
   let Navigate = useNavigate();
   let navigeteToTargetedURL = (e, path) => {
-    console.log(e);
     Navigate(path);
   };
   return (

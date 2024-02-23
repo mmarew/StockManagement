@@ -9,17 +9,13 @@ let UpdateBusinesssName = async (
 ) => {
   let businessId = "businessName_" + targetBusinessId,
     businessname = $("#" + businessId).val();
-  console.log(businessname, targetBusinessId);
   setShowProgressBar(true);
-  alert("ooooooooooooooo");
-  return;
   let updateRes = await axios.post(`${serverAddress}updateBusinessName/`, {
     businessname,
     targetBusinessId,
     token: localStorage.getItem("storeToken"),
   });
   setShowProgressBar(false);
-  console.log(updateRes.data);
   let data = updateRes.data.data;
   if (data == "reservedByOtherBusiness") {
     alert(

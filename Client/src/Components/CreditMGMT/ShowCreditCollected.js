@@ -8,7 +8,6 @@ function ShowCreditCollected({ Results }) {
       unCollectedMoney = 0,
       partiallySold = 0;
     data.map((d, dindex) => {
-      console.log("my data", d);
       let {
           partiallyPaiedInfo,
           salesTypeValues,
@@ -26,12 +25,6 @@ function ShowCreditCollected({ Results }) {
       });
     });
     unCollectedMoney = partiallySold - totalCollectedAmount;
-    console.log(
-      "unCollectedMoney",
-      unCollectedMoney,
-      "totalCollectedAmount",
-      totalCollectedAmount
-    );
     setAccountRecivableAmt(() => unCollectedMoney);
     setCollectedMoney((prev) => prev + totalCollectedAmount);
   }, []);

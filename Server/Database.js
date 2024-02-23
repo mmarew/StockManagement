@@ -4,9 +4,7 @@ const JWT = require("jsonwebtoken");
 require("dotenv").config();
 
 try {
-} catch (error) {
-  //console.log("connection to data base error", error);
-}
+} catch (error) {}
 
 let createBasicTables = async () => {
   try {
@@ -46,12 +44,8 @@ let createBasicTables = async () => {
              primary key(dailySalesId))`;
     pool
       .query(createTableDailyTransaction)
-      .then((data) => {
-        //console.log(data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
+      .then((data) => {})
+      .catch((error) => {});
 
     let create = `create table if not exists employeeTable(employeeId int auto_increment, hiredDate DATETIME, userIdInEmployee int,BusinessIDEmployee int, employerId int, primary key(employeeId))`;
     pool
@@ -65,15 +59,9 @@ let createBasicTables = async () => {
     let queryTocreate = `create table if not exists usersTable(userId int auto_increment, phoneNumber varchar(200),employeeName varchar(600), passwordStatus varchar(40), passwordResetPin int, password varchar(200),primary key(userId))`;
     pool
       .query(queryTocreate)
-      .then((data) => {
-        //console.log(data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  } catch (error) {
-    console.log(error);
-  }
+      .then((data) => {})
+      .catch((error) => {});
+  } catch (error) {}
 };
 
 let createBusiness = async (
@@ -118,7 +106,6 @@ let createBusiness = async (
         return await registerMainBusinessName(newBusinessName);
       }
     } catch (error) {
-      console.log("error", error);
       return res.json({ data: "Errors" });
     }
   };
@@ -138,7 +125,6 @@ let createBusiness = async (
         ]);
         return data; // Return the query result
       } catch (error) {
-        console.log(error);
         throw error; // Rethrow the error to be caught later
       }
     });
@@ -152,7 +138,6 @@ let createBusiness = async (
 
     return { data: "created well", source, tableCollections };
   } catch (error) {
-    console.error("errors on table creating systems", error);
     if (error === "registeredBefore") return { error };
     return { error: "Unable to create tables." };
   }
@@ -180,7 +165,6 @@ const insertIntoUserTable = async (fullName, phoneNumber, password) => {
       return { data: "Data is inserted successfully.", token };
     }
   } catch (error) {
-    console.error("Error in insertIntoUserTable:", error);
     return { error: "An error occurred." };
   }
 };
@@ -188,10 +172,8 @@ const insertIntoUserTable = async (fullName, phoneNumber, password) => {
 const deleteBusiness = async (body) => {
   try {
     let { businessName, businessId } = body;
-    console.log("businessName, businessId");
     let sqlToGetBusiness = `select * from Business where BusinessID=?`;
     let businessRows = await executeQuery(sqlToGetBusiness, [businessId]);
-    console.log("businessRows", businessRows);
     if (businessRows.length === 0) {
       return { data: "business not found" };
     }
@@ -221,7 +203,6 @@ const deleteBusiness = async (body) => {
           return deleteEachTable(); // Return the promise to properly handle the async flow
         }
       } catch (error) {
-        console.error(error);
         return {
           error: `error in deleting business`,
         };
@@ -230,7 +211,6 @@ const deleteBusiness = async (body) => {
 
     return deleteEachTable(); // Return the promise to properly handle the async flow
   } catch (error) {
-    console.log(error);
     return { data: "error", error: "error no d1" };
   }
 };

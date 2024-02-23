@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SearchCostsCss from "../Costs/SearchCosts.module.css";
-import { Button, LinearProgress } from "@mui/material";
+import { Button, LinearProgress, TableContainer } from "@mui/material";
 import { ButtonProcessing } from "../Utilities/Utility";
 import ExportToExcel from "../PDF_EXCEL/PDF_EXCEL";
 import EditExpItem from "./EditExpItem";
@@ -14,6 +14,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { DateFormatter } from "../Body/Date/currentDate";
 function SearchExpencesItem({
   setSearchTypeValueError,
   InputValue,
@@ -45,14 +46,25 @@ function SearchExpencesItem({
       let { data } = responce.data;
 
       if (data == `you are not owner of this business`) {
+        setSuccessError({
+          Message: `FAIL`,
+          Detail: `you are not owner of this business`,
+        });
         return setSearchTypeValueError(data);
       }
       if (data.length == 0) {
         setSearchTypeValueError("Expence items are not found");
+        setSuccessError({
+          Message: `FAIL`,
+          Detail: `You haven't registered Expences`,
+        });
       }
       setMyCostData(data);
     } catch (error) {
-      console.log("error", error);
+      setSuccessError({
+        Message: `FAIL`,
+        Detail: error.Message,
+      });
     }
   };
 
@@ -67,66 +79,85 @@ function SearchExpencesItem({
 
   return (
     <div>
-      {ShowSuccessError.Message && (
+      {ShowSuccessError?.Message && (
         <SuccessOrError
-          request={ShowSuccessError.Detail}
+          request={ShowSuccessError?.Detail}
           setErrors={setSuccessError}
         />
       )}
       {Processing && <LinearProgress />}
-      {MyCostData?.length > 0 && (
+      {MyCostData?.length > 0 ? (
         <>
           <ExportToExcel data={MyCostData} target={"searchedExpences"} />
-          <div className={SearchCostsCss.costWrapperDiv}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Cost Name</TableCell>
-                  <TableCell>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {MyCostData?.map((cost, index) => (
-                  <TableRow
-                    key={"costItem_" + index}
-                    className={SearchCostsCss.eachCostItem}
-                  >
-                    <TableCell>{cost.costName}</TableCell>
-                    <TableCell>
-                      {!Processing ? (
-                        <div className={SearchCostsCss.editAndDelete}>
-                          <Button
-                            onClick={() => {
-                              setopenEditingModal({ open: true, cost, index });
-                            }}
-                            variant="outlined"
-                          >
-                            Edit
-                          </Button>
-                          &nbsp; &nbsp; &nbsp;
-                          <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={() =>
-                              setopenDeletingModal({
-                                open: true,
-                                item: cost,
-                              })
-                            }
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      ) : (
-                        <ButtonProcessing />
-                      )}
-                    </TableCell>
+          <div className={SearchCostsCss?.costWrapperDiv}>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Cost Name</TableCell>
+                    <TableCell>Registration Date</TableCell>
+                    <TableCell>Action</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {MyCostData?.map((cost, index) => (
+                    <TableRow
+                      key={"costItem_" + index}
+                      className={SearchCostsCss.eachCostItem}
+                    >
+                      <TableCell>{cost.costName}</TableCell>
+                      <TableCell>
+                        {DateFormatter(cost.expItemRegistrationDate)}
+                      </TableCell>
+                      <TableCell>
+                        {!Processing ? (
+                          localStorage.getItem("openedBusiness") ==
+                            "myBusiness" && (
+                            <div className={SearchCostsCss.editAndDelete}>
+                              <Button
+                                onClick={() => {
+                                  setopenEditingModal({
+                                    open: true,
+                                    cost,
+                                    index,
+                                  });
+                                }}
+                                variant="outlined"
+                              >
+                                Edit
+                              </Button>
+                              &nbsp; &nbsp; &nbsp;
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={() =>
+                                  setopenDeletingModal({
+                                    open: true,
+                                    item: cost,
+                                  })
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          )
+                        ) : (
+                          <ButtonProcessing />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </div>
         </>
+      ) : (
+        !Processing && (
+          <div style={{ color: "red", padding: "20px 0" }}>
+            No Expences data found
+          </div>
+        )
       )}
       {openDeletingModal.open && (
         <DeleteExpItem

@@ -31,7 +31,6 @@ function GetMinimumQty({ viewInTable, setFetchedDataLength }) {
       businessId,
     });
     setShowProgressBar(false);
-    console.log("res from GetMinimumQty == ", response);
     let { data } = response.data;
 
     if (data === `you are not owner of this business`) {
@@ -50,7 +49,6 @@ function GetMinimumQty({ viewInTable, setFetchedDataLength }) {
     <div>
       <br />
       <h5 style={{ textAlign: "center" }}>Current Minimum Qty and Inventory</h5>
-      {console.log("MinimumQty111", MinimumQty)}
       {MinimumQty.progress === "wait" ? (
         <h4>Please wait...</h4>
       ) : MinimumQty?.data?.length > 0 ? (
@@ -112,7 +110,6 @@ function GetMinimumQty({ viewInTable, setFetchedDataLength }) {
             </Box>
           ) : (
             <TableContainer align="center">
-              {console.log("MinimumQty", MinimumQty?.data?.length)}
               <Table sx={{ width: "100%" }}>
                 <TableBody
                   sx={{
@@ -121,8 +118,6 @@ function GetMinimumQty({ viewInTable, setFetchedDataLength }) {
                   }}
                 >
                   {MinimumQty?.data?.map((item, index) => {
-                    console.log(item);
-
                     return (
                       <TableRow
                         sx={{

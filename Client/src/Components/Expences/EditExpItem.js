@@ -4,28 +4,26 @@ import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { ButtonProcessing } from "../Utilities/Utility";
 
-function EditExpItem({ data }) {
-  let {
+function EditExpItem({
+  data: {
     openEditingModal,
     setopenEditingModal,
     getExpencesLists,
     setSuccessError,
-  } = data;
-  //   console.log("openEditingModal", openEditingModal);
-
+  },
+}) {
   const token = localStorage.getItem("storeToken");
   const businessId = localStorage.getItem("businessId");
   const businessName = localStorage.getItem("businessName");
   const serverAddress = localStorage.getItem("targetUrl");
 
   const [costName, setCostName] = useState(openEditingModal.cost.costName);
-  const [Processing, setProcessing] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
-  const updateMycostData = async (e) => {
-    e.preventDefault();
+  const updateMyCostData = async () => {
     try {
       setProcessing(true);
-      const response = await axios.post(`${serverAddress}/updateCostData/`, {
+      const response = await axios.post(`${serverAddress}updateExpencesItem/`, {
         costName,
         businessId,
         businessName,
@@ -33,22 +31,29 @@ function EditExpItem({ data }) {
         costsId: openEditingModal.cost.costsId,
       });
       setProcessing(false);
-      handleClose();
+
       getExpencesLists();
-      console.log("response", response.data);
-      if (response.data.data === "updated successfully") {
-        alert(`Your data is updated. Thank you.`);
+      const data = response.data.data;
+      if (data === "updated successfully") {
+        setSuccessError({
+          Message: "SUCCESS",
+          Detail: "SUCCESS",
+        });
+        setopenEditingModal({ open: false });
+      } else {
+        setSuccessError({
+          Message: "Fail",
+          Detail: data,
+        });
       }
     } catch (error) {
-      console.error("Error updating cost data:", error);
-      alert(
-        "An error occurred while updating cost data. Please try again later."
-      );
+      setProcessing(false);
+      setSuccessError({
+        Message: "Errors",
+        Detail:
+          "An error occurred while updating cost data. Please try again later.",
+      });
     }
-  };
-
-  const handleClose = () => {
-    setopenEditingModal({ open: false });
   };
 
   return (
@@ -68,7 +73,7 @@ function EditExpItem({ data }) {
         >
           <IconButton
             aria-label="close"
-            onClick={handleClose}
+            onClick={() => setopenEditingModal({ open: false })}
             sx={{
               position: "absolute",
               top: 0,
@@ -96,13 +101,13 @@ function EditExpItem({ data }) {
               type="text"
             />
             <br />
-            {Processing ? (
+            {processing ? (
               <ButtonProcessing />
             ) : (
               <Button
                 variant="contained"
                 color="primary"
-                onClick={updateMycostData}
+                onClick={updateMyCostData}
               >
                 Update
               </Button>

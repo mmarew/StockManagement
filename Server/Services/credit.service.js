@@ -48,13 +48,11 @@ let getCreditList = async (req) => {
       transactionIdList.push(transactionId);
     }
     const [data] = await pool.query(SelectOnCreditFromTotal);
-    // console.log("SelectOnCreditFromTotal", data);
     // Iterate over the data and push transaction IDs into the list
     for (const d of data) {
       const transactionId = d.transactionId;
       transactionIdList.push(transactionId);
     }
-    // console.log("transactionIdList", transactionIdList);
     // Check for date range conditions
     if (
       fromDate === "notInDateRange" &&
@@ -89,7 +87,6 @@ let getCreditList = async (req) => {
         );
       partiallyPaidInTotal = [...FromTotalSales, ...FromSingleSales];
     }
-    //console.log(data);
     return {
       partiallyPaidInTotal,
       soldOnTotal_Oncredit: data,
@@ -100,4 +97,74 @@ let getCreditList = async (req) => {
     return { data: "error no 891" };
   }
 };
-module.exports.getCreditList = getCreditList;
+let updatePartiallyPaidInfo = async (body) => {
+  try {
+    const { DeletableInfo } = body;
+    const sanitizedCollectionIds = DeletableInfo.map((info) =>
+      String(info.collectionId).replace(/'/g, "\\'")
+    );
+    const sql = `DELETE FROM creditCollection WHERE collectionId IN (?)`;
+    await pool.query(sql, [sanitizedCollectionIds]);
+    return { data: "Updated successfully" };
+  } catch (error) {
+    console.error(error);
+    return { Type: "error", error: "Internal Server Error" };
+  }
+};
+let confirmPayments = async (body) => {
+  try {
+    const {
+      businessId,
+      userID,
+      creditPaymentDate,
+      collectedAmount,
+      data: { dailySalesId, ProductId, creditsalesQty, productsUnitPrice },
+    } = body;
+
+    let previouslycollectedAmount = 0;
+
+    const selectQuery = `SELECT * FROM creditCollection WHERE transactionId='${dailySalesId}' AND businessId='${businessId}' AND registrationSource='Single'`;
+    const [results] = await pool.query(selectQuery);
+
+    results.forEach((result) => {
+      previouslycollectedAmount += Number(result.collectionAmount);
+    });
+
+    const SalesIncredit = creditsalesQty * productsUnitPrice;
+    const tobeCollected = SalesIncredit - previouslycollectedAmount;
+
+    if (SalesIncredit === previouslycollectedAmount) {
+      await pool.query(
+        `UPDATE dailyTransaction SET salesTypeValues='Credit paied' WHERE transactionId='${dailySalesId}'`
+      );
+      return {
+        data: `You have collected your money previously. Now you can't collect money again`,
+      };
+    }
+
+    if (collectedAmount > tobeCollected) {
+      return {
+        data: `You can't collect more money than remaining amount`,
+      };
+    }
+
+    if (SalesIncredit === previouslycollectedAmount + collectedAmount) {
+      await pool.query(
+        `UPDATE dailyTransaction SET salesTypeValues='Credit paied' WHERE dailySalesId='${dailySalesId}'`
+      );
+    }
+
+    const InsertQuery = `INSERT INTO creditCollection (collectionDate, collectionAmount, registrationSource, transactionId, userId, businessId, targtedProductId) 
+    VALUES ('${creditPaymentDate}', '${collectedAmount}', 'Single', '${dailySalesId}', '${userID}', '${businessId}', '${ProductId}')`;
+
+    const [response] = await pool.query(InsertQuery);
+
+    if (response.affectedRows > 0) {
+      return { data: "You have inserted your data correctly" };
+    }
+  } catch (error) {
+    console.error(error);
+    return { Type: "error", error: "Internal Server Error" };
+  }
+};
+module.exports = { getCreditList, updatePartiallyPaidInfo, confirmPayments };

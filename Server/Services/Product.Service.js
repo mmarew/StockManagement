@@ -212,7 +212,6 @@ const searchProducts = async (body, query) => {
       let select = "SELECT * FROM ?? where Status='active'";
       let table = `${businessName}_products`;
       let [rows] = await pool.query(select, [table]);
-      //console.log("in getRegisteredProducts", rows);
       return { data: rows };
     } catch (error) {
       console.log("error", error);

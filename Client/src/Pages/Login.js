@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Loginmodulecss from "./Login.module.css";
 import axios from "axios";
-
 import { Button, LinearProgress, TextField } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import ImgApp from "../ImgSlider";
@@ -22,6 +21,10 @@ function Login() {
       setProcess(true);
       let response = await axios.post(serverAddress + "Login/", loginForm);
       setProcess(false);
+      if (response.data == "Not Registered Phone Number") {
+        setloginErrors(response.data);
+        return;
+      }
 
       let { Message, token } = response.data;
       let { usersFullName } = DecodeJWT(token);
@@ -46,13 +49,11 @@ function Login() {
     setloginForm({ ...loginForm, [names]: values });
   };
 
-  let savedToken = localStorage.getItem("storeToken");
   let navigate = useNavigate();
   useEffect(() => {
     Localstorage();
     setProcess(true);
     let data = VerifyLogin();
-    // console.log("data", data);
     data
       .then((response) => {
         if (response?.data == "alreadyConnected") {
@@ -64,7 +65,6 @@ function Login() {
         setProcess(false);
       })
       .catch((error) => {
-        console.log(error);
         setProcess(false);
         setloginErrors(error.message);
       });
@@ -88,7 +88,6 @@ function Login() {
             flexDirection: "column",
             maxWidth: "500px",
           }}
-          // className={Loginmodulecss.loginForm}
           onSubmit={submitForm}
           action=""
         >
@@ -120,13 +119,7 @@ function Login() {
           {Process ? (
             <LinearProgress id="LinearProgress" />
           ) : (
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              // className={Loginmodulecss.btnLogin}
-              type="submit"
-            >
+            <Button fullWidth variant="contained" color="primary" type="submit">
               Login
             </Button>
           )}
@@ -156,8 +149,6 @@ function Login() {
         </form>
       </div>
       <div className={Loginmodulecss.loginRightSide}>
-        {/* <img src={loginimg} /> */}
-
         <ImgApp />
       </div>
     </div>

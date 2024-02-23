@@ -6,7 +6,6 @@ function LogoutofThisPage() {
   localStorage.removeItem("ownersName");
   localStorage.clear();
   let storeToken = localStorage.getItem("storeToken");
-  console.log("storeToken", storeToken);
   if (storeToken == "" || storeToken == null) {
     window.location.href = "/login";
   }

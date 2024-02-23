@@ -33,15 +33,7 @@ export let getCollectedMoney = (data, salesRegistrationWay, infos) => {
   if (salesRegistrationWay == "Single") {
     transactionId = dailySalesId;
   }
-  console.log(
-    "salesRegistrationWay",
-    salesRegistrationWay,
-    "transactionId",
-    transactionId
-  );
   let Money = 0;
-  //  let infos = creditData.partiallyPaidInTotal;
-  // return console.log("creditData", creditData);
   infos.map((info) => {
     if (info.transactionId == transactionId) {
       let { collectionAmount } = info;
@@ -94,7 +86,6 @@ function GetCreditLists({
   });
 
   let getUsersCreditList = async () => {
-    console.log("@getUsersCreditList dateRange == ", dateRange);
     setShowProgressBar(true);
     try {
       let Responces = await axios.get(
@@ -119,7 +110,6 @@ function GetCreditLists({
         soldInDaily_SoldOncredits,
         soldInDaily_CreditPaied,
       } = Responces.data;
-      console.log("@getUsersCreditList Responces.data = ", Responces.data);
 
       // return;
       if (typeof setFetchedDataLength === "function") {
@@ -139,7 +129,6 @@ function GetCreditLists({
       setShowProgressBar(false);
     } catch (error) {
       setSuccessOrErrorsOnCredit(error.message);
-      // console.log(error);
     }
   };
   useEffect(() => {
@@ -176,14 +165,11 @@ function GetCreditLists({
       })
       .then((Responces) => {
         getUsersCreditList();
-        console.log(Responces.data.data);
         let Message = Responces.data.data;
-        console.log("Message", Message);
         setSuccessOrErrorsOnCredit("SUCCESS");
       })
       .catch((error) => {
         setSuccessOrErrorsOnCredit("error no 13");
-        console.log(error);
       });
     setOpenConfirmationModal((prevstate) => {
       return { ...prevstate, Open: false };
@@ -198,7 +184,6 @@ function GetCreditLists({
   });
 
   useEffect(() => {
-    // console.log("dateRange", dateRange);
     let {
       partiallyPaidInTotal,
       soldInDaily_SoldOncredits,
@@ -209,16 +194,12 @@ function GetCreditLists({
       totalCollectedAmount = 0;
     // sold on total sales way and on credit
     let calculateCollectedMoney = (collectedMoneyData) => {
-      console.log("collectedMoneyData", collectedMoneyData);
-      // return;
       collectedMoneyData?.map((data) => {
         let { collectionAmount } = data;
         totalCollectedAmount += Number(collectionAmount);
-        // console.log("calculatePartiallyCollectedMoney,first", data);
       });
     };
     let calculateAccountRecivable = (datas) => {
-      // console.log("calculateAccountRecivable", datas);
       datas?.map((data) => {
         let { creditsalesQty, productsUnitPrice } = data;
         accountRecivableTotalMoney +=
@@ -334,7 +315,6 @@ function GetCreditLists({
                               </div>
                               <div>
                                 <strong>Unit Price: </strong>
-                                {console.log("@data", data)}
                                 {CurrencyFormatter(data.unitPrice)}
                               </div>
                               <div>

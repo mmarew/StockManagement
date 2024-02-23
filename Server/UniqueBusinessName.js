@@ -20,7 +20,6 @@ let getUniqueBusinessName = async (businessId, userID) => {
     let { uniqueBusinessName } = businessData[0];
     return uniqueBusinessName;
   } catch (error) {
-    console.log("error", error);
     return "Error in server 456";
   }
 };

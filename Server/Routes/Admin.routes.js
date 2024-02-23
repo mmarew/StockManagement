@@ -9,7 +9,6 @@ router.get("/admin__getUsers", async (req, res) => {
   res.json({ data: users });
 });
 router.get("/get__businesses", async (req, res) => {
-  // console.log("req", res);'
   try {
     let get__businesses = `select * from Business, usersTable where userId=ownerId`;
     let [Result1] = await pool.query(get__businesses);

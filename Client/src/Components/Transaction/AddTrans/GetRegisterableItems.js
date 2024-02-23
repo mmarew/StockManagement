@@ -49,7 +49,7 @@ function AddSingleSales_GetItems({ randVal, setrandVal }) {
         data === "you are not owner of this business" ||
         data === "Error in server 456"
       ) {
-        alert(data);
+        setErrors(data);
         return;
       }
 
@@ -61,7 +61,6 @@ function AddSingleSales_GetItems({ randVal, setrandVal }) {
     } catch (error) {
       setErrors(error.message);
       setProccess(false);
-      console.error("Error fetching searched products:", error);
     }
   };
 
@@ -71,6 +70,7 @@ function AddSingleSales_GetItems({ randVal, setrandVal }) {
 
   return (
     <>
+      <div style={{ color: "red" }}> {errors}</div>
       <Box display="flex" flexWrap="wrap" marginTop="10px">
         {searchedProducts.map((items, index) => (
           <Box
@@ -137,7 +137,6 @@ function AddSingleSales_GetItems({ randVal, setrandVal }) {
           <LinearProgress />
         </>
       )}
-
       {getAllDailyRegisters.open && (
         <GetEachTransaction
           ErrorsProps={{ errors, setErrors }}
@@ -146,7 +145,6 @@ function AddSingleSales_GetItems({ randVal, setrandVal }) {
           ProductId={getAllDailyRegisters.ProductId}
         />
       )}
-
       {registerableItems.Open && (
         <AddSingleSales_Register
           RegisterableItems={registerableItems}

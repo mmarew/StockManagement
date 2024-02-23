@@ -46,14 +46,11 @@ function AddTotalSales({ Time }) {
       BusinessId,
       businessName,
     });
-    console.log("@getRegisteredProducts Response.data.data");
-    console.log(Response.data.data);
     setProductsList(Response.data.data);
   };
   let sendFormDataToServer = async (e, ProductId) => {
     e.preventDefault();
     setProcessing(true);
-    console.log("ProductId", ProductId);
     let dates = CollectedProducts.dates;
     CollectedProducts.ProductId = ProductId;
     if (dates == undefined) {
@@ -77,7 +74,6 @@ function AddTotalSales({ Time }) {
     }
     // registrationSource
     copyOfCollection["registrationSource" + ProductId] = "Total";
-    console.log("copyOfCollection", copyOfCollection);
     // return;
     copyOfCollection.token = token;
     copyOfCollection.businessId = BusinessId;
@@ -89,7 +85,6 @@ function AddTotalSales({ Time }) {
     setProcessing(false);
     // salesTypeValues;
     let datas = response.data.data;
-    console.log(datas, "response is = ", response);
     if (datas == "This is already registered") {
       alert(
         "Your data is not registered, because on this date data is already registered"
@@ -114,7 +109,6 @@ function AddTotalSales({ Time }) {
   }, [selectedTime]);
   useEffect(() => {
     let CDATE = currentDates();
-    console.log("CDATE", CDATE);
   }, [ProductsList]);
 
   useEffect(() => {
@@ -127,8 +121,6 @@ function AddTotalSales({ Time }) {
   }, []);
   return (
     <div className={AddTotalSalesCss.addTotalSalesWrapper}>
-      {console.log(CollectedProducts)}
-      {console.log("ProductsList", ProductsList)}
       {ProductsList !== "Wait" ? (
         ProductsList?.length > 0 ? (
           <>
@@ -228,10 +220,6 @@ function AddTotalSales({ Time }) {
                     name="dates"
                     id={AddTotalSalesCss.dateIdInTotalSales}
                   />
-                  {console.log(
-                    "CollectedProducts.dates",
-                    CollectedProducts.dates
-                  )}
                   <br />
                   <TextField
                     required

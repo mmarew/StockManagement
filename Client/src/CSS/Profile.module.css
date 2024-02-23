@@ -49,3 +49,7 @@
 .leftOfProfile li:nth-child(2) div img {
   filter: invert(100%) brightness(600%);
 }
+.deleteProfileButtons {
+  display: flex;
+  justify-content: center;
+}

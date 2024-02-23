@@ -74,7 +74,6 @@ function SearchProducts({ InputValue, setSearchTypeValueError }) {
                     {openedBusiness === "myBusiness" && (
                       <TableCell>Actions</TableCell>
                     )}
-                    <TableCell>View Details</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -96,7 +95,7 @@ function SearchProducts({ InputValue, setSearchTypeValueError }) {
                             Edit
                           </Button>
                           <Button
-                            sx={{ marginLeft: "10px" }}
+                            sx={{ margin: "0 10px" }}
                             onClick={(e) =>
                               setConfirmDelete(() => ({
                                 Verify: true,
@@ -108,21 +107,24 @@ function SearchProducts({ InputValue, setSearchTypeValueError }) {
                           >
                             Delete
                           </Button>
+
+                          <Button
+                            sx={{ width: "150px" }}
+                            onClick={() => {
+                              setViewPdoductInfo((prev) => {
+                                return {
+                                  ...prev,
+                                  Open: true,
+                                  Product: product,
+                                };
+                              });
+                            }}
+                            variant="outlined"
+                          >
+                            View Details
+                          </Button>
                         </TableCell>
                       )}
-                      <TableCell>
-                        <Button
-                          sx={{ width: "150px" }}
-                          onClick={() => {
-                            setViewPdoductInfo((prev) => {
-                              return { ...prev, Open: true, Product: product };
-                            });
-                          }}
-                          variant="outlined"
-                        >
-                          View Details
-                        </Button>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -130,7 +132,11 @@ function SearchProducts({ InputValue, setSearchTypeValueError }) {
             </TableContainer>
           </>
         ) : (
-          ""
+          !loadingStatus && (
+            <div style={{ color: "red", padding: "0 20px" }}>
+              No products found
+            </div>
+          )
         )}
         {ViewPdoductInfo.Open && (
           <DetailedProducts

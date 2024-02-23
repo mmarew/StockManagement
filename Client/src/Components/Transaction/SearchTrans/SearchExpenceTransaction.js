@@ -35,7 +35,6 @@ function SearchExpenceTransaction({
   let openedBusiness = localStorage.getItem("openedBusiness");
 
   let handleExpencesTransactions = async (response) => {
-    console.log("response = ", response);
     response.sort((a, b) =>
       a.productName > b.productName ? 1 : b.productName > a.productName ? -1 : 0
     );
@@ -53,7 +52,6 @@ function SearchExpenceTransaction({
       let inList = "NotFound";
       // check if it is in list
       for (let i = 0; i < costList.length; i++) {
-        console.log(costList[i]);
         if (costList[i].costId == cost.costId) {
           inList = "Found";
           return;
@@ -73,10 +71,6 @@ function SearchExpenceTransaction({
             ListByCostId.costDescription += items.costDescription + ", ";
           }
         });
-        console.log(
-          "ListByCostId.costRegisteredDate = ",
-          ListByCostId.costRegisteredDate
-        );
 
         costList.push(ListByCostId);
       }
@@ -105,7 +99,6 @@ function SearchExpenceTransaction({
           },
         }
       );
-      console.log("getExpTransactions", results);
       let { expenceTransaction } = results.data;
       if (expenceTransaction == "error no 113") {
         return setErrors("error no 113 on get expences data");

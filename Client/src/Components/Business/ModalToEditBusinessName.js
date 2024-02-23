@@ -27,7 +27,6 @@ function ModalToEditBusinessName({
     );
     getBusiness();
     setProcessing(false);
-    console.log("updateRes", updateRes);
     setopenBusinessEditingModal({ open: false });
     // Perform any additional form submission logic here
     // For example, you can make an API request to submit the form data to the server
@@ -37,7 +36,6 @@ function ModalToEditBusinessName({
     // Open the modal
   };
   useEffect(() => {
-    console.log("openBusinessEditingModal", openBusinessEditingModal);
     setBusinessI(openBusinessEditingModal.datas.BusinessID);
 
     setUpdatedBusinessName(openBusinessEditingModal.datas.BusinessName);
@@ -58,7 +56,6 @@ function ModalToEditBusinessName({
             p: 2,
           }}
         >
-          {console.log("updatedBusinessName", updatedBusinessName)}
           <h2 style={{ textAlign: "center", margin: "10px auto" }}>
             Business Form Edition
           </h2>
@@ -77,7 +74,6 @@ function ModalToEditBusinessName({
               onChange={(e) => {
                 let Value = e.target.value;
                 let namingRule = NameValidators(Value, setBusinessNameError);
-                console.log("namingRule", namingRule);
                 if (namingRule == "wrong naming rule") {
                   return;
                 }

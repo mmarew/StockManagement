@@ -19,7 +19,6 @@ function App() {
   const [InputValue, setInputValue] = useState("");
   const [showEachItems, setshowEachItems] = useState();
 
-  // RegisterableCots, setopen, setErrorsOrSuccess;
   const [RegisterableCots, setRegisterableCots] = useState([{}]);
   let serverAddress = localStorage.getItem("targetUrl");
   const businessId = localStorage.getItem("businessId");
@@ -48,7 +47,6 @@ function App() {
     axios
       .post(serverAddress + "searchExpByName", { ...searchData })
       .then((response) => {
-        console.log(response.data);
         setSearchResult(response.data.data);
         setProcessing(false);
       })
@@ -69,8 +67,8 @@ function App() {
     }));
   };
   let handleAddTransaction = (item) => {
-    setRegisterableCots([item]);
     setopen(true);
+    setRegisterableCots([item]);
   };
 
   let handleView = (input) => {
@@ -184,7 +182,7 @@ function App() {
       )}
       {open && (
         <AddExpencesTransaction
-          data={{ RegisterableCots, setopen, setErrorsOrSuccess }}
+          data={{ RegisterableCots, setopen, setErrorsOrSuccess, open }}
         />
       )}
       {GetSingleExpTransaction.Open && GetSingleExpTransaction.Rand && (

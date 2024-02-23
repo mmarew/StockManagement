@@ -4,9 +4,7 @@ import { TextField } from "@mui/material";
 import { useEffect } from "react";
 import axios from "axios";
 import SuccessOrError from "../Body/Others/SuccessOrError";
-
 // Define custom styles for the modal
-
 const MyModal = ({ removeModal, employeeId, getBusinessEmployee }) => {
   const [open, setOpen] = useState(false);
   const [Errors, setErrors] = useState();
@@ -14,7 +12,6 @@ const MyModal = ({ removeModal, employeeId, getBusinessEmployee }) => {
   const handleOpen = () => {
     setOpen(true);
   };
-
   // Function to handle closing the modal
   const handleClose = () => {
     setOpen(false);
@@ -43,8 +40,6 @@ const MyModal = ({ removeModal, employeeId, getBusinessEmployee }) => {
         handleClose();
       }, 2000);
 
-      // console.log("items is ");
-      // console.log(response.data);
       if (response.data.Status == "deleted") {
         setShowSuccess(true);
         setErrors("");
@@ -56,7 +51,6 @@ const MyModal = ({ removeModal, employeeId, getBusinessEmployee }) => {
       setProcessing(false);
       setShowSuccess(false);
       setErrors(error.message);
-      console.log("error", error);
     }
   };
   return (
@@ -86,6 +80,8 @@ const MyModal = ({ removeModal, employeeId, getBusinessEmployee }) => {
         <Fade in={open}>
           <div
             style={{
+              maxWidth: "400px",
+              width: "80%",
               backgroundColor: "white",
               padding: "20px",
               position: "absolute",
@@ -109,7 +105,7 @@ const MyModal = ({ removeModal, employeeId, getBusinessEmployee }) => {
               {Processing ? (
                 <Button disabled>Processing</Button>
               ) : (
-                <>
+                <div style={{ display: "flex", justifyContent: "center" }}>
                   <Button
                     style={{ marginRight: "10px" }}
                     type="submit"
@@ -126,7 +122,7 @@ const MyModal = ({ removeModal, employeeId, getBusinessEmployee }) => {
                   >
                     Close
                   </Button>
-                </>
+                </div>
               )}
             </form>
           </div>

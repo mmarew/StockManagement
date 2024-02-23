@@ -9,7 +9,6 @@ function AddTransaction({ Time }) {
     let salesOrCosts = document.getElementsByClassName("salesOrCosts"),
       i = 0;
     for (; i < salesOrCosts.length; i++) {
-      console.log(salesOrCosts[i]);
       salesOrCosts[i].classList.remove("activeClass");
     }
     let currentBtn = e.target;

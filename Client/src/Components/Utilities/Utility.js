@@ -2,8 +2,6 @@ import Businessmodulecss from "../../CSS/Business.module.css";
 import React, { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 function CurrencyFormatter(money) {
-  // console.log("CurrencyFormatter", money);
-  // console.log("money", money);
   money = Number(money);
   return (
     " " +

@@ -27,10 +27,12 @@ function GetExpencesLists() {
       setProcecssing(true);
       setShowProgressBar(true);
       // return;
-      let response = await axios.post(serverAddress + "getExpencesLists/", {
-        businessName,
-        businessId,
-        token,
+      let response = await axios.get(serverAddress + "getExpencesLists/", {
+        params: {
+          businessName,
+          businessId,
+          token,
+        },
       });
       setShowProgressBar(false);
       setProcecssing(false);

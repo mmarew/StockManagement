@@ -17,7 +17,6 @@ function OpenBusinessLeftSide() {
   useEffect(() => {
     setcurrentURL(location.pathname);
   }, [location]);
-  console.log("currentURL", currentURL);
   return (
     <div id="Wrapper" className={OpenBusinessLeftCss.Wrapper}>
       <div className={OpenBusinessLeftCss.listWrapper}>
@@ -71,12 +70,12 @@ function OpenBusinessLeftSide() {
         {/* ///////////////////// */}
         {openedBusiness == "myBusiness" && (
           <Link
-            to="additems"
+            to="Items"
             // onClick={markTargetedLink}
             className={
               `${OpenBusinessLeftCss.openBusinessTabLeft} ` +
               `  ${
-                currentURL.startsWith("/OpenBusiness/additems") &&
+                currentURL.startsWith("/OpenBusiness/Items") &&
                 OpenBusinessLeftCss.activeClass
               }`
             }
@@ -85,7 +84,7 @@ function OpenBusinessLeftSide() {
               src={itemsIcon}
               className={OpenBusinessLeftCss.nonTransaction}
             />
-            <span name="addItem" id="additems">
+            <span name="addItem" id="Items">
               Items
             </span>
           </Link>

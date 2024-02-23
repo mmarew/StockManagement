@@ -1,5 +1,4 @@
 function DateFormatter(dateTimeString, timeZone) {
-  console.log("dateTimeString==", new Date(dateTimeString));
   let date = new Date(dateTimeString);
   let Year = date.getFullYear();
   let Month = date.getMonth();
@@ -12,8 +11,6 @@ function DateFormatter(dateTimeString, timeZone) {
     "-" +
     Day.toString().padStart(2, "0");
 
-  console.log("formattedDate", formattedDate);
-
   return formattedDate;
 }
 
@@ -22,7 +19,6 @@ const year = currentDate.getFullYear();
 const month = currentDate.getMonth() + 1; // Months are zero-based, so we add 1
 const day = currentDate.getDate();
 // let CurrentYMD = year + "-" + month + "-" + day;
-console.log("Current date:", year, "-", month, "-", day);
 function isValidDateFormat(dateString) {
   const timestamp = Date.parse(dateString);
   return !isNaN(timestamp);

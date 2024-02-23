@@ -15,7 +15,6 @@ function DeleteExpItem({ data }) {
     getExpencesLists,
     setSuccessError,
   } = data;
-  console.log("openDeletingModal", openDeletingModal);
   const [userPassword, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
@@ -31,7 +30,6 @@ function DeleteExpItem({ data }) {
         token,
         costsId: openDeletingModal.item.costsId,
       });
-      console.log("response", response);
       // Check response from server
       if (response.data.data == "deleted") {
         // Password verification successful
@@ -50,7 +48,6 @@ function DeleteExpItem({ data }) {
       }
     } catch (error) {
       setProcessing(true);
-      console.error("Error deleting expenses:", error);
       setSuccessError({
         Message: "FAIL",
         Detail: "Errors in deleting expenses. Please try again.",
@@ -67,6 +64,8 @@ function DeleteExpItem({ data }) {
       <Modal open={openDeletingModal.open}>
         <Box
           sx={{
+            maxWidth: 300,
+            width: "80%",
             position: "absolute",
             top: "50%",
             left: "50%",
