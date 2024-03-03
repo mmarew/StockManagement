@@ -4,6 +4,7 @@ const tokenKey = process.env.tokenKey;
 let createBusiness = async (req, res) => {
   try {
     let result = await businessService.createBusiness(req.body);
+    // console.log(" createBusiness result", result);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });

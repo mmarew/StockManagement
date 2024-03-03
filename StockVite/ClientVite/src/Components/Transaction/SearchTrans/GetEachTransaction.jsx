@@ -1,27 +1,21 @@
 import {
   Box,
-  Button,
   IconButton,
-  MenuItem,
-  Modal,
-  Select,
+  LinearProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
 import axios from "axios";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import singleSalesCss from "../../../CSS/AddSingleSales.module.css";
 import React, { useEffect, useState } from "react";
 import currentDates, { DateFormatter } from "../../Body/Date/currentDate";
 import CurrencyFormatter, { ButtonProcessing } from "../../Utilities/Utility";
-import CloseIcon from "@material-ui/icons/Close";
 import { ConsumeableContext } from "../../Body/UserContext/UserContext";
 import { Checkbox, Paper } from "@mui/material";
 import ExportToExcel from "../../PDF_EXCEL/PDF_EXCEL";
@@ -29,26 +23,22 @@ import ExportToExcel from "../../PDF_EXCEL/PDF_EXCEL";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
 import SuccessOrError from "../../Body/Others/SuccessOrError";
 import ModalTodeleteEachTransaction from "./ModalTodeleteEachTransaction";
+import ModalToEditEachTransaction from "./ModalToEditEachTransaction";
+import HRTAG from "../../Utilities/HRTAG";
 
 function GetEachTransaction({
   RandValue,
   ProductId,
   searchInput,
   currentDay,
-  setGetAllDailyRegisters,
+  productName,
   fromDate,
   toDate,
-  // ErrorsProps,
 }) {
-  const [Errors, setErrors] = useState("");
   let token = localStorage.getItem("storeToken");
   let openedBusiness = localStorage.getItem("openedBusiness");
-  let { setShowProgressBar, setProcessing } = ConsumeableContext();
   // use state starts here
-  const [formInputValues, setFormInputValues] = useState({
-    salesType: "Default",
-    token: token,
-  });
+  const [ErrorsOrSuccess, setErrorsOrSuccess] = useState("");
   const [EditSingleItem, setEditSingleItem] = useState({
     open: false,
     Items: {},
@@ -58,26 +48,20 @@ function GetEachTransaction({
       open: false,
       Items: {},
     });
-  const [productDetailes, setproductDetailes] = useState([]);
   let businessId = localStorage.getItem("businessId");
   let businessName = localStorage.getItem("businessName");
   let serverAddress = localStorage.getItem("targetUrl");
-  const [Proccess, setProccess] = useState(false);
+  const { Processing, setProcessing } = ConsumeableContext();
 
   let Today = currentDates();
-  const [searchedProducts, setSearchedProducts] = useState([]);
-  const [allDailySales, setAllDailySales] = useState({});
-
   const [DailyTransaction, setDailyTransaction] = useState([]);
-
-  /**getTotalRegisters start here */
   const [mergedDataArray, setmergedDataArray] = useState([]);
-
+  /**getTotalRegisters start here */
   let getTotalRegisters = async (targetproductId) => {
     try {
-      setSearchedProducts([]);
       // searchInput, currentDay;
       let OB = {
+        productName,
         currentDates: currentDay ? currentDay : Today,
         businessId,
         productId: targetproductId,
@@ -87,8 +71,8 @@ function GetEachTransaction({
         fromDate,
         toDate,
       };
-      setShowProgressBar(true);
       setProcessing(true);
+      setErrorsOrSuccess();
       setTransactionData((prev) => ({ TotalSales: 0, TotalPurchase: 0 }));
       let responce = await axios.post(
         serverAddress + "Transaction/getDailyTransaction/",
@@ -96,11 +80,10 @@ function GetEachTransaction({
           ...OB,
         }
       );
-      setShowProgressBar(false);
       setProcessing(false);
       let mydata = responce.data.data;
       if (mydata == "Error") {
-        setErrors(responce.data.Error);
+        setErrorsOrSuccess(responce.data.Error);
         return;
       }
       const data = [...mydata];
@@ -118,14 +101,13 @@ function GetEachTransaction({
           mergedData[key].salesQty += current.salesQty || 0;
           mergedData[key].creditsalesQty += current.creditsalesQty || 0;
           mergedData[key].brokenQty += current.brokenQty || 0;
-          // mergedData[key].productsUnitCost += current.productsUnitCost || 0;
         }
       });
 
       setmergedDataArray(Object.values(mergedData));
 
       if (mydata.length == 0) {
-        return setErrors("There is no registered data on this date.");
+        return setErrorsOrSuccess("There is no registered data on this date.");
       }
       let i = 0;
       let Description = "",
@@ -133,12 +115,9 @@ function GetEachTransaction({
         productsIdList = [],
         ProductId = "",
         purchaseQty = 0,
-        // searched products will be here
         creditSalesQty = 0,
-        productName = "",
         salesQty = 0,
         registrationDate = "",
-        dailySalesId = "",
         prevProductId = 0,
         dailySales = {},
         productDetail = [],
@@ -179,7 +158,6 @@ function GetEachTransaction({
         productName = mydata[i].productName;
         Description += mydata[i].Description + " ";
         brokenQty += mydata[i].brokenQty;
-        dailySalesId = mydata[i].dailySalesId;
         purchaseQty += mydata[i].purchaseQty;
         registrationDate = mydata[i].registrationDate;
         salesQty += mydata[i].salesQty;
@@ -210,57 +188,17 @@ function GetEachTransaction({
         prevProductId = ProductId;
       }
 
-      setAllDailySales(dailySales);
-      setproductDetailes(mydata);
       setDailyTransaction(mydata);
     } catch (error) {
-      setShowProgressBar(false);
       setProcessing(false);
-      setErrors(error.message);
+      setErrorsOrSuccess(error.message);
     }
   };
 
-  const editDailyTransaction = async (e) => {
-    e.preventDefault();
-
-    try {
-      formInputValues.token = token;
-      // return;
-
-      const response = await axios.put(
-        serverAddress + "Transaction/updateDailyTransactions",
-        {
-          ...formInputValues,
-        }
-      );
-
-      const { data } = response.data;
-
-      if (data === "update successfully") {
-        setEditSingleItem((prevstate) => ({ ...prevstate, open: false }));
-        alert(`Thank you. ${data}`);
-        await getTotalRegisters("getAllTransaction");
-      }
-    } catch (error) {
-      setErrors(error.message);
-    }
-  };
-
-  let handleSalesTransactionInput = (e, ProductId) => {
-    setFormInputValues((prev) => {
-      return {
-        ...prev,
-        [e.target.name]: e.target.value,
-        ProductId,
-      };
-    });
-  };
   useEffect(() => {
     setDailyTransaction([]);
     getTotalRegisters(ProductId);
-    // getTotalRegisters(ProductId);
   }, [, RandValue, ProductId]);
-  ////////// *** **** *** **** *** *** ////////////////////
 
   const [deviceSize, setdeviceSize] = useState(window.innerWidth);
   window.addEventListener("resize", () => {
@@ -289,520 +227,352 @@ function GetEachTransaction({
   useEffect(() => {
     setviewableData(viewEachTransactions ? DailyTransaction : mergedDataArray);
   }, [viewEachTransactions, DailyTransaction, mergedDataArray]);
-  const [ExpandView, setExpandView] = useState(false);
+  const [ExpandView, setExpandView] = useState(true);
   return (
-    <Paper style={{ padding: "20px", margin: "30px auto" }}>
-      {Errors && <SuccessOrError request={Errors} setErrors={setErrors} />}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          backgroundColor: "white",
-        }}
-        onClick={() => {
-          setExpandView(!ExpandView);
-        }}
-      >
-        <Typography>Transaction Table </Typography>
-        <span>{ExpandView ? <ExpandMore /> : <ExpandLess />}</span>
-      </Box>
-      {!ExpandView && (
+    <div style={{ marginTop: "40px" }}>
+      {Processing ? (
+        <LinearProgress />
+      ) : (
         <div>
-          <br />
-          <div>
-            Total Sales :- {CurrencyFormatter(TransactionData.TotalSales)}
-          </div>
-          <div>
-            Total Cost:- {CurrencyFormatter(TransactionData.TotalPurchase)}
-          </div>
-          {DailyTransaction.length > 0 && (
-            <div>
-              <Checkbox
-                checked={deviceSize > 768 ? true : false}
-                onChange={() => {
-                  setdeviceSize(deviceSize > 768 ? 700 : 800);
-                }}
-              />{" "}
-              View in table
-              <Checkbox
-                onChange={() => setviewEachTransactions(!viewEachTransactions)}
-                checked={viewEachTransactions}
-              />{" "}
-              View Each Transaction
-              {deviceSize < 768 ? (
-                <div style={{ display: "flex", flexWrap: "wrap" }}>
-                  {viewableData?.map((items, index) => {
-                    return (
-                      <Paper
-                        sx={{
-                          padding: "20px",
-                          margin: "10px",
-                          width: "300px",
-                        }}
-                        key={"details_" + index}
-                      >
-                        <div>
-                          <strong>Product Name: </strong>
-                          {items.itemDetailInfo
-                            ? JSON.parse(items.itemDetailInfo).productName
-                            : ""}
-                        </div>
-                        <div>
-                          <strong>Registered By:- </strong>
-                          {items.employeeName}
-                        </div>
-                        <div>
-                          <strong>Purchase QTY: </strong>
-                          {items.purchaseQty}
-                        </div>
-                        <div>
-                          <strong>Unit Cost:- </strong>
-                          <span>{CurrencyFormatter(items.unitCost)}</span>
-                        </div>
-                        <div>
-                          <strong>Total Cost:- </strong>
-                          <span>
-                            {CurrencyFormatter(
-                              items.purchaseQty * items.unitCost
-                            )}
-                          </span>
-                        </div>
-                        <div>
-                          <strong>Sales QTY: </strong>
-                          {items.salesQty ? items.salesQty : 0}
-                        </div>
-                        <div>
-                          <strong>Sales QTY Credit: </strong>
-                          {items.creditsalesQty ? items.creditsalesQty : 0}
-                        </div>
-                        <div
-                          style={{ color: "white", backgroundColor: "green" }}
-                        >
-                          <strong>Inventory: </strong>
-                          {items.inventoryItem}
-                        </div>
-
-                        <div>
-                          <strong>Unit Price: </strong>
-                          {CurrencyFormatter(items.unitPrice)}
-                        </div>
-                        <div>
-                          <strong>Total Price: </strong>
-                          {CurrencyFormatter(
-                            items.unitPrice *
-                              (Number(items.creditsalesQty) +
-                                Number(items.salesQty))
-                          )}
-                        </div>
-                        <div>
-                          <strong>Registration Date: </strong>
-                          {DateFormatter(items.registeredTimeDaily)}
-                        </div>
-                        <div>
-                          <strong>Payment Date: </strong>
-                          {DateFormatter(items.creditPaymentDate)}
-                        </div>
-                        <div>
-                          <strong>Sales Type : </strong>
-                          {items.salesTypeValues}
-                        </div>
-                        {/* {(creditPaymentDate, creditsalesQty,)} */}
-                        <div>
-                          <strong>Broken QTY: </strong>
-                          {items.brokenQty}
-                        </div>
-                        <div>
-                          <strong>Description: </strong> {items.Description}
-                        </div>
-                        <div>
-                          <strong>Actions: </strong>
-                          {openedBusiness !== "employersBusiness" ? (
-                            <>
-                              <IconButton
-                                onClick={() => {
-                                  setShowDeleteConfirmationModal({
-                                    open: true,
-                                    Items: items,
-                                  });
-                                }}
-                                aria-label="delete"
-                              >
-                                <DeleteIcon color="error" />
-                              </IconButton>
-                              <IconButton
-                                onClick={() => {
-                                  setFormInputValues({
-                                    ...items,
-                                  });
-                                  setEditSingleItem((previousState) => {
-                                    return {
-                                      ...previousState,
-                                      open: true,
-                                      Items: items,
-                                    };
-                                  });
-                                }}
-                              >
-                                <EditIcon color="info" />
-                              </IconButton>
-                            </>
-                          ) : (
-                            ""
-                          )}
-                        </div>
-                      </Paper>
-                    );
-                  })}
-                </div>
-              ) : (
-                <TableContainer>
-                  <Table>
-                    <TableHead sx={{ backgroundColor: "rgba(50,256,100,0.5)" }}>
-                      <TableRow>
-                        <TableCell>Product Name</TableCell>
-                        <TableCell>Registered by</TableCell>
-                        <TableCell>Purchase Qty </TableCell>
-                        <TableCell>Unit Cost </TableCell>
-                        <TableCell>Total Cost </TableCell>
-                        <TableCell>Total Sales</TableCell>
-                        <TableCell>Sales Qty Credit</TableCell>
-                        <TableCell>unit Price</TableCell>
-                        <TableCell>Sales in cash</TableCell>
-                        <TableCell>Sales Date</TableCell>
-                        <TableCell>Credit Payment Date</TableCell>
-                        <TableCell> Sales Type</TableCell>
-                        <TableCell> Inventory</TableCell>
-                        <TableCell>Broken Qty</TableCell>
-                        <TableCell>Description</TableCell>
-                        <TableCell> Update / Delete </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {viewableData?.map((items, index) => {
-                        return (
-                          <TableRow key={"detailes_" + index}>
-                            <TableCell>
-                              {items.itemDetailInfo
-                                ? JSON.parse(items.itemDetailInfo).productName
-                                : ""}
-                            </TableCell>
-                            <TableCell>{items.employeeName}</TableCell>
-                            <TableCell>{items.purchaseQty}</TableCell>
-                            <TableCell>
-                              {CurrencyFormatter(items.unitCost)}
-                            </TableCell>
-                            <TableCell>
-                              {CurrencyFormatter(
-                                items.purchaseQty * items.unitCost
-                              )}
-                            </TableCell>
-                            <TableCell>{items.salesQty}</TableCell>
-                            <TableCell>{items.creditsalesQty}</TableCell>
-                            <TableCell>
-                              {CurrencyFormatter(items.unitPrice)}
-                            </TableCell>
-                            <TableCell>
-                              {CurrencyFormatter(
-                                (items.salesQty + items.creditsalesQty) *
-                                  items.unitPrice
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              {DateFormatter(items.registeredTimeDaily)}
-                            </TableCell>
-                            <TableCell>
-                              {DateFormatter(items.creditPaymentDate)}
-                            </TableCell>
-                            <TableCell>{items.salesTypeValues}</TableCell>
-                            <TableCell>{items.inventoryItem}</TableCell>
-                            {/* {(creditPaymentDate, creditsalesQty,)} */}
-                            <TableCell> {items.brokenQty} </TableCell>
-                            <TableCell> {items.Description}</TableCell>
-                            <TableCell>
-                              {openedBusiness !== "employersBusiness" ? (
-                                <>
-                                  <IconButton
-                                    onClick={() => {
-                                      setShowDeleteConfirmationModal({
-                                        open: true,
-                                        Items: items,
-                                      });
-                                    }}
-                                    aria-label="delete"
-                                  >
-                                    <DeleteIcon color="error" />
-                                  </IconButton>
-                                  <IconButton
-                                    onClick={() => {
-                                      setFormInputValues(items);
-                                      setEditSingleItem((previousState) => {
-                                        return {
-                                          ...previousState,
-                                          open: true,
-                                          Items: items,
-                                        };
-                                      });
-                                    }}
-                                  >
-                                    <EditIcon color="info" />
-                                  </IconButton>
-                                </>
-                              ) : (
-                                ""
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                      <TableRow>
-                        <TableCell colSpan={6}></TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+          <Box
+            sx={{
+              padding: "30px",
+              display: "flex",
+              justifyContent: "space-between",
+              backgroundColor: "white",
+            }}
+            onClick={() => {
+              setExpandView(!ExpandView);
+            }}
+          >
+            <Typography>Sales & Purchase Transaction Table </Typography>
+            <span>{ExpandView ? <ExpandMore /> : <ExpandLess />}</span>
+          </Box>
+          <HRTAG />
+          {ExpandView && (
+            <Paper>
+              {ErrorsOrSuccess && (
+                <SuccessOrError
+                  request={ErrorsOrSuccess}
+                  setErrorsOrSuccess={setErrorsOrSuccess}
+                />
               )}
-              <Box sx={{ display: "flex", justifyContent: "center" }}>
-                {!Proccess ? (
-                  <div style={{ width: "600px", margin: "auto" }}>
-                    <ExportToExcel
-                      data={DailyTransaction}
-                      target="dailySales"
-                    />
+
+              <div>
+                <br />
+                <div>
+                  Total Sales :- {CurrencyFormatter(TransactionData.TotalSales)}
+                </div>
+                <div>
+                  Total Cost:-{" "}
+                  {CurrencyFormatter(TransactionData.TotalPurchase)}
+                </div>
+                {DailyTransaction.length > 0 && (
+                  <div>
+                    <Checkbox
+                      checked={deviceSize > 768 ? true : false}
+                      onChange={() => {
+                        setdeviceSize(deviceSize > 768 ? 700 : 800);
+                      }}
+                    />{" "}
+                    View in table
+                    <Checkbox
+                      onChange={() =>
+                        setviewEachTransactions(!viewEachTransactions)
+                      }
+                      checked={viewEachTransactions}
+                    />{" "}
+                    View Each Transaction
+                    {deviceSize < 768 ? (
+                      <div style={{ display: "flex", flexWrap: "wrap" }}>
+                        {viewableData?.map((items, index) => {
+                          return (
+                            <Paper
+                              sx={{
+                                padding: "20px",
+                                margin: "10px",
+                                width: "300px",
+                              }}
+                              key={"details_" + index}
+                            >
+                              <div>
+                                <strong>Product Name: </strong>
+                                {items.itemDetailInfo
+                                  ? JSON.parse(items.itemDetailInfo).productName
+                                  : ""}
+                              </div>
+                              <div>
+                                <strong>Registered By:- </strong>
+                                {items.employeeName}
+                              </div>
+                              <div>
+                                <strong>Purchase QTY: </strong>
+                                {items.purchaseQty}
+                              </div>
+                              <div>
+                                <strong>Unit Cost:- </strong>
+                                <span>{CurrencyFormatter(items.unitCost)}</span>
+                              </div>
+                              <div>
+                                <strong>Total Cost:- </strong>
+                                <span>
+                                  {CurrencyFormatter(
+                                    items.purchaseQty * items.unitCost
+                                  )}
+                                </span>
+                              </div>
+                              <div>
+                                <strong>Sales QTY: </strong>
+                                {items.salesQty ? items.salesQty : 0}
+                              </div>
+                              <div>
+                                <strong>Sales QTY Credit: </strong>
+                                {items.creditsalesQty
+                                  ? items.creditsalesQty
+                                  : 0}
+                              </div>
+                              <div
+                                style={{
+                                  color: "white",
+                                  backgroundColor: "green",
+                                }}
+                              >
+                                <strong>Inventory: </strong>
+                                {items.inventoryItem}
+                              </div>
+
+                              <div>
+                                <strong>Unit Price: </strong>
+                                {CurrencyFormatter(items.unitPrice)}
+                              </div>
+                              <div>
+                                <strong>Total Price: </strong>
+                                {CurrencyFormatter(
+                                  items.unitPrice *
+                                    (Number(items.creditsalesQty) +
+                                      Number(items.salesQty))
+                                )}
+                              </div>
+                              <div>
+                                <strong>Registration Date: </strong>
+                                {DateFormatter(items.registeredTimeDaily)}
+                              </div>
+                              <div>
+                                <strong>Payment Date: </strong>
+                                {DateFormatter(items.creditPaymentDate)}
+                              </div>
+                              <div>
+                                <strong>Sales Type : </strong>
+                                {items.salesTypeValues}
+                              </div>
+                              {/* {(creditPaymentDate, creditsalesQty,)} */}
+                              <div>
+                                <strong>Broken QTY: </strong>
+                                {items.brokenQty}
+                              </div>
+                              <div>
+                                <strong>Description: </strong>{" "}
+                                {items.Description}
+                              </div>
+                              <div>
+                                <strong>Actions: </strong>
+                                {openedBusiness !== "employersBusiness"
+                                  ? viewEachTransactions && (
+                                      <>
+                                        <IconButton
+                                          onClick={() => {
+                                            setShowDeleteConfirmationModal({
+                                              open: true,
+                                              Items: items,
+                                            });
+                                          }}
+                                          aria-label="delete"
+                                        >
+                                          <DeleteIcon color="error" />
+                                        </IconButton>
+                                        <IconButton
+                                          onClick={() => {
+                                            setEditSingleItem(
+                                              (previousState) => {
+                                                return {
+                                                  ...previousState,
+                                                  open: true,
+                                                  Items: items,
+                                                };
+                                              }
+                                            );
+                                          }}
+                                        >
+                                          <EditIcon color="info" />
+                                        </IconButton>
+                                      </>
+                                    )
+                                  : ""}
+                              </div>
+                            </Paper>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <TableContainer>
+                        <Table>
+                          <TableHead
+                            sx={{ backgroundColor: "rgba(50,256,100,0.5)" }}
+                          >
+                            <TableRow>
+                              <TableCell>Product Name</TableCell>
+                              <TableCell>Registered by</TableCell>
+                              <TableCell>Purchase Qty </TableCell>
+                              <TableCell>Unit Cost </TableCell>
+                              <TableCell>Total Cost </TableCell>
+                              <TableCell>Total Sales</TableCell>
+                              <TableCell>Sales Qty Credit</TableCell>
+                              <TableCell>unit Price</TableCell>
+                              <TableCell>Sales in cash</TableCell>
+                              <TableCell>Sales Date</TableCell>
+                              <TableCell>Credit Payment Date</TableCell>
+                              <TableCell> Sales Type</TableCell>
+                              <TableCell> Inventory</TableCell>
+                              <TableCell>Broken Qty</TableCell>
+                              <TableCell>Description</TableCell>
+                              {viewEachTransactions &&
+                                openedBusiness !== "employersBusiness" && (
+                                  <TableCell> Update / Delete </TableCell>
+                                )}
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {viewableData?.map((items, index) => {
+                              return (
+                                <TableRow key={"detailes_" + index}>
+                                  <TableCell>
+                                    {items.itemDetailInfo
+                                      ? JSON.parse(items.itemDetailInfo)
+                                          .productName
+                                      : ""}
+                                  </TableCell>
+                                  <TableCell>{items.employeeName}</TableCell>
+                                  <TableCell>{items.purchaseQty}</TableCell>
+                                  <TableCell>
+                                    {CurrencyFormatter(items.unitCost)}
+                                  </TableCell>
+                                  <TableCell>
+                                    {CurrencyFormatter(
+                                      items.purchaseQty * items.unitCost
+                                    )}
+                                  </TableCell>
+                                  <TableCell>{items.salesQty}</TableCell>
+                                  <TableCell>{items.creditsalesQty}</TableCell>
+                                  <TableCell>
+                                    {CurrencyFormatter(items.unitPrice)}
+                                  </TableCell>
+                                  <TableCell>
+                                    {CurrencyFormatter(
+                                      (items.salesQty + items.creditsalesQty) *
+                                        items.unitPrice
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    {DateFormatter(items.registeredTimeDaily)}
+                                  </TableCell>
+                                  <TableCell>
+                                    {DateFormatter(items.creditPaymentDate)}
+                                  </TableCell>
+                                  <TableCell>{items.salesTypeValues}</TableCell>
+                                  <TableCell>{items.inventoryItem}</TableCell>
+                                  {/* {(creditPaymentDate, creditsalesQty,)} */}
+                                  <TableCell> {items.brokenQty} </TableCell>
+                                  <TableCell> {items.Description}</TableCell>
+                                  <TableCell>
+                                    {openedBusiness !== "employersBusiness"
+                                      ? viewEachTransactions && (
+                                          <>
+                                            <IconButton
+                                              onClick={() => {
+                                                setShowDeleteConfirmationModal({
+                                                  open: true,
+                                                  Items: items,
+                                                });
+                                              }}
+                                              aria-label="delete"
+                                            >
+                                              <DeleteIcon color="error" />
+                                            </IconButton>
+                                            <IconButton
+                                              onClick={() => {
+                                                setEditSingleItem(
+                                                  (previousState) => {
+                                                    return {
+                                                      ...previousState,
+                                                      open: true,
+                                                      Items: items,
+                                                    };
+                                                  }
+                                                );
+                                              }}
+                                            >
+                                              <EditIcon color="info" />
+                                            </IconButton>
+                                          </>
+                                        )
+                                      : ""}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                            <TableRow>
+                              <TableCell colSpan={6}></TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    )}
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      {!Processing ? (
+                        <div style={{ width: "600px", margin: "auto" }}>
+                          <ExportToExcel
+                            data={DailyTransaction}
+                            target="dailySales"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <ButtonProcessing />
+                          <LinearProgress />
+                        </>
+                      )}
+                    </Box>
                   </div>
-                ) : (
-                  <ButtonProcessing />
                 )}
-              </Box>
-            </div>
-          )}
-          <Modal open={EditSingleItem.open}>
-            <Box
-              sx={{
-                height: "90%",
-                overflow: "scroll",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                maxWidth: 400,
-                bgcolor: "background.paper",
-                boxShadow: 24,
-                p: 4,
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6" component="h2">
-                  Edit Item {EditSingleItem.Items.productName}
-                </Typography>
-                <IconButton
-                  onClick={() =>
-                    setEditSingleItem((prev) => {
-                      return { ...prev, open: false };
-                    })
-                  }
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-              <Typography variant="body1" component="p">
-                <form
-                  className={singleSalesCss.singleTransactionForm}
-                  onSubmit={(e) => editDailyTransaction(e)}
-                >
-                  <TextField
-                    fullWidth
-                    type="number"
-                    required
-                    value={formInputValues.purchaseQty}
-                    className={"dailyRegistrationInputs"}
-                    onInput={(e) =>
-                      handleSalesTransactionInput(
-                        e,
-                        EditSingleItem.Items.ProductId
-                      )
-                    }
-                    name="purchaseQty"
-                    label="purchase quantity"
-                  />
-                  <br />
-                  <TextField
-                    fullWidth
-                    value={formInputValues.unitCost}
-                    type="number"
-                    className=""
-                    label="Unit Cost"
-                    name={"unitCost"}
-                    onInput={(e) => {
-                      handleSalesTransactionInput(
-                        e,
-                        EditSingleItem.Items.ProductId
-                      );
+                {/*ModalToEditEachTransaction  */}
+                {EditSingleItem.open && (
+                  <ModalToEditEachTransaction
+                    Data={{
+                      EditSingleItem,
+                      setEditSingleItem,
+                      setErrorsOrSuccess,
+                      getTotalRegisters,
                     }}
                   />
-                  <br />
-                  <div>
-                    {" "}
-                    Total Cost{" "}
-                    {CurrencyFormatter(
-                      formInputValues.purchaseQty * formInputValues.unitCost
-                    )}
-                  </div>
-                  <br />
-                  <TextField
-                    fullWidth
-                    type="number"
-                    required
-                    className={"dailyRegistrationInputs"}
-                    onInput={(e) =>
-                      handleSalesTransactionInput(
-                        e,
-                        EditSingleItem.Items.ProductId
-                      )
+                )}
+                {/* modal to delete items */}
+                {ShowDeleteConfirmationModal.open && (
+                  <ModalTodeleteEachTransaction
+                    getTotalRegisters={getTotalRegisters}
+                    setShowDeleteConfirmationModal={
+                      setShowDeleteConfirmationModal
                     }
-                    name={
-                      formInputValues.salesTypeValues == "On credit" ||
-                      formInputValues.salesTypeValues == "credit paied"
-                        ? "creditsalesQty"
-                        : "salesQty"
-                    }
-                    label="Sales quantity"
-                    value={
-                      formInputValues.salesTypeValues == "On credit" ||
-                      formInputValues.salesTypeValues == "credit paied"
-                        ? formInputValues.creditsalesQty
-                        : formInputValues.salesQty
-                    }
+                    ShowDeleteConfirmationModal={ShowDeleteConfirmationModal}
                   />
-                  <br /> <br />
-                  <TextField
-                    value={formInputValues.unitPrice}
-                    name="unitPrice"
-                    fullWidth
-                    required
-                    type="number"
-                    label="Unit price"
-                  />{" "}
-                  <br />
-                  Total Sales={" "}
-                  {CurrencyFormatter(
-                    (Number(formInputValues.creditsalesQty) +
-                      Number(formInputValues.salesQty)) *
-                      Number(formInputValues.unitPrice)
-                  )}
-                  <br />
-                  <br />
-                  <TextField
-                    fullWidth
-                    required
-                    type="number"
-                    className={"dailyRegistrationInputs"}
-                    onInput={(e) =>
-                      handleSalesTransactionInput(
-                        e,
-                        EditSingleItem.Items.ProductId
-                      )
-                    }
-                    name="brokenQty"
-                    label="Broken quantity"
-                    value={formInputValues.brokenQty}
-                  />
-                  <br />
-                  <label>payment type</label>
-                  <Select
-                    value={formInputValues.salesTypeValues}
-                    name="salesTypeValues"
-                    onChange={(e) =>
-                      handleSalesTransactionInput(
-                        e,
-                        EditSingleItem.Items.ProductId
-                      )
-                    }
-                    sx={{ margin: "20px auto" }}
-                    fullWidth
-                    required
-                  >
-                    <MenuItem value={"On cash"}>On cash</MenuItem>
-                    <MenuItem value={"By bank"}>By bank</MenuItem>
-                    <MenuItem value={"On credit"}>On credit</MenuItem>
-                    <MenuItem value={"credit paied"}>credit paied</MenuItem>
-                  </Select>
-                  {formInputValues.salesTypeValues == "On credit" && (
-                    <Box>
-                      <lab>Payment date</lab>
-                      <TextField
-                        id=""
-                        onChange={(e) =>
-                          handleSalesTransactionInput(
-                            e,
-                            EditSingleItem.Items.ProductId
-                          )
-                        }
-                        value={DateFormatter(formInputValues.creditPaymentDate)}
-                        name="creditPaymentDate"
-                        className=""
-                        required
-                        fullWidth
-                        type="date"
-                      />
-                      <br /> <br />
-                    </Box>
-                  )}
-                  <TextField
-                    fullWidth
-                    required
-                    className={"dailyRegistrationInputs"}
-                    onInput={(e) =>
-                      handleSalesTransactionInput(
-                        e,
-                        EditSingleItem.Items.ProductId
-                      )
-                    }
-                    value={formInputValues.Description}
-                    name="Description"
-                    label="Description"
-                  />
-                  <br />
-                  <Box>
-                    <Button color="primary" variant="contained" type="submit">
-                      UPDATE
-                    </Button>
-                    &nbsp; &nbsp; &nbsp;
-                    <Button
-                      onClick={() =>
-                        setEditSingleItem((prevstate) => {
-                          return { ...prevstate, open: false };
-                        })
-                      }
-                      color="warning"
-                      variant="contained"
-                      type="submit"
-                    >
-                      CANCEL
-                    </Button>
-                  </Box>
-                </form>
-              </Typography>
-            </Box>
-          </Modal>
-          {/* modal to delete items */}
-          {ShowDeleteConfirmationModal.open && (
-            <ModalTodeleteEachTransaction
-              getTotalRegisters={getTotalRegisters}
-              setShowDeleteConfirmationModal={setShowDeleteConfirmationModal}
-              ShowDeleteConfirmationModal={ShowDeleteConfirmationModal}
-            />
+                )}
+              </div>
+            </Paper>
           )}
         </div>
       )}
-    </Paper>
+    </div>
   );
 }
 
 export default GetEachTransaction;
+// dani biruk ,saron asech, bek seif

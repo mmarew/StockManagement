@@ -4,9 +4,14 @@ import DeleteBusiness from "./DeleteBusiness";
 import { useState } from "react";
 import { ButtonProcessing } from "../Utilities/Utility";
 function ModalToDeleteBusiness({ Data }) {
-  let { openBusinessDeletingModal, setopenBusinessDeletingModal } = Data;
+  let {
+    openBusinessDeletingModal,
+    setopenBusinessDeletingModal,
+    getBusiness,
+    setRequestFailOrSuccess,
+  } = Data;
   let { datas, Open } = openBusinessDeletingModal;
-  let { businessId, businessName, getBusiness, setBusinessLists } = datas;
+  let { businessId, businessName } = datas;
   const [Proccessing, setProccessing] = useState(false);
   //   let { setOpen, setProccessing } = openBusinessDeletingModal;
   const [userPassword, setuserPassword] = useState(null);
@@ -15,6 +20,7 @@ function ModalToDeleteBusiness({ Data }) {
   let callDeleteFnction = async (e) => {
     e.preventDefault();
     let responce = await DeleteBusiness({
+      setRequestFailOrSuccess,
       businessId,
       businessName,
       getBusiness,

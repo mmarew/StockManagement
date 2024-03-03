@@ -4,7 +4,9 @@ import GetCreditLists from "../../CreditMGMT/GetCreditLists";
 import GetEachTransaction from "../SearchTrans/GetEachTransaction";
 
 let SearchSales_Purchase = ({ InputValue, setSearchTypeValueError }) => {
-  let { toDate, fromDate } = InputValue;
+  let { toDate, fromDate, selectedValue, productName } = InputValue;
+  console.log("InputValue", InputValue);
+  // return;
   const [getAllDailyRegisters, setGetAllDailyRegisters] = useState({
     Open: false,
     ProductId: "getAllTransaction",
@@ -22,7 +24,12 @@ let SearchSales_Purchase = ({ InputValue, setSearchTypeValueError }) => {
         fromDate={fromDate}
         RandValue={InputValue.randval}
         setGetAllDailyRegisters={setGetAllDailyRegisters}
-        ProductId="getAllTransaction"
+        productName={productName}
+        ProductId={
+          selectedValue == "SINGLETRANSACTION"
+            ? "getSingleTransaction"
+            : "getAllTransaction"
+        }
       />
       <SearchExpenceTransaction
         InputValue={InputValue}

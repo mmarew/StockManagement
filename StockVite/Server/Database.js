@@ -25,6 +25,7 @@ let createBasicTables = async () => {
     let [responses] = await pool.query(createCreditCollection);
 
     let createTableDailyTransaction = `create table if not exists dailyTransaction(dailySalesId int auto_increment,
+      registeredBy int not null,
        mainProductId int, 
        purchaseQty float not null default 0,
         unitPrice float not null default 0, 
@@ -64,84 +65,67 @@ let createBasicTables = async () => {
   } catch (error) {}
 };
 
-let createBusiness = async (
+const createBusiness = async ({
   businessName,
   ownerId,
   createdDate,
-  res,
-  source
-) => {
-  let uniqueBusinessName = businessName.replace(/[^A-Za-z0-9_]/g, "");
-
-  let tableExpenses =
-    "CREATE TABLE IF NOT EXISTS ?? (expenseId INT(11) NOT NULL AUTO_INCREMENT, costId INT(11) NOT NULL,registeredBy int, costAmount float(11) NOT NULL, costDescription VARCHAR(9000) NOT NULL, costRegisteredDate DATE NOT NULL, PRIMARY KEY (expenseId)) ";
-  let costTable =
-    "CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, registeredBy int,  expItemRegistrationDate Date, unitCost float(11) NOT NULL, PRIMARY KEY (costsId)) ";
-
-  let createProductsTable =
-    "CREATE TABLE IF NOT EXISTS ??(ProductId INT(11) NOT NULL AUTO_INCREMENT, productRegistrationDate date, registeredBy int, mainProductId int, productsUnitCost float(11) NOT NULL, prevUnitCost float, productsUnitPrice float(11) NOT NULL, prevUnitPrice float, productName VARCHAR(900) NOT NULL, prevProductName varchar(1000), minimumQty float(11) NOT NULL, prevMinimumQty float, Status enum('active','changed','replaced','active_but_updated'), PRIMARY KEY (ProductId)) ";
-  /////////////////////////
-  let createTransaction = `CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL,registeredBy int, unitPrice float(11) NOT NULL, productIDTransaction INT(11) NOT NULL, mainProductId int, salesQty float(11) NOT NULL default 0, creditsalesQty float(11) NOT NULL  default 0,  purchaseQty float(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory float(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, creditDueDate date ,salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'),registrationSource enum('Total','Single'), partiallyPaidInfo JSON, creditPayementdate date, PRIMARY KEY (transactionId))`;
-
-  let queries = [],
-    tableCollections = {};
-  let newBusinessName = uniqueBusinessName;
-  let select = `SELECT * FROM Business WHERE uniqueBusinessName = ?`;
-  let insert = `INSERT INTO Business (businessName,uniqueBusinessName, ownerId, createdDate) VALUES (?,?,?,?)`;
-  let registerMainBusinessName = async (nameOfBusiness) => {
-    try {
-      nameOfBusiness = nameOfBusiness.replace(/[^A-Za-z0-9_]/g, "");
-      const [rows] = await pool.query(select, [nameOfBusiness]);
-      if (rows.length == 0) {
-        const data = await pool.query(insert, [
-          businessName,
-          nameOfBusiness,
-          ownerId,
-          createdDate,
-        ]);
-        return "Business Created";
-      } else {
-        let { BusinessID } = rows[0];
-        newBusinessName = uniqueBusinessName + "_" + BusinessID;
-        return await registerMainBusinessName(newBusinessName);
-      }
-    } catch (error) {
-      return res.json({ data: "Errors" });
-    }
-  };
+  source,
+}) => {
   try {
-    await registerMainBusinessName(newBusinessName);
-    let tables = ["_expenses", "_Costs", "_products", "_Transaction"];
-    queries = [
-      tableExpenses,
-      costTable,
-      createProductsTable,
-      createTransaction,
-    ];
-    let promises = queries.map(async (query, index) => {
-      try {
-        const [data] = await pool.query(query, [
-          newBusinessName + tables[index],
-        ]);
-        return data; // Return the query result
-      } catch (error) {
-        throw error; // Rethrow the error to be caught later
-      }
-    });
+    const cleanBusinessName = businessName.replace(/[^A-Za-z0-9_]/g, "");
+    let newBusinessName = cleanBusinessName;
 
-    const results = await Promise.all(promises);
-    if (results) {
-      results.forEach((result, index) => {
-        tableCollections[queries[index]] = result.rowCount;
-      });
+    const selectQuery = `SELECT * FROM Business WHERE uniqueBusinessName = ?`;
+    const insertQuery = `INSERT INTO Business (businessName, uniqueBusinessName, ownerId, createdDate) VALUES (?, ?, ?, ?)`;
+
+    const registerMainBusinessName = async (nameOfBusiness) => {
+      try {
+        const [rows] = await pool.query(selectQuery, [nameOfBusiness]);
+        if (rows.length === 0) {
+          await pool.query(insertQuery, [
+            businessName,
+            nameOfBusiness,
+            ownerId,
+            createdDate,
+          ]);
+          return "Business Created";
+        } else {
+          const { BusinessID } = rows[0];
+          newBusinessName = cleanBusinessName + "_" + BusinessID;
+          return await registerMainBusinessName(newBusinessName);
+        }
+      } catch (error) {
+        throw error;
+      }
+    };
+
+    await registerMainBusinessName(newBusinessName);
+
+    const tableNames = ["_expenses", "_Costs", "_products", "_Transaction"];
+    const createTableQueries = [
+      `CREATE TABLE IF NOT EXISTS ?? (expenseId INT(11) NOT NULL AUTO_INCREMENT, costId INT(11) NOT NULL, registeredBy int, costAmount float(11) NOT NULL, costDescription VARCHAR(9000) NOT NULL, costRegisteredDate DATE NOT NULL, PRIMARY KEY (expenseId))`,
+      `CREATE TABLE IF NOT EXISTS ?? (costsId INT(11) NOT NULL AUTO_INCREMENT, costName VARCHAR(3000) NOT NULL, registeredBy int, expItemRegistrationDate Date, unitCost float(11) NOT NULL, PRIMARY KEY (costsId))`,
+      `CREATE TABLE IF NOT EXISTS ?? (ProductId INT(11) NOT NULL AUTO_INCREMENT, productRegistrationDate date, registeredBy int, mainProductId int, productsUnitCost float(11) NOT NULL, prevUnitCost float, productsUnitPrice float(11) NOT NULL, prevUnitPrice float, productName VARCHAR(900) NOT NULL, prevProductName varchar(1000), minimumQty float(11) NOT NULL, prevMinimumQty float, Status enum('active','changed','replaced','active_but_updated'), PRIMARY KEY (ProductId))`,
+      `CREATE TABLE IF NOT EXISTS ?? (transactionId INT(11) NOT NULL AUTO_INCREMENT, unitCost INT(11) NOT NULL, registeredBy int, unitPrice float(11) NOT NULL, productIDTransaction INT(11) NOT NULL, mainProductId int, salesQty float(11) NOT NULL default 0, creditsalesQty float(11) NOT NULL default 0, purchaseQty float(11) NOT NULL default 0, wrickages INT(11) NOT NULL default 0, Inventory float(11) NOT NULL default 0, description VARCHAR(5000) NOT NULL, registeredTime DATE NOT NULL, creditDueDate date, salesTypeValues enum('On cash','By bank','On credit','Credit paied','Partially paied'), registrationSource enum('Total','Single'), partiallyPaidInfo JSON, creditPayementdate date, PRIMARY KEY (transactionId))`,
+    ];
+
+    const tableCollections = {};
+
+    for (let i = 0; i < createTableQueries.length; i++) {
+      const query = createTableQueries[i];
+      const tableName = newBusinessName + tableNames[i];
+      const [result] = await pool.query(query, [tableName]);
+      tableCollections[query] = result.rowCount;
     }
 
-    return { data: "created well", source, tableCollections };
+    return {
+      message: "Business created successfully",
+    };
   } catch (error) {
-    if (error === "registeredBefore") return { error };
-    return { error: "Unable to create tables." };
+    return { error: "Unable to create business" };
   }
 };
+
 const insertIntoUserTable = async (fullName, phoneNumber, password) => {
   try {
     const salt = bcript.genSaltSync();

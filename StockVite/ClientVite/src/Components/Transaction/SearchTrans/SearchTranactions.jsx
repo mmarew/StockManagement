@@ -10,7 +10,6 @@ function SearchTranactions({ data }) {
     setSinlgeSalesInputValues,
     singleSalesInputValues,
   } = data;
-  const [searchedProducts, setSearchedProducts] = useState([]);
 
   const [Processing, setProcessing] = useState(false);
   let handleSearchableProductInput = (event) => {
@@ -51,7 +50,7 @@ function SearchTranactions({ data }) {
             marginTop: "30px",
           }}
         >
-          Select Date
+          From Date
         </label>
         <br />
         <TextField
@@ -59,8 +58,28 @@ function SearchTranactions({ data }) {
           value={singleSalesInputValues.singleSalesDate || currentDates()}
           required
           fullWidth
-          name="singleSalesDate"
-          id="singleSalesDate"
+          name="singleSalesFromDate"
+          id="singleSalesFromDate"
+          type="date"
+        />{" "}
+        <label
+          style={{
+            textAlign: "center",
+            paddingLeft: "100px",
+            width: "fit-content ",
+            marginTop: "30px",
+          }}
+        >
+          To Date
+        </label>
+        <br />
+        <TextField
+          onChange={handleSearchableProductInput}
+          value={singleSalesInputValues.singleSalesDate || currentDates()}
+          required
+          fullWidth
+          name="singleSalesToDate"
+          id="singleSalesToDate"
           type="date"
         />
         {!Processing ? (

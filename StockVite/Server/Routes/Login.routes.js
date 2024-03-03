@@ -13,5 +13,6 @@ Router.get("/requestPasswordReset/", loginController.requestPasswordReset);
 Router.post("/verifyPin", loginController.verifyPin);
 Router.post("/forgetRequest", loginController.forgetRequest);
 Router.post("/updateChangeInpassword/", loginController.updateChangeInpassword);
+Router.get("/getPasswordResetPin/", loginController.getPasswordResetPin);
 
 module.exports = Router;

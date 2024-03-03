@@ -109,7 +109,6 @@ let deleteExpenceItem = async (body) => {
 };
 let getExpTransactions = async (query, body) => {
   try {
-    console.log("in getExpTransactions", query);
     let { businessId, fromDate, toDate, searchTarget, InputValue } = query;
     let { userID } = body;
     let businessName = await getUniqueBusinessName(businessId, userID);
@@ -180,7 +179,6 @@ let AddExpencesItems = async (body) => {
   try {
     let { businessId, registrationDate, userID } = body;
     let businessName = await getUniqueBusinessName(businessId, userID);
-    console.log("businessName", businessName);
     if (businessName == "you are not owner of this business")
       return { data: "you are not owner of this business" };
     let Results = await inserExpencesItem({
@@ -202,6 +200,8 @@ const registerExpenseTransaction = async (body) => {
       body;
     console.log("costData", costData);
     const businessName = await getUniqueBusinessName(businessId, userID);
+    if (businessName == "you are not owner of this business")
+      return { data: "you are not owner of this business" };
     const costsId = costData.costsId;
     let costName = costData.costName.replace(/ /g, "");
     const table = `${businessName}_expenses`;
@@ -221,6 +221,8 @@ const updateMyExpensesList = async (body) => {
   try {
     const { businessId, userID, costDescription, costAmount, expenseId } = body;
     const businessName = await getUniqueBusinessName(businessId, userID);
+    if (businessName == "you are not owner of this business")
+      return { data: "you are not owner of this business" };
     console.log("Body:", body);
     console.log("Business Name:", businessName);
 
@@ -240,7 +242,28 @@ const updateMyExpensesList = async (body) => {
     return { data: "Error updating expenses" };
   }
 };
+let deleteExpenceTransaction = async (body) => {
+  try {
+    let { expenseId, userID, businessId } = body;
+    const businessName = await getUniqueBusinessName(businessId, userID);
+    if (businessName == "you are not owner of this business")
+      return { data: businessName };
+    const table = `${businessName}_expenses`;
+    let sqlToDelete = `DELETE FROM ?? WHERE expenseId=?`;
+    const values = [table, expenseId];
+    const [rows] = await pool.query(sqlToDelete, values);
+    if (rows.affectedRows > 0) {
+      return { data: "Successfully deleted" };
+    } else {
+      return { data: "Unable to delete" };
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    return { data: "Error deleting expenses" };
+  }
+};
 module.exports = {
+  deleteExpenceTransaction,
   updateExpencesItem,
   updateMyExpensesList,
   registerExpenseTransaction,

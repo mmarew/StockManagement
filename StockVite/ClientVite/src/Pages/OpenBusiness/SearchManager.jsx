@@ -6,6 +6,7 @@ import SearchExpencesItem from "../../Components/Expences/SearchExpencesItem";
 import currentDates from "../../Components/Body/Date/currentDate";
 import { ButtonProcessing } from "../../Components/Utilities/Utility";
 import { ConsumeableContext } from "../../Components/Body/UserContext/UserContext";
+import GetEachTransaction from "../../Components/Transaction/SearchTrans/GetEachTransaction";
 
 function SearchManager() {
   const [inputValue, setInputValue] = useState({
@@ -20,19 +21,19 @@ function SearchManager() {
   const [searchTypeValueError, setSearchTypeValueError] = useState("");
   const submitSearch = (e) => {
     // used to re render in click
-    setProcessing(true);
-    setInputValue({ ...inputValue, randval: Math.random(), formSubmit: true });
-
     e.preventDefault();
     if (inputValue.selectedValue === "Default") {
       setSearchTypeValueError("Please select a search type first.");
       return;
     }
+    setInputValue({ ...inputValue, randval: Math.random(), formSubmit: true });
+    setProcessing(true);
     setSearchTypeValueError("");
   };
 
   const handleInputChange = (e) => {
     const { value, name } = e.target;
+    setSearchTypeValueError("");
     setInputValue((prevState) => ({
       ...prevState,
       [name]: value,
@@ -121,14 +122,19 @@ function SearchManager() {
       {inputValue.formSubmit && (
         <React.Fragment>
           {inputValue.selectedValue === "SINGLETRANSACTION" ? (
-            <SearchSales_Purchase
-              Processing={{ Processing, setProcessing }}
-              setSearchTypeValueError={setSearchTypeValueError}
-              InputValue={inputValue}
+            <GetEachTransaction
+              toDate={inputValue.toDate}
+              fromDate={inputValue.fromDate}
+              RandValue={inputValue.randval}
+              productName={inputValue.productName}
+              ProductId={
+                inputValue.selectedValue == "SINGLETRANSACTION"
+                  ? "getSingleTransaction"
+                  : "getAllTransaction"
+              }
             />
           ) : inputValue.selectedValue === "COSTS" ? (
             <SearchExpencesItem
-              proccessData={{ Processing, setProcessing }}
               InputValue={inputValue}
               setSearchTypeValueError={setSearchTypeValueError}
             />

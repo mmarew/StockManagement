@@ -1,9 +1,4 @@
 const express = require("express");
-const { pool } = require("../Config/db.config");
-const tokenKey = process.env.tokenKey;
-const { getUniqueBusinessName } = require("../UniqueBusinessName");
-const JWT = require("jsonwebtoken");
-const { CurrentYMD } = require("../DateFormatter");
 const { authMiddleware, authMiddleware2 } = require("../middleware/Auth");
 const {
   searchExpByName,
@@ -14,10 +9,17 @@ const {
   registerExpenseTransaction,
   updateMyExpensesList,
   updateExpencesItem,
+  deleteExpenceTransaction,
 } = require("../Controllers/Expences.controller");
 const router = express.Router();
 router.post("/", () => {});
 router.get("/", () => {});
+router.post(
+  "/Expences/deleteExpenceTransaction/",
+  authMiddleware,
+  authMiddleware2,
+  deleteExpenceTransaction
+);
 
 router.post("/Expences/AddExpencesItems/", authMiddleware, AddExpencesItems);
 router.post(
@@ -25,7 +27,12 @@ router.post(
   authMiddleware,
   updateMyExpensesList
 );
-router.post("/Expences/deleteExpencesItem", authMiddleware, deleteExpenceItem);
+router.post(
+  "/Expences/deleteExpencesItem",
+  authMiddleware,
+  authMiddleware2,
+  deleteExpenceItem
+);
 router.post(
   `/Expences/registerExpenceTransaction/`,
   authMiddleware,

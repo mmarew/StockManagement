@@ -6,12 +6,23 @@ import { Button, LinearProgress } from "@mui/material";
 import AddCostTransactionCss from "../Costs/AddCostTransaction.module.css";
 import SuccessOrError from "../Body/Others/SuccessOrError";
 import AddExpTransaction from "../Transaction/AddTrans/AddExpTransaction";
-function GetExpencesLists() {
-  const [RegisterableCots, setRegisterableCots] = useState([{}]);
+export let fetchExpencesItemsFromServer = async () => {
   let serverAddress = localStorage.getItem("targetUrl");
   const businessId = localStorage.getItem("businessId");
   const token = localStorage.getItem("storeToken");
   let businessName = localStorage.getItem("businessName");
+  let response = await axios.get(serverAddress + "getExpencesLists/", {
+    params: {
+      businessName,
+      businessId,
+      token,
+    },
+  });
+  return response;
+};
+function GetExpencesLists() {
+  const [RegisterableCots, setRegisterableCots] = useState([{}]);
+
   const [errorsOrSuccess, setErrorsOrSuccess] = useState({
     Message: "",
     Detail: "",
@@ -27,13 +38,7 @@ function GetExpencesLists() {
       setProcecssing(true);
       setShowProgressBar(true);
       // return;
-      let response = await axios.get(serverAddress + "getExpencesLists/", {
-        params: {
-          businessName,
-          businessId,
-          token,
-        },
-      });
+      let response = await fetchExpencesItemsFromServer();
       setShowProgressBar(false);
       setProcecssing(false);
       setshowCostForm(true);

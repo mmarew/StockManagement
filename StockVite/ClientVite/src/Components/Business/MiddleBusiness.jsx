@@ -4,7 +4,7 @@ import { ConsumeableContext } from "../Body/UserContext/UserContext";
 import ModalToEditBusinessName from "../Business/ModalToEditBusinessName";
 
 import ModalToDeleteBusiness from "../Business/ModalToDeleteBusiness";
-import { Button, TextField } from "@mui/material";
+import { Button, Grid, LinearProgress, Paper, TextField } from "@mui/material";
 import CreateBusiness from "./CreateBusiness";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit"; // Import css
@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ModalToRemoveEmployerBusiness from "./ModalToRemoveEmployerBusiness";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import SuccessOrError from "../Body/Others/SuccessOrError";
 function MiddleBusiness({}) {
   let ModalData = {
     Open: false,
@@ -119,6 +120,16 @@ function MiddleBusiness({}) {
 
   return (
     <div>
+      {requestFailOrSuccess?.Responce && (
+        <SuccessOrError
+          request={
+            requestFailOrSuccess.Responce === "SUCCESS"
+              ? "SUCCESS"
+              : requestFailOrSuccess.Message
+          }
+          setErrors={setRequestFailOrSuccess}
+        />
+      )}
       <div className={Businessmodulecss.MiddelSideBusinessWrapper}>
         <div className={Businessmodulecss.BusinessWrapper}>
           {ownersName != "" ? (
@@ -127,17 +138,18 @@ function MiddleBusiness({}) {
               <h4 className={Businessmodulecss.welcomeMessage}>
                 Hello {ownersName} , welcome to Smart Stock management system
               </h4>
-              <p className={Businessmodulecss.welcomeMessage}>
-                Today is {new Date().toDateString()}
-              </p>
-              <br />
             </>
           ) : (
             <h4 className={Businessmodulecss.welcomeMessage}>
               Hello User , welcome to Smart Stock management system
             </h4>
           )}
-
+          <div>
+            <p className={Businessmodulecss.welcomeMessage}>
+              Today is {new Date().toDateString()}
+            </p>
+            <br />
+          </div>
           <Button
             variant="contained"
             onClick={() => {
@@ -148,11 +160,10 @@ function MiddleBusiness({}) {
             Add
           </Button>
           <br />
+          {ShowProgressBar && <LinearProgress />}
           {newBusiness.Open && (
             <CreateBusiness
               setRequestFailOrSuccess={setRequestFailOrSuccess}
-              ShowProgressBar={ShowProgressBar}
-              setShowProgressBar={setShowProgressBar}
               getBusiness={getBusiness}
               setnewBusiness={setnewBusiness}
               newBusiness={newBusiness}
@@ -165,31 +176,22 @@ function MiddleBusiness({}) {
           )}
           <div>
             {businessListsInfo}
-            <div className={Businessmodulecss.createdBusinessWrapper}>
+            <Grid spacing={1} container>
               {createdBusiness?.map((datas) => {
                 return (
-                  <div
-                    key={datas.BusinessID}
-                    className={Businessmodulecss.createdBusiness}
-                  >
-                    <div className={Businessmodulecss.Business}>
-                      <h4 style={{ textAlign: "center" }}>
-                        {datas.BusinessName}
-                      </h4>
+                  <Grid sx={{ maxWidth: "350px" }} item key={datas.BusinessID}>
+                    <Paper sx={{ p: 2 }}>
+                      <h4>{datas.BusinessName}</h4>
                       <div
                         style={{
                           fontSize: "12px",
-                          padding: "10px",
-                          textAlign: "center",
+                          padding: "10px 0",
                         }}
                       >
                         Created on {DateFormatter(datas.createdDate)}
                       </div>
 
-                      <div
-                        className={Businessmodulecss.businessButton}
-                        id={"openEditWrapper" + datas.BusinessID}
-                      >
+                      <div className={Businessmodulecss.businessButton}>
                         <Button
                           onClick={() =>
                             openThisBusiness(
@@ -206,11 +208,7 @@ function MiddleBusiness({}) {
                         <Button
                           size="small"
                           sx={{
-                            "&:hover": {
-                              borderColor: "rgb(25, 118, 210)", // set your desired border color here
-                              borderWidth: 2,
-                              borderStyle: "solid",
-                            },
+                            margin: "0 5px",
                           }}
                           onClick={() =>
                             setopenBusinessEditingModal({
@@ -296,8 +294,8 @@ function MiddleBusiness({}) {
                           </div>
                         </form>
                       </div>
-                    </div>
-                  </div>
+                    </Paper>
+                  </Grid>
                 );
               })}
               {
@@ -338,13 +336,7 @@ function MiddleBusiness({}) {
                           </Button>
                           <Button
                             disabled
-                            sx={{
-                              "&:hover": {
-                                borderColor: "rgb(25, 118, 210)", // set your desired border color here
-                                borderWidth: 2,
-                                borderStyle: "solid",
-                              },
-                            }}
+                            sx={{}}
                             variant="outlined"
                             startIcon={<EditIcon />}
                           >
@@ -353,8 +345,8 @@ function MiddleBusiness({}) {
                           <Button
                             onClick={() => {
                               setRemoveEmployerBusiness({
-                                open: true,
-                                getBusiness: getBusiness,
+                                Open: true,
+                                getBusiness,
                                 items,
                               });
                             }}
@@ -372,13 +364,14 @@ function MiddleBusiness({}) {
                   })}
                 </>
               }
-            </div>
+            </Grid>
           </div>
         </div>
       </div>
       {openBusinessDeletingModal.Open && (
         <ModalToDeleteBusiness
           Data={{
+            setRequestFailOrSuccess,
             getBusiness,
             openBusinessDeletingModal,
             setopenBusinessDeletingModal,
@@ -392,7 +385,7 @@ function MiddleBusiness({}) {
           openBusinessEditingModal={openBusinessEditingModal}
         />
       )}
-      {RemoveEmployerBusiness?.open && (
+      {RemoveEmployerBusiness?.Open && (
         <ModalToRemoveEmployerBusiness
           data={{
             RemoveEmployerBusiness,

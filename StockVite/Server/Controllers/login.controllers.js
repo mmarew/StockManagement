@@ -27,13 +27,23 @@ let verifyPin = async (req, res) => {
 };
 let forgetRequest = async (req, res) => {
   let result = await loginService.forgetRequest(req.body);
+  let { error, data } = result;
+  if (error) return res.status(400).json({ error });
   res.json(result);
 };
 let updateChangeInpassword = async (req, res) => {
   let result = await loginService.updateChangeInpassword(req.body);
   res.json(result);
 };
+let getPasswordResetPin = async (req, res) => {
+  let result = await loginService.getPasswordResetPin(req.body);
+  if (result == "error" || !result) {
+    return res.status(400).json({ Message: "Error in getting data" });
+  }
+  res.status(200).json(result);
+};
 module.exports = {
+  getPasswordResetPin,
   updateChangeInpassword,
   forgetRequest,
   login,

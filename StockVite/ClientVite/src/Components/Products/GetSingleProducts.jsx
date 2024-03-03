@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import singleSalesCss from "../../CSS/AddSingleSales.module.css";
 import {
   Button,
+  LinearProgress,
+  MenuItem,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -14,47 +17,33 @@ import {
 import axios from "axios";
 import currentDates from "../Body/Date/currentDate";
 import { ButtonProcessing } from "../Utilities/Utility";
+import fetchProducts from "./fetchProducts";
+import { ConsumeableContext } from "../Body/UserContext/UserContext";
 function GetSingleProducts({ data }) {
   let { setGetAllDailyRegisters, steRegisterableItems } = data;
-  let token = localStorage.getItem("storeToken");
-  let businessId = localStorage.getItem("businessId");
-  let businessName = localStorage.getItem("businessName");
   //   use states start here
-  const [searchedProducts, setsearchedProducts] = useState([]);
-  const [Errors, setErrors] = useState(false);
-  const [Processing, setProcessing] = useState(false);
-  let serverAddress = localStorage.getItem("targetUrl");
+  const { Processing, setProcessing } = ConsumeableContext();
   //   const [productDetailes, setproductDetailes] = useState([]);
   const [singleSalesInputValues, setSinlgeSalesInputValues] = useState({
-    singleSalesDate: currentDates(),
-    searchInput: null,
+    singleSalesFromDate: currentDates(),
+    singleSalesToDate: currentDates(),
+    targetedProduct: null,
   });
   //   functions start here
   let handleSearchSubmit = async (e) => {
     e.preventDefault();
-    try {
-      e.preventDefault();
-      setProcessing(true);
-      let responce = await axios.post(
-        serverAddress + "products/getSingleProducts/",
-        {
-          ...singleSalesInputValues,
-          token,
-          businessId,
-          businessName,
-        }
-      );
-      setProcessing(false);
-      let { data } = responce.data;
-      if (data.length == 0) {
-        setErrors(
-          `ummmmm product name like ${singleSalesInputValues.searchInput}    is not found`
-        );
-      } else setsearchedProducts(data);
-    } catch (error) {
-      setProcessing(false);
-      setErrors(error.message);
-    }
+    console.log(
+      " singleSalesInputValues.targetedProduct.ProductId",
+      singleSalesInputValues.targetedProduct.ProductId
+    );
+    // return;
+    setGetAllDailyRegisters({
+      fromDate: singleSalesInputValues.singleSalesFromDate,
+      toDate: singleSalesInputValues.singleSalesToDate,
+      Open: true,
+      RandValue: Math.random(),
+      ProductId: singleSalesInputValues.targetedProduct.ProductId,
+    });
   };
 
   let handleSearchableProductInput = (event) => {
@@ -63,124 +52,97 @@ function GetSingleProducts({ data }) {
       [event.target.name]: event.target.value,
     });
   };
+  const [ProductsList, setProductsList] = useState([]);
+  useEffect(() => {
+    setProcessing(true);
+    fetchProducts()
+      .then((data) => {
+        setProcessing(false);
+        setProductsList(data.data);
+      })
+      .catch((error) => {
+        setProcessing(false);
+        setErrors(error.message);
+      });
+  }, []);
+
   return (
     <div>
-      <form
-        className={singleSalesCss.formToSearchItems}
-        onSubmit={handleSearchSubmit}
-      >
-        <label
-          style={{
-            textAlign: "center",
-            paddingLeft: "100px",
-            width: "fit-content ",
-          }}
-        >
-          Select Date
-        </label>
-        <br />
-        <TextField
-          onChange={handleSearchableProductInput}
-          value={singleSalesInputValues.singleSalesDate || currentDates()}
-          required
-          fullWidth
-          name="singleSalesDate"
-          type="date"
-        />
-        <br />
+      {console.log("ProductsList", ProductsList)}
 
-        <TextField
-          required
-          name="searchInput"
-          value={singleSalesInputValues.searchInput}
-          onChange={handleSearchableProductInput}
-          label="Type Product Name"
-          className=""
-          type={"search"}
-          id="searchInputToSingleProducts"
-        />
-        <br />
-        {!Processing ? (
-          <Button
-            id="btnsearchSingleProduct"
-            fullWidth
-            type="submit"
-            variant="contained"
+      {ProductsList.length > 0 ? (
+        <form
+          className={singleSalesCss.formToSearchItems}
+          onSubmit={handleSearchSubmit}
+        >
+          <label
+            style={{
+              textAlign: "center",
+              paddingLeft: "100px",
+              width: "fit-content ",
+            }}
           >
-            Search
-          </Button>
-        ) : (
-          <ButtonProcessing />
-        )}
-        <br />
-      </form>
-      {searchedProducts.length > 0 ? (
-        <TableContainer className={singleSalesCss.TableContainer}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Product Name</TableCell>
-                <TableCell>Register</TableCell>
-                <TableCell>Get</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {searchedProducts?.map((items) => {
-                return (
-                  <TableRow key={items.ProductId}>
-                    <TableCell>{items.productName}</TableCell>
-                    <TableCell>
-                      <Button
-                        className={
-                          "class_" +
-                          items.ProductId +
-                          " " +
-                          singleSalesCss.getProducts
-                        }
-                        onClick={() => {
-                          steRegisterableItems({ items: items, Open: true });
-                        }}
-                      >
-                        Register
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          setGetAllDailyRegisters({
-                            Open: true,
-                            RandValue: Math.random(),
-                            ProductId: items.ProductId,
-                          });
-                        }}
-                        className={singleSalesCss.getProducts}
-                      >
-                        view
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      ) : (
-        <>
-          {Errors && (
-            <div
-              style={{
-                color: "red",
-                backgroundColor: "white",
-                padding: "10px",
-                marginTop: "10px",
-                width: "320px",
-              }}
+            From Date
+          </label>
+          <br />
+          <TextField
+            onChange={handleSearchableProductInput}
+            value={singleSalesInputValues.singleSalesDate || currentDates()}
+            required
+            fullWidth
+            name="singleSalesFromDate"
+            type="date"
+          />
+          <br />
+          <label
+            style={{
+              textAlign: "center",
+              paddingLeft: "100px",
+              width: "fit-content ",
+            }}
+          >
+            TO Date
+          </label>
+          <TextField
+            onChange={handleSearchableProductInput}
+            value={singleSalesInputValues.singleSalesDate || currentDates()}
+            required
+            fullWidth
+            name="singleSalesToDate"
+            type="date"
+          />
+          <br />
+          <Select
+            onChange={handleSearchableProductInput}
+            value={singleSalesInputValues.targetedProduct}
+            required
+            name="targetedProduct"
+          >
+            {ProductsList?.map((product) => {
+              return (
+                <MenuItem key={product.ProductId} value={product}>
+                  {product.productName}
+                </MenuItem>
+              );
+            })}
+          </Select>
+          <br />
+          {Processing ? (
+            <ButtonProcessing />
+          ) : (
+            <Button
+              id="btnsearchSingleProduct"
+              fullWidth
+              type="submit"
+              variant="contained"
             >
-              {Errors}
-            </div>
+              Search
+            </Button>
           )}
-          {/* {Errors && <SuccessOrError setErrors={setErrors} request={Errors} />} */}
-        </>
+          <br />
+        </form>
+      ) : (
+        <>{Processing ? <LinearProgress /> : <p>No Products Found</p>}</>
       )}
     </div>
   );

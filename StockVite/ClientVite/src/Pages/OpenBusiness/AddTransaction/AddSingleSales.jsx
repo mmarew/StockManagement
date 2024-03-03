@@ -13,7 +13,8 @@ import currentDates from "../../../Components/Body/Date/currentDate";
 
 function AddSingleSales() {
   const [singleSalesInputValues, setSinlgeSalesInputValues] = useState({
-    singleSalesDate: currentDates(),
+    singleSalesToDate: currentDates(),
+    singleSalesFromDate: currentDates(),
   });
   const [getAllDailyRegisters, setGetAllDailyRegisters] = useState({
     Open: false,
@@ -66,7 +67,6 @@ function AddSingleSales() {
           />
         </>
       )}
-
       {RegisterableItems.Open && (
         <AddSingleSales_Register
           RegisterableItems={RegisterableItems}
@@ -75,9 +75,11 @@ function AddSingleSales() {
       )}
       {getAllDailyRegisters.Open && (
         <GetEachTransaction
+          fromDate={singleSalesInputValues.singleSalesFromDate}
+          toDate={singleSalesInputValues.singleSalesToDate}
           ErrorsProps={{ Errors, setErrors }}
           setGetAllDailyRegisters={setGetAllDailyRegisters}
-          currentDay={singleSalesInputValues.singleSalesDate}
+          currentDay={singleSalesInputValues.singleSalesToDate}
           ProductId={getAllDailyRegisters.ProductId}
           RandValue={getAllDailyRegisters.RandValue}
           searchInput={singleSalesInputValues.searchInput}

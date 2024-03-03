@@ -6,7 +6,7 @@ import CurrencyFormatter, { ButtonProcessing } from "../../Utilities/Utility";
 import AddSingleSales_Register from "./RegisterPurchaseAndSales";
 import SuccessOrError from "../../Body/Others/SuccessOrError";
 
-function AddSingleSales_GetItems({ randVal, setrandVal }) {
+function GetRegisterableItems({ randVal, setrandVal }) {
   const token = localStorage.getItem("storeToken");
   const businessId = localStorage.getItem("businessId");
   const businessName = localStorage.getItem("businessName");
@@ -57,6 +57,8 @@ function AddSingleSales_GetItems({ randVal, setrandVal }) {
         setErrors("No products found here");
       } else if (Array.isArray(data)) {
         setSearchedProducts(data);
+      } else {
+        setErrors("wrong data type");
       }
     } catch (error) {
       setErrors(error.message);
@@ -79,7 +81,6 @@ function AddSingleSales_GetItems({ randVal, setrandVal }) {
               transition: "transform ease-in-out 0.3s",
               margin: "10px",
               backgroundColor: "#ffffff",
-              padding: " 10px 20px",
               boxShadow: "0px 10px 40px 0px rgba(46, 46, 46, 0.15)",
               padding: "20px",
               display: "flex",
@@ -107,7 +108,7 @@ function AddSingleSales_GetItems({ randVal, setrandVal }) {
                     style={{ marginRight: "10px" }}
                     onClick={() => setRegisterableItems({ items, Open: true })}
                   >
-                    Add Sales
+                    Add
                   </Button>
                   <Button
                     color="success"
@@ -155,4 +156,4 @@ function AddSingleSales_GetItems({ randVal, setrandVal }) {
   );
 }
 
-export default AddSingleSales_GetItems;
+export default GetRegisterableItems;

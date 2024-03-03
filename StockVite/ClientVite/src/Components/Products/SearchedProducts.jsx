@@ -39,11 +39,12 @@ function SearchProducts({ InputValue, setSearchTypeValueError }) {
     let Results = await fetchProducts();
     setLoadingStatus("Done");
     setProcessing(false);
+    console.log("Results", Results);
     let { Message, data } = Results;
     if (Message == "Success") {
       setSearchedProducts(data);
       if (data.length == 0) {
-        setSearchTypeValueError("you haven't registered products.");
+        // setSearchTypeValueError("you haven't registered products.");
       }
     } else if (Message == "Fail") {
       return setSearchTypeValueError(data);

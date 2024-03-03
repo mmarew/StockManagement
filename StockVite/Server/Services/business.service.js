@@ -12,20 +12,21 @@ const minute = String(date.getMinutes()).padStart(2, "0");
 const fullTime = `${year}-${month}-${day} ${hour}:${minute}`;
 
 let createBusiness = async (body) => {
-  let { businessName, userID, res, createdDate } = body;
-  let verifyExistance = `SELECT * FROM Business WHERE businessName = ?`;
+  let { businessName, userID, createdDate } = body;
+  console.log("businessName", businessName);
+  let verifyExistance = `SELECT * FROM Business WHERE BusinessName =? and ownerId=?`;
 
-  let [Results] = await pool.query(verifyExistance, [businessName]);
-  if (Results > 0) {
-    return { data: "already exist" };
+  let [Results] = await pool.query(verifyExistance, [businessName, userID]);
+  console.log("Results in service", Results);
+  if (Results.length > 0) {
+    return { message: "already exist" };
   }
-  return await database.createBusiness(
-    businessName,
-    userID,
-    fullTime,
-    res,
-    createdDate
-  );
+  return await database.createBusiness({
+    businessName: businessName,
+    ownerId: userID,
+    source: fullTime,
+    createdDate: createdDate,
+  });
 };
 
 let deleteBusiness = async (body) => {
@@ -76,6 +77,7 @@ let updateBusinessName = async (body) => {
 let removeEmployeersBusiness = async (body) => {
   try {
     const { userID, businessId } = body;
+    console.log("userID=== ", userID, "businessId ==== ", businessId);
     const getEmployeerBusiness = `SELECT * FROM employeeTable WHERE userIdInEmployee = ? AND BusinessIDEmployee = ?`;
     const getEmployeerBusinessValues = [userID, businessId];
     if (userID === null || businessId === null) {

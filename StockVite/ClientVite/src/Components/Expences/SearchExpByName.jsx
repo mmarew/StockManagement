@@ -1,85 +1,44 @@
 import React, { useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import axios from "axios";
 import { ButtonProcessing } from "../Utilities/Utility";
 import SuccessOrError from "../Body/Others/SuccessOrError";
-import ErrorHandler from "../Utilities/ErrorHandler";
-import currentDates from "../Body/Date/currentDate";
-import {
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@mui/material";
+import { Select, MenuItem } from "@mui/material";
 import AddExpencesTransaction from "../Transaction/AddTrans/AddExpTransaction";
 import SearchExpenceTransaction from "../Transaction/SearchTrans/SearchExpenceTransaction";
+import { fetchExpencesItemsFromServer } from "./GetExpencesLists";
+import { ConsumeableContext } from "../Body/UserContext/UserContext";
 function App() {
-  const [InputValue, setInputValue] = useState("");
+  const [InputValue, setInputValue] = useState({});
   const [showEachItems, setshowEachItems] = useState();
 
-  const [RegisterableCots, setRegisterableCots] = useState([{}]);
-  let serverAddress = localStorage.getItem("targetUrl");
-  const businessId = localStorage.getItem("businessId");
-  const token = localStorage.getItem("storeToken");
+  const [expencesList, setExpencesList] = useState([{}]);
   const [open, setopen] = useState();
-  const [searchData, setSearchData] = useState({
-    expName: "",
-    token,
-    businessId,
-    transactionDate: currentDates(),
-  });
-  const [searchResult, setSearchResult] = useState([]);
-  const [Processing, setProcessing] = useState(false);
+  let { Processing } = ConsumeableContext();
   const [ErrorsOrSuccess, setErrorsOrSuccess] = useState({
     Message: "",
     Detail: "",
   });
-  const [GetSingleExpTransaction, setGetSingleExpTransaction] = useState({
+  const ReloadData = {
     Reload: false,
     Open: false,
     Rand: Math.random(),
-  });
-  const handleSearch = () => {
-    // Send a request to the server using Axios
-    setProcessing(true);
-    axios
-      .post(serverAddress + "searchExpByName", { ...searchData })
-      .then((response) => {
-        setSearchResult(response.data.data);
-        setProcessing(false);
-      })
-      .catch((error) => {
-        ErrorHandler(error, setErrorsOrSuccess);
-        setProcessing(false);
-      });
   };
-  let handleInputChannges = (e) => {
-    setSearchResult([]);
-    setGetSingleExpTransaction((prev) => ({
-      ...prev,
-      Open: false,
-    }));
-    setSearchData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-  let handleAddTransaction = (item) => {
-    setopen(true);
-    setRegisterableCots([item]);
-  };
+  const [GetSingleExpTransaction, setGetSingleExpTransaction] =
+    useState(ReloadData);
 
-  let handleView = (input) => {
-    setInputValue(input);
-
+  let handleSearch = () => {
     setGetSingleExpTransaction((prev) => ({
       ...prev,
       Reload: !prev.Reload,
       Open: !prev.Open,
     }));
   };
+  useEffect(() => {
+    fetchExpencesItemsFromServer().then((res) =>
+      setExpencesList(res.data.data)
+    );
+  }, []);
 
   return (
     <div>
@@ -110,17 +69,27 @@ function App() {
           required
           type="date"
           name="transactionDate"
-          value={searchData.transactionDate}
-          onChange={handleInputChannges}
+          value={InputValue.transactionDate}
+          onChange={(e) => {
+            setGetSingleExpTransaction(ReloadData);
+            setInputValue({ ...InputValue, [e.target.name]: e.target.value });
+          }}
         />
-        <TextField
+        <Select
           required
-          label="Expenses Name"
-          variant="outlined"
-          name="expName"
-          value={searchData.expName}
-          onChange={handleInputChannges}
-        />
+          name="expenceItem"
+          onChange={(e) => {
+            setGetSingleExpTransaction(ReloadData);
+            setInputValue({ ...InputValue, ...e.target.value });
+          }}
+        >
+          {expencesList?.map((item, index) => (
+            <MenuItem key={"index_" + index} value={item}>
+              {item.costName}
+            </MenuItem>
+          ))}
+        </Select>
+
         {Processing ? (
           <ButtonProcessing />
         ) : (
@@ -129,60 +98,15 @@ function App() {
           </Button>
         )}
       </form>
-      {searchResult?.length > 0 && (
-        <div>
-          <h2>Search Result:</h2>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Cost Name</TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {searchResult.map((item) => (
-                <TableRow key={item.costsId}>
-                  <TableCell>{item.costName}</TableCell>
-                  <TableCell>
-                    <Button
-                      sx={{ mr: 1 }}
-                      variant="contained"
-                      onClick={() => handleAddTransaction(item)}
-                    >
-                      Add Transaction
-                    </Button>
-                    {!GetSingleExpTransaction.Open ? (
-                      <Button
-                        variant="contained"
-                        onClick={() => handleView(item)}
-                      >
-                        View
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        color="warning"
-                        onClick={() => {
-                          setGetSingleExpTransaction({
-                            ...GetSingleExpTransaction,
-                            Open: false,
-                          });
-                        }}
-                      >
-                        Close
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <br />
-        </div>
-      )}
+
       {open && (
         <AddExpencesTransaction
-          data={{ RegisterableCots, setopen, setErrorsOrSuccess, open }}
+          data={{
+            RegisterableCots: expencesList,
+            setopen,
+            setErrorsOrSuccess,
+            open,
+          }}
         />
       )}
       {GetSingleExpTransaction.Open && GetSingleExpTransaction.Rand && (
@@ -190,8 +114,8 @@ function App() {
           <SearchExpenceTransaction
             searchTarget="singleTransaction"
             InputValue={InputValue}
-            toDate={searchData.transactionDate}
-            fromDate={searchData.transactionDate}
+            toDate={InputValue.transactionDate}
+            fromDate={InputValue.transactionDate}
             setshowEachItems={setshowEachItems}
           />
         </>

@@ -15,12 +15,9 @@ import {
   TableRow,
 } from "@mui/material";
 import { DateFormatter } from "../Body/Date/currentDate";
-function SearchExpencesItem({
-  setSearchTypeValueError,
-  InputValue,
-  proccessData,
-}) {
-  let { Processing, setProcessing } = proccessData;
+import { ConsumeableContext } from "../Body/UserContext/UserContext";
+function SearchExpencesItem({ setSearchTypeValueError, InputValue }) {
+  let { Processing, setProcessing } = ConsumeableContext();
   let Token = localStorage.getItem("storeToken");
   let businessId = localStorage.getItem("businessId");
   let serverAddress = localStorage.getItem("targetUrl");

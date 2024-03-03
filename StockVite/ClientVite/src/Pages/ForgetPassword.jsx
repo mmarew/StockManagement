@@ -1,9 +1,11 @@
 import { Box, Button, TextField } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import forgetCss from "../CSS/Forget.module.css";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import SuccessOrError from "../Components/Body/Others/SuccessOrError";
 function ForgetPassword() {
+  const [Processing, setProcessing] = useState(false);
   // const [PhoneNumber, setPhoneNumber] = useState("");
   let serverUrl = localStorage.getItem("targetUrl");
   const [showPasswordField, setshowPasswordField] = useState(false);
@@ -12,9 +14,10 @@ function ForgetPassword() {
     e.preventDefault();
   };
   const [PhoneNumber, setPhoneNumber] = useState("");
+  const [Erorrs, setErorrs] = useState(null);
   let requestBySms = async () => {
     const encodedPhoneNumber = encodeURIComponent(PhoneNumber);
-    alert("PhoneNumber " + PhoneNumber);
+    // alert("PhoneNumber " + PhoneNumber);
     try {
       let Responces = await axios.get(
         `https://sms.masetawosha.com?Phonenumber=${encodedPhoneNumber}`
@@ -23,18 +26,27 @@ function ForgetPassword() {
   };
   let submitRegistrationRequest = async (e) => {
     e.preventDefault();
+    setProcessing(true);
     try {
       let Responces = await axios.post(serverUrl + "forgetRequest/", {
         PhoneNumber,
       });
+      console.log("Responces", Responces);
       if (Responces.data.data == "requestedToChangePassword") {
         setshowPincodeField(true);
         requestBySms();
       }
-    } catch (error) {
-      if (error.response.data.error == "Phone number not found") {
-        alert("This Phone number is not found");
+      if (Responces.data.error == "Phone number not found") {
+        setErorrs(error.message);
       }
+      setProcessing(false);
+    } catch (error) {
+      setProcessing(false);
+
+      // console.log("error", error);
+      if (error.response.data.error == "Phone number not found") {
+        return setErorrs(`Phone number not found`);
+      } else setErorrs(error.message);
     }
   };
 
@@ -80,6 +92,13 @@ function ForgetPassword() {
       setPincodeStatus("wrong Pincode ");
     }
   };
+  let getPasswordResetPin = async () => {
+    let responce = await axios.get(serverUrl + "getPasswordResetPin/");
+    console.log("responce======", responce);
+  };
+  useEffect(() => {
+    getPasswordResetPin();
+  }, []);
 
   return (
     <div className={forgetCss.forgetFormWrapper}>
@@ -98,14 +117,18 @@ function ForgetPassword() {
           label="Enter Phone Number"
         />
         <div>
-          <Button
-            sx={{ display: "block", margin: "auto" }}
-            className={forgetCss.requestButton}
-            type="submit"
-            variant="contained"
-          >
-            Request Forget
-          </Button>
+          {Processing ? (
+            <Button disabled>Processing ..... </Button>
+          ) : (
+            <Button
+              sx={{ display: "block", margin: "auto" }}
+              className={forgetCss.requestButton}
+              type="submit"
+              variant="contained"
+            >
+              Request Forget
+            </Button>
+          )}
         </div>
         <Link className={forgetCss.linkToOthers} to={"/login"}>
           If you have an account, Login here.
@@ -174,6 +197,7 @@ function ForgetPassword() {
           </Box>
         </form>
       )}
+      {Erorrs && <SuccessOrError request={Erorrs} setErrors={setErorrs} />}
     </div>
   );
 }

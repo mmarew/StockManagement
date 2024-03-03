@@ -35,15 +35,15 @@ function ModalTodeleteEachTransaction({
         Items: {},
       });
       const { data } = response.data;
-
+      await getTotalRegisters(items.ProductId);
       if (data === "success") {
         setErrors("You have deleted data successfully");
-        await getTotalRegisters(items.ProductId);
       } else {
         setErrors("Unknown error");
       }
       setErrors(null);
     } catch (error) {
+      console.log("error", error);
       setProcessing(false);
       setErrors(error.message);
     }

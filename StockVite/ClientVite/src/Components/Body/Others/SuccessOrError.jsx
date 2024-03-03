@@ -7,14 +7,12 @@ function SuccessOrError({ request, setErrors }) {
   const [type, setType] = useState("");
 
   const handleSuccess = (event) => {
-    // event.preventDefault();
     setOpen(true);
     setMessage("Success!");
     setType("success");
   };
 
   const handleError = (event) => {
-    // event.preventDefault();
     setOpen(true);
     setMessage(request);
     setType("error");

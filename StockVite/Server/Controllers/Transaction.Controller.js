@@ -12,7 +12,9 @@ let getDailyTransaction = async (req, res) => {
     await require("../Services/Transaction.service").getDailyTransaction(
       req.body
     );
-  res.json(responces);
+  let { data } = responces;
+  if (data == "error") return res.status(500).json(responces);
+  return res.status(200).json(responces);
 };
 let deleteDailyTransactionController = async (req, res) => {
   let Result = await deleteTransactions(req.body);
@@ -23,7 +25,12 @@ let updateDailyTransactionsController = async (req, res) => {
     await require("../Services/Transaction.service").updateDailyTransactions(
       req.body
     );
-  res.json(Result);
+  let { data } = Result;
+  if (data == "update successfully") {
+    res.status(200).json(Result);
+  } else {
+    res.status(500).json(Result);
+  }
 };
 let getSingleItemsTransactionController = async (req, res) => {
   let Result =

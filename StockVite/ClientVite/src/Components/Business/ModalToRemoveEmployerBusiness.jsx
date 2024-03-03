@@ -5,21 +5,24 @@ import SuccessOrError from "../Body/Others/SuccessOrError";
 import { ButtonProcessing } from "../Utilities/Utility";
 
 function ModalToRemoveEmployerBusiness({ data }) {
+  // console.log("data", data);
   const [Processing, setProcessing] = useState(false);
   let serverAddress = localStorage.getItem("targetUrl");
-  let businessId = localStorage.getItem("businessId");
-  let { RemoveEmployerBusiness, setRemoveEmployerBusiness, getBusiness } = data;
+  let token = localStorage.getItem("storeToken");
+  let { RemoveEmployerBusiness, setRemoveEmployerBusiness } = data;
+  let { getBusiness, items } = RemoveEmployerBusiness;
+  let businessId = items?.BusinessID;
   const [userPassword, setuserPassword] = useState(null);
   const [Errors, setErrors] = useState(null);
   let handleInputSubmit = async (e) => {
     try {
       e.preventDefault();
       setProcessing(true);
-      let token = localStorage.getItem("storeToken");
-
+      let formdata = { userPassword, token, businessId };
+      // return;
       let Responces = await axios.post(
         serverAddress + "removeEmployeersBusiness/",
-        { userPassword, token, businessId }
+        formdata
       );
       let { data } = Responces.data;
       if (data == "wrong Password.") setErrors(data);
@@ -33,7 +36,7 @@ function ModalToRemoveEmployerBusiness({ data }) {
     }
   };
   let handleClose = () => {
-    setRemoveEmployerBusiness({ ...RemoveEmployerBusiness, open: false });
+    setRemoveEmployerBusiness({ ...RemoveEmployerBusiness, Open: false });
   };
   return (
     <Modal open={true}>

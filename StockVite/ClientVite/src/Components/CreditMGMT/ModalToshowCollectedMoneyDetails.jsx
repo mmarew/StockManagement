@@ -48,17 +48,9 @@ function ModalToshowCollectedMoneyDetails({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            maxWidth: "90%",
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
-            // backgroundColor: "white",
-            // padding: "40px",
-            // borderRadius: "10px",
-            // display: "flex",
-            // flexDirection: "column",
-            // alignItems: "center",
-            // justifyContent: "center",
             maxWidth: "90%",
             maxHeight: "80vh", // Set a maximum height for the modal content
             overflow: "auto", // Enable scrolling when content overflows

@@ -22,7 +22,8 @@ function SearchExpenceTransaction({
   const [Errors, setErrors] = useState("");
   let token = localStorage.getItem("storeToken");
 
-  const { accountRecivableAmt, collectedMoney } = ConsumeableContext();
+  const { accountRecivableAmt, collectedMoney, setProcessing } =
+    ConsumeableContext();
   const [ShowMoneyDetailModal, setShowMoneyDetailModal] = useState(false);
 
   let TotalSalesRevenue = 0,
@@ -85,6 +86,7 @@ function SearchExpenceTransaction({
   }, [expencesData]);
   let getExpencesTransaction = async () => {
     setexpencesData([]);
+    setProcessing(true);
     try {
       let results = await axios.get(
         serverAddress + "Expences/getExpTransactions",
@@ -99,6 +101,7 @@ function SearchExpenceTransaction({
           },
         }
       );
+      setProcessing(false);
       let { expenceTransaction } = results.data;
       if (expenceTransaction == "error no 113") {
         return setErrors("error no 113 on get expences data");
@@ -106,6 +109,8 @@ function SearchExpenceTransaction({
 
       setexpencesData(expenceTransaction);
     } catch (error) {
+      setProcessing(false);
+
       setErrors(error.message);
     }
   };

@@ -15,37 +15,45 @@ import axios from "axios";
 import currentDates, { DateFormatter } from "../../Body/Date/currentDate";
 import CurrencyFormatter from "../../Utilities/Utility";
 import SuccessOrError from "../../Body/Others/SuccessOrError";
+let token = localStorage.getItem("storeToken");
+let serverAddress = localStorage.getItem("targetUrl");
+let inputData = {
+  salesType: "Default",
+  Description: "",
+  ProductId: "",
+  brokenQty: "",
+  creditPaymentDate: "",
+  purchaseQty: "",
+  salesQty: "",
+  selectedDate: currentDates(),
+  useNewPrice: false,
+  unitPrice: null,
+  newUnitPrice: "",
+  newUnitCost: "",
+  useNewCost: false,
+};
 function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
   const [singleSalesError, setsingleSalesError] = useState({});
   const [ErrorsOrSuccess, setErrorsOrSuccess] = useState(null);
   let handleSalesTransactionInput = (e, ProductId) => {
-    let { name, value } = e.target;
+    let { name, value, type } = e.target;
+    if (Number(value) < 0 && type === "number") {
+      setErrorsOrSuccess("negative value not allowed");
+      return;
+    }
     setformInputValues((previousState) => ({
       ...previousState,
       [name]: value,
       ProductId,
     }));
   };
-  let token = localStorage.getItem("storeToken");
-  let businessId = localStorage.getItem("businessId");
   let [Processing, setProcessing] = useState(false);
-  let serverAddress = localStorage.getItem("targetUrl");
-  const [formInputValues, setformInputValues] = useState({
-    salesType: "Default",
-    Description: "",
-    ProductId: "",
-    brokenQty: "",
-    creditPaymentDate: "",
-    purchaseQty: "",
-    salesQty: "",
-    selectedDate: currentDates(),
-    useNewPrice: false,
-    unitPrice: null,
-  });
+
+  const [formInputValues, setformInputValues] = useState({ ...inputData });
   let registerSinglesalesTransaction = async (e, items) => {
     try {
       e.preventDefault();
-      let { brokenQty, salesType } = formInputValues;
+      let { salesType } = formInputValues;
 
       if (salesType === "Default") {
         setsingleSalesError((reviousErrorsOrSuccess) => ({
@@ -66,18 +74,7 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
         }
       );
       DateFormatter();
-      setformInputValues({
-        salesType: "Default",
-        Description: "",
-        ProductId: "",
-        brokenQty: "",
-        creditPaymentDate: "",
-        purchaseQty: "",
-        salesQty: "",
-        selectedDate: "",
-        useNewPrice: false,
-        unitPrice: null,
-      }); // Reset the form values to default
+      setformInputValues({ ...inputData }); // Reset the form values to default
       setProcessing(false);
 
       if (responce.data.data === "success") {
@@ -156,15 +153,58 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
                 name="purchaseQty"
                 label="purchase quantity"
               />
+              {formInputValues.useNewCost ? (
+                <>
+                  <br />
+                  <TextField
+                    onInput={(e) =>
+                      handleSalesTransactionInput(
+                        e,
+                        RegisterableItems.items.ProductId
+                      )
+                    }
+                    value={formInputValues.newUnitCost}
+                    label="Enter New Cost"
+                    fullWidth
+                    required
+                    name="newUnitCost"
+                    type="number"
+                  />
+                </>
+              ) : (
+                <div style={{ paddingTop: "10px" }}>
+                  Unit Cost={RegisterableItems.items.productsUnitCost}
+                </div>
+              )}
+              <div>
+                <Checkbox
+                  checked={formInputValues.useNewCost}
+                  onChange={(e) => {
+                    setformInputValues((previousState) => ({
+                      ...previousState,
+                      useNewCost: !formInputValues.useNewCost,
+                      ProductId: RegisterableItems.items.ProductId,
+                    }));
+                  }}
+                  name="useNewCost"
+                />
+                <span>Use New Cost</span>
+              </div>
               {formInputValues.purchaseQty > 0 && (
                 <div style={{ padding: "10px 0" }}>
                   Purchase in money{" "}
-                  {CurrencyFormatter(
-                    formInputValues.purchaseQty *
-                      RegisterableItems.items.productsUnitCost
-                  )}
+                  {formInputValues.useNewCost
+                    ? CurrencyFormatter(
+                        formInputValues.purchaseQty *
+                          formInputValues.newUnitCost
+                      )
+                    : CurrencyFormatter(
+                        formInputValues.purchaseQty *
+                          RegisterableItems.items.productsUnitCost
+                      )}
                 </div>
               )}
+              {/* sales input section */}
               <br />
               <TextField
                 fullWidth
@@ -182,7 +222,7 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
                 value={formInputValues.salesQty}
               />
               <br />
-              {formInputValues.useNewPrice && (
+              {formInputValues.useNewPrice ? (
                 <TextField
                   value={formInputValues.unitPrice}
                   name="unitPrice"
@@ -197,6 +237,10 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
                   fullWidth
                   type="number"
                 />
+              ) : (
+                <div style={{}}>
+                  Unit Price={RegisterableItems.items.productsUnitPrice}
+                </div>
               )}
               <div>
                 <Checkbox
@@ -226,18 +270,20 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
                       )}
                 </div>
               )}
+              {/* broken qty input start here */}
               <br />
               <TextField
                 required
                 fullWidth
                 type="number"
                 className={"dailyRegistrationInputs"}
-                onInput={(e) =>
+                onInput={(e) => {
                   handleSalesTransactionInput(
                     e,
                     RegisterableItems.items.ProductId
-                  )
-                }
+                  );
+                }}
+                minimum="0"
                 name="brokenQty"
                 label="Broken quantity"
                 value={formInputValues.brokenQty}
@@ -338,7 +384,7 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
           </Typography>
         </Box>
       </Modal>
-      {ErrorsOrSuccess == "SUCCESS" && (
+      {ErrorsOrSuccess && (
         <SuccessOrError
           request={ErrorsOrSuccess}
           setErrors={setErrorsOrSuccess}

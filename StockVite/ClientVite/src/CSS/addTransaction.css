@@ -1,24 +1,7 @@
-.addTransaction {
-  display: flex;
-  background-color: white;
-}
-.addTransaction span {
-  border: none;
-  font-size: 20px;
-  font-family: Manrope;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-.addTransaction span:hover {
-  color: #6998ff;
+.salesOrExpences:hover {
+  color: white !important;
+  background-color: black !important;
 }
 .activeClass {
-  border-bottom: 3px solid #6998ff !important;
-}
-.addTransactionWrapper {
-  /* background-color: white; */
+  border-bottom: 3px solid white !important;
 }

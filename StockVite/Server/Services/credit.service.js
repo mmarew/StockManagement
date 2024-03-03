@@ -15,14 +15,12 @@ let getCreditList = async (req) => {
     let SelectOnCreditFromDaily = "",
       soldInDaily_SoldOncredits = [],
       SelectOnCreditFromTotal = "",
-      selectOncreditFromSingle = "",
-      sqlToCollectedMoney = "",
       sqlToCollectedMoneyFromTotalSales = "",
       sqlToCollectedMoneyFromSingleSales = "";
     // select items sold in credit from daily transaction which is single type
-    SelectOnCreditFromDaily = `select * from dailyTransaction , ${businessName}_products where (salesTypeValues = 'On credit' or  salesTypeValues = 'Partially paied') and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId}`;
+    SelectOnCreditFromDaily = `select * from dailyTransaction , ${businessName}_products where (salesTypeValues = 'On credit' or  salesTypeValues = 'Partially paied' or salesTypeValues = 'Partially paid') and ${businessName}_products.ProductId = dailyTransaction.ProductId and businessId=${businessId}`;
     // select items from transaction where total items sold on credit
-    SelectOnCreditFromTotal = `select * from ${businessName}_Transaction , ${businessName}_products where (salesTypeValues = 'On credit' or  salesTypeValues = 'Partially paied') and ProductId = productIDTransaction`;
+    SelectOnCreditFromTotal = `select * from ${businessName}_Transaction , ${businessName}_products where (salesTypeValues = 'On credit' or  salesTypeValues = 'Partially paied'  or salesTypeValues = 'Partially paid') and ProductId = productIDTransaction`;
     /////////////////////////////////
     // sqlToCollectedMoney = `SELECT * FROM creditCollection WHERE businessId='${businessId}'`;
     let transactionTable = `${businessName}_Transaction`,
@@ -42,6 +40,7 @@ let getCreditList = async (req) => {
     let partiallyPaidInTotal = [];
     let transactionIdList = [];
     const [Information] = await pool.query(SelectOnCreditFromDaily);
+    console.log("Information", Information);
     soldInDaily_SoldOncredits = Information;
     for (const Info of Information) {
       const transactionId = Info.dailySalesId;
@@ -133,24 +132,28 @@ let confirmPayments = async (body) => {
     const SalesIncredit = creditsalesQty * productsUnitPrice;
     const tobeCollected = SalesIncredit - previouslycollectedAmount;
 
-    if (SalesIncredit === previouslycollectedAmount) {
+    if (tobeCollected <= 0) {
       await pool.query(
-        `UPDATE dailyTransaction SET salesTypeValues='Credit paied' WHERE transactionId='${dailySalesId}'`
+        `UPDATE dailyTransaction SET salesTypeValues='Credit paied' WHERE dailySalesId='${dailySalesId}'`
       );
       return {
-        data: `You have collected your money previously. Now you can't collect money again`,
+        data: `You have collected all of your money previously. Now you can't collect money again`,
       };
     }
 
-    if (collectedAmount > tobeCollected) {
+    if (Number(collectedAmount) > tobeCollected) {
       return {
         data: `You can't collect more money than remaining amount`,
       };
     }
 
-    if (SalesIncredit === previouslycollectedAmount + collectedAmount) {
+    if (tobeCollected === Number(collectedAmount)) {
       await pool.query(
         `UPDATE dailyTransaction SET salesTypeValues='Credit paied' WHERE dailySalesId='${dailySalesId}'`
+      );
+    } else if (tobeCollected > Number(collectedAmount)) {
+      await pool.query(
+        `UPDATE dailyTransaction SET salesTypeValues='Partially paid' WHERE dailySalesId='${dailySalesId}'`
       );
     }
 

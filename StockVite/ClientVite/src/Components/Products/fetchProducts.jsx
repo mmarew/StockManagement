@@ -1,8 +1,10 @@
 import axios from "axios";
-let serverAddress = localStorage.getItem("targetUrl");
-let businessId = localStorage.getItem("businessId");
-let token = localStorage.getItem("storeToken");
 let fetchProducts = async () => {
+  let serverAddress = localStorage.getItem("targetUrl");
+  let businessId = localStorage.getItem("businessId");
+  let token = localStorage.getItem("storeToken");
+  if (!token) return { Message: "Fail", data: "Login First" };
+  if (!businessId) return { Message: "Fail", data: "Login First" };
   try {
     let response = await axios.get(serverAddress + "products/searchProducts", {
       params: { token, businessId },

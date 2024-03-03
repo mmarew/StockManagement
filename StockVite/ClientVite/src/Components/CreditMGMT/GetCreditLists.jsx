@@ -26,6 +26,7 @@ import CurrencyFormatter, { ButtonProcessing } from "../Utilities/Utility";
 import GetCreditListEdit from "./GetCreditListEdit";
 import ExportToExcel from "../PDF_EXCEL/PDF_EXCEL";
 import SuccessOrError from "../Body/Others/SuccessOrError";
+import HRTAG from "../Utilities/HRTAG";
 
 export let getCollectedMoney = (data, salesRegistrationWay, infos) => {
   if (data == undefined || data == null) return 0;
@@ -87,6 +88,7 @@ function GetCreditLists({
 
   let getUsersCreditList = async () => {
     setShowProgressBar(true);
+    setProcessing(true);
     try {
       let Responces = await axios.get(
         serverAddress +
@@ -101,6 +103,8 @@ function GetCreditLists({
           "&&toDate=" +
           dateRange.toDate
       );
+      console.log("Responces", Responces);
+      setProcessing(false);
 
       let {
         partiallyPaidInTotal,
@@ -128,6 +132,8 @@ function GetCreditLists({
 
       setShowProgressBar(false);
     } catch (error) {
+      setShowProgressBar(false);
+      setProcessing(false);
       setSuccessOrErrorsOnCredit(error.message);
     }
   };
@@ -144,8 +150,7 @@ function GetCreditLists({
 
     if (
       isNaN(collectedAmount) ||
-      collectedAmount == "" ||
-      collectedAmount == null ||
+      !collectedAmount ||
       Number(collectedAmount) == 0
     ) {
       alert("paid amount should be > 0 value");
@@ -166,6 +171,7 @@ function GetCreditLists({
       .then((Responces) => {
         getUsersCreditList();
         let Message = Responces.data.data;
+
         setSuccessOrErrorsOnCredit("SUCCESS");
       })
       .catch((error) => {
@@ -188,8 +194,8 @@ function GetCreditLists({
       partiallyPaidInTotal,
       soldInDaily_SoldOncredits,
       soldOnTotal_Oncredit,
-      partiallyPaidInDailyNotInRegisteredDate,
     } = creditData;
+    console.log("creditData", creditData);
     let accountRecivableTotalMoney = 0,
       totalCollectedAmount = 0;
     // sold on total sales way and on credit
@@ -257,27 +263,26 @@ function GetCreditLists({
     <div>
       <Box
         sx={{
-          textAlign: "center",
           backgroundColor: "white",
-          padding: "20px",
+          padding: "20px ",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
         }}
       >
-        <Typography sx={{ width: "80%", margin: "auto" }}>
-          Sales in credit
-        </Typography>
+        <div>Sales in credit</div>
         {SuccessOrErrorsOnCredit && (
           <SuccessOrError
             request={SuccessOrErrorsOnCredit}
             setErrors={setSuccessOrErrorsOnCredit}
           />
         )}
+
         <IconButton onClick={() => setminimizeTable(!minimizeTable)}>
           {minimizeTable ? <ExpandMore /> : <ExpandLess />}
         </IconButton>
       </Box>
+      <HRTAG />
       {!minimizeTable && (
         <Paper sx={{ padding: "20px" }}>
           {creditData.soldInDaily_SoldOncredits.length > 0 && (
@@ -528,7 +533,7 @@ function GetCreditLists({
               {Processing ? (
                 " Waiting ... "
               ) : (
-                <h1 style={{ margin: "10px" }}> No credit data </h1>
+                <h4 style={{ color: "#333" }}> No credit data </h4>
               )}
             </>
           )}

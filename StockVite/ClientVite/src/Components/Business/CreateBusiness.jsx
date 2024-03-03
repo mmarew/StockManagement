@@ -8,7 +8,7 @@ import currentDates from "../Body/Date/currentDate";
 function CreateBusiness({
   getBusiness,
   setnewBusiness,
-  setShowProgressBar,
+
   newBusiness,
   setRequestFailOrSuccess,
 }) {
@@ -43,7 +43,8 @@ function CreateBusiness({
       setBusinessNameError(`Business name must be from a-z and 0-9`);
       return;
     }
-    setShowProgressBar(true);
+    setRequestFailOrSuccess({});
+
     setProcess(true);
     try {
       let response = await axios.post(
@@ -52,17 +53,22 @@ function CreateBusiness({
       );
 
       setProcess(false);
-      setShowProgressBar(false);
       getBusiness();
-      // window.location.reload();
-      let data = response.data.data;
-
-      if (data === "created well") {
+      let data = response.data.message;
+      if (data == "already exist") {
+        setRequestFailOrSuccess((prev) => ({
+          ...prev,
+          Responce: "FAIL",
+          Message: "Error on create table ",
+        }));
+        setBusinessNameError(
+          "This business name is reserved before. Please change its name."
+        );
+      } else if (data === "Business created successfully") {
         setRequestFailOrSuccess((prev) => ({
           ...prev,
           Responce: "SUCCESS",
-          Message:
-            "This business name is reserved before. Please change its name. Thank you.",
+          Message: "Business created successfully",
         }));
         cancelBusinessCreation("");
       } else if (data == "Errors") {
@@ -79,18 +85,14 @@ function CreateBusiness({
         Responce: "FAIL",
         Message: "An error occurred while creating the business.",
       }));
-      setShowProgressBar(false);
     }
   };
 
   let cancelBusinessCreation = () => {
-    setShowProgressBar(false);
     setnewBusiness("");
   };
 
-  useEffect(() => {
-    setShowProgressBar(false);
-  }, []);
+  useEffect(() => {}, []);
   const [businessNameError, setBusinessNameError] = useState(null);
   return (
     <div>
@@ -101,10 +103,12 @@ function CreateBusiness({
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
+            width: "80%",
+            maxWidth: "400px",
           }}
         >
           <form
-            style={{ width: "100%", maxWidth: "400px" }}
+            style={{}}
             action=""
             className="createBusinessForm"
             onSubmit={submitAlldatas}

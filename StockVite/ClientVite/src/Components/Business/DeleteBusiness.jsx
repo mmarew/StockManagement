@@ -1,6 +1,7 @@
 import axios from "axios";
 let serverAddress = localStorage.getItem("targetUrl");
 async function DeleteBusiness({
+  setRequestFailOrSuccess,
   setDeleteError,
   setopenBusinessDeletingModal,
   businessId,
@@ -12,6 +13,7 @@ async function DeleteBusiness({
   let token = localStorage.getItem("storeToken");
   let deleteUsersBusiness = async () => {
     setProccessing(true);
+    setRequestFailOrSuccess({});
     try {
       let updateRes = await axios.post(
         `${serverAddress}business/deleteBusines`,
@@ -27,6 +29,10 @@ async function DeleteBusiness({
 
       if (data == "user is not found.") {
       } else if (data == "delete success") {
+        setRequestFailOrSuccess({
+          Responce: "SUCCESS",
+          Message: "Business deleted successfully",
+        });
         getBusiness();
         setopenBusinessDeletingModal((prev) => {
           return { ...prev, Open: false };

@@ -1,7 +1,6 @@
 const { pool } = require("../Config/db.config");
-const { isValidDateFormat } = require("../DateFormatter");
+const { isValidDateFormat, DateFormatter } = require("../DateFormatter");
 const { getUniqueBusinessName } = require("../UniqueBusinessName");
-const { validateAlphabet } = require("../Utility/validateAlphabet");
 const updateNextInventory = async ({
   dailySalesId,
   mainProductId,
@@ -12,7 +11,7 @@ const updateNextInventory = async ({
   registeredTimeDaily,
 }) => {
   try {
-    const sqlToGetNextInventory = `SELECT * FROM dailyTransaction WHERE mainProductId=? AND businessId=? AND registeredTimeDaily>? AND dailySalesId !=? ORDER BY registeredTimeDaily, dailySalesId ASC`;
+    const sqlToGetNextInventory = `SELECT * FROM dailyTransaction WHERE mainProductId=? AND businessId=? AND registeredTimeDaily>=? AND dailySalesId >? ORDER BY registeredTimeDaily, dailySalesId ASC`;
     const values = [
       mainProductId,
       businessId,
@@ -43,12 +42,6 @@ const updateNextInventory = async ({
 
       const updateQuery = `UPDATE dailyTransaction SET inventoryItem='${inventoryItem}', reportStatus='unreported to total sales' WHERE dailySalesId='${id}'`;
       await pool.query(updateQuery);
-
-      // Formatted date for deletion
-      const formattedDate = DateFormatter(registeredTimeDaily);
-
-      const deleteFromTotalSales = `DELETE FROM ${uniqueBusinessName}_Transaction WHERE productIDTransaction='${ProductId}' AND registeredTime='${formattedDate}'`;
-      await pool.query(deleteFromTotalSales);
     };
 
     for (const result of nextResult) {
@@ -67,10 +60,14 @@ let getPreviousDayInventory = async (
   businessId,
   registeredTimeDaily
 ) => {
-  let sqlToGetPrevInventori = `select * from dailyTransaction where dailySalesId<'${dailySalesId}' and registeredTimeDaily<='${registeredTimeDaily}' and mainProductId='${mainProductId}' and businessId='${businessId}' order by registeredTimeDaily desc, dailySalesId desc limit 1`;
+  let sqlToGetPrevInventori = `select * from dailyTransaction where dailySalesId<'${dailySalesId}' and registeredTimeDaily<='${DateFormatter(
+    registeredTimeDaily
+  )}' and mainProductId='${mainProductId}' and businessId='${businessId}' order by registeredTimeDaily desc, dailySalesId desc limit 1`;
+
+  console.log("queri is ", sqlToGetPrevInventori);
   let [prevResult] = await pool.query(sqlToGetPrevInventori);
   let inventoryItem = 0;
-  if (prevResult.length > 0) inventoryItem = prevResult[0].inventoryItem;
+  if (prevResult.length > 0) inventoryItem = prevResult[0]?.inventoryItem;
 
   return [inventoryItem, prevResult];
 };
@@ -92,11 +89,17 @@ let registerSinglesalesTransaction = async (body) => {
       unitPrice,
       useNewPrice,
       userID,
+      newUnitCost,
+      useNewCost,
     } = body;
+    // useNewCost, newUnitCost
     let { productsUnitCost, mainProductId, productsUnitPrice } = items;
+    if (useNewCost) {
+      productsUnitCost = Number(newUnitCost);
+    }
     if (unitPrice) items.productsUnitPrice = unitPrice;
     if (!useNewPrice) {
-      unitPrice = productsUnitPrice;
+      unitPrice = Number(productsUnitPrice);
     }
 
     if (mainProductId == null) mainProductId = ProductId;
@@ -165,24 +168,29 @@ let getDailyTransaction = async (body) => {
       currentDates,
       businessName,
       userID,
+      productName,
     } = body;
     businessName = await getUniqueBusinessName(businessId, userID);
     console.log("businessName", businessName);
     if (businessName == "you are not owner of this business") {
       return { data: "Error", Error: businessName };
     }
-    let query, values;
+    let query = null,
+      values = "";
     if (productId === "getAllTransaction") {
+      // get all transaction without filter
       query = `SELECT * FROM ?? AS dt JOIN ?? AS bp JOIN ?? as ut  ON ut.userId=dt.registeredBy and  bp.ProductId = dt.ProductId    WHERE dt.businessId = ?  AND dt.registeredTimeDaily = ?  `;
       values = [
         "dailyTransaction",
         `${businessName}_products`,
         "usersTable",
         businessId,
-        currentDates,
+        DateFormatter(currentDates),
       ];
       if (isValidDateFormat(fromDate) && isValidDateFormat(toDate)) {
-        query = `SELECT * FROM ?? AS dt JOIN ?? AS bp JOIN ?? as ut  ON ut.userId=dt.registeredBy and  bp.ProductId = dt.ProductId WHERE dt.businessId = ?  AND dt.registeredTimeDaily between '${fromDate}' and '${toDate}'`;
+        query = `SELECT * FROM ?? AS dt JOIN ?? AS bp JOIN ?? as ut  ON ut.userId=dt.registeredBy and  bp.ProductId = dt.ProductId WHERE dt.businessId = ?  AND dt.registeredTimeDaily between '${DateFormatter(
+          fromDate
+        )}' and '${DateFormatter(toDate)}'`;
         values = [
           "dailyTransaction",
           `${businessName}_products`,
@@ -190,7 +198,31 @@ let getDailyTransaction = async (body) => {
           businessId,
         ];
       }
+    } else if (productId === "getSingleTransaction") {
+      // get transaction by productName
+      query = `SELECT * FROM ?? AS dt JOIN ?? AS bp JOIN ?? as ut  ON ut.userId=dt.registeredBy and  bp.ProductId = dt.ProductId    WHERE dt.businessId = ?  AND dt.registeredTimeDaily = ? and bp.productName like ? `;
+      values = [
+        "dailyTransaction",
+        `${businessName}_products`,
+        "usersTable",
+        businessId,
+        currentDates,
+        `${productName}%`,
+      ];
+      if (isValidDateFormat(fromDate) && isValidDateFormat(toDate)) {
+        query = `SELECT * FROM ?? AS dt JOIN ?? AS bp JOIN ?? as ut  ON ut.userId=dt.registeredBy and  bp.ProductId = dt.ProductId WHERE dt.businessId = ?  AND dt.registeredTimeDaily between '${fromDate}' and '${toDate}' and bp.productName like ?`;
+        values = [
+          "dailyTransaction",
+          `${businessName}_products`,
+          "usersTable",
+          businessId,
+          `%${productName}%`,
+        ];
+      }
+      // getSingleTransaction
+      // productName;
     } else {
+      // get transaction by productId
       query = `SELECT * FROM ?? AS dt JOIN ?? AS bp JOIN ?? as ut ON bp.ProductId = dt.ProductId and ut.userId = dt.registeredBy WHERE dt.businessId = ?  AND dt.ProductId = ?  AND dt.registeredTimeDaily = ? `;
       values = [
         "dailyTransaction",
@@ -252,7 +284,7 @@ let deleteTransactions = async (body) => {
 };
 let updateDailyTransactions = async (body) => {
   try {
-    const {
+    let {
       unitCost,
       registeredTimeDaily,
       ProductId,
@@ -263,23 +295,23 @@ let updateDailyTransactions = async (body) => {
       creditPaymentDate,
       creditsalesQty,
       purchaseQty,
-      registrationDate,
       salesQty,
       salesTypeValues,
       userID,
 
       itemDetailInfo,
     } = body;
+    // change values to number starts here
+    unitCost = Number(unitCost);
+    brokenQty = Number(brokenQty);
+    creditsalesQty = Number(creditsalesQty);
+    purchaseQty = Number(purchaseQty);
+    salesQty = Number(salesQty);
+    // change values to number ends here
     let { mainProductId } = body;
 
     const itemDetailInfoObject = JSON.parse(itemDetailInfo);
     if (unitCost) itemDetailInfoObject.unitCost = unitCost;
-
-    console.log("2344", body.items);
-    console.log(
-      " itemDetailInfoObject.unitCost ",
-      itemDetailInfoObject.unitCost
-    );
 
     if (!mainProductId) mainProductId = ProductId;
 
@@ -290,8 +322,11 @@ let updateDailyTransactions = async (body) => {
       registeredTimeDaily
     );
 
+    console.log("inventoryItem", inventoryItem);
+
     const updatedInventoryItem =
       inventoryItem + purchaseQty - salesQty - creditsalesQty - brokenQty;
+    //  + purchaseQty - salesQty - creditsalesQty - brokenQty;
 
     const updateQuery = `UPDATE dailyTransaction SET purchaseQty=?, unitCost=?, salesQty=?, creditsalesQty=?, salesTypeValues=?, creditPaymentDate=?, brokenQty=?, Description=?, inventoryItem=?, itemDetailInfo=? WHERE dailySalesId=?`;
 
@@ -330,43 +365,14 @@ let updateDailyTransactions = async (body) => {
     res.status(500).json({ data: error.message });
   }
 };
-
-const getSingleItemsTransaction = async (reqBody, query) => {
-  const { businessId, toDate, fromDate, productName } = query;
-  const { userID } = reqBody;
-
-  let businessName = await getUniqueBusinessName(businessId, userID);
-
-  if (businessName === "you are not owner of this business") {
-    return { error: "Unauthorized access" };
-  }
-
-  const sqlQuery = `
-    SELECT *
-    FROM ${businessName}_Transaction AS t
-    INNER JOIN ${businessName}_products AS p
-    ON t.productIDTransaction = p.ProductId
-    WHERE p.productName LIKE ?
-    AND t.registeredTime BETWEEN ? AND ?
-  `;
-
-  const queryParams = [`%${productName}%`, fromDate, toDate];
-
-  try {
-    const [rows] = await pool.query(sqlQuery, queryParams);
-    console.log("Fetched rows:", rows);
-    ({ data: rows });
-  } catch (error) {
-    console.error("Database error:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
 let getMultipleItemsTransaction = async (body, query) => {
   try {
     let { toDate, fromDate, selectSearches, productName, token, businessId } =
       query;
 
-    let selectData = `select * from dailyTransaction where registeredTimeDaily BETWEEN '${fromDate}' and '${toDate}' and businessId='${businessId}'`;
+    let selectData = `select * from dailyTransaction where registeredTimeDaily BETWEEN '${DateFormatter(
+      fromDate
+    )}' and '${DateFormatter(toDate)}' and businessId='${businessId}'`;
     let [results] = await pool.query(selectData);
     return { data: results };
   } catch (error) {
@@ -381,297 +387,9 @@ let getBusinessTransactions = async (body, query) => {
   let [eachResult] = await pool.query(selcetEachInfo);
   return { data: eachResult };
 };
-const deleteSalesPurchase = async (body, query) => {
-  try {
-    const { items, userID } = body;
-    const { transactionId, businessId } = items;
-
-    const businessName = await getUniqueBusinessName(businessId, userID);
-    const deleteQuery = "DELETE FROM ?? WHERE transactionId = ?";
-    const table = `${businessName}_Transaction`;
-    const deleteValues = [table, transactionId];
-
-    const verifyQuery =
-      "SELECT * FROM Business WHERE uniqueBusinessName=? AND ownerId = ?";
-    const verifyValues = [businessName, userID];
-
-    // Verify business ownership
-    const [verificationRows] = await pool.query(verifyQuery, verifyValues);
-    if (verificationRows.length > 0) {
-      // Business is owned by the user, proceed with deletion
-      const [deleteResults] = await pool.query(deleteQuery, deleteValues);
-      return { data: "deleted", results: deleteResults };
-    } else {
-      return { data: "NotAllowedByYou" };
-    }
-  } catch (error) {
-    console.error("Error in deleteSalesPurchase:", error);
-    throw new Error("Internal Server Error");
-  }
-};
-
-const registerTransaction = async (body) => {
-  try {
-    const { businessId, userID, ProductsList, dates } = body;
-    const businessName = await getUniqueBusinessName(businessId, userID);
-
-    // Validate business name
-    const validate = validateAlphabet(businessName);
-    if (validate !== "correctData") {
-      return "Invalid business name. Please use only alphanumeric characters.";
-    }
-
-    const insertedProducts = [];
-    const inventoryList = [];
-
-    for (const product of ProductsList) {
-      const {
-        ProductId,
-        mainProductId,
-        productsUnitCost,
-        productsUnitPrice,
-        salesQuantity,
-        salesTypeValues,
-        creditDueDate,
-        purchaseQty,
-        creditSalesQty,
-        wrickageQty,
-        description,
-        registrationSource,
-      } = product;
-
-      // Check if the product is already registered for the given date
-      const selectToCheck = `SELECT * FROM ${businessName}_Transaction WHERE registeredTime LIKE ? AND productIDTransaction = ?`;
-      const [rows] = await pool.query(selectToCheck, [`%${dates}%`, ProductId]);
-
-      if (rows.length > 0) {
-        continue; // Skip if product is already registered
-      }
-
-      // Calculate Inventory
-      const prevInventoryQuery = `SELECT * FROM ${businessName}_Transaction WHERE mainProductId = ? AND registeredTime <= ? ORDER BY registeredTime DESC LIMIT 1`;
-      const [prevInventoryRows] = await pool.query(prevInventoryQuery, [
-        mainProductId,
-        dates,
-      ]);
-
-      let Inventory = 0;
-      if (prevInventoryRows.length > 0) {
-        Inventory = prevInventoryRows[0].Inventory;
-      }
-
-      Inventory +=
-        parseFloat(purchaseQty) -
-        parseFloat(salesQuantity) -
-        parseFloat(wrickageQty) -
-        parseFloat(creditSalesQty);
-      inventoryList.push(Inventory);
-
-      // Insert transaction
-      const insertQuery = `INSERT INTO ${businessName}_Transaction(description, unitCost, unitPrice, productIDTransaction, mainProductId, salesQty, purchaseQty, registeredTime, wrickages, Inventory, creditDueDate, salesTypeValues, creditSalesQty, registrationSource, registeredBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-      const Values = [
-        description,
-        productsUnitCost,
-        productsUnitPrice,
-        ProductId,
-        mainProductId || ProductId, // If mainProductId is null or undefined, use ProductId
-        salesQuantity,
-        purchaseQty,
-        dates,
-        wrickageQty,
-        Inventory,
-        creditDueDate,
-        salesTypeValues,
-        creditSalesQty || 0, // Default creditSalesQty to 0 if null or undefined
-        registrationSource,
-        userID,
-      ];
-
-      await pool.query(insertQuery, Values);
-
-      // Update dailyTransaction if registrationSource is "Single"
-      if (registrationSource === "Single") {
-        const updateQuery = `UPDATE dailyTransaction SET reportStatus='reported to total sales' WHERE registeredTimeDaily=? AND businessId=? AND ProductId=?`;
-        await pool.query(updateQuery, [dates, businessId, ProductId]);
-      }
-
-      // Prepare inserted product data for response
-      const insertedProduct = {
-        mainProductId,
-        creditSalesQty: creditSalesQty || 0,
-        creditDueDate,
-        salesTypeValues,
-        description,
-        productsUnitCost,
-        productsUnitPrice,
-        ProductId,
-        salesQuantity,
-        purchaseQty,
-        wrickageQty,
-        Inventory,
-      };
-      insertedProducts.push(insertedProduct);
-    }
-
-    if (insertedProducts.length === 0) {
-      return {
-        data: "All data are registered before",
-        previouslyRegisteredData: [],
-        date: dates,
-        values: "",
-      };
-    }
-
-    // Update next date inventory
-    updateNextDateInventory(
-      `${businessName}_Transaction`,
-      insertedProducts,
-      dates,
-      inventoryList
-    );
-
-    return {
-      data: "Data is registered successfully",
-      previouslyRegisteredData: [],
-      dataToSendResponseToClient: "NoNeed",
-    };
-  } catch (error) {
-    console.error("Error in registerTransaction:", error);
-    throw new Error("Internal Server Error");
-  }
-};
-
-let ViewTransactions = async (body) => {
-  try {
-    let businessName = "",
-      time = body.time;
-
-    // Validate business name
-    let validate = validateAlphabet(body.businessName);
-    if (validate !== "correctData") {
-      return "This data contains a string so no need for execution";
-    }
-    businessName = body.businessName;
-
-    const transactionTable = `${businessName}_Transaction`;
-    const productsTable = `${businessName}_products`;
-    const select = `SELECT * FROM ?? as t INNER JOIN ?? as p ON p.productId = t.productIDTransaction WHERE t.registeredTime LIKE ?`;
-    const timeDate = `%${time}%`;
-    const values = [transactionTable, productsTable, timeDate];
-
-    let salesTransaction = await pool.query(select, values);
-    salesTransaction = salesTransaction[0]; // Extract result from array
-
-    const selectCostQuery = `SELECT * FROM ${businessName}_expenses, ${businessName}_Costs WHERE ${businessName}_expenses.costId = ${businessName}_Costs.costsId AND costRegisteredDate = ?`;
-    const expenseTransaction = await pool.query(selectCostQuery, [time]);
-
-    return { expenseTransaction: expenseTransaction[0], salesTransaction };
-  } catch (error) {
-    console.error("Error in ViewTransactions:", error);
-    throw new Error("Internal Server Error");
-  }
-};
-
-let updateTransactions = async (req, res) => {
-  try {
-    let {
-      productId,
-      date,
-      mainProductId,
-      wrickages,
-      purchaseQty,
-      salesQty,
-      salesQtyInCredit,
-      Description,
-      transactionId,
-      salesTypeValues,
-      creditPayementdate,
-      businessName,
-    } = req.body;
-
-    // Validate business name
-    let validate = validateAlphabet(businessName, res);
-    if (validate !== "correctData") {
-      return res.send("This data contains a string so no need for execution");
-    }
-
-    // Check partial payment
-    let sqlToCheckPartialPayment = `SELECT salesTypeValues FROM ${businessName}_Transaction WHERE transactionId=?`;
-    let [partialValues] = await pool.query(sqlToCheckPartialPayment, [
-      transactionId,
-    ]);
-    let savedSalesTypeValues = partialValues[0]?.salesTypeValues || "";
-
-    if (savedSalesTypeValues === "Partially paied") {
-      salesTypeValues = savedSalesTypeValues;
-    }
-
-    // Retrieve previous inventory data
-    const selectQuery = `SELECT * FROM ${businessName}_Transaction WHERE registeredTime < ? AND mainProductId = ? ORDER BY registeredTime DESC LIMIT 1`;
-    let [data] = await pool.query(selectQuery, [date, mainProductId]);
-
-    let currentInventory =
-      Number(purchaseQty) -
-      Number(salesQty) -
-      Number(salesQtyInCredit) -
-      Number(wrickages);
-
-    if (data.length > 0) {
-      let prevInventory = parseInt(data[0].Inventory);
-      currentInventory += prevInventory;
-    }
-
-    // Update transaction
-    const updateQuery = `UPDATE ${businessName}_Transaction SET wrickages=?, purchaseQty=?, salesQty=?, creditsalesQty=?, Inventory=?, description=?, salesTypeValues=?, creditPayementdate=? WHERE transactionId=?`;
-    await pool.query(updateQuery, [
-      wrickages,
-      purchaseQty,
-      salesQty,
-      salesQtyInCredit,
-      currentInventory,
-      Description,
-      salesTypeValues,
-      creditPayementdate,
-      transactionId,
-    ]);
-
-    // Select data for response
-    const sqlToSelect = `SELECT * FROM ${businessName}_Transaction AS t, ${businessName}_products AS p WHERE t.productIDTransaction = p.ProductId AND t.registeredTime BETWEEN ? AND ? ORDER BY t.registeredTime DESC`;
-    let [rows] = await pool.query(sqlToSelect, [
-      req.body.fromDate,
-      req.body.toDate,
-    ]);
-
-    rows.forEach(async (item) => {
-      if (req.body.transactionId == item.transactionId) {
-        await updateNextDateInventory(
-          `${businessName}_Transaction`,
-          [item],
-          DateFormatter(item.registrationDate),
-          [currentInventory],
-          {
-            sqlToSelect,
-            inputToSelect: [req.body.fromDate, req.body.toDate],
-            res,
-          }
-        );
-        return { data: rows };
-      }
-    });
-  } catch (error) {
-    console.error("Error in updateTransactions:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
 module.exports = {
-  updateTransactions,
-  ViewTransactions,
-  registerTransaction,
-  deleteSalesPurchase,
   getBusinessTransactions,
   getMultipleItemsTransaction,
-  getSingleItemsTransaction,
   updateDailyTransactions,
   registerSinglesalesTransaction,
   getDailyTransaction,

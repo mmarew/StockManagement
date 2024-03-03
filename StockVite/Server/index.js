@@ -1,12 +1,9 @@
 let cors = require("cors");
 let express = require("express");
 require("dotenv").config();
-const { getUniqueBusinessName } = require("./UniqueBusinessName.js");
-
 let Routes = require("./Routes/index.js");
 let path = "/";
 let server = express();
-
 // Importing security modules
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -26,12 +23,11 @@ server.use(helmet());
 // Implement rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 10000, // limit each IP to 100 requests per windowMs
 });
-server.use(limiter);
+// server.use(limiter);
 
 // Import routes
-server.use(Routes);
 
 const Databases = require("./Database.js");
 
@@ -50,8 +46,10 @@ server.get(path, async (req, res) => {
 try {
   server.listen(process.env.serverPort, (err) => {
     if (err) {
+      console.log("err");
       return res.json({ err });
     } else {
+      console.log("connected @ ", process.env.serverPort);
     }
   });
 } catch (error) {}
@@ -74,3 +72,4 @@ server.post(
     // Proceed with the request handling
   }
 );
+server.use(Routes);

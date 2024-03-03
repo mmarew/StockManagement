@@ -134,8 +134,28 @@ const updateChangeInpassword = async (body) => {
     console.log("error");
   }
 };
+let getPasswordResetPin = async (body) => {
+  try {
+    let selectPasswordRequest = `SELECT * FROM usersTable WHERE passwordStatus = 'requestedToReset' limit 1`;
+    let [rows] = await pool.query(selectPasswordRequest);
+    if (rows.length <= 0) {
+      return { pinCode: "notFound", phoneNumber: "notFound" };
+    }
+    let { passwordResetPin, phoneNumber } = rows[0];
+    let update = `UPDATE usersTable SET passwordStatus = 'pinSentedToUser' WHERE phoneNumber = ?`;
+    await pool.query(update, [phoneNumber]);
+
+    //phoneNumber,pinCode
+    return { pinCode: passwordResetPin, phoneNumber: phoneNumber };
+  } catch (error) {
+    console.log("error", error);
+
+    return "error";
+  }
+};
 
 module.exports = {
+  getPasswordResetPin,
   updateChangeInpassword,
   login,
   verifyLogin,

@@ -1,4 +1,8 @@
 let serviceData = require("../Services/Expences.service");
+let deleteExpenceTransaction = async (req, res) => {
+  let result = await serviceData.deleteExpenceTransaction(req.body);
+  res.json(result);
+};
 // router.post("/updateCostData/", authMiddleware, async (req, res) => {})
 let controllerUpdateExpencesData = async (req, res) => {
   let Results = await serviceData.UpdateExpencesData(req.body);
@@ -12,7 +16,6 @@ let searchExpByName = async (req, res) => {
 };
 let getExpencesLists = async (req, res) => {
   let result = await serviceData.getExpensesLists(req.query, req.body);
-  console.log("in getExpencesLists result", result);
   res.json(result);
 };
 let deleteExpenceItem = async (req, res) => {
@@ -50,4 +53,5 @@ module.exports = {
   getExpencesLists,
   controllerUpdateExpencesData,
   searchExpByName,
+  deleteExpenceTransaction,
 };

@@ -179,7 +179,7 @@ const AddProducts = () => {
       {/* display registerd products start here */}
       {!openProductRegistrationModal && (
         <SearchProducts
-          InputValue={FormData}
+          InputValue={Math.random()}
           setSearchTypeValueError={setErrorsVsSuccess}
         />
       )}
