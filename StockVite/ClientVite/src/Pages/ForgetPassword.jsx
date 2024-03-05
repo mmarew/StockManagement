@@ -1,104 +1,103 @@
 import { Box, Button, TextField } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import forgetCss from "../CSS/Forget.module.css";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import SuccessOrError from "../Components/Body/Others/SuccessOrError";
+
 function ForgetPassword() {
-  const [Processing, setProcessing] = useState(false);
-  // const [PhoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [password, setPassword] = useState({
+    password: "",
+    retypedPassword: "",
+  });
+  const [processing, setProcessing] = useState(false);
+  const [errors, setErrors] = useState(null);
+  const [showPincodeField, setShowPincodeField] = useState(false);
+  const [showPasswordField, setShowPasswordField] = useState(false);
+
   let serverUrl = localStorage.getItem("targetUrl");
-  const [showPasswordField, setshowPasswordField] = useState(false);
-  let colllectPhoneNumber = (e) => {
+  let navigate = useNavigate();
+
+  const handlePhoneNumberChange = (e) => {
     setPhoneNumber(e.target.value);
-    e.preventDefault();
   };
-  const [PhoneNumber, setPhoneNumber] = useState("");
-  const [Erorrs, setErorrs] = useState(null);
-  let requestBySms = async () => {
-    const encodedPhoneNumber = encodeURIComponent(PhoneNumber);
-    // alert("PhoneNumber " + PhoneNumber);
-    try {
-      let Responces = await axios.get(
-        `https://sms.masetawosha.com?Phonenumber=${encodedPhoneNumber}`
-      );
-    } catch (error) {}
-  };
-  let submitRegistrationRequest = async (e) => {
+
+  const submitRegistrationRequest = async (e) => {
     e.preventDefault();
     setProcessing(true);
     try {
-      let Responces = await axios.post(serverUrl + "forgetRequest/", {
-        PhoneNumber,
+      const response = await axios.post(serverUrl + "forgetRequest/", {
+        phoneNumber,
       });
-      console.log("Responces", Responces);
-      if (Responces.data.data == "requestedToChangePassword") {
-        setshowPincodeField(true);
-        requestBySms();
+
+      if (response.data.data === "requestedToChangePassword") {
+        setShowPincodeField(true);
+      } else if (response.data.error === "Phone number not found") {
+        setErrors("Phone number not found");
       }
-      if (Responces.data.error == "Phone number not found") {
-        setErorrs(error.message);
-      }
+
       setProcessing(false);
     } catch (error) {
       setProcessing(false);
-
-      // console.log("error", error);
-      if (error.response.data.error == "Phone number not found") {
-        return setErorrs(`Phone number not found`);
-      } else setErorrs(error.message);
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.error === "Phone number not found"
+      ) {
+        setErrors("Phone number not found");
+      } else {
+        setErrors(error.message);
+      }
     }
   };
 
-  const [Password, setPassword] = useState({});
-  let navigate = useNavigate();
-  let updatePassword = async (e) => {
+  const verifyPincode = async (e) => {
     e.preventDefault();
-    // password: "marew123";
-    // retypedPassword: "marew123";
-    if (Password.password !== Password.retypedPassword) {
-      return alert("password mismatch");
-    }
-    let Responces = await axios.post(serverUrl + "updateChangeInpassword/", {
-      PhoneNumber,
-      Password,
-    });
-    if ((Responces.data.data = "passwordChanged")) {
-      setshowPasswordField(false);
-      navigate("/login");
-      alert("your password is changed");
-    }
-  };
-  let handlPassword = (e) => {
-    setPassword({ ...Password, [e.target.name]: e.target.value });
-  };
-  const [showPincodeField, setshowPincodeField] = useState(false);
-  const [pincode, setpincode] = useState("");
+    setProcessing(true);
+    try {
+      const response = await axios.post(serverUrl + "verifyPin/", {
+        phoneNumber,
+        pincode,
+      });
 
-  let collectPincode = (e) => {
-    setpincode(e.target.value);
-  };
-  const [PincodeStatus, setPincodeStatus] = useState("");
-  let verifyPincode = async (e) => {
-    e.preventDefault();
-    let responce = await axios.post(serverUrl + "verifyPin/", {
-      PhoneNumber,
-      pincode,
-    });
-    if (responce.data.data == "correctPin") {
-      setshowPasswordField(true);
-      setPincodeStatus("");
-    } else {
-      setPincodeStatus("wrong Pincode ");
+      if (response.data.data === "correctPin") {
+        setShowPasswordField(true);
+        setErrors("");
+      } else {
+        setErrors("Wrong Pincode");
+      }
+    } catch (error) {
+      setErrors(error.message);
     }
+    setProcessing(false);
   };
-  let getPasswordResetPin = async () => {
-    let responce = await axios.get(serverUrl + "getPasswordResetPin/");
-    console.log("responce======", responce);
+
+  const updatePassword = async (e) => {
+    e.preventDefault();
+    if (password.password !== password.retypedPassword) {
+      alert("Password mismatch");
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const response = await axios.post(serverUrl + "updateChangeInpassword/", {
+        phoneNumber,
+        password,
+      });
+
+      if (response.data.data === "passwordChanged") {
+        setShowPasswordField(false);
+        navigate("/login");
+        alert("Your password has been changed");
+      }
+    } catch (error) {
+      setErrors(error.message);
+    }
+    setProcessing(false);
   };
-  useEffect(() => {
-    getPasswordResetPin();
-  }, []);
 
   return (
     <div className={forgetCss.forgetFormWrapper}>
@@ -113,11 +112,11 @@ function ForgetPassword() {
           className={forgetCss.phoneNumberInput}
           required
           type="tel"
-          onChange={colllectPhoneNumber}
+          onChange={handlePhoneNumberChange}
           label="Enter Phone Number"
         />
         <div>
-          {Processing ? (
+          {processing ? (
             <Button disabled>Processing ..... </Button>
           ) : (
             <Button
@@ -146,20 +145,24 @@ function ForgetPassword() {
           <TextField
             className={forgetCss.pincodeInput}
             required
-            onChange={collectPincode}
+            onChange={(e) => setPincode(e.target.value)}
             type="number"
             label="Enter Pin Code"
           />
-          {PincodeStatus}
+          {errors && <div>{errors}</div>}
           <div style={{ display: "block", margin: "auto" }}>
-            <Button
-              className={forgetCss.verifyButton}
-              variant="contained"
-              color="primary"
-              type="submit"
-            >
-              Verify
-            </Button>
+            {processing ? (
+              <Button disabled>Processing ..... </Button>
+            ) : (
+              <Button
+                className={forgetCss.verifyButton}
+                variant="contained"
+                color="primary"
+                type="submit"
+              >
+                Verify
+              </Button>
+            )}
           </div>
         </form>
       )}
@@ -168,36 +171,47 @@ function ForgetPassword() {
           <h3 className={forgetCss.passwordFormTitle}>
             Please Enter Your New Password
           </h3>
+          <br />
           <TextField
             className={forgetCss.passwordInput}
             required
             name="password"
-            onChange={handlPassword}
+            onChange={(e) =>
+              setPassword({ ...password, password: e.target.value })
+            }
             type="password"
             label="Enter Password"
           />
+          <br />
           <TextField
             className={forgetCss.passwordInput}
             required
             name="retypedPassword"
-            onChange={handlPassword}
+            onChange={(e) =>
+              setPassword({ ...password, retypedPassword: e.target.value })
+            }
             type="password"
             label="Re-enter Password"
           />
+          <br />
           <Box>
-            <Button
-              sx={{ margin: "auto", display: "block" }}
-              className={forgetCss.updateButton}
-              type="submit"
-              color="primary"
-              variant="contained"
-            >
-              Update
-            </Button>
+            {processing ? (
+              <Button disabled>Processing ..... </Button>
+            ) : (
+              <Button
+                sx={{ margin: "auto", display: "block" }}
+                className={forgetCss.updateButton}
+                type="submit"
+                color="primary"
+                variant="contained"
+              >
+                Update
+              </Button>
+            )}
           </Box>
         </form>
       )}
-      {Erorrs && <SuccessOrError request={Erorrs} setErrors={setErorrs} />}
+      {errors && <SuccessOrError request={errors} setErrors={setErrors} />}
     </div>
   );
 }

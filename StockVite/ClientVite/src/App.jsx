@@ -22,6 +22,11 @@ import RegisterEmployersProducts from "./Pages/RegisterEmployersProducts";
 import AddSingleSales from "./Pages/OpenBusiness/AddTransaction/AddSingleSales";
 import SearchManager from "./Pages/OpenBusiness/SearchManager";
 import OpenEmployeersBusiness from "./Pages/OpenEmployeersBusiness";
+import HowToRegisterAndLogin from "./Components/Afterlogin/Help/HowToRegisterAndLogin";
+import HowToCreateBusiness from "./Components/Afterlogin/Help/HowToCreateBusiness";
+import HowToRegisterProductsAndExpencesItems from "./Components/Afterlogin/Help/OpenedBsiness/HowToRegisterProductsAndExpencesItems";
+import HowToregisterSalesAndPurchaseTransaction from "./Components/Afterlogin/Help/OpenedBsiness/HowToregisterSalesAndPurchaseTransaction";
+import HowToRegisterExpencesTransaction from "./Components/Afterlogin/Help/OpenedBsiness/HowToRegisterExpencesTransaction";
 function App() {
   return (
     <div className="App">
@@ -90,11 +95,32 @@ function App() {
             path="/help"
             element={
               <>
-                {window.innerWidth < 768 && <NavBar />}
+                {/* {window.innerWidth < 768 && <NavBar />} */}
                 <Help />
               </>
             }
-          />
+          >
+            <Route
+              path="loginAndRegister"
+              element={<HowToRegisterAndLogin />}
+            />
+            <Route
+              path="howToCreateBusiness"
+              element={<HowToCreateBusiness />}
+            />
+            <Route
+              path="registerProductsAndExpencesItems"
+              element={<HowToRegisterProductsAndExpencesItems />}
+            />
+            <Route
+              path="registerSalesAndPurchaseTransaction"
+              element={<HowToregisterSalesAndPurchaseTransaction />}
+            />
+            <Route
+              path="registerExpencesTransaction"
+              element={<HowToRegisterExpencesTransaction />}
+            />
+          </Route>
           <Route path="/login" element={<Login />} />
           <Route
             path="/register"

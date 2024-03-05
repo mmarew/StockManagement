@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const tokenKey = process.env.tokenKey;
 let login = async (phoneNumber, password) => {
   try {
-    // let phoneNumber = body.phoneNumber;
     let select = `SELECT * FROM usersTable WHERE phoneNumber = ? LIMIT 1`;
     let [rows] = await pool.query(select, [phoneNumber]);
     if (rows.length == 0) {

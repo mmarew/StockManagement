@@ -9,7 +9,15 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { body, validationResult } = require("express-validator");
 
-server.use(cors());
+var corsOptions = {
+  origin: [
+    `https://stock.masetawosha.com`,
+    `http://localhost:5173`,
+    `http://localhost:5174`,
+  ],
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+server.use(cors(corsOptions));
 server.use(express.json());
 server.use(
   express.urlencoded({
