@@ -4,12 +4,15 @@ const { pool, executeQuery } = require("../Config/db.config");
 const bcrypt = require("bcryptjs");
 
 let authMiddleware = (req, res, next) => {
+  console.log("req.body", req.body);
   let tokenString = req.body.token;
   // console.log("req.params", req.params, " req.query====", req.query);
   // console.log("req.body", req.body);
   // console.log("in authMiddleware tokenString token", req.query);
   if (!tokenString) tokenString = req.query.token;
-
+  console.log("tokenString", tokenString);
+  if (!tokenString)
+    return res.status(401).json({ error: "No token provided." });
   try {
     // Assuming 'datas' contains the token
     const token = jwt.verify(tokenString, process.env.tokenKey);

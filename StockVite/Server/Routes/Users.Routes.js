@@ -27,6 +27,7 @@ Router.post(
   async (req, res) => {
     try {
       console.log(" req.body", req.body);
+      // return;
       let { fullName, phoneNumber, oldPassword, newPassword, userID } =
         req.body;
       let query, values;

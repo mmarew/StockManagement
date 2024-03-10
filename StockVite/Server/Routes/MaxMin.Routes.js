@@ -36,30 +36,35 @@ Router.post(path + "getMaximumSales/", authMiddleware, async (req, res) => {
     });
 });
 Router.post(path + "GetMinimumQty/", authMiddleware, async (req, res) => {
-  const { businessId, userID } = req.body;
-  let uniqueBusinessName = await getUniqueBusinessName(businessId, userID);
-
-  if (uniqueBusinessName === "you are not owner of this business") {
-    return res.json({ data: uniqueBusinessName });
-  }
-
-  console.log("uniqueBusinessName", uniqueBusinessName);
-  const table = `${uniqueBusinessName}_`;
-
-  const selectInventory = `SELECT P.*, T.* FROM ${table}products AS P LEFT JOIN  dailyTransaction  AS T
-    ON T.ProductId = P.ProductId
-    WHERE T.registeredTimeDaily = (
-      SELECT MAX(registeredTimeDaily)
-      FROM dailyTransaction
-      WHERE T.ProductId = P.ProductId
-    ) ORDER BY P.ProductId`;
-
   try {
-    const [result] = await pool.query(selectInventory);
-    return res.json({ data: result });
+    const { businessId, userID } = req.body;
+    let uniqueBusinessName = await getUniqueBusinessName(businessId, userID);
+
+    if (uniqueBusinessName === "you are not owner of this business") {
+      return res.json({ data: uniqueBusinessName });
+    }
+    const table = `${uniqueBusinessName}_`;
+    const inventoryList = [];
+    let getProducts = `SELECT * FROM ${table}products`;
+    const [ProductResults] = await pool.query(getProducts);
+    if (ProductResults.length === 0) {
+      return res.json({ data: inventoryList });
+      // return res.json({ data: "No products found" });
+    } else if (ProductResults.length > 0) {
+      ProductResults.map(async (item, index) => {
+        let ProductId = item.ProductId;
+        let queryToselectInventory = `SELECT * FROM ${table}products AS P, dailyTransaction AS T WHERE P.ProductId = T.ProductId AND P.ProductId = ${ProductId} ORDER BY T.dailySalesId desc limit 1`;
+        let [eachInventory] = await pool.query(queryToselectInventory);
+        console.log("eachInventory", eachInventory);
+        inventoryList.push({ ...eachInventory[0] });
+        if (index === ProductResults.length - 1) {
+          return res.json({ data: inventoryList });
+        }
+      });
+      console.log("ProductResults", ProductResults);
+    }
   } catch (error) {
-    console.log(error);
-    return res.json({ data: "@minimumerr", error });
+    console.log("error", error);
   }
 });
 

@@ -12,6 +12,8 @@ let getDailyTransaction = async (req, res) => {
     await require("../Services/Transaction.service").getDailyTransaction(
       req.body
     );
+  // console.log("responces", responces);
+  // return;
   let { data } = responces;
   if (data == "error") return res.status(500).json(responces);
   return res.status(200).json(responces);

@@ -36,8 +36,15 @@ const verifyLogin = async (body) => {
 
     const [rows] = await pool.query(selectQuery, [userID]);
 
+    let { employeeName } = rows[0];
+
+    let token = jwt.sign(
+      { userID: rows[0].userId, usersFullName: employeeName },
+      tokenKey
+    );
+
     if (rows.length > 0) {
-      return { data: "alreadyConnected", result: rows };
+      return { data: "alreadyConnected", token };
     } else {
       return { data: "dataNotFound" };
     }
@@ -47,8 +54,9 @@ const verifyLogin = async (body) => {
   }
 };
 const requestPasswordReset = async (body) => {
+  console.log("requestPasswordReset", body);
   try {
-    const select = `SELECT * FROM usersTable WHERE passwordStatus = 'requestedToReset'`;
+    const select = `update    usersTable WHERE passwordStatus = 'requestedToReset'`;
     const [rows] = await pool.query(select);
 
     if (rows.length > 0) {
@@ -69,8 +77,13 @@ const requestPasswordReset = async (body) => {
 };
 const verifyPin = async (body) => {
   try {
-    const phone = body.PhoneNumber;
+    // phoneNumber,
+    //     pincode,
+    const phone = body.phoneNumber;
     const pincode = body.pincode;
+    if (!phone || !pincode) {
+      return { error: "phone number or pincode not found" };
+    }
     const select = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
     const [rows] = await pool.query(select, [phone]);
 
@@ -91,10 +104,10 @@ const verifyPin = async (body) => {
 };
 const forgetRequest = async (body) => {
   try {
-    const phoneNumber = body.PhoneNumber;
+    const phoneNumber = body.phoneNumber;
+    console.log("phoneNumber", phoneNumber);
     const sql = `SELECT * FROM usersTable WHERE phoneNumber = ?`;
     const [rows] = await pool.query(sql, [phoneNumber]);
-
     if (rows.length > 0) {
       const rand = Math.floor(Math.random() * 1000000);
       const updateForgetPassStatus = `UPDATE usersTable SET passwordStatus = 'requestedToReset', passwordResetPin = ? WHERE phoneNumber = ?`;
@@ -102,7 +115,6 @@ const forgetRequest = async (body) => {
       await pool.query(updateForgetPassStatus, [rand, phoneNumber]);
       return { data: "requestedToChangePassword" };
     } else {
-      console.log("Phone number not found");
       return { error: "Phone number not found" };
     }
   } catch (error) {
@@ -111,10 +123,12 @@ const forgetRequest = async (body) => {
   }
 };
 const updateChangeInpassword = async (body) => {
+  console.log("body", body);
+  // return;
   try {
-    let phoneNumber = body.PhoneNumber;
-    let password = body.Password.password;
-    let retypedPassword = body.Password.retypedPassword;
+    let phoneNumber = body.phoneNumber;
+    let password = body.password.password;
+    let retypedPassword = body.password.retypedPassword;
 
     if (password !== retypedPassword) {
       return { error: "Passwords do not match" };
@@ -135,7 +149,7 @@ const updateChangeInpassword = async (body) => {
 };
 let getPasswordResetPin = async (body) => {
   try {
-    let selectPasswordRequest = `SELECT * FROM usersTable WHERE passwordStatus = 'requestedToReset' limit 1`;
+    let selectPasswordRequest = `SELECT * FROM usersTable WHERE passwordStatus = 'requestedToReset'  limit 1`;
     let [rows] = await pool.query(selectPasswordRequest);
     if (rows.length <= 0) {
       return { pinCode: "notFound", phoneNumber: "notFound" };

@@ -14,10 +14,12 @@ var corsOptions = {
     `https://stock.masetawosha.com`,
     `http://localhost:5173`,
     `http://localhost:5174`,
+    `196.188.33.195`,
+    `196.189.127.142`,
   ],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
-server.use(cors(corsOptions));
+server.use(cors());
 server.use(express.json());
 server.use(
   express.urlencoded({

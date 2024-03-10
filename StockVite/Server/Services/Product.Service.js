@@ -5,7 +5,6 @@ let addProducts = async (body) => {
   try {
     const rowData = body;
     console.log("rowData", rowData);
-
     const {
       businessId,
       userID,
@@ -65,7 +64,7 @@ const searchProducts = async (body, query) => {
       let { toDate, fromDate, selectSearches, productName, businessId } = query;
       let { userID } = body;
       businessName = await getUniqueBusinessName(businessId, userID);
-      if (businessName === `you are not owner of this business_products`) {
+      if (businessName === "you are not owner of this business") {
         return { data: "Error", Error: businessName };
       }
       let selectProducts = `select * from ?? where Status='active' || Status IS NULL`;
@@ -85,6 +84,12 @@ const searchProducts = async (body, query) => {
       // return;
 
       let businessName = await getUniqueBusinessName(businessId, userID);
+      if (
+        businessName === "you are not the owner of this business" ||
+        businessName === `Error in server 456`
+      ) {
+        return { data: businessName };
+      }
       console.log(" businessName == == ", businessName);
 
       let select = `select * from usersTable where userId='${userID}'`;
@@ -125,7 +130,12 @@ const searchProducts = async (body, query) => {
         minimumQty,
       } = body;
       let businessName = await getUniqueBusinessName(businessId, userID);
-
+      if (
+        businessName === "you are not the owner of this business" ||
+        businessName === `Error in server 456`
+      ) {
+        return { data: businessName };
+      }
       // Retrieve current product details
       const [currentProductResult] = await pool.query(
         `SELECT * FROM ${businessName}_products WHERE ProductId = ?`,
@@ -170,18 +180,13 @@ const searchProducts = async (body, query) => {
     try {
       let productName = body.searchInput;
       let { businessId, Target, userID } = body;
-      console.log("@getSingleProducts body", body);
-
       let businessName = await getUniqueBusinessName(businessId, userID);
-      console.log("businessName", businessName);
-
       if (
         businessName === "you are not the owner of this business" ||
         businessName === `Error in server 456`
       ) {
         return { data: businessName };
       }
-
       let query = `SELECT * FROM ?? WHERE productName LIKE ? and Status=?`;
       let values = [
         `${businessName}_products`,

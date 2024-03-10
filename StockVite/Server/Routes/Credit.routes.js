@@ -1,5 +1,5 @@
 const express = require("express");
-const { authMiddleware } = require("../middleware/Auth");
+const { authMiddleware, authMiddleware2 } = require("../middleware/Auth");
 const controllerData = require("../Controllers/Credit.controller");
 const router = express.Router();
 require("dotenv").config();
@@ -13,6 +13,7 @@ router.get(
 router.post(
   "/updatePartiallyPaidInfo",
   authMiddleware,
+  authMiddleware2,
   controllerData.updatePartiallyPaidInfo
 );
 
