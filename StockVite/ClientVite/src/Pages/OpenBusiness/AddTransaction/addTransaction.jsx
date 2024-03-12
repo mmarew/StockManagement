@@ -25,7 +25,6 @@ function AddTransaction({ Time }) {
   const { ownersName, setownersName } = ConsumeableContext();
   useEffect(() => {
     let getByName = document.getElementsByName("salesOrBuy");
-    console.log("getByName", getByName);
     let firstElement = getByName[0];
     firstElement.click();
     setownersName(localStorage.getItem("ownersName"));

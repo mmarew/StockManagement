@@ -17,6 +17,7 @@ function SearchExpenceTransaction({
   InputValue,
   searchTarget,
 }) {
+  console.log("searchTarget", searchTarget);
   const [expencesData, setexpencesData] = useState([]);
   let businessId = localStorage.getItem("businessId");
   const [Errors, setErrors] = useState("");
@@ -174,50 +175,64 @@ function SearchExpenceTransaction({
         <h3>no expence transaction</h3>
       )}
       {Errors && <SuccessOrError setErrors={setErrors} request={Errors} />}
-      <Paper style={{ padding: "20px" }}>
-        <Typography variant="body1" sx={{ color: "black", cursor: "default" }}>
-          Total Sales Revenue = {CurrencyFormatter(TotalSalesRevenue)}
-        </Typography>
-        <br />
-        <Typography
-          sx={{ cursor: "pointer", color: "blue" }}
-          variant="body1"
-          onClick={(e) => setShowMoneyDetailModal(true)}
-        >
-          Collected Money = {CurrencyFormatter(collectedMoney.Money)}
-        </Typography>
-        <br />
-        <Typography variant="body1" sx={{ color: "black", cursor: "default" }}>
-          Total Purchase Cost ={" "}
-          {openedBusiness === "myBusiness"
-            ? CurrencyFormatter(TotalPurchaseCost)
-            : 0}
-        </Typography>
-        <br />
-        <Typography variant="body1" sx={{ color: "black", cursor: "default" }}>
-          Account Receivable = {CurrencyFormatter(accountRecivableAmt)}
-        </Typography>
-        <br />
-        {/* ///////////////// */}
-        <Typography variant="body1" sx={{ color: "black", cursor: "default" }}>
-          Net Cash Flow (Total Sales - Total Costs - Sold In Credit)
-          &nbsp;&nbsp;&nbsp;
-          {openedBusiness === "myBusiness"
-            ? CurrencyFormatter(
-                TotalSalesRevenue -
-                  TotalPurchaseCost -
-                  TotalCostAmount -
-                  accountRecivableAmt +
-                  collectedMoney.Money
-              )
-            : CurrencyFormatter(
-                TotalSalesRevenue -
-                  TotalCostAmount -
-                  accountRecivableAmt +
-                  collectedMoney.Money
-              )}
-        </Typography>
-      </Paper>
+      {searchTarget !== "singleTransaction" && (
+        <Paper style={{ padding: "20px" }}>
+          <Typography
+            variant="body1"
+            sx={{ color: "black", cursor: "default" }}
+          >
+            Total Sales Revenue = {CurrencyFormatter(TotalSalesRevenue)}
+          </Typography>
+          <br />
+          <Typography
+            sx={{ cursor: "pointer", color: "blue" }}
+            variant="body1"
+            onClick={(e) => setShowMoneyDetailModal(true)}
+          >
+            Collected Money = {CurrencyFormatter(collectedMoney.Money)}
+          </Typography>
+          <br />
+          <Typography
+            variant="body1"
+            sx={{ color: "black", cursor: "default" }}
+          >
+            Total Purchase Cost ={" "}
+            {openedBusiness === "myBusiness"
+              ? CurrencyFormatter(TotalPurchaseCost)
+              : 0}
+          </Typography>
+          <br />
+          <Typography
+            variant="body1"
+            sx={{ color: "black", cursor: "default" }}
+          >
+            Account Receivable = {CurrencyFormatter(accountRecivableAmt)}
+          </Typography>
+          <br />
+          {/* ///////////////// */}
+          <Typography
+            variant="body1"
+            sx={{ color: "black", cursor: "default" }}
+          >
+            Net Cash Flow (Total Sales - Total Costs - Sold In Credit)
+            &nbsp;&nbsp;&nbsp;
+            {openedBusiness === "myBusiness"
+              ? CurrencyFormatter(
+                  TotalSalesRevenue -
+                    TotalPurchaseCost -
+                    TotalCostAmount -
+                    accountRecivableAmt +
+                    collectedMoney.Money
+                )
+              : CurrencyFormatter(
+                  TotalSalesRevenue -
+                    TotalCostAmount -
+                    accountRecivableAmt +
+                    collectedMoney.Money
+                )}
+          </Typography>
+        </Paper>
+      )}
       {ShowMoneyDetailModal && (
         <ModalToshowCollectedMoneyDetails
           setShowMoneyDetailModal={setShowMoneyDetailModal}

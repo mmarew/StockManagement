@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import ProfileCss from "../CSS/Profile.module.css";
-import EditProfile from "../Components/Body/Profile/EditProfile";
+import EditProfile from "../Components/Afterlogin/Profile/EditProfile";
 import axios from "axios";
 import LeftSideBusiness from "../Components/LeftSide/LeftSideBusiness";
 import { Box, Button, Modal, TextField } from "@mui/material";
+import DeleteUsersProfile from "../Components/Afterlogin/Profile/DeleteUsersProfile";
+import { ConsumeableContext } from "../Components/Body/UserContext/UserContext";
 function Profile() {
   const [targetRender, settargetRender] = useState("");
   let navigate = useNavigate();
@@ -18,25 +20,7 @@ function Profile() {
     }
   }, [navigate, storeToken]);
   const [deleteProfileModal, setdeleteProfileModal] = useState(false);
-  const [Password, setPassword] = useState(null);
-  let deleteProfile = async () => {
-    settargetRender("DeleteProfile");
 
-    if (Password != null)
-      if (Password.length > 0) {
-        let responces = await axios.post(serverUrl + "deleteUsers/", {
-          token: storeToken,
-          userPassword: Password,
-        });
-        if (responces.data.data == "deleted data") {
-          alert("you are deleted from stock management system");
-          localStorage.removeItem("storeToken");
-          navigate("/login");
-        } else if (responces.data.data == "wrong password") {
-          alert("wrong password confirmation");
-        }
-      }
-  };
   let handleEditeProfile = (e) => {
     setEditProfileOpen(true);
     settargetRender("EditProfile");
@@ -54,7 +38,7 @@ function Profile() {
   window.addEventListener("resize", () => {
     setWindowsInnerWidth(window.innerWidth);
   });
-
+  let { ownersName } = ConsumeableContext();
   return (
     <div className={ProfileCss.ProfileWrapper}>
       {windowsInnerWidth > 768 && (
@@ -62,7 +46,9 @@ function Profile() {
           <LeftSideBusiness />
         </div>
       )}
-      <div>
+      <div style={{ padding: "20px" }}>
+        <br />
+        {<h4>Hello {ownersName} , welcome to Smart Stock management system</h4>}
         <div className={ProfileCss.buttonContainer}>
           <Button
             // className={ProfileCss.editButton}
@@ -92,62 +78,13 @@ function Profile() {
             setEditProfileOpen={setEditProfileOpen}
           />
         ) : targetRender === "DeleteProfile" ? (
-          <Modal open={deleteProfileModal}>
-            <Box
-              sx={{
-                position: "absolute",
-                left: "50%",
-                top: "50%",
-                transform: "translate(-50%, -50%)",
-                bgcolor: "white",
-                p: 4,
-                borderRadius: 4,
-                boxShadow: 4,
-              }}
-            >
-              <form
-                className={ProfileCss.deleteProfileForm}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  deleteProfile();
-                }}
-              >
-                <TextField
-                  type="password"
-                  className={ProfileCss.passwordInput}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                  }}
-                  value={Password}
-                  label="Enter Your Password"
-                />
-                <br />
-                <br />
-                <Box className={ProfileCss.deleteProfileButtons}>
-                  <Button
-                    sx={{
-                      marginRight: "10px",
-                    }}
-                    className={ProfileCss.deleteSubmitButton}
-                    variant="contained"
-                    type="submit"
-                  >
-                    Submit
-                  </Button>
-                  <Button
-                    className={ProfileCss.deleteCloseButton}
-                    onClick={() => {
-                      setdeleteProfileModal(false);
-                    }}
-                    variant="contained"
-                    color="error"
-                  >
-                    Close
-                  </Button>
-                </Box>
-              </form>
-            </Box>
-          </Modal>
+          <DeleteUsersProfile
+            data={{
+              deleteProfileModal,
+              setdeleteProfileModal,
+              settargetRender,
+            }}
+          />
         ) : (
           ""
         )}

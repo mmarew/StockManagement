@@ -22,17 +22,15 @@ function Login() {
       let response = await axios.post(serverAddress + "Login/", loginForm);
       setProcess(false);
       if (response.data == "Not Registered Phone Number") {
-        setloginErrors(response.data);
-        return;
+        return setloginErrors(response.data);
       }
 
       let { Message, token } = response.data;
-      let { usersFullName } = DecodeJWT(token);
 
       if (Message == "login successfully.") {
+        let { usersFullName } = DecodeJWT(token);
         localStorage.setItem("ownersName", usersFullName);
         localStorage.setItem("storeToken", token);
-        localStorage.getItem("storeToken");
         Navigate("/Business");
       } else {
         setloginErrors(Message);

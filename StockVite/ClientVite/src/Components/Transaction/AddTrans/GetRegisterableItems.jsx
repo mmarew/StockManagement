@@ -5,6 +5,7 @@ import GetEachTransaction from "../SearchTrans/GetEachTransaction";
 import CurrencyFormatter, { ButtonProcessing } from "../../Utilities/Utility";
 import AddSingleSales_Register from "./RegisterPurchaseAndSales";
 import SuccessOrError from "../../Body/Others/SuccessOrError";
+import currentDates from "../../Body/Date/currentDate";
 
 function GetRegisterableItems({ randVal, setrandVal }) {
   const token = localStorage.getItem("storeToken");
@@ -140,6 +141,8 @@ function GetRegisterableItems({ randVal, setrandVal }) {
       )}
       {getAllDailyRegisters.open && (
         <GetEachTransaction
+          fromDate={currentDates()}
+          toDate={currentDates()}
           ErrorsProps={{ errors, setErrors }}
           RandValue={getAllDailyRegisters.RandValue}
           setGetAllDailyRegisters={setGetAllDailyRegisters}

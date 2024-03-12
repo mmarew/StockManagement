@@ -103,7 +103,6 @@ function GetCreditLists({
           "&&toDate=" +
           dateRange.toDate
       );
-      console.log("Responces", Responces);
       setProcessing(false);
 
       let {
@@ -195,7 +194,6 @@ function GetCreditLists({
       soldInDaily_SoldOncredits,
       soldOnTotal_Oncredit,
     } = creditData;
-    console.log("creditData", creditData);
     let accountRecivableTotalMoney = 0,
       totalCollectedAmount = 0;
     // sold on total sales way and on credit

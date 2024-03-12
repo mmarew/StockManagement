@@ -5,41 +5,33 @@ import {
   LinearProgress,
   MenuItem,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
 } from "@mui/material";
 
-import axios from "axios";
 import currentDates from "../Body/Date/currentDate";
 import { ButtonProcessing } from "../Utilities/Utility";
 import fetchProducts from "./fetchProducts";
 import { ConsumeableContext } from "../Body/UserContext/UserContext";
 function GetSingleProducts({ data }) {
-  let { setGetAllDailyRegisters, steRegisterableItems } = data;
+  let {
+    setGetAllDailyRegisters,
+    steRegisterableItems,
+    singleSalesInputValues,
+    setSinlgeSalesInputValues,
+  } = data;
   //   use states start here
   const { Processing, setProcessing } = ConsumeableContext();
   //   const [productDetailes, setproductDetailes] = useState([]);
-  const [singleSalesInputValues, setSinlgeSalesInputValues] = useState({
-    singleSalesFromDate: currentDates(),
-    singleSalesToDate: currentDates(),
-    targetedProduct: null,
-  });
+
   //   functions start here
   let handleSearchSubmit = async (e) => {
     e.preventDefault();
-    console.log(
-      " singleSalesInputValues.targetedProduct.ProductId",
-      singleSalesInputValues.targetedProduct.ProductId
-    );
+    console.log("singleSalesInputValues", singleSalesInputValues);
     // return;
     setGetAllDailyRegisters({
-      fromDate: singleSalesInputValues.singleSalesFromDate,
-      toDate: singleSalesInputValues.singleSalesToDate,
+      ...singleSalesInputValues,
+      // fromDate: singleSalesInputValues.singleSalesFromDate,
+      // toDate: singleSalesInputValues.singleSalesToDate,
       Open: true,
       RandValue: Math.random(),
       ProductId: singleSalesInputValues.targetedProduct.ProductId,
@@ -68,8 +60,6 @@ function GetSingleProducts({ data }) {
 
   return (
     <div>
-      {console.log("ProductsList", ProductsList)}
-
       {ProductsList.length > 0 ? (
         <form
           className={singleSalesCss.formToSearchItems}
@@ -87,7 +77,7 @@ function GetSingleProducts({ data }) {
           <br />
           <TextField
             onChange={handleSearchableProductInput}
-            value={singleSalesInputValues.singleSalesDate || currentDates()}
+            value={singleSalesInputValues.singleSalesFromDate}
             required
             fullWidth
             name="singleSalesFromDate"
@@ -105,7 +95,7 @@ function GetSingleProducts({ data }) {
           </label>
           <TextField
             onChange={handleSearchableProductInput}
-            value={singleSalesInputValues.singleSalesDate || currentDates()}
+            value={singleSalesInputValues.singleSalesToDate}
             required
             fullWidth
             name="singleSalesToDate"

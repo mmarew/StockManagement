@@ -16,6 +16,7 @@ function AddSingleSales() {
     singleSalesToDate: currentDates(),
     singleSalesFromDate: currentDates(),
   });
+
   const [getAllDailyRegisters, setGetAllDailyRegisters] = useState({
     Open: false,
     ProductId: 0,
@@ -51,6 +52,8 @@ function AddSingleSales() {
       {tabValue == 1 && (
         <GetSingleProducts
           data={{
+            singleSalesInputValues,
+            setSinlgeSalesInputValues,
             setGetAllDailyRegisters,
             steRegisterableItems,
           }}

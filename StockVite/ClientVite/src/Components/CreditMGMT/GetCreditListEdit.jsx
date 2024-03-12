@@ -10,6 +10,7 @@ import {
   TableHead,
   TableRow,
   Box,
+  TextField,
 } from "@mui/material";
 
 import axios from "axios";
@@ -63,11 +64,12 @@ const GetCreditListEdit = ({
     open: false,
     data: {},
   });
-
+  const [userPassword, setuserPassword] = useState("");
   let token = localStorage.getItem("storeToken");
   let serverAddress = localStorage.getItem("targetUrl");
   let businessName = localStorage.getItem("businessName");
-  let confirmDeletionofPartiallyPaiedInfo = async () => {
+  let confirmDeletionofPartiallyPaiedInfo = async (e) => {
+    e.preventDefault();
     setProcessing(true);
     let Result = await axios.post(serverAddress + "updatePartiallyPaidInfo", {
       data: partiallyPaidInfo,
@@ -77,6 +79,7 @@ const GetCreditListEdit = ({
       dailySalesId,
       transactionId,
       salesWay,
+      userPassword,
     });
     setProcessing(false);
     setshowCreditListDetails((prev) => {
@@ -132,43 +135,81 @@ const GetCreditListEdit = ({
               </Table>
             </TableContainer>
           ) : (
-            <center>No credit payment data found</center>
-          )}
-          <Box
-            sx={{
-              margin: "20px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            {ConfirmDeletion.open && (
-              <>
-                {!Processing ? (
+            <>
+              {!ConfirmDeletion.open && (
+                <>
+                  <center>No credit payment data found</center>
+                  <br />
                   <Button
-                    onClick={() => confirmDeletionofPartiallyPaiedInfo()}
-                    sx={{ marginRight: "20px" }}
+                    fullWidth
                     variant="contained"
-                    color="error"
+                    color="warning"
+                    onClick={() => {
+                      setshowCreditListDetails((prev) => {
+                        return { ...prev, open: false };
+                      });
+                    }}
                   >
-                    confirm delete Process
+                    Close
                   </Button>
-                ) : (
-                  <Button>Processing</Button>
-                )}
-              </>
-            )}
-            <Button
-              variant="contained"
-              color="warning"
-              onClick={() => {
-                setshowCreditListDetails((prev) => {
-                  return { ...prev, open: false };
-                });
+                </>
+              )}
+            </>
+          )}
+          {ConfirmDeletion.open && (
+            <Box
+              sx={{
+                margin: "20px",
+                display: "flex",
+                justifyContent: "center",
               }}
             >
-              Close
-            </Button>
-          </Box>
+              <>
+                <form onSubmit={confirmDeletionofPartiallyPaiedInfo}>
+                  <h4 style={{ color: "red", marginBottom: "10px" }}>
+                    Are you sure you want to delete this payment? If so please
+                    type your password to confirm.{" "}
+                  </h4>
+                  <TextField
+                    onChange={(e) => setuserPassword(e.target.value)}
+                    name="userPassword"
+                    label="Password"
+                    type="password"
+                    required
+                    fullWidth
+                  />
+                  <br /> <br />
+                  {!Processing ? (
+                    <>
+                      <Button
+                        type="submit"
+                        sx={{ marginRight: "10px" }}
+                        variant="contained"
+                        color="error"
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="warning"
+                        onClick={() => {
+                          setshowCreditListDetails((prev) => {
+                            return { ...prev, open: false };
+                          });
+                        }}
+                      >
+                        Close
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button>Processing</Button>
+                    </>
+                  )}
+                </form>
+              </>
+            </Box>
+          )}
         </Paper>
       </Modal>
     </div>

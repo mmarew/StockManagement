@@ -5,7 +5,6 @@ import SuccessOrError from "../Body/Others/SuccessOrError";
 import { ButtonProcessing } from "../Utilities/Utility";
 
 function ModalToRemoveEmployerBusiness({ data }) {
-  // console.log("data", data);
   const [Processing, setProcessing] = useState(false);
   let serverAddress = localStorage.getItem("targetUrl");
   let token = localStorage.getItem("storeToken");

@@ -22,11 +22,10 @@ function ModalToEditEachTransaction({ Data }) {
     EditSingleItem,
     setEditSingleItem,
     setErrorsOrSuccess,
-    getTotalRegisters,
+    getDailyTransaction,
   } = Data;
   let { Items } = EditSingleItem;
   let { ProductId } = Items;
-  console.log("Items", Items);
   const [formInputValues, setFormInputValues] = useState({
     salesType: "Default",
     token: token,
@@ -54,7 +53,7 @@ function ModalToEditEachTransaction({ Data }) {
         setEditSingleItem((prevstate) => ({ ...prevstate, open: false }));
         // alert(`Thank you. ${data}`);
         setErrorsOrSuccess("SUCCESS");
-        await getTotalRegisters(ProductId);
+        await getDailyTransaction(ProductId);
       }
     } catch (error) {
       setProcessing(false);
@@ -173,6 +172,12 @@ function ModalToEditEachTransaction({ Data }) {
               />
               <br /> <br />
               <TextField
+                onChange={(e) => {
+                  handleSalesTransactionInput(
+                    e,
+                    EditSingleItem.Items.ProductId
+                  );
+                }}
                 value={formInputValues.unitPrice}
                 name="unitPrice"
                 fullWidth

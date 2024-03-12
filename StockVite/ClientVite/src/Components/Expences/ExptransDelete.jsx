@@ -41,7 +41,6 @@ function ExptransDelete({
       setProcessing(false);
       setErrorVsSuccess("Error on deleting");
 
-      console.log(error);
     }
   };
 

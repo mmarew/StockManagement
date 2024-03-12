@@ -39,7 +39,6 @@ function SearchProducts({ InputValue, setSearchTypeValueError }) {
     let Results = await fetchProducts();
     setLoadingStatus("Done");
     setProcessing(false);
-    console.log("Results", Results);
     let { Message, data } = Results;
     if (Message == "Success") {
       setSearchedProducts(data);

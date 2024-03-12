@@ -56,8 +56,8 @@ function GetEachTransaction({
   let Today = currentDates();
   const [DailyTransaction, setDailyTransaction] = useState([]);
   const [mergedDataArray, setmergedDataArray] = useState([]);
-  /**getTotalRegisters start here */
-  let getTotalRegisters = async (targetproductId) => {
+  /**getDailyTransaction start here */
+  let getDailyTransaction = async (targetproductId) => {
     try {
       // searchInput, currentDay;
       let OB = {
@@ -71,6 +71,8 @@ function GetEachTransaction({
         fromDate,
         toDate,
       };
+      // console.log("OB", OB);
+      // return;
       setProcessing(true);
       setErrorsOrSuccess();
       setTransactionData((prev) => ({ TotalSales: 0, TotalPurchase: 0 }));
@@ -80,6 +82,8 @@ function GetEachTransaction({
           ...OB,
         }
       );
+      // console.log("responce", responce);
+      // return;
       setProcessing(false);
       let mydata = responce.data.data;
       if (mydata == "Error") {
@@ -87,6 +91,13 @@ function GetEachTransaction({
         return;
       }
       const data = [...mydata];
+      data.sort((a, b) => {
+        return (
+          new Date(a.registeredTimeDaily) - new Date(b.registeredTimeDaily)
+        );
+      });
+      // console.log("data", data);
+      // return;
 
       const mergedData = {};
 
@@ -138,10 +149,13 @@ function GetEachTransaction({
         Description = dailySales["Description" + ProductId];
         creditPaymentDate = dailySales["Description" + creditPaymentDate];
         // return
-        if (creditPaymentDate == undefined || creditPaymentDate == "null")
+        if (
+          !creditPaymentDate ||
+          creditPaymentDate == undefined ||
+          creditPaymentDate == "null"
+        )
           creditPaymentDate = "";
-        if (creditDueDate == null || creditDueDate == undefined)
-          creditDueDate = "";
+        if (!creditDueDate) creditDueDate = "";
         if (salesTypeValues == undefined) salesTypeValues = "";
         if (isNaN(creditSalesQty)) creditSalesQty = 0;
         if (isNaN(salesQty)) salesQty = 0;
@@ -197,7 +211,7 @@ function GetEachTransaction({
 
   useEffect(() => {
     setDailyTransaction([]);
-    getTotalRegisters(ProductId);
+    getDailyTransaction(ProductId);
   }, [, RandValue, ProductId]);
 
   const [deviceSize, setdeviceSize] = useState(window.innerWidth);
@@ -302,6 +316,10 @@ function GetEachTransaction({
                                   : ""}
                               </div>
                               <div>
+                                <strong>Registration Date: </strong>
+                                {DateFormatter(items.registeredTimeDaily)}
+                              </div>
+                              <div>
                                 <strong>Registered By:- </strong>
                                 {items.employeeName}
                               </div>
@@ -353,10 +371,7 @@ function GetEachTransaction({
                                       Number(items.salesQty))
                                 )}
                               </div>
-                              <div>
-                                <strong>Registration Date: </strong>
-                                {DateFormatter(items.registeredTimeDaily)}
-                              </div>
+
                               <div>
                                 <strong>Payment Date: </strong>
                                 {DateFormatter(items.creditPaymentDate)}
@@ -416,28 +431,63 @@ function GetEachTransaction({
                     ) : (
                       <TableContainer>
                         <Table>
-                          <TableHead
-                            sx={{ backgroundColor: "rgba(50,256,100,0.5)" }}
-                          >
+                          <TableHead className="tableHeader">
                             <TableRow>
-                              <TableCell>Product Name</TableCell>
-                              <TableCell>Registered by</TableCell>
-                              <TableCell>Purchase Qty </TableCell>
-                              <TableCell>Unit Cost </TableCell>
-                              <TableCell>Total Cost </TableCell>
-                              <TableCell>Total Sales</TableCell>
-                              <TableCell>Sales Qty Credit</TableCell>
-                              <TableCell>unit Price</TableCell>
-                              <TableCell>Sales in cash</TableCell>
-                              <TableCell>Sales Date</TableCell>
-                              <TableCell>Credit Payment Date</TableCell>
-                              <TableCell> Sales Type</TableCell>
-                              <TableCell> Inventory</TableCell>
-                              <TableCell>Broken Qty</TableCell>
-                              <TableCell>Description</TableCell>
+                              <TableCell>NO</TableCell>
+                              <TableCell className="thTitle">
+                                Product Name
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Sales Date
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Registered by
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Purchase Qty{" "}
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Unit Cost{" "}
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Total Cost{" "}
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Total Sales
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Sales Qty Credit
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                unit Price
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Sales in cash
+                              </TableCell>
+
+                              <TableCell className="thTitle">
+                                Credit Payment Date
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                {" "}
+                                Sales Type
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                {" "}
+                                Inventory
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Broken Qty
+                              </TableCell>
+                              <TableCell className="thTitle">
+                                Description
+                              </TableCell>
                               {viewEachTransactions &&
                                 openedBusiness !== "employersBusiness" && (
-                                  <TableCell> Update / Delete </TableCell>
+                                  <TableCell className="thTitle">
+                                    {" "}
+                                    Update / Delete{" "}
+                                  </TableCell>
                                 )}
                             </TableRow>
                           </TableHead>
@@ -445,11 +495,15 @@ function GetEachTransaction({
                             {viewableData?.map((items, index) => {
                               return (
                                 <TableRow key={"detailes_" + index}>
+                                  <TableCell>{index + 1}</TableCell>
                                   <TableCell>
                                     {items.itemDetailInfo
                                       ? JSON.parse(items.itemDetailInfo)
                                           .productName
                                       : ""}
+                                  </TableCell>
+                                  <TableCell>
+                                    {DateFormatter(items.registeredTimeDaily)}
                                   </TableCell>
                                   <TableCell>{items.employeeName}</TableCell>
                                   <TableCell>{items.purchaseQty}</TableCell>
@@ -472,9 +526,7 @@ function GetEachTransaction({
                                         items.unitPrice
                                     )}
                                   </TableCell>
-                                  <TableCell>
-                                    {DateFormatter(items.registeredTimeDaily)}
-                                  </TableCell>
+
                                   <TableCell>
                                     {DateFormatter(items.creditPaymentDate)}
                                   </TableCell>
@@ -551,14 +603,14 @@ function GetEachTransaction({
                       EditSingleItem,
                       setEditSingleItem,
                       setErrorsOrSuccess,
-                      getTotalRegisters,
+                      getDailyTransaction: getDailyTransaction,
                     }}
                   />
                 )}
                 {/* modal to delete items */}
                 {ShowDeleteConfirmationModal.open && (
                   <ModalTodeleteEachTransaction
-                    getTotalRegisters={getTotalRegisters}
+                    getDailyTransaction={getDailyTransaction}
                     setShowDeleteConfirmationModal={
                       setShowDeleteConfirmationModal
                     }

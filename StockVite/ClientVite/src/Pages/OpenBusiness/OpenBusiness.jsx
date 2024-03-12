@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import homeIcon from "../../Components/ICONS/BusinessJS/iconHomeBlack.svg";
 import businessIcon from "../../Components/ICONS/BusinessJS/businessBlack.svg";
 import transactionIcon from "../../Components/ICONS/BusinessJS/transactionBlack.svg";
+import logoutIcon from "../../Components/ICONS/Login/logout-svgrepo-com.svg";
 import EmployeeIcon from "../../Components/ICONS/BusinessJS/iconEmployee.svg";
 import viewIcon from "../../Components/ICONS/BusinessJS/iconView.svg";
 import ItemsIcon from "../../Components/ICONS/BusinessJS/iconItems.svg";
@@ -14,6 +15,7 @@ import { ConsumeableContext } from "../../Components/Body/UserContext/UserContex
 import { AppBar, Box, MenuItem, Toolbar } from "@mui/material";
 import OpenBusinessLeftSide from "../../Components/OPEN/OpenBusinessLeftSide";
 import HoverableLink from "../../Components/Body/HoverableLink";
+import { LogoutofThisPage } from "../../Components/Logout/Logout";
 
 function OpenBusiness() {
   const [HoverableTitle, setHoverableTitle] = useState("");
@@ -92,7 +94,8 @@ function OpenBusiness() {
                   setHoverableTitle();
                 }}
                 className={`${
-                  activeTab.startsWith("/OpenBusiness/addTransaction")
+                  typeof activeTab === "string" &&
+                  activeTab?.startsWith("/OpenBusiness/addTransaction")
                     ? OpenBusinesscss.activeLink
                     : ""
                 }`}
@@ -116,7 +119,8 @@ function OpenBusiness() {
                   registerItems("addItem");
                 }}
                 className={`${
-                  activeTab.startsWith("/OpenBusiness/Items")
+                  typeof activeTab === "string" &&
+                  activeTab?.startsWith("/OpenBusiness/Items")
                     ? OpenBusinesscss.activeLink
                     : ""
                 }`}
@@ -141,7 +145,8 @@ function OpenBusiness() {
                   registerItems("Search");
                 }}
                 className={`${
-                  activeTab.startsWith("/OpenBusiness/search")
+                  typeof activeTab === "string" &&
+                  activeTab?.startsWith("/OpenBusiness/search")
                     ? OpenBusinesscss.activeLink
                     : ""
                 }`}
@@ -180,6 +185,51 @@ function OpenBusiness() {
                   open={Boolean(anchorEl)}
                   onClose={handleMenuClose}
                 >
+                  <MenuItem>
+                    <HoverableLink
+                      title="Open Business"
+                      onClick={registerItems}
+                      className={OpenBusinesscss.openBusinessTab}
+                      name="gotoBusiness"
+                      to="/"
+                      id="Open Business"
+                    >
+                      <IconButton
+                        style={{ flexDirection: "row" }}
+                        className={OpenBusinesscss.iconButton}
+                      >
+                        <img
+                          style={{ width: "30px", marginRight: "10px" }}
+                          className={OpenBusinesscss.openBusIcon}
+                          src={businessIcon}
+                        />
+                        <span className={OpenBusinesscss.Title}>Business</span>
+                      </IconButton>
+                    </HoverableLink>
+                  </MenuItem>
+                  {/* logout menu */}
+                  <MenuItem>
+                    <HoverableLink
+                      title="Open Business"
+                      onClick={LogoutofThisPage}
+                      className={OpenBusinesscss.openBusinessTab}
+                      name="gotoBusiness"
+                      to="/login"
+                      id="Open Business"
+                    >
+                      <IconButton
+                        style={{ flexDirection: "row" }}
+                        className={OpenBusinesscss.iconButton}
+                      >
+                        <img
+                          style={{ width: "30px", marginRight: "10px" }}
+                          className={OpenBusinesscss.openBusIcon}
+                          src={logoutIcon}
+                        />
+                        <span className={OpenBusinesscss.Title}>Logout</span>
+                      </IconButton>
+                    </HoverableLink>
+                  </MenuItem>
                   <MenuItem onClick={() => handleOptionClick("Option 1")}>
                     <HoverableLink
                       title="Employee"
@@ -202,28 +252,6 @@ function OpenBusiness() {
                         <span className={OpenBusinesscss.Title}>Employee</span>
                       </IconButton>
                       {/* <img src={E} /> */}
-                    </HoverableLink>
-                  </MenuItem>
-                  <MenuItem>
-                    <HoverableLink
-                      title="Open Business"
-                      onClick={registerItems}
-                      className={OpenBusinesscss.openBusinessTab}
-                      name="gotoBusiness"
-                      to="/"
-                      id="Open Business"
-                    >
-                      <IconButton
-                        style={{ flexDirection: "row" }}
-                        className={OpenBusinesscss.iconButton}
-                      >
-                        <img
-                          style={{ width: "30px", marginRight: "10px" }}
-                          className={OpenBusinesscss.openBusIcon}
-                          src={businessIcon}
-                        />
-                        <span className={OpenBusinesscss.Title}>Business</span>
-                      </IconButton>
                     </HoverableLink>
                   </MenuItem>
                 </Menu>

@@ -12,7 +12,7 @@ import { useState } from "react";
 import axios from "axios";
 import SuccessOrError from "../../Body/Others/SuccessOrError";
 function ModalTodeleteEachTransaction({
-  getTotalRegisters,
+  getDailyTransaction,
   ShowDeleteConfirmationModal,
   setShowDeleteConfirmationModal,
 }) {
@@ -35,7 +35,7 @@ function ModalTodeleteEachTransaction({
         Items: {},
       });
       const { data } = response.data;
-      await getTotalRegisters(items.ProductId);
+      await getDailyTransaction(items.ProductId);
       if (data === "success") {
         setErrors("You have deleted data successfully");
       } else {
@@ -43,7 +43,6 @@ function ModalTodeleteEachTransaction({
       }
       setErrors(null);
     } catch (error) {
-      console.log("error", error);
       setProcessing(false);
       setErrors(error.message);
     }

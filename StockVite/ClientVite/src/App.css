@@ -25,6 +25,13 @@ button {
 td {
   min-width: 90px;
 }
+.thTitle {
+  font-weight: bold !important;
+  /* color: aqua !important; */
+}
+.tableHeader {
+  background-color: rgba(50, 256, 100, 0.5);
+}
 
 @media screen and (min-width: 768px) {
   .leftSideDiv {

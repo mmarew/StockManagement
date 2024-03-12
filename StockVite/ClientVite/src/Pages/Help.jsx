@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
 import helpStyles from "../CSS/Help.module.css";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import LeftSideBusiness from "../Components/LeftSide/LeftSideBusiness";
 import { Button } from "@mui/material";
+// 250,250,250
 function Help() {
   let navigate = useNavigate();
   let goTo = (Path) => {

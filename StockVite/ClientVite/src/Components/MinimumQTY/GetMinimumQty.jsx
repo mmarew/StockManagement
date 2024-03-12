@@ -13,6 +13,7 @@ import {
   Chip,
 } from "@mui/material";
 import { ConsumeableContext } from "../Body/UserContext/UserContext";
+import { DateFormatter } from "../Body/Date/currentDate";
 
 function GetMinimumQty({ viewInTable, setFetchedDataLength }) {
   let businessId = localStorage.getItem("businessId");
@@ -32,6 +33,7 @@ function GetMinimumQty({ viewInTable, setFetchedDataLength }) {
     });
     setShowProgressBar(false);
     let { data } = response.data;
+    console.log("Current Minimum Qty and Inventory", data);
 
     if (data === `you are not owner of this business`) {
       alert(data);
@@ -62,6 +64,7 @@ function GetMinimumQty({ viewInTable, setFetchedDataLength }) {
                       <TableCell>
                         <strong>Product&nbsp;&nbsp;&nbsp;Name</strong>
                       </TableCell>
+                      <TableCell>Last sold</TableCell>
                       <TableCell>
                         <strong>Inventory</strong>
                       </TableCell>
@@ -77,6 +80,9 @@ function GetMinimumQty({ viewInTable, setFetchedDataLength }) {
                     {MinimumQty?.data?.map((item, index) => (
                       <TableRow key={"minimum_" + index}>
                         <TableCell>{item.productName}</TableCell>
+                        <TableCell>
+                          {DateFormatter(item.registeredTimeDaily)}
+                        </TableCell>
                         <TableCell>{item.inventoryItem}</TableCell>
                         <TableCell>{item.minimumQty}</TableCell>
                         <TableCell>

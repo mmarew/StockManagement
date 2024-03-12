@@ -5,8 +5,6 @@ import GetEachTransaction from "../SearchTrans/GetEachTransaction";
 
 let SearchSales_Purchase = ({ InputValue, setSearchTypeValueError }) => {
   let { toDate, fromDate, selectedValue, productName } = InputValue;
-  console.log("InputValue", InputValue);
-  // return;
   const [getAllDailyRegisters, setGetAllDailyRegisters] = useState({
     Open: false,
     ProductId: "getAllTransaction",

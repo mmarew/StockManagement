@@ -56,6 +56,7 @@ function ForgetPassword() {
   const verifyPincode = async (e) => {
     e.preventDefault();
     setProcessing(true);
+
     try {
       const response = await axios.post(serverUrl + "verifyPin/", {
         phoneNumber,
@@ -87,7 +88,6 @@ function ForgetPassword() {
         phoneNumber,
         password,
       });
-
       if (response.data.data === "passwordChanged") {
         setShowPasswordField(false);
         navigate("/login");

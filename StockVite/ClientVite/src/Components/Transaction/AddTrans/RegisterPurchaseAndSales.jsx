@@ -63,7 +63,8 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
         return;
       }
       setProcessing(true);
-
+      // console.log("formInputValues", formInputValues);
+      // return;
       let responce = await axios.post(
         serverAddress + "Transaction/registerSinglesalesTransaction/",
         {
@@ -73,6 +74,7 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
           businessId: localStorage.getItem("businessId"),
         }
       );
+      // return;
       DateFormatter();
       setformInputValues({ ...inputData }); // Reset the form values to default
       setProcessing(false);
@@ -81,6 +83,7 @@ function AddSingleSales_Register({ RegisterableItems, steRegisterableItems }) {
         setErrorsOrSuccess("SUCCESS");
       }
     } catch (error) {
+      setProcessing(false);
       setErrorsOrSuccess(error.message);
     }
   };

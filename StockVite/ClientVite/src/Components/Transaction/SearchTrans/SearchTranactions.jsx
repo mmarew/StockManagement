@@ -55,7 +55,7 @@ function SearchTranactions({ data }) {
         <br />
         <TextField
           onChange={handleSearchableProductInput}
-          value={singleSalesInputValues.singleSalesDate || currentDates()}
+          value={singleSalesInputValues.singleSalesFromDate || currentDates()}
           required
           fullWidth
           name="singleSalesFromDate"
@@ -75,7 +75,7 @@ function SearchTranactions({ data }) {
         <br />
         <TextField
           onChange={handleSearchableProductInput}
-          value={singleSalesInputValues.singleSalesDate || currentDates()}
+          value={singleSalesInputValues.singleSalesToDate || currentDates()}
           required
           fullWidth
           name="singleSalesToDate"
